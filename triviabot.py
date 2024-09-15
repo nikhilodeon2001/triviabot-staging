@@ -1397,7 +1397,7 @@ def start_trivia_round():
             #Update round streaks
             update_round_streaks(round_winner)
             # Increment the round count
-            end_of_round()
+
             round_count += 1
         
             time.sleep(5)

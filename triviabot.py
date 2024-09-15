@@ -18,28 +18,18 @@ import time
 import pytz
 import os
 from pymongo import MongoClient
-
-# Add these imports for fuzzy matching
 import difflib
 import string
-
-from urllib.parse import urlparse # IMAGE CODE
-
-from PIL import Image # WIDTH
-import io             # WIDTH
-
-import hashlib #DEDUP
-
-from PIL import Image, ImageDraw, ImageFont #POLY
+from urllib.parse import urlparse 
+from PIL import Image 
+import io            
+import hashlib 
+from PIL import Image, ImageDraw, ImageFont 
 import os
-
-
-
-
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
-upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload" #IMAGE CODE
+upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
 sync_url = f"{matrix_base_url}/sync"
 
 # Define global variables to store streaks and scores
@@ -56,7 +46,8 @@ question_start_time = None  # This will store the time the question is asked
 
 # Set up headers, including the authorization token
 headers = []
-headers_media = [] #IMAGE CODE
+headers_media = [] 
+
 params = []
 filter_json = []
 
@@ -68,24 +59,18 @@ bearer_token = ""
 submission_queue = []
 max_queue_size = 100  # Number of submissions to accumulate before flushing
 
-
-
 # Initialize bot username and password
-username = "OkraStrut"
-password = "fhk!azv2bvr8yfx9VUC"
+username = "No-Employer1482"
+password = "MBM5rbr1nud_kwu9hqw"
 
 target_room_id = os.getenv("target_room_id", "!JLesJ-RQTwWEtYf5ft63Ww:reddit.com")
-#bot_user_id = os.getenv("bot_user_id", "@t2_176cig8216:reddit.com")
-#bearer_token = os.getenv("bearer_token", "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzI1MTM3MjI0LjcxNDUxMywiaWF0IjoxNzI1MDUwODI0LjcxNDUxMywianRpIjoiNXJwTHd3VmFzSWU4OHdMZXNqTEZxTS1udDNhNU9nIiwiY2lkIjoiMFItV0FNaHVvby1NeVEiLCJsaWQiOiJ0Ml8xNzZjaWc4MjE2IiwiYWlkIjoidDJfMTc2Y2lnODIxNiIsImxjYSI6MTcyNDMwMzk4OTE4Mywic2NwIjoiZUp4a2tkR090REFJaGQtbDF6N0JfeXBfTmh0c2NZYXNMUWFvazNuN0RWb2NrNzA3Y0w0aUhQOG5LSXFGTEUydUJLR2tLV0VGV3RPVU5pTHY1OHk5T1pFRlN5RlRSODQzeXdva2FVcFBVbU41cHlsUndXWmtMbGZhc1VLREI2WXBWUzZaMjBLUFM1dlEzSTFGejA2TXFseFdIdFRZbzNKcGJHTUsyeFBqemNacVF5cXV5NmxNWUZrb244V0xmdnlHLXRZLWY3YmZoSFl3cktnS0RfVE91Rnh3WV9IREZIYl9ucHIwYkYyd3FMM1hnOVEtMS1OMjdiTm1vZG01X1Z6UHZ6YVNjVG1HNWlmWXY3dC1DUjE0NUhtWlVRY3dZZzBfeXJBajZfQ3ZPb0RLQlFXTUpZaFBJNUFybDJfX0pkaXVUZjhhdHlkLS1HYkVUV180clJtbzV4TEVvVV9qNnpjQUFQX19YRF9lNHciLCJyY2lkIjoiSzlUUFFkM1lSSV9URnRadG5udl9aVHA4YTFLcDNWVllwNDB6RTZrc0tBWSIsImZsbyI6Mn0.IH9JzcCqFUB4h0tK-HKhCQacqotfsGgaFHUnOU63dJK03ZE2aaYC_VBkh8VaNUjMupJrzG2VaAAMcU6wnhdTljiYSmCUOS5v3CUf13Q7Qf1Bf6PJMFWyI6Fq7-mIHBHUOl7kWsxCMTOVnxFA427wwOb-cFJ1vDuIkhN1rFDqy_5UdKAwd-E_hzJqWZvvT9lboQhUm65A6a97364Ga0XyeL8OONu-Iyp2WG2BQYnPqV4nCntcdY2Flz-MmtcXJUw0W8CmD0_tjdQSMgB2vpRThEZYEeCmIm-T1m-bSnqOXRhlKspWsjcXdoqhXMsin_rVnglS4mlmaKPquwOd_GroyA")
 question_time = int(os.getenv("question_time", "10"))
 questions_per_round = int(os.getenv("questions_per_round", "10"))
 time_between_rounds = int(os.getenv("time_between_rounds", "20"))
 time_between_questions = int(os.getenv("time_between_questions", "10"))
 questions_module = os.getenv("questions_module", "trivia_questions")
-#max_retries = int(os.getenv("max_retries", "3"))
-#delay_between_retries = int(os.getenv("delay_between_retries", "3"))
-max_retries = 3
-delay_between_retries = 3
+max_retries = int(os.getenv("max_retries", "3"))
+delay_between_retries = int(os.getenv("delay_between_retries", "3"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 

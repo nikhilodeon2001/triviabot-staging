@@ -65,10 +65,9 @@ bearer_token = ""
 submission_queue = []
 max_queue_size = 100  # Number of submissions to accumulate before flushing
 
-# Initialize bot username and password
-username = "No-Employer1482"
-password = "MBM5rbr1nud_kwu9hqw"
-
+# Initialize all variables
+username = os.getenv("username")
+password = os.getenv("password")
 openai.api_key = os.getenv("open_api_key")  # Store your API key securely
 target_room_id = os.getenv("target_room_id")
 question_time = int(os.getenv("question_time"))

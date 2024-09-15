@@ -88,7 +88,7 @@ def generate_round_summary(round_data):
     """
     # Construct the prompt with clear instructions
     prompt = (
-        "Here is a summary of the trivia round to create two ribbons from:\n"
+        "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
         "Questions asked:\n"
     )
 
@@ -108,7 +108,7 @@ def generate_round_summary(round_data):
                 username = response["username"]
                 user_response = response["response"]
                 is_correct = "Correct" if any(fuzzy_match(user_response, answer) for answer in correct_answers) else "Incorrect"
-                prompt += f"{username}: {user_response} ({is_correct})\n"
+                prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
         else:
             prompt += "No responses recorded for this question.\n"
         
@@ -122,12 +122,11 @@ def generate_round_summary(round_data):
         
         prompt += "\n"
 
-
     # Add specific instructions for generating the ribbons
     prompt += (
-        "\nCreate two different fun and witty honorable mention ribbons for two specific losing players, meaning they did not finish at the top of the scoreboard. "
-        "Make sure to name each player's username specifically, mention specific responses they gave during the round that were noteworthy or funny or random, and mention specifically why they earned that ribbon. "
-        "Create 3 sentences per each ribbon awarded. Use emojis in the ribbon name to make it engaging and fun."
+        "\nCreate one fun and witty honorable mention ribbon for one specific losing player, meaning they did not finish at the top of the scoreboard. "
+        "Make sure to name the player's username specifically, mention specific responses they gave during the round that were noteworthy or funny or random, and mention specifically why they earned that ribbon. "
+        "Create 4 sentences for why the ribbon was awarded to that specific player. Use emojis in the ribbon name to make it engaging and fun."
     )
 
     # Use OpenAI's API to generate the summary
@@ -135,7 +134,7 @@ def generate_round_summary(round_data):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a quirky and fun trivia game host who creates honorable mention ribbons for losing players using specifics from the past round."},
+                {"role": "system", "content": "You are a quirky and fun trivia game host who creates an honorable mention ribbon for one of the losing players using specifics from the past round."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=200,

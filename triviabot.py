@@ -122,10 +122,6 @@ def generate_round_summary(round_data):
         
         prompt += "\n"
 
-    # Add the final scoreboard to the prompt
-    prompt += "\nFinal Scoreboard:\n"
-    for user, score in round_data["scoreboard"].items():
-        prompt += f"{user}: {score}\n"
 
     # Add specific instructions for generating the ribbons
     prompt += (
@@ -1411,8 +1407,6 @@ def start_trivia_round():
             
             # Reset round data for the next round
             round_data["questions"] = []
-            round_data["responses"] = []
-            round_data["scoreboard"] = {}
 
             # Randomly select n questions
             selected_questions = select_trivia_questions(questions_per_round)  #DEDUP 

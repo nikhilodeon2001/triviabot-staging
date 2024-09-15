@@ -108,19 +108,26 @@ def generate_round_summary(round_data):
         "Be creative and humorous."
     )
 
+    # Use OpenAI's API to generate the summary
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "You are a trivia game summarizer."},
+                      {"role": "user", "content": prompt}],
+            max_tokens=200,
+            n=1,
+            stop=None,
+            temperature=0.7,
+        )
 
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=200,
-        n=1,
-        stop=None,
-        temperature=0.7,
-    )
+        # Extract the generated summary from the response
+        summary = response.choices[0].message['content'].strip()
+        return summary
 
-    # Extract the generated summary from the response
-    summary = response.choices[0].text.strip()
-    return summary
+    except openai.OpenAIError as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error generating round summary: {e}")
+        return "Sorry, something went wrong while generating the summary."
 
 
 

@@ -63,7 +63,7 @@ max_queue_size = 100  # Number of submissions to accumulate before flushing
 username = "No-Employer1482"
 password = "MBM5rbr1nud_kwu9hqw"
 
-target_room_id = os.getenv("target_room_id", "!JLesJ-RQTwWEtYf5ft63Ww:reddit.com")
+target_room_id = os.getenv("target_room_id", "!f8kbyzQw-SEGDy2Xl7pmcuDNd4M8QQ2iH1zNf5_K8w0:reddit.com")
 question_time = int(os.getenv("question_time", "10"))
 questions_per_round = int(os.getenv("questions_per_round", "10"))
 time_between_rounds = int(os.getenv("time_between_rounds", "20"))

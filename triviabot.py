@@ -21,11 +21,9 @@ from pymongo import MongoClient
 import difflib
 import string
 from urllib.parse import urlparse 
-from PIL import Image 
 import io            
 import hashlib 
 from PIL import Image, ImageDraw, ImageFont 
-import os
 import openai
 
 

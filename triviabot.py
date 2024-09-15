@@ -3,7 +3,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Setup Sentry
 sentry_sdk.init(
-    dsn="https://c8e1b1f7f540166fdc01aed67501a156@o4507935419400192.ingest.us.sentry.io/4507935424839680",  # Replace with your DSN from Sentry
+    dsn=sentry_dsn,  # Replace with your DSN from Sentry
     integrations=[LoggingIntegration(level=None, event_level='ERROR')]
 )
 

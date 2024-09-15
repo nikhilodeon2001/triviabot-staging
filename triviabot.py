@@ -35,12 +35,12 @@ sync_url = f"{matrix_base_url}/sync"
 # Define global variables to store streaks and scores
 round_count = 0
 scoreboard = {}
+
 # Define a global variable to store round data
 round_data = {
-    "questions": [],  # Collect questions asked
-    "responses": [],  # Collect responses by username
-    "scoreboard": {}  # Store the scoreboard at the end of the round
+    "questions": []  # Collect questions asked with their answers and responses
 }
+
 fastest_answers_count = {}
 current_longest_answer_streak = {"user": None, "streak": 0}
 current_longest_round_streak = {"user": None, "streak": 0}
@@ -86,42 +86,62 @@ def generate_round_summary(round_data):
     """
     Generate a summary of the trivia round using OpenAI's API.
     """
-    # Prepare the prompt with round data
+    # Construct the prompt with clear instructions
     prompt = (
-        "Here is a summary of the trivia round:\n"
+        "Here is a summary of the trivia round to create two ribbons from:\n"
         "Questions asked:\n"
     )
 
-    # Add questions to the prompt
-    for question in round_data["questions"]:
-        question_number = question["question_number"]
-        question_text = question["question"]
+    # Add questions, their correct answers, users' responses, and scoreboard status after each question
+    for question_data in round_data["questions"]:
+        question_number = question_data["question_number"]
+        question_text = question_data["question_text"]
+        correct_answers = question_data["correct_answers"]
+        
         prompt += f"Question {question_number}: {question_text}\n"
+        prompt += f"Correct Answers: {', '.join(correct_answers)}\n"
+        
+        # Add users and their responses for each question
+        prompt += "Users and their responses:\n"
+        if question_data["user_responses"]:
+            for response in question_data["user_responses"]:
+                username = response["username"]
+                user_response = response["response"]
+                is_correct = "Correct" if any(fuzzy_match(user_response, answer) for answer in correct_answers) else "Incorrect"
+                prompt += f"{username}: {user_response} ({is_correct})\n"
+        else:
+            prompt += "No responses recorded for this question.\n"
+        
+        # Add scoreboard status after the question
+        prompt += f"\nScoreboard after Question {question_number}:\n"
+        if "scoreboard_after_question" in question_data:
+            for user, score in question_data["scoreboard_after_question"].items():
+                prompt += f"{user}: {score}\n"
+        else:
+            prompt += "No responses recorded.\n"
+        
+        prompt += "\n"
 
-    # Add users and their answers to the prompt
-    prompt += "\nUsers and their answers:\n"
-    for response in round_data["responses"]:
-        user, answer = response
-        prompt += f"{user}: {answer}\n"
-    
-    # Add the scoreboard to the prompt
-    prompt += "\nScoreboard:\n"
+    # Add the final scoreboard to the prompt
+    prompt += "\nFinal Scoreboard:\n"
     for user, score in round_data["scoreboard"].items():
         prompt += f"{user}: {score}\n"
 
-    # Add instructions for generating a witty summary
+    # Add specific instructions for generating the ribbons
     prompt += (
-        "\nCreate a fun and witty summary for this round. Mention any funny answers, "
-        "close competition, and any inappropriate behavior in a light-hearted and non-offensive manner. "
-        "Be creative and humorous."
+        "\nCreate two different fun and witty honorable mention ribbons for two specific losing players, meaning they did not finish at the top of the scoreboard. "
+        "Make sure to name each player specifically, mention their performance, and why they earned that ribbon. "
+        "Create 2-3 sentences per ribbon. Use emojis in the ribbon name to make it engaging."
     )
 
     # Use OpenAI's API to generate the summary
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "You are a trivia game summarizer."},
-                      {"role": "user", "content": prompt}],
+            messages=[
+                {"role": "system", "content": "You are a quirky and fun trivia game host who creates honorable mention ribbons for losing players."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=200,
             n=1,
             stop=None,
@@ -135,9 +155,8 @@ def generate_round_summary(round_data):
     except openai.OpenAIError as e:
         sentry_sdk.capture_exception(e)
         print(f"Error generating round summary: {e}")
-        return "Sorry, something went wrong while generating the summary."
-
-
+        return "No ribbons (or soup) for you!"
+        
 # Modify the log_user_submission function to add submissions to a queue
 def log_user_submission(user_id):
     """
@@ -347,7 +366,7 @@ def connect_to_mongodb(max_retries=3, delay_between_retries=5):
         try:
             # Attempt to connect to MongoDB
             client = MongoClient(mongo_db_string)
-            db = client["triviabot-testing"]
+            db = client["triviabot"]
             return db  # Return the database connection if successful
         
         except Exception as e:
@@ -654,8 +673,10 @@ def ask_question(trivia_question, trivia_url, question_number):
 
     # Store the question being asked in round_data
     round_data["questions"].append({
-        "question": trivia_question,
-        "question_number": question_number
+        "question_number": question_number,
+        "question_text": trivia_question,
+        "correct_answers": trivia_answer_list,  # Store the possible correct answers
+        "user_responses": []  # Initialize a list to collect user responses
     })
     
     if is_valid_url(trivia_url): 
@@ -887,9 +908,14 @@ def check_correct_responses(question_ask_time, trivia_answer_list):
                             message_content = event.get("content", {}).get("body", "")
                             normalized_message_content = normalize_text(message_content)
 
-                            # Add the user's response to the round_data
-                            round_data["responses"].append((display_name, message_content))
-                            
+                            # Find the current question data to add responses
+                            current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
+                            if current_question_data:
+                                current_question_data["user_responses"].append({
+                                    "username": display_name,
+                                    "response": message_content
+                                })
+                                
                             # Check if the user's response is in the list of correct answers
                             if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
                                 
@@ -932,7 +958,12 @@ def check_correct_responses(question_ask_time, trivia_answer_list):
                             scoreboard[display_name] = points                    
             
                 update_answer_streaks(fastest_correct_user)  # Update the correct answer streak for this user
-            
+               
+                # Add the current state of the scoreboard to round_data
+                current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
+                if current_question_data:
+                    current_question_data["scoreboard_after_question"] = dict(scoreboard)
+
                 # Construct a single message for all the responses
                 message = ""
                 message += f"\n✅ Answer ✅\n{trivia_answer}\n"
@@ -948,12 +979,12 @@ def check_correct_responses(question_ask_time, trivia_answer_list):
                             message += f"\n⚡ {display_name}: {points}"
                             if current_longest_answer_streak["streak"] > 1:
                                 message += f"  🔥{current_longest_answer_streak['streak']}"
-                            message += f"\n💬 Answered: {message_content}"
-                            if correct_responses_length > 1:
-                                message += f"\n\n👥 The Rest"
+                            #message += f"\n💬 Answered: {message_content}"
+                            #if correct_responses_length > 1:
+                            #    message += f"\n\n👥 The Rest"
                         else:
                             message += f"\n🎉 {display_name}: {points} (+{round(time_diff, 1)}s)"
-                    message += f"\n"
+                    #message += f"\n"
                 else:
                     potential_messages = [
                         "\n🥴 We've got a bunch of geniuses here...\n",
@@ -982,9 +1013,6 @@ def check_correct_responses(question_ask_time, trivia_answer_list):
                 if message:
                     send_message(target_room_id, message)
 
-
-                # Add the current state of the scoreboard to round_data
-                round_data["scoreboard"] = dict(scoreboard)
                 flush_submission_queue()
                 
                 return None
@@ -1043,14 +1071,20 @@ def update_round_streaks(user):
 
     if user is not None:
 
-        # Assuming round_data is already populated with responses and scoreboard
-        summary = generate_round_summary(round_data)
+        summary = ""
+        ai_awards = generate_round_summary(round_data)
+        print(round_data)
+        print(ai_awards)
+    
+        #if len(scoreboard) >= 5:
+            # Generate the summary if there are 5 or more players
+            #summary = ai_awards
         
         if current_longest_round_streak["streak"] > 1:
-            #Fundraising :-)
-            send_message(target_room_id, f"\n🏆 Winner: {user}...{current_longest_round_streak['streak']} in a row!\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
+            # Include the summary in the message if it's not empty
+            send_message(target_room_id, f"\n🏆 Winner: {user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
         else:
-            send_message(target_room_id, f"\n🏆 Winner: {user}!\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
+            send_message(target_room_id, f"\n🏆 Winner: {user}!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
             
 
 def determine_round_winner():
@@ -1414,7 +1448,7 @@ def start_trivia_round():
 
             round_count += 1
         
-            time.sleep(5)
+            time.sleep(7)
             if round_count % 5 == 0:
                 send_message(target_room_id, f"🧘‍♂️ Let's take a breather for 30s.\n\n🫶 While you rest, why not support the cause?\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 time.sleep(30)

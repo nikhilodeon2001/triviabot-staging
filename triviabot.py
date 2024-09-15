@@ -126,8 +126,8 @@ def generate_round_summary(round_data):
     # Add specific instructions for generating the ribbons
     prompt += (
         "\nCreate two different fun and witty honorable mention ribbons for two specific losing players, meaning they did not finish at the top of the scoreboard. "
-        "Make sure to name each player specifically, mention their performance, and why they earned that ribbon. "
-        "Create 2-3 sentences per ribbon. Use emojis in the ribbon name to make it engaging."
+        "Make sure to name each player's username specifically, mention specific responses they gave during the round that were noteworthy or funny or random, and mention specifically why they earned that ribbon. "
+        "Create 3 sentences per each ribbon awarded. Use emojis in the ribbon name to make it engaging and fun."
     )
 
     # Use OpenAI's API to generate the summary
@@ -135,7 +135,7 @@ def generate_round_summary(round_data):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a quirky and fun trivia game host who creates honorable mention ribbons for losing players."},
+                {"role": "system", "content": "You are a quirky and fun trivia game host who creates honorable mention ribbons for losing players using specifics from the past round."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=200,

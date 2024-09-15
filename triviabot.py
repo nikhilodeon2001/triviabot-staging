@@ -664,7 +664,7 @@ def remove_diacritics(input_str):
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return ''.join([char for char in nfkd_form if not unicodedata.combining(char)])
 
-def ask_question(trivia_question, trivia_url, question_number):
+def ask_question(trivia_question, trivia_url, trivia_answer_list, question_number):
     """Ask the trivia question."""
     # Define the numbered block emojis for questions 1 to 10
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
@@ -1424,7 +1424,7 @@ def start_trivia_round():
             for trivia_question, trivia_url, trivia_answer_list in selected_questions:
                 # Ask the trivia question and get start times
                 initialize_sync()
-                question_ask_time, new_solution = ask_question(trivia_question, trivia_url, question_number)
+                question_ask_time, new_solution = ask_question(trivia_question, trivia_url, trivia_answer_list, question_number)
                 time.sleep(question_time)  # Wait for n seconds for answers
                 #fetch_all_responses(question_ask_time)  # Pass both local and server start times
                 send_message(target_room_id, f"\n🛑 TIME 🛑\n")

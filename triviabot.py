@@ -26,6 +26,8 @@ import io
 import hashlib 
 from PIL import Image, ImageDraw, ImageFont 
 import os
+import openai
+
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
@@ -35,6 +37,11 @@ sync_url = f"{matrix_base_url}/sync"
 # Define global variables to store streaks and scores
 round_count = 0
 scoreboard = {}
+# Define a global variable to store round data
+round_data = {
+    "responses": [],  # Collect responses by username
+    "scoreboard": {}  # Store the scoreboard at the end of the round
+}
 fastest_answers_count = {}
 current_longest_answer_streak = {"user": None, "streak": 0}
 current_longest_round_streak = {"user": None, "streak": 0}
@@ -63,16 +70,65 @@ max_queue_size = 100  # Number of submissions to accumulate before flushing
 username = "No-Employer1482"
 password = "MBM5rbr1nud_kwu9hqw"
 
-target_room_id = os.getenv("target_room_id", "!f8kbyzQw-SEGDy2Xl7pmcuDNd4M8QQ2iH1zNf5_K8w0:reddit.com")
-question_time = int(os.getenv("question_time", "10"))
-questions_per_round = int(os.getenv("questions_per_round", "10"))
-time_between_rounds = int(os.getenv("time_between_rounds", "20"))
-time_between_questions = int(os.getenv("time_between_questions", "10"))
+openai.api_key = os.getenv("open_api_key")  # Store your API key securely
+target_room_id = os.getenv("target_room_id")
+question_time = int(os.getenv("question_time"))
+questions_per_round = int(os.getenv("questions_per_round"))
+time_between_rounds = int(os.getenv("time_between_rounds"))
+time_between_questions = int(os.getenv("time_between_questions"))
 questions_module = os.getenv("questions_module", "trivia_questions")
-max_retries = int(os.getenv("max_retries", "3"))
-delay_between_retries = int(os.getenv("delay_between_retries", "3"))
+max_retries = int(os.getenv("max_retries"))
+delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
+
+
+def generate_round_summary(round_data):
+    """
+    Generate a summary of the trivia round using OpenAI's API.
+    """
+    # Prepare the prompt with round data
+    prompt = (
+        "Here is a summary of the trivia round:\n"
+        "Users and their answers:\n"
+    )
+
+    # Add users and their answers to the prompt
+    for response in round_data["responses"]:
+        user, answer = response
+        prompt += f"{user}: {answer}\n"
+    
+    # Add the scoreboard to the prompt
+    prompt += "\nScoreboard:\n"
+    for user, score in round_data["scoreboard"].items():
+        prompt += f"{user}: {score}\n"
+
+    # Add instructions for generating a witty summary
+    prompt += (
+        "\nCreate a fun and witty summary for this round. Mention any funny answers, "
+        "close competition, and any inappropriate behavior in a light-hearted and non-offensive manner. "
+        "Be creative and humorous."
+    )
+
+    # Use OpenAI's API to generate the summary
+    try:
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=200,
+            n=1,
+            stop=None,
+            temperature=0.7,
+        )
+
+        # Extract the generated summary from the response
+        summary = response.choices[0].text.strip()
+        return summary
+
+    except openai.error.OpenAIError as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error generating round summary: {e}")
+        return "Sorry, something went wrong while generating the summary."
 
 
 # Modify the log_user_submission function to add submissions to a queue
@@ -818,6 +874,9 @@ def check_correct_responses(question_ask_time, trivia_answer_list):
                             message_content = event.get("content", {}).get("body", "")
                             normalized_message_content = normalize_text(message_content)
 
+                            # Add the user's response to the round_data
+                            round_data["responses"].append((display_name, message_content))
+                            
                             # Check if the user's response is in the list of correct answers
                             if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
                                 
@@ -910,6 +969,9 @@ def check_correct_responses(question_ask_time, trivia_answer_list):
                 if message:
                     send_message(target_room_id, message)
 
+
+                # Add the current state of the scoreboard to round_data
+                round_data["scoreboard"] = dict(scoreboard)
                 flush_submission_queue()
                 
                 return None
@@ -967,11 +1029,15 @@ def update_round_streaks(user):
         insert_data_to_mongo("round_wins", user)
 
     if user is not None:
+
+        # Assuming round_data is already populated with responses and scoreboard
+        summary = generate_round_summary(round_data)
+        
         if current_longest_round_streak["streak"] > 1:
             #Fundraising :-)
-            send_message(target_room_id, f"\n🏆 Winner: {user}...{current_longest_round_streak['streak']} in a row!\n\n\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
+            send_message(target_room_id, f"\n🏆 Winner: {user}...{current_longest_round_streak['streak']} in a row!\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
         else:
-            send_message(target_room_id, f"\n🏆 Winner: {user}!\n\n\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
+            send_message(target_room_id, f"\n🏆 Winner: {user}!\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
             
 
 def determine_round_winner():
@@ -1295,6 +1361,10 @@ def start_trivia_round():
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
             fastest_answers_count.clear()
+            
+            # Reset round data for the next round
+            round_data["responses"] = []
+            round_data["scoreboard"] = {}
 
             # Randomly select n questions
             selected_questions = select_trivia_questions(questions_per_round)  #DEDUP 
@@ -1327,8 +1397,9 @@ def start_trivia_round():
             #Update round streaks
             update_round_streaks(round_winner)
             # Increment the round count
+            end_of_round()
             round_count += 1
-
+        
             time.sleep(5)
             if round_count % 5 == 0:
                 send_message(target_room_id, f"🧘‍♂️ Let's take a breather for 30s.\n\n🫶 While you rest, why not support the cause?\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")

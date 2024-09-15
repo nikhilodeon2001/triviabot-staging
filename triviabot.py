@@ -37,6 +37,7 @@ round_count = 0
 scoreboard = {}
 # Define a global variable to store round data
 round_data = {
+    "questions": [],  # Collect questions asked
     "responses": [],  # Collect responses by username
     "scoreboard": {}  # Store the scoreboard at the end of the round
 }
@@ -88,10 +89,17 @@ def generate_round_summary(round_data):
     # Prepare the prompt with round data
     prompt = (
         "Here is a summary of the trivia round:\n"
-        "Users and their answers:\n"
+        "Questions asked:\n"
     )
 
+    # Add questions to the prompt
+    for question in round_data["questions"]:
+        question_number = question["question_number"]
+        question_text = question["question"]
+        prompt += f"Question {question_number}: {question_text}\n"
+
     # Add users and their answers to the prompt
+    prompt += "\nUsers and their answers:\n"
     for response in round_data["responses"]:
         user, answer = response
         prompt += f"{user}: {answer}\n"
@@ -128,7 +136,6 @@ def generate_round_summary(round_data):
         sentry_sdk.capture_exception(e)
         print(f"Error generating round summary: {e}")
         return "Sorry, something went wrong while generating the summary."
-
 
 
 # Modify the log_user_submission function to add submissions to a queue
@@ -644,6 +651,12 @@ def ask_question(trivia_question, trivia_url, question_number):
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     number_block = numbered_blocks[question_number - 1]  # Get the corresponding numbered block
     new_solution = None #POLY
+
+    # Store the question being asked in round_data
+    round_data["questions"].append({
+        "question": trivia_question,
+        "question_number": question_number
+    })
     
     if is_valid_url(trivia_url): 
         if "polynomial" in trivia_url:
@@ -1363,6 +1376,7 @@ def start_trivia_round():
             fastest_answers_count.clear()
             
             # Reset round data for the next round
+            round_data["questions"] = []
             round_data["responses"] = []
             round_data["scoreboard"] = {}
 

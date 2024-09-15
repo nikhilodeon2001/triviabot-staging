@@ -865,7 +865,7 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
     return False  # No match found
                           
                 
-def check_correct_responses(question_ask_time, trivia_answer_list):
+def check_correct_responses(question_ask_time, trivia_answer_list, question_number):
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
     sync_url = f"{matrix_base_url}/sync"
@@ -1430,9 +1430,9 @@ def start_trivia_round():
                 send_message(target_room_id, f"\n🛑 TIME 🛑\n")
                 
                 if new_solution is None:
-                    check_correct_responses(question_ask_time, trivia_answer_list)  # Check the answers     # POLY
+                    check_correct_responses(question_ask_time, trivia_answer_list, question_number)  # Check the answers     # POLY
                 else:
-                    check_correct_responses(question_ask_time, [new_solution])  # Check the answers     # LATENCY
+                    check_correct_responses(question_ask_time, [new_solution], question_number)  # Check the answers     # LATENCY
                 
                 show_standings()  # Show the standings after each question
                 #save_trivia_data_answers()

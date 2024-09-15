@@ -68,6 +68,8 @@ max_queue_size = 100  # Number of submissions to accumulate before flushing
 # Initialize all variables
 username = os.getenv("username")
 password = os.getenv("password")
+sentry_dsn = os.getenv("sentry_dsn")
+mongo_db_string = os.getenv("mongo_db_string")
 openai.api_key = os.getenv("open_api_key")  # Store your API key securely
 target_room_id = os.getenv("target_room_id")
 question_time = int(os.getenv("question_time"))

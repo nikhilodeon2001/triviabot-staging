@@ -109,12 +109,14 @@ def generate_round_summary(round_data):
     )
 
 
-    response = client.chat.completions.create(# Capital C here
-        model="gpt-3.5-turbo",  # or "gpt-3.5-turbo" for faster responses
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant Answer the following question in a max of 2 words. Include no punctuation and give answers in all lowercase. If the answer is a name, return only the first name. If the answer is a number, return it using 0-9 digits. Don't include any special characters at all. If you cannot respond for any reason, just respond with 'frog'"},
-            {"role": "user", "content": prompt}
-        ])
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=200,
+        n=1,
+        stop=None,
+        temperature=0.7,
+    )
 
     # Extract the generated summary from the response
     summary = response.choices[0].text.strip()

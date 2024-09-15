@@ -298,8 +298,8 @@ def connect_to_mongodb(max_retries=3, delay_between_retries=5):
     for attempt in range(max_retries):
         try:
             # Attempt to connect to MongoDB
-            client = MongoClient("mongodb+srv://nsharma2:WBX1gqf4wtr_wxt7xkr@triviabot.oxez2.mongodb.net/?retryWrites=true&w=majority&appName=triviabot")
-            db = client["triviabot"]
+            client = MongoClient("mongodb+srv://nsharma2:WBX1gqf4wtr_wxt7xkr@triviabot-testing.oxez2.mongodb.net/?retryWrites=true&w=majority&appName=triviabot-testing")
+            db = client["triviabot-testing"]
             return db  # Return the database connection if successful
         
         except Exception as e:

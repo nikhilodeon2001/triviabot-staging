@@ -868,6 +868,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
     # Define the first item in the list as trivia_answer
     trivia_answer = trivia_answer_list[0]  # The first item is the main answer
     correct_responses = []  # To store users who answered correctly
+    has_responses = False  # Track if there are any responses
    
     for attempt in range(max_retries):
         try:
@@ -903,6 +904,9 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                             message_content = event.get("content", {}).get("body", "")
                             normalized_message_content = normalize_text(message_content)
 
+                            # Indicate that there was at least one response
+                            has_responses = True
+                            
                             # Find the current question data to add responses
                             current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
                             if current_question_data:
@@ -979,8 +983,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                             #    message += f"\n\n👥 The Rest"
                         else:
                             message += f"\n🎉 {display_name}: {points} (+{round(time_diff, 1)}s)"
-                    #message += f"\n"
-                else:
+                elif has_responses:  # Only if there were responses but none correct
                     potential_messages = [
                         "\n🥴 We've got a bunch of geniuses here...\n",
                         "\n🤔 Did someone hide the thinking cap?\n",
@@ -1078,9 +1081,9 @@ def update_round_streaks(user):
         
         if current_longest_round_streak["streak"] > 1:
             # Include the summary in the message if it's not empty
-            send_message(target_room_id, f"\n🏆 Winner: {user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
+            send_message(target_room_id, f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
         else:
-            send_message(target_room_id, f"\n🏆 Winner: {user}!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
+            send_message(target_room_id, f"\n🏆 Winner: @{user}!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
             
 
 def determine_round_winner():
@@ -1116,7 +1119,7 @@ def show_standings():
             if rank <= 3:
                 # Use medals for the top 3
                 if fastest_count > 0:
-                    standing_message += f"\n{medals[rank-1]} {user}: {formatted_points} (⚡{fastest_count})"
+                    standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}  ⚡{fastest_count}"
                 else:
                     standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}"
             #elif rank == len(standings) and rank > 5:

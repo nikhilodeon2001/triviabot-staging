@@ -124,9 +124,9 @@ def generate_round_summary(round_data):
 
     # Add specific instructions for generating the ribbons
     prompt += (
-        "\nCreate one fun and witty honorable mention ribbon for one specific losing player, meaning they did not finish at the top of the scoreboard. "
-        "Make sure to name the player's username specifically, mention specific responses they gave during the round that were noteworthy or funny or random, and mention specifically why they earned that ribbon. "
-        "Create 4 sentences for why the ribbon was awarded to that specific player. Use emojis in the ribbon name to make it engaging and fun."
+        "\nCompliment the winning trivia player who has finished with the highest score on the scoreboard.  "
+        "Make sure to name the player's username specifically, mention specific responses they gave during the round that were noteworthy or funny or random, and make mention of other players if the game was especially close or a blow out. "
+        "Create 3 sentences to compliment the player on their victory. Use emojis in your compliments to make it engaging and fun."
     )
 
     # Use OpenAI's API to generate the summary
@@ -134,7 +134,7 @@ def generate_round_summary(round_data):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a quirky and fun trivia game host who creates an honorable mention ribbon for one of the losing players using specifics from the past round."},
+                {"role": "system", "content": "You are a quirky and fun trivia game host who compliments the winning trivia player using specifics from the past round."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=200,
@@ -998,7 +998,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                         "\n😵‍💫 I think we all just forgot how to trivia.\n",
                         "\n💡 Lightbulb moment? More like a power outage!\n",
                         "\n🎯 Missed by a mile! Anyone aiming?\n",
-                        "\n🚶‍♂️ That was embarassing. I'll just see myself out.\n",
+                        "\n🚶‍♂️ Um wow. I'll just see myself out.\n",
                         "\n🤪 What a brain twister...yikes!\n",
                         "\n🎱 Outlook not so good...for all of us.\n"
                     ]
@@ -1066,9 +1066,10 @@ def update_round_streaks(user):
 
     if user is not None:
 
+        #summary = "🎗️ Honorable mention ribbons awarded once we have 5 players..."
         summary = ""
         ai_awards = generate_round_summary(round_data)
-        print(round_data)
+        #print(round_data)
         print(ai_awards)
     
         #if len(scoreboard) >= 5:
@@ -1115,7 +1116,7 @@ def show_standings():
             if rank <= 3:
                 # Use medals for the top 3
                 if fastest_count > 0:
-                    standing_message += f"\n{medals[rank-1]} {user}: {formatted_points} (*{fastest_count})"
+                    standing_message += f"\n{medals[rank-1]} {user}: {formatted_points} (⚡{fastest_count})"
                 else:
                     standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}"
             #elif rank == len(standings) and rank > 5:

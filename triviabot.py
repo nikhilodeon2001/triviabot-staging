@@ -1070,10 +1070,9 @@ def update_round_streaks(user):
     if user is not None:
 
         #summary = "🎗️ Honorable mention ribbons awarded once we have 5 players..."
-        summary = ""
-        ai_awards = generate_round_summary(round_data)
+        summary = generate_round_summary(round_data)
         #print(round_data)
-        print(ai_awards)
+        #print(ai_awards)
     
         #if len(scoreboard) >= 5:
             # Generate the summary if there are 5 or more players

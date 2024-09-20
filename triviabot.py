@@ -1055,36 +1055,63 @@ def update_round_streaks(user):
     """Update the current longest round streak for the user who answered correctly."""
     global current_longest_round_streak
 
+    # Variables to store data to be inserted or saved later
+    mongo_operations = []
+
+    # Check if we need to update the longest round streak
     if current_longest_round_streak["user"] != user:
         if current_longest_round_streak["user"] is not None:
-            # Append the streak
-            insert_data_to_mongo("longest_round_streaks", current_longest_round_streak)
+            # Prepare the data to be inserted into longest_round_streaks
+            mongo_operations.append({
+                "operation": "insert",
+                "collection": "longest_round_streaks",
+                "data": current_longest_round_streak
+            })
+        # Update the user and reset the streak
         current_longest_round_streak["user"] = user
         current_longest_round_streak["streak"] = 0
 
+    # Increment streak or handle no user case
     if user is None:
-        save_data_to_mongo("current_streaks", "current_longest_round_streak", current_longest_round_streak)
+        mongo_operations.append({
+            "operation": "save",
+            "collection": "current_streaks",
+            "document_id": "current_longest_round_streak",
+            "data": current_longest_round_streak
+        })
     else:
         current_longest_round_streak["streak"] += 1
-        save_data_to_mongo("current_streaks", "current_longest_round_streak", current_longest_round_streak)
-        insert_data_to_mongo("round_wins", user)
+        mongo_operations.append({
+            "operation": "save",
+            "collection": "current_streaks",
+            "document_id": "current_longest_round_streak",
+            "data": current_longest_round_streak
+        })
+        mongo_operations.append({
+            "operation": "insert",
+            "collection": "round_wins",
+            "data": user
+        })
 
+    # Generate the round summary if the user is not None
     if user is not None:
-
-        #summary = "🎗️ Honorable mention ribbons awarded once we have 5 players..."
         summary = generate_round_summary(round_data)
-        #print(round_data)
-        #print(ai_awards)
-    
-        #if len(scoreboard) >= 5:
-            # Generate the summary if there are 5 or more players
-            #summary = ai_awards
-        
+
+        # Determine the message to send
         if current_longest_round_streak["streak"] > 1:
-            # Include the summary in the message if it's not empty
-            send_message(target_room_id, f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
+            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n"
         else:
-            send_message(target_room_id, f"\n🏆 Winner: @{user}!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n")
+            message = f"\n🏆 Winner: @{user}!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n"
+
+        # Send the message
+        send_message(target_room_id, message)
+
+    # Perform all MongoDB operations at the end
+    for operation in mongo_operations:
+        if operation["operation"] == "insert":
+            insert_data_to_mongo(operation["collection"], operation["data"])
+        elif operation["operation"] == "save":
+            save_data_to_mongo(operation["collection"], operation["document_id"], operation["data"])
             
 
 def determine_round_winner():

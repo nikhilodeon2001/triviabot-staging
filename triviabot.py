@@ -1095,8 +1095,10 @@ def update_round_streaks(user):
 
     # Generate the round summary if the user is not None
     if user is not None:
+        print("starting generating")
         summary = generate_round_summary(round_data)
-
+        print("generating over")
+        print("startign message")
         # Determine the message to send
         if current_longest_round_streak["streak"] > 1:
             message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n"
@@ -1105,6 +1107,7 @@ def update_round_streaks(user):
 
         # Send the message
         send_message(target_room_id, message)
+        print("messaage sent")
 
     # Perform all MongoDB operations at the end
     for operation in mongo_operations:

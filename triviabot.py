@@ -703,6 +703,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
         time.sleep(3)
 
         message_body = f"\n{number_block} Question {number_block}\n{trivia_question}"
+        initialize_sync()
         response = send_message(target_room_id, message_body)
 
         if response is None:
@@ -1432,7 +1433,6 @@ def start_trivia_round():
             question_number = 1
             for trivia_question, trivia_url, trivia_answer_list in selected_questions:
                 # Ask the trivia question and get start times
-                initialize_sync()
                 question_ask_time, new_solution = ask_question(trivia_question, trivia_url, trivia_answer_list, question_number)
                 time.sleep(question_time)  # Wait for n seconds for answers
                 #fetch_all_responses(question_ask_time)  # Pass both local and server start times

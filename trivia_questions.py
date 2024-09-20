@@ -1,16 +1,8 @@
 # trivia_questions.py
 
 trivia_questions = [
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"]),
-("What is the name for this type of image that can trick the brain into seeing a 3D scene?","", ["Ohm's Law"])
+("What conic section is represented by the following equation?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/conic-sections/hyperbola.png", ["Hyperbola"]),
+("What conic section is represented by the following equation?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/conic-sections/parabola.png", ["Parabola"]),
+("What conic section is represented by the following equation?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/conic-sections/ellipse.png", ["Ellipse"]),
+("What conic section is represented by the following equation?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/conic-sections/circle.png", ["Circle"])  
 ]

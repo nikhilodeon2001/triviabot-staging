@@ -1412,7 +1412,7 @@ def start_trivia_round():
             load_streak_data()
 
             """Start a round of n trivia questions."""
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n🏁 Get ready...\n\nRemember only your first answer counts...\n\n")
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n🏁 Get ready...only your first answer counts...\n\n")
             round_start_messages()
             time.sleep(5)
 
@@ -1459,7 +1459,7 @@ def start_trivia_round():
             time.sleep(7)
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ Let's take a 60s breather...\n\n💰 This game has been a pure hobby effort. Help me keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
-                time.sleep(30)
+                time.sleep(60)
             else:
                 send_message(target_room_id, f"\n💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")
                 time.sleep(time_between_rounds)  # Adjust this time to whatever delay you need between rounds

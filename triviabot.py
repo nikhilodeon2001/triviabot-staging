@@ -698,6 +698,10 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
 
     else:
         # Send the question to the chat
+        message_body = f"\n✋ Get Ready! ✋ \n"
+        send_message(target_room_id, message_body)
+        time.sleep(3)
+
         message_body = f"\n{number_block} Question {number_block}\n{trivia_question}"
         response = send_message(target_room_id, message_body)
 

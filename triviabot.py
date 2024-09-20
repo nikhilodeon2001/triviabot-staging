@@ -1,3 +1,4 @@
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -1130,7 +1131,7 @@ def show_standings():
             else:
                 # Use numbers for 4th place and beyond
                 if fastest_count > 0:
-                    standing_message += f"\n{rank}. {user}: {formatted_points} (*{fastest_count})"
+                    standing_message += f"\n{rank}. {user}: {formatted_points}  ⚡{fastest_count}"
                 else:
                     standing_message += f"\n{rank}. {user}: {formatted_points}"
         

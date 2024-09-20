@@ -125,9 +125,9 @@ def generate_round_summary(round_data):
 
     # Add specific instructions for generating the ribbons
     prompt += (
-        "\nCompliment the winning trivia player who has finished with the highest score on the scoreboard.  "
-        "Make sure to name the player's username specifically, mention specific responses they gave during the round that were noteworthy or funny or random, and make mention of other players if the game was especially close or a blow out. "
-        "Create 3 sentences to compliment the player on their victory. Use emojis in your compliments to make it engaging and fun."
+        "\nCongratulate and then roast the winning trivia player who finished with the highest score on the scoreboard.  "
+        "Start by mentoning the player's username specifically, and making fun of their username. Then roast the specific responses they gave during the round that were noteworthy or funny or random, and make mention of other players if the game was especially close or a blow out. "
+        "Create 3 sentences to compliment the player on their victory. Be creative, funny, and sarcastic. Use emojis in your compliments to make it engaging and fun."
     )
 
     # Use OpenAI's API to generate the summary
@@ -698,10 +698,6 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
 
     else:
         # Send the question to the chat
-        message_body = f"\n✋ HOLD ✋ \n"
-        send_message(target_room_id, message_body)
-        time.sleep(3)
-
         message_body = f"\n{number_block} Question {number_block}\n{trivia_question}"
         initialize_sync()
         response = send_message(target_room_id, message_body)
@@ -875,7 +871,6 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
     trivia_answer = trivia_answer_list[0]  # The first item is the main answer
     correct_responses = []  # To store users who answered correctly
     has_responses = False  # Track if there are any responses
-    answered_users = set()  # Track users who have already answered
    
     for attempt in range(max_retries):
         try:
@@ -902,22 +897,15 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                             display_name = get_display_name(event.get("content", {}).get("displayname", sender))  # Get the display name from content
                             
                             # Check if the user has already answered correctly, ignore if they have
-                            #if any(resp[0] == display_name for resp in correct_responses):
-                            #    continue  # Ignore this response since the user has already answered correctly
+                            if any(resp[0] == display_name for resp in correct_responses):
+                                continue  # Ignore this response since the user has already answered correctly
 
-                            # **Check if the user has already answered**
-                            if display_name in answered_users:
-                                continue  # Ignore any additional answers from the same user
-                            
                             # Log user submission (MongoDB operation)
                             log_user_submission(display_name)
                             
                             message_content = event.get("content", {}).get("body", "")
                             normalized_message_content = normalize_text(message_content)
 
-                            # Add user to answered_users set
-                            answered_users.add(display_name)
-                            
                             # Indicate that there was at least one response
                             has_responses = True
                             
@@ -1412,7 +1400,7 @@ def start_trivia_round():
             load_streak_data()
 
             """Start a round of n trivia questions."""
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n❗ Only your first answer counts!!!\n\n🏁 Get ready...")
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n🏁 Get ready...\n")
             round_start_messages()
             time.sleep(5)
 
@@ -1458,10 +1446,10 @@ def start_trivia_round():
         
             time.sleep(7)
             if round_count % 5 == 0:
-                send_message(target_room_id, f"\n🧘‍♂️ Let's take a 60s breather...\n\n💰 This game has been a pure hobby effort. Help me keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 time.sleep(60)
             else:
-                send_message(target_room_id, f"\n💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")
+                send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")
                 time.sleep(time_between_rounds)  # Adjust this time to whatever delay you need between rounds
 
     except Exception as e:

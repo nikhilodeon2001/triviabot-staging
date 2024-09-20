@@ -1062,6 +1062,8 @@ def update_round_streaks(user):
     if current_longest_round_streak["user"] != user:
         if current_longest_round_streak["user"] is not None:
             # Prepare the data to be inserted into longest_round_streaks
+            print("appending")
+            print(current_longest_round_streak)
             mongo_operations.append({
                 "operation": "insert",
                 "collection": "longest_round_streaks",
@@ -1111,6 +1113,7 @@ def update_round_streaks(user):
 
     # Perform all MongoDB operations at the end
     for operation in mongo_operations:
+        print(operation)
         if operation["operation"] == "insert":
             insert_data_to_mongo(operation["collection"], operation["data"])
         elif operation["operation"] == "save":

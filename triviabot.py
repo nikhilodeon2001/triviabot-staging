@@ -1412,7 +1412,7 @@ def start_trivia_round():
             load_streak_data()
 
             """Start a round of n trivia questions."""
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n🏁 Get ready...only your first answer counts...\n\n")
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n❗ Only your first answer counts!!!\n\n🏁 Get ready...")
             round_start_messages()
             time.sleep(5)
 

@@ -1058,6 +1058,11 @@ def update_round_streaks(user):
     # Variables to store data to be inserted or saved later
     mongo_operations = []
 
+    # Manually copy function for dictionaries
+    def manual_copy(data):
+        """Manually copy a dictionary by reconstructing it."""
+        return {key: value for key, value in data.items()}
+
     # Check if we need to update the longest round streak
     if current_longest_round_streak["user"] != user:
         if current_longest_round_streak["user"] is not None:
@@ -1067,7 +1072,7 @@ def update_round_streaks(user):
             mongo_operations.append({
                 "operation": "insert",
                 "collection": "longest_round_streaks",
-                "data": current_longest_round_streak
+                "data": manual_copy(current_longest_round_streak)  # Manually copy the data
             })
         # Update the user and reset the streak
         current_longest_round_streak["user"] = user
@@ -1079,7 +1084,7 @@ def update_round_streaks(user):
             "operation": "save",
             "collection": "current_streaks",
             "document_id": "current_longest_round_streak",
-            "data": current_longest_round_streak
+            "data": manual_copy(current_longest_round_streak)  # Manually copy the data
         })
     else:
         current_longest_round_streak["streak"] += 1
@@ -1087,12 +1092,12 @@ def update_round_streaks(user):
             "operation": "save",
             "collection": "current_streaks",
             "document_id": "current_longest_round_streak",
-            "data": current_longest_round_streak
+            "data": manual_copy(current_longest_round_streak)  # Manually copy the data
         })
         mongo_operations.append({
             "operation": "insert",
             "collection": "round_wins",
-            "data": user
+            "data": user  # If user is simple data (e.g., string), no need to copy
         })
 
     # Generate the round summary if the user is not None
@@ -1100,7 +1105,7 @@ def update_round_streaks(user):
         print("starting generating")
         summary = generate_round_summary(round_data)
         print("generating over")
-        print("startign message")
+        print("starting message")
         # Determine the message to send
         if current_longest_round_streak["streak"] > 1:
             message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n"
@@ -1109,7 +1114,7 @@ def update_round_streaks(user):
 
         # Send the message
         send_message(target_room_id, message)
-        print("messaage sent")
+        print("message sent")
 
     # Perform all MongoDB operations at the end
     for operation in mongo_operations:

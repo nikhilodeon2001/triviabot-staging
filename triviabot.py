@@ -870,6 +870,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
     trivia_answer = trivia_answer_list[0]  # The first item is the main answer
     correct_responses = []  # To store users who answered correctly
     has_responses = False  # Track if there are any responses
+    answered_users = set()  # Track users who have already answered
    
     for attempt in range(max_retries):
         try:
@@ -896,15 +897,22 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                             display_name = get_display_name(event.get("content", {}).get("displayname", sender))  # Get the display name from content
                             
                             # Check if the user has already answered correctly, ignore if they have
-                            if any(resp[0] == display_name for resp in correct_responses):
-                                continue  # Ignore this response since the user has already answered correctly
+                            #if any(resp[0] == display_name for resp in correct_responses):
+                            #    continue  # Ignore this response since the user has already answered correctly
 
+                            # **Check if the user has already answered**
+                            if display_name in answered_users:
+                                continue  # Ignore any additional answers from the same user
+                            
                             # Log user submission (MongoDB operation)
                             log_user_submission(display_name)
                             
                             message_content = event.get("content", {}).get("body", "")
                             normalized_message_content = normalize_text(message_content)
 
+                            # Add user to answered_users set
+                            answered_users.add(display_name)
+                            
                             # Indicate that there was at least one response
                             has_responses = True
                             

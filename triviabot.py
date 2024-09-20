@@ -698,7 +698,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
 
     else:
         # Send the question to the chat
-        message_body = f"\n✋ Get Ready! ✋ \n"
+        message_body = f"\n✋ HOLD ✋ \n"
         send_message(target_room_id, message_body)
         time.sleep(3)
 
@@ -1321,8 +1321,6 @@ def round_start_messages():
                 send_message(target_room_id, f"⚔️  {username} has one leaderboard left to conquer. Who will mount the defense?")
             elif top_count == 4:
                 send_message(target_room_id, f"🌡️  {username} is heating up. Only two leaderboards left. Stay safe everyone.")
-            time.sleep(5)
-    
     return None
 
 def generate_and_render_polynomial_image(): #POLY
@@ -1416,6 +1414,7 @@ def start_trivia_round():
             """Start a round of n trivia questions."""
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n🏁 Get ready...\n\nRemember only your first answer counts...\n\n")
             round_start_messages()
+            time.sleep(5)
 
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
@@ -1462,7 +1461,7 @@ def start_trivia_round():
                 send_message(target_room_id, f"\n🧘‍♂️ Let's take a 60s breather...\n\n💰 This game has been a pure hobby effort. Help me keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 time.sleep(30)
             else:
-                send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")
+                send_message(target_room_id, f"\n💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")
                 time.sleep(time_between_rounds)  # Adjust this time to whatever delay you need between rounds
 
     except Exception as e:

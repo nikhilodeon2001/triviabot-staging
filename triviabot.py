@@ -1459,7 +1459,7 @@ def start_trivia_round():
         
             time.sleep(7)
             if round_count % 2 == 0:
-                send_message(target_room_id, f"🧘‍♂️ Let's take a 60s breather...\n\n💰 I made this with my own time and money. Help out!\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                send_message(target_room_id, f"\n🧘‍♂️ Let's take a 60s breather...\n\n💰 This game has been a pure hobby effort. Help me keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 time.sleep(30)
             else:
                 send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")

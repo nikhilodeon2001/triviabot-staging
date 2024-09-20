@@ -1413,7 +1413,7 @@ def start_trivia_round():
             load_streak_data()
 
             """Start a round of n trivia questions."""
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n🏁 Get ready...\n")
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n🏁 Get ready...\n\nRemember only your first answer counts...\n\n")
             round_start_messages()
 
             # Reset the scoreboard and fastest answers at the start of each round

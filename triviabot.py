@@ -83,13 +83,14 @@ hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
 
-def generate_round_summary(round_data):
+def generate_round_summary(round_data, winner):
     """
     Generate a summary of the trivia round using OpenAI's API.
     """
     # Construct the prompt with clear instructions
     prompt = (
-        "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+        "You are a depressed and sarcastic trivia game host. Start the summary with a unique and random opening each time, "
+        "vary your language, and make it sarcastic, ironic, hopeless in a hilarious way. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
         "Questions asked:\n"
     )
 
@@ -125,23 +126,24 @@ def generate_round_summary(round_data):
 
     # Add specific instructions for generating the ribbons
     prompt += (
-        "\nCongratulate and then roast the winning trivia player who finished with the highest score on the scoreboard.  "
-        "Start by mentoning the player's username specifically, and making fun of their username. Then roast the specific responses they gave during the round that were noteworthy or funny or random, and make mention of other players if the game was especially close or a blow out. "
-        "Create 3 sentences to compliment the player on their victory. Be creative, funny, and sarcastic. Use emojis in your compliments to make it engaging and fun."
+        f"\nThe winner of the trivia round is {winner}. "
+        "Roast them about their username. Also mention any notable responses they gave during the round and mention other players if the round was close."
+        "Create 3 sentences in your response. Be creative and sarcastic. Use emojis in your response to make it engaging."
     )
+
 
     # Use OpenAI's API to generate the summary
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a quirky and fun trivia game host who compliments the winning trivia player using specifics from the past round."},
+                {"role": "system", "content": "You are a sarcastic trivia game host who roasts the winning trivia player using specifics from the trivia round."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=200,
             n=1,
             stop=None,
-            temperature=0.7,
+            temperature=0.8,
         )
 
         # Extract the generated summary from the response
@@ -815,7 +817,7 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
-    if len(user_answer) < 4 or len(correct_answer) < 4:
+    if len(user_answer) < 3 or len(correct_answer) < 3:
         return user_answer.lower() == correct_answer.lower()  # Only accept an exact match for short answers
 
     # Normalize both user and correct answers
@@ -1100,16 +1102,15 @@ def update_round_streaks(user):
 
     # Generate the round summary if the user is not None
     if user is not None:
-        summary = generate_round_summary(round_data)
+        summary = generate_round_summary(round_data, user)
         # Determine the message to send
         if current_longest_round_streak["streak"] > 1:
-            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n"
+            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://livetriviastats.com\n"
         else:
-            message = f"\n🏆 Winner: @{user}!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://redditlivetrivia.com\n"
+            message = f"\n🏆 Winner: @{user}!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://livetriviastats.com\n"
 
         # Send the message
         send_message(target_room_id, message)
-        print("message sent")
 
     # Perform all MongoDB operations at the end
     for operation in mongo_operations:
@@ -1478,7 +1479,7 @@ def start_trivia_round():
         
             time.sleep(7)
             if round_count % 5 == 0:
-                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://livetriviamerch.com\n")
                 time.sleep(60)
             else:
                 send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")

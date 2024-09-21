@@ -752,7 +752,6 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             image_size = 100
         
         elif "scramble" in trivia_url:
-            print(trivia_answer_list[0])
             image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
             image_size = 100
     

@@ -83,6 +83,75 @@ hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
 
+def generate_scrambled_image(scrambled_text):
+    """
+    Generate an image with scrambled words using PIL (Pillow).
+    """
+    # Define the font path and size
+    font_path = "/Library/Fonts/Arial Unicode.ttf"  # Use the Arial Unicode font on your Mac
+    font_size = 48
+    
+    # Create a blank image
+    img_width, img_height = 800, 200
+    img = Image.new('RGB', (img_width, img_height), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Load the font
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return
+
+    # Draw the scrambled text in the center of the image
+    text_bbox = draw.textbbox((0, 0), scrambled_text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2
+    draw.text((text_x, text_y), scrambled_text, fill=(255, 255, 255), font=font)
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+
+    # Upload the image to Matrix
+    content_uri = upload_image_to_matrix(image_buffer.read())
+    if content_uri:
+        return content_uri, img_width, img_height
+    else:
+        print("Failed to upload the image to Matrix.")
+
+
+
+def scramble_text(input_text):
+    """
+    Scramble the entire phrase by shuffling all the letters while keeping spaces
+    in their original positions.
+    """
+    # Extract only the letters, ignore spaces
+    letters_only = [char for char in input_text if char != ' ']
+    
+    # Shuffle the letters
+    random.shuffle(letters_only)
+    
+    # Reinsert spaces into their original positions
+    scrambled_text = []
+    letter_index = 0
+    
+    for char in input_text:
+        if char == ' ':
+            scrambled_text.append(' ')  # Keep spaces in their original positions
+        else:
+            scrambled_text.append(letters_only[letter_index])
+            letter_index += 1
+
+    return ''.join(scrambled_text)
+
+
+
+
 def generate_round_summary(round_data, winner):
     """
     Generate a summary of the trivia round using OpenAI's API.
@@ -681,6 +750,11 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
         if "polynomial" in trivia_url:
             image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image() #POLY
             image_size = 100
+        
+        elif "scramble" in trivia_url:
+            image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
+            image_size = 100
+    
         else:
             image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
             image_mxc = upload_image_to_matrix(image_data)

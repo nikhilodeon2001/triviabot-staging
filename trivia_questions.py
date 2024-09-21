@@ -25,7 +25,7 @@ trivia_questions = [
     ("Unscramble this world capital:", "https://scramble22.com", ["Bratislava"]),
     ("Unscramble this world capital:", "https://scramble23.com", ["Amsterdam"]),
     ("Unscramble this world capital:", "https://scramble24.com", ["Copenhagen"]),
-    ("Unscramble this world capital:", "https://scramble25.com", ["Washington DC"]),
+    ("Unscramble this world capital:", "https://scramble25.com", ["Washington DC", "Washington", "DC"]),
     ("Unscramble this world capital:", "https://scramble26.com", ["Kuala Lumpur"]),
     ("Unscramble this world capital:", "https://scramble27.com", ["Canberra"]),
     ("Unscramble this world capital:", "https://scramble28.com", ["Helsinki"]),

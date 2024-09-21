@@ -92,7 +92,7 @@ def generate_scrambled_image(scrambled_text):
     font_size = 48
     
     # Create a blank image
-    img_width, img_height = 800, 200
+    img_width, img_height = 400, 150
     img = Image.new('RGB', (img_width, img_height), color=(0, 0, 0))
     draw = ImageDraw.Draw(img)
 

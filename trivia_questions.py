@@ -1,8 +1,14 @@
 # trivia_questions.py
 
 trivia_questions = [
-("What conic section is represented by the following equation?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/conic-sections/hyperbola.png", ["Hyperbola"]),
-("What conic section is represented by the following equation?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/conic-sections/parabola.png", ["Parabola"]),
-("What conic section is represented by the following equation?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/conic-sections/ellipse.png", ["Ellipse"]),
-("What conic section is represented by the following equation?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/conic-sections/circle.png", ["Circle"])  
+("Unscramble this country:", "https://scramble1.com", ["New Zealand"]),
+("Unscramble this country:", "https://scramble2.com", ["United States"]),
+("Unscramble this country:", "https://scramble3.com", ["North Korea"]),
+("Unscramble this country:", "https://scramble4.com", ["Somalia"]),
+("Unscramble this city:", "https://scramble5.com", ["Los Angeles"]),
+("Unscramble this world capital name:", "https://scramble6.com", ["Ouagadougou"]),
+("Unscramble this world capital:", "https://scramble7.com", ["New Delhi"]),
+("Unscramble this world capital:", "https://scramble8.com", ["Buenos Aries"]),
+("Unscramble this element name:", "https://scramble9.com", ["Hydrogen"]),
+("Unscramble this element name:", "https://scramble10.com", ["Tungsten"]) 
 ]

@@ -109,7 +109,7 @@ def generate_scrambled_image(scrambled_text):
     text_height = text_bbox[3] - text_bbox[1]
     text_x = (img_width - text_width) // 2
     text_y = (img_height - text_height) // 2
-    draw.text((text_x, text_y), scrambled_text, fill=(255, 255, 0), font=font)
+    draw.text((text_x, text_y), scrambled_text, fill=(0, 255, 0), font=font)
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()

@@ -88,7 +88,7 @@ def generate_scrambled_image(scrambled_text):
     Generate an image with scrambled words using PIL (Pillow).
     """
     # Define the font path and size
-    font_path = "/Library/Fonts/Arial Unicode.ttf"  # Use the Arial Unicode font on your Mac
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
     font_size = 48
     
     # Create a blank image
@@ -752,6 +752,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             image_size = 100
         
         elif "scramble" in trivia_url:
+            print(trivia_answer_list[0])
             image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
             image_size = 100
     

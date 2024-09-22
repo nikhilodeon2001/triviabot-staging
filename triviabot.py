@@ -116,6 +116,7 @@ def messages_test():
     print(messages_url)
     print(message_headers)
     print(message_params)
+    print("here")
     response = requests.get(messages_url, headers=message_headers, params=message_params)
     print(response.json())
     

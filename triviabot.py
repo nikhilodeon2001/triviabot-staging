@@ -114,9 +114,11 @@ def messages_test():
     
     # Make the GET request to the Matrix API
     print(messages_url)
+    print("about to do headers")
     print(message_headers)
+    print("about to do params")
     print(message_params)
-    print("here")
+    print("about to do request")
     response = requests.get(messages_url, headers=message_headers, params=message_params)
     print(response.json())
     

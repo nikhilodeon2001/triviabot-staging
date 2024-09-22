@@ -107,7 +107,7 @@ def messages_test():
         message_params["from"] = from_token
     
     # Set up the headers including the Authorization
-    messages_headers = {
+    message_headers = {
         "Authorization": f"Bearer {bearer_token}",
         "Accept": "application/json"
     }

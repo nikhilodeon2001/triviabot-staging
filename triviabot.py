@@ -31,7 +31,7 @@ import openai
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
 upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
-#sync_url = f"{matrix_base_url}/sync"
+sync_url = f"{matrix_base_url}/sync"
 
 
 # Define global variables to store streaks and scores
@@ -83,7 +83,52 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
-sync_url = f"{matrix_base_url}/rooms/{target_room_id}/messages"
+
+
+def messages_test():
+    # Set up necessary variables
+    homeserver_url = "https://matrix.redditspace.com"  # Replace with your Matrix homeserver URL
+    direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
+    limit = 10  # Max number of events to return (you can change this value)
+    
+    # Prepare the API request URL
+    messages_url = f"{homeserver_url}/_matrix/client/v3/rooms/{target_room_id}/messages"
+    
+    # Prepare request parameters
+    message_params = {
+        "dir": direction,
+        "limit": limit
+    }
+    
+    # Add 'from' parameter if available
+    if from_token:
+        params["from"] = from_token
+    
+    # Set up the headers including the Authorization
+    messages_headers = {
+        "Authorization": f"Bearer {bearer_token}",
+        "Accept": "application/json"
+    }
+    
+    # Make the GET request to the Matrix API
+    response = requests.get(messages_url, headers=message_headers, params=message_params)
+    
+    # Check if the request was successful
+    if response.status_code == 200:
+        data = response.json()
+        print("Messages:", data.get("chunk", []))
+        print("Start token:", data.get("start"))
+        print("End token:", data.get("end"))
+    else:
+        print(f"Failed to fetch messages. Status code: {response.status_code}")
+        print(response.text)
+
+
+
+
+
+
+
 
 def generate_scrambled_image(scrambled_text):
     """
@@ -1580,10 +1625,11 @@ try:
     load_global_variables()
 
     # Call this function at the start of the script to initialize the sync
-    initialize_sync()
-
+    #initialize_sync()
+    messages_test()
+    
     # Start the trivia round
-    start_trivia_round()
+    #start_trivia_round()
 
 except Exception as e:
     sentry_sdk.capture_exception(e)

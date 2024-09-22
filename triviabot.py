@@ -31,7 +31,8 @@ import openai
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
 upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
-sync_url = f"{matrix_base_url}/sync"
+#sync_url = f"{matrix_base_url}/sync"
+
 
 # Define global variables to store streaks and scores
 round_count = 0
@@ -82,6 +83,7 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
+sync_url  f"{matrix_base_url}/rooms/{target_room_id}/messages
 
 def generate_scrambled_image(scrambled_text):
     """
@@ -803,7 +805,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
 def initialize_sync():
     """Perform an initial sync to update the since_token without processing messages."""
     global since_token, filter_json, headers, params, max_retries, delay_between_retries
-    sync_url = f"{matrix_base_url}/sync"
+    #sync_url = f"{matrix_base_url}/sync"
         
     for attempt in range(max_retries):
         try:
@@ -944,7 +946,7 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
 def check_correct_responses(question_ask_time, trivia_answer_list, question_number):
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
-    sync_url = f"{matrix_base_url}/sync"
+    #sync_url = f"{matrix_base_url}/sync"
     
     # Define the first item in the list as trivia_answer
     trivia_answer = trivia_answer_list[0]  # The first item is the main answer

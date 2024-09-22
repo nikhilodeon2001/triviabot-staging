@@ -87,6 +87,7 @@ from_token = None
 
 
 def messages_test():
+    global from_token
     # Set up necessary variables
     homeserver_url = "https://matrix.redditspace.com"  # Replace with your Matrix homeserver URL
     direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
@@ -103,7 +104,7 @@ def messages_test():
     
     # Add 'from' parameter if available
     if from_token:
-        params["from"] = from_token
+        message_params["from"] = from_token
     
     # Set up the headers including the Authorization
     messages_headers = {
@@ -112,7 +113,11 @@ def messages_test():
     }
     
     # Make the GET request to the Matrix API
+    print(messages_url)
+    print(message_headers)
+    print(message_params)
     response = requests.get(messages_url, headers=message_headers, params=message_params)
+    print(response.json())
     
     # Check if the request was successful
     if response.status_code == 200:

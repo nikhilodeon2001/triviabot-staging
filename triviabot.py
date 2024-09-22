@@ -130,6 +130,9 @@ def scramble_text(input_text):
     Scramble the entire phrase by shuffling all the letters while keeping spaces
     in their original positions.
     """
+    # Convert the input text to lowercase
+    input_text = input_text.lower()
+    
     # Extract only the letters, ignore spaces
     letters_only = [char for char in input_text if char != ' ']
     
@@ -158,8 +161,8 @@ def generate_round_summary(round_data, winner):
     """
     # Construct the prompt with clear instructions
     prompt = (
-        "You are a depressed and sarcastic trivia game host. Start the summary with a unique and random opening each time, "
-        "vary your language, and make it sarcastic, ironic, hopeless in a hilarious way. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+        "You are an arrogan, sarcastic, and jaded trivia game host. Insult the trivia winner's username and let them know they're not as good as you. "
+        "Vary your language, and make it sarcastic, ironic, and antagonistic. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
         "Questions asked:\n"
     )
 
@@ -196,8 +199,8 @@ def generate_round_summary(round_data, winner):
     # Add specific instructions for generating the ribbons
     prompt += (
         f"\nThe winner of the trivia round is {winner}. "
-        "Roast them about their username. Also mention any notable responses they gave during the round and mention other players if the round was close."
-        "Create 3 sentences in your response. Be creative and sarcastic. Use emojis in your response to make it engaging."
+        "Insult their username and let them know that you're the best and you would crush them at trivia. Highlight any stupid or idiotic responses they gave during the round."
+        "Create no more than 5 sentences in total. Be creative, sarcastic, and antagonistic. Use emojis in your response to make it engaging."
     )
 
 
@@ -1406,16 +1409,16 @@ def round_start_messages():
         # If the user is in the Hall of Sovereigns, only show the message if top_count == 6
         if username in sovereigns:
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We must bow down.")
+                send_message(target_room_id, f"👑  {username} is #1 across all leaderboards. They are our Sovereign. We must bow down.")
                 time.sleep(5)
         else:
             # For users not in the Hall of Sovereigns, show all applicable messages
             if top_count == 6:
                 send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We must bow down.")
             elif top_count == 5:
-                send_message(target_room_id, f"⚔️  {username} has one leaderboard left to conquer. Who will mount the defense?")
+                send_message(target_room_id, f"⚔️  {username} is getting too close. Only one leaderboard left. Who will mount the defense?")
             elif top_count == 4:
-                send_message(target_room_id, f"🌡️  {username} is heating up. Only two leaderboards left. Stay safe everyone.")
+                send_message(target_room_id, f"🌡️  {username} is heating up. Only two leaderboards left. Stay safe.")
     return None
 
 def generate_and_render_polynomial_image(): #POLY

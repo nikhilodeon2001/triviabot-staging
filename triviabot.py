@@ -83,6 +83,7 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
+from_token = None
 
 
 def messages_test():
@@ -1632,12 +1633,12 @@ try:
     #start_trivia_round()
 
 except Exception as e:
-    sentry_sdk.capture_exception(e)
-    print(f"Unhandled exception: {e}. Restarting in 5 seconds...")
-    traceback.print_exc()  # Print the stack trace for debugging
+    #sentry_sdk.capture_exception(e)
+    #print(f"Unhandled exception: {e}. Restarting in 5 seconds...")
+    #traceback.print_exc()  # Print the stack trace for debugging
     time.sleep(5)
-    reddit_login()
-    login_to_chat()
-    load_global_variables()
-    initialize_sync()
-    start_trivia_round()  # Restart the bot
+    #reddit_login()
+    #login_to_chat()
+    #load_global_variables()
+    #initialize_sync()
+    #start_trivia_round()  # Restart the bot

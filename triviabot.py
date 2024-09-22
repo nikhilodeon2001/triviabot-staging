@@ -83,7 +83,7 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
-sync_url  f"{matrix_base_url}/rooms/{target_room_id}/messages
+sync_url  f"{matrix_base_url}/rooms/{target_room_id}/messages"
 
 def generate_scrambled_image(scrambled_text):
     """

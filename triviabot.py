@@ -422,7 +422,6 @@ def login_to_chat():
 
                 bearer_token = chat_login_response_json.get('access_token')
                 bot_user_id = chat_login_response_json.get('user_id')
-                print(bearer_token)
                 return bearer_token, bot_user_id
 
             else:
@@ -979,27 +978,22 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                 message_params["from"] = since_token
             print(message_params)
             response = requests.get(messages_url, headers=message_headers, params=message_params)
-            print("now here")
             if response.status_code == 200:
                 response_data = response.json()
-                #print("Messages:", data.get("chunk", []))
-                #print("Start token:", data.get("start"))
-                #print("End token:", data.get("end"))
                 since_token = response_data.get("end")
                 messages = response_data.get("chunk", [])
                 for message in messages:
-                    content = message.get("content", {})
                     sender = message.get("sender", "Unknown sender")
+                    if sender == bot_user_id:
+                        continue
+                    content = message.get("content", {})
                     body = content.get("body", "[No message body]")
-            
-                    # Print who said the message and the message content
-                    #print(f"{sender} said: {body}")
+                    print(f"{sender} said: {body}")
             else:
                 print(f"Failed to fetch messages. Status code: {response.status_code}")
                 print(response.text)
             
-            
-        
+
             '''
             if response.status_code == 200:
                 sync_data = response.json()

@@ -496,7 +496,7 @@ def load_global_variables():
         "filter": json.dumps(filter_json),  # Filter JSON as a parameter
     }
 
-     message_headers = {
+    message_headers = {
         "Authorization": f"Bearer {bearer_token}",
         "Accept": "application/json"
     }

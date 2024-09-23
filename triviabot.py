@@ -28,10 +28,7 @@ from PIL import Image, ImageDraw, ImageFont
 import openai
 
 
-# Define the base API URL for Matrix
-matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
-upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
-sync_url = f"{matrix_base_url}/sync"
+
 
 
 # Define global variables to store streaks and scores
@@ -55,8 +52,10 @@ question_start_time = None  # This will store the time the question is asked
 # Set up headers, including the authorization token
 headers = []
 headers_media = [] 
+message_headers = []
 
 params = []
+message_params = []
 filter_json = []
 
 # Initialize tokens
@@ -83,66 +82,14 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
-from_token = None
 
-
-def messages_test():
-    global from_token
-    # Set up necessary variables
-    direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
-    limit = 1000  # Max number of events to return (you can change this value)
-    
-    # Prepare the API request URL
-    messages_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/messages"
-    
-    # Prepare request parameters
-    message_params = {
-        "dir": direction,
-        "limit": limit
-    }
-    
-    # Add 'from' parameter if available
-   
-    
-    # Set up the headers including the Authorization
-    message_headers = {
-        "Authorization": f"Bearer {bearer_token}",
-        "Accept": "application/json"
-    }
-
-    print(message_params)
-    print(message_headers)
-    
-
-    if from_token:
-        message_params["from"] = from_token
-    # Make the GET request to the Matrix API
-    response = requests.get(messages_url, headers=message_headers, params=message_params)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        response_data = response.json()
-        #print("Messages:", data.get("chunk", []))
-        #print("Start token:", data.get("start"))
-        #print("End token:", data.get("end"))
-        from_token = response_data.get("end")
-        messages = response_data.get("chunk", [])
-        for message in messages:
-            content = message.get("content", {})
-            sender = message.get("sender", "Unknown sender")
-            body = content.get("body", "[No message body]")
-    
-            # Print who said the message and the message content
-            print(f"{sender} said: {body}")
-    else:
-        print(f"Failed to fetch messages. Status code: {response.status_code}")
-        print(response.text)
-
-
-
-
-
-
+# Define the base API URL for Matrix
+matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
+upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
+sync_url = f"{matrix_base_url}/sync"
+messages_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/messages"
+direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
+limit = 1000  # Max number of events to return (you can change this value)
 
 
 def generate_scrambled_image(scrambled_text):
@@ -547,6 +494,16 @@ def load_global_variables():
     params = {
         "timeout": "3000",  # Timeout to quickly retrieve messages
         "filter": json.dumps(filter_json),  # Filter JSON as a parameter
+    }
+
+     message_headers = {
+        "Authorization": f"Bearer {bearer_token}",
+        "Accept": "application/json"
+    }
+
+    message_params = {
+    "dir": direction,
+    "limit": limit
     }
 
     #print(f"target room id is: {target_room_id}")
@@ -1019,10 +976,32 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
             fastest_response_time = None
             
             if since_token:
-                params["since"] = since_token
+                message_params["from"] = since_token
 
-            response = requests.get(sync_url, headers=headers, params=params)
+            response = requests.get(messages_url, headers=message_headers, params=message_params)
+            if response.status_code == 200:
+                response_data = response.json()
+                #print("Messages:", data.get("chunk", []))
+                #print("Start token:", data.get("start"))
+                #print("End token:", data.get("end"))
+                since_token = response_data.get("end")
+                messages = response_data.get("chunk", [])
+                for message in messages:
+                    content = message.get("content", {})
+                    sender = message.get("sender", "Unknown sender")
+                    body = content.get("body", "[No message body]")
             
+                    # Print who said the message and the message content
+                    print(f"{sender} said: {body}")
+            else:
+                print(f"Failed to fetch messages. Status code: {response.status_code}")
+                print(response.text)
+            
+            
+            
+            
+            
+            '''
             if response.status_code == 200:
                 sync_data = response.json()
                 since_token = sync_data.get("next_batch")  # Update the since token
@@ -1172,7 +1151,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                 return None  
                     
     return None  
-
+'''
 
 def update_answer_streaks(user):
     """Update the current longest answer streak for the user who answered correctly."""

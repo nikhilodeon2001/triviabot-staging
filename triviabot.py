@@ -1618,7 +1618,6 @@ try:
 
     # Call this function at the start of the script to initialize the sync
     initialize_sync()
-    messages_test()
     
     # Start the trivia round
     start_trivia_round()

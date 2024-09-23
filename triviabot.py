@@ -998,9 +998,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                 print(response.text)
             
             
-            
-            
-            
+        
             '''
             if response.status_code == 200:
                 sync_data = response.json()
@@ -1139,7 +1137,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
             else:
                 print(f"Failed to fetch messages. Status code: {response.status_code}")
                 return None
-         
+         '''
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Attempt {attempt + 1} failed: {e}")
@@ -1151,7 +1149,6 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                 return None  
                     
     return None  
-'''
 
 def update_answer_streaks(user):
     """Update the current longest answer streak for the user who answered correctly."""

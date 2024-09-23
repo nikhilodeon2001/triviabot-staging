@@ -779,7 +779,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
 
     else:
         # Send the question to the chat
-        message_body = f"\n{number_block} QUESTION {number_block}\n{trivia_question}"
+        message_body = f"\n{number_block}❓ QUESTION ❓{number_block}\n{trivia_question}"
         initialize_sync()
         response = send_message(target_room_id, message_body)
 

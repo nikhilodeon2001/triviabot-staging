@@ -1617,19 +1617,19 @@ try:
     load_global_variables()
 
     # Call this function at the start of the script to initialize the sync
-    #initialize_sync()
+    initialize_sync()
     messages_test()
     
     # Start the trivia round
-    #start_trivia_round()
+    start_trivia_round()
 
 except Exception as e:
-    #sentry_sdk.capture_exception(e)
-    #print(f"Unhandled exception: {e}. Restarting in 5 seconds...")
-    #traceback.print_exc()  # Print the stack trace for debugging
+    sentry_sdk.capture_exception(e)
+    print(f"Unhandled exception: {e}. Restarting in 5 seconds...")
+    traceback.print_exc()  # Print the stack trace for debugging
     time.sleep(5)
-    #reddit_login()
-    #login_to_chat()
-    #load_global_variables()
-    #initialize_sync()
-    #start_trivia_round()  # Restart the bot
+    reddit_login()
+    login_to_chat()
+    load_global_variables()
+    initialize_sync()
+    start_trivia_round()  # Restart the bot

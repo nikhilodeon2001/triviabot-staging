@@ -28,6 +28,12 @@ from PIL import Image, ImageDraw, ImageFont
 import openai
 
 
+# Define the base API URL for Matrix
+matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
+upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
+sync_url = f"{matrix_base_url}/sync"
+
+
 # Define global variables to store streaks and scores
 round_count = 0
 scoreboard = {}
@@ -77,16 +83,7 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
-
-
-# Define the base API URL for Matrix
-matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
-upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
-#sync_url = f"{matrix_base_url}/sync"
-sync_url = f"{matrix_base_url}/rooms/{target_room_id}/messages"
 from_token = None
-
-
 
 
 def messages_test():
@@ -1022,33 +1019,16 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
             fastest_response_time = None
             
             if since_token:
-                params["from"] = since_token
+                params["since"] = since_token
 
-            response = requests.get(messages_url, headers=headers, params=params)
+            response = requests.get(sync_url, headers=headers, params=params)
             
             if response.status_code == 200:
                 sync_data = response.json()
-                since_token = sync_data.get("end")  # Update the since token
+                since_token = sync_data.get("next_batch")  # Update the since token
                 
                 # Process messages from the room
                 responses.clear()
-                
-                messages = sync_data.get("chunk", [])
-                for message in messages:
-                    content = message.get("content", {})
-                    sender = message.get("sender", "Unknown sender")
-                    body = content.get("body", "[No message body]")
-                    
-                    # Print who said the message and the message content
-                    print(f"{sender} said: {body}")
-                    if sender == bot_user_id:
-                        continue
-                    display_name = get_display_name(event.get("content", {}).get("displayname", sender))  # Get the display name from content
-
-
-
-
-                
                 for room_id, room_data in sync_data.get("rooms", {}).get("join", {}).items():
                     if room_id == target_room_id:  # Only process messages from the target room
                         for event in room_data.get("timeline", {}).get("events", []):

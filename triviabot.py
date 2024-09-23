@@ -113,30 +113,30 @@ def messages_test():
     print(message_params)
     print(message_headers)
     
-    while(True):
-        if from_token:
-            message_params["from"] = from_token
-        # Make the GET request to the Matrix API
-        response = requests.get(messages_url, headers=message_headers, params=message_params)
+
+    if from_token:
+        message_params["from"] = from_token
+    # Make the GET request to the Matrix API
+    response = requests.get(messages_url, headers=message_headers, params=message_params)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        response_data = response.json()
+        #print("Messages:", data.get("chunk", []))
+        #print("Start token:", data.get("start"))
+        #print("End token:", data.get("end"))
+        from_token = response_data.get("end")
+        messages = response_data.get("chunk", [])
+        for message in messages:
+            content = message.get("content", {})
+            sender = message.get("sender", "Unknown sender")
+            body = content.get("body", "[No message body]")
     
-        # Check if the request was successful
-        if response.status_code == 200:
-            response_data = response.json()
-            #print("Messages:", data.get("chunk", []))
-            #print("Start token:", data.get("start"))
-            #print("End token:", data.get("end"))
-            from_token = response_data.get("end")
-            messages = response_data.get("chunk", [])
-            for message in messages:
-                content = message.get("content", {})
-                sender = message.get("sender", "Unknown sender")
-                body = content.get("body", "[No message body]")
-        
-                # Print who said the message and the message content
-                print(f"{sender} said: {body}")
-        else:
-            print(f"Failed to fetch messages. Status code: {response.status_code}")
-            print(response.text)
+            # Print who said the message and the message content
+            print(f"{sender} said: {body}")
+    else:
+        print(f"Failed to fetch messages. Status code: {response.status_code}")
+        print(response.text)
 
 
 

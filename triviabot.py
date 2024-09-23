@@ -111,6 +111,9 @@ def messages_test():
         "Accept": "application/json"
     }
 
+    print(message_params)
+    print(message_headers)
+    
     while(True):
         # Make the GET request to the Matrix API
         response = requests.get(messages_url, headers=message_headers, params=message_params)

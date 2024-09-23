@@ -89,12 +89,11 @@ from_token = None
 def messages_test():
     global from_token
     # Set up necessary variables
-    homeserver_url = "https://matrix.redditspace.com"  # Replace with your Matrix homeserver URL
     direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
     limit = 10  # Max number of events to return (you can change this value)
     
     # Prepare the API request URL
-    messages_url = f"{homeserver_url}/_matrix/client/v3/rooms/{target_room_id}/messages"
+    messages_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/messages"
     
     # Prepare request parameters
     message_params = {
@@ -111,26 +110,21 @@ def messages_test():
         "Authorization": f"Bearer {bearer_token}",
         "Accept": "application/json"
     }
+
+    while(True):
+        # Make the GET request to the Matrix API
+        response = requests.get(messages_url, headers=message_headers, params=message_params)
     
-    # Make the GET request to the Matrix API
-    print(messages_url)
-    print("about to do headers")
-    print(message_headers)
-    print("about to do params")
-    print(message_params)
-    print("about to do request")
-    response = requests.get(messages_url, headers=message_headers, params=message_params)
-    print(response.json())
-    
-    # Check if the request was successful
-    if response.status_code == 200:
-        data = response.json()
-        print("Messages:", data.get("chunk", []))
-        print("Start token:", data.get("start"))
-        print("End token:", data.get("end"))
-    else:
-        print(f"Failed to fetch messages. Status code: {response.status_code}")
-        print(response.text)
+        # Check if the request was successful
+        if response.status_code == 200:
+            data = response.json()
+            print("Messages:", data.get("chunk", []))
+            print("Start token:", data.get("start"))
+            print("End token:", data.get("end"))
+            from_token = data.get("end")
+        else:
+            print(f"Failed to fetch messages. Status code: {response.status_code}")
+            print(response.text)
 
 
 

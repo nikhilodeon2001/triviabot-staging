@@ -502,8 +502,8 @@ def load_global_variables():
     }
 
     message_params = {
-    "dir": direction,
-    "limit": limit
+        "dir": direction,
+        "limit": limit
     }
 
     #print(f"target room id is: {target_room_id}")

@@ -460,7 +460,7 @@ def connect_to_mongodb(max_retries=3, delay_between_retries=5):
             time.sleep(delay_between_retries)
 
 def load_global_variables():
-    global headers, headers_media, filter_json, params
+    global headers, headers_media, filter_json, params, message_headers, message_params
     
     headers = {
         "accept": "application/json",

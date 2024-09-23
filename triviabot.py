@@ -90,7 +90,7 @@ def messages_test():
     global from_token
     # Set up necessary variables
     direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
-    limit = 1000  # Max number of events to return (you can change this value)
+    limit = 100  # Max number of events to return (you can change this value)
     
     # Prepare the API request URL
     messages_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/messages"
@@ -121,11 +121,11 @@ def messages_test():
     
         # Check if the request was successful
         if response.status_code == 200:
-            data = response.json()
+            response_data = response.json()
             #print("Messages:", data.get("chunk", []))
             #print("Start token:", data.get("start"))
             #print("End token:", data.get("end"))
-            from_token = data.get("end")
+            from_token = response_data.get("end")
             messages = response_data.get("chunk", [])
             for message in messages:
                 content = message.get("content", {})

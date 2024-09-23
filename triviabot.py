@@ -977,7 +977,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
             
             if since_token:
                 message_params["from"] = since_token
-            print("here")
+            print(message_params)
             response = requests.get(messages_url, headers=message_headers, params=message_params)
             print("now here")
             if response.status_code == 200:
@@ -993,7 +993,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                     body = content.get("body", "[No message body]")
             
                     # Print who said the message and the message content
-                    print(f"{sender} said: {body}")
+                    #print(f"{sender} said: {body}")
             else:
                 print(f"Failed to fetch messages. Status code: {response.status_code}")
                 print(response.text)

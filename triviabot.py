@@ -28,12 +28,6 @@ from PIL import Image, ImageDraw, ImageFont
 import openai
 
 
-# Define the base API URL for Matrix
-matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
-upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
-sync_url = f"{matrix_base_url}/sync"
-
-
 # Define global variables to store streaks and scores
 round_count = 0
 scoreboard = {}
@@ -83,7 +77,16 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
+
+
+# Define the base API URL for Matrix
+matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
+upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
+#sync_url = f"{matrix_base_url}/sync"
+sync_url = f"{matrix_base_url}/rooms/{target_room_id}/messages"
 from_token = None
+
+
 
 
 def messages_test():

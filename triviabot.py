@@ -753,18 +753,18 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
         if "polynomial" in trivia_url:
             image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image() #POLY
             image_size = 100
-            message_body = f"\n{number_block}∑ Math Question ∑{number_block}\n{trivia_question}"
+            message_body = f"\n{number_block}📊 MATH 📊{number_block}\n{trivia_question}"
         
         elif "scramble" in trivia_url:
             image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
             image_size = 100
-            message_body = f"\n{number_block}🧩 Scramble Question 🧩{number_block}\n{trivia_question}"
+            message_body = f"\n{number_block}🧩 SCRAMBLE 🧩{number_block}\n{trivia_question}"
     
         else:
             image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
             image_mxc = upload_image_to_matrix(image_data)
             image_size = len(image_data)
-            message_body = f"\n{number_block}📷 Image Question 📷{number_block}\n{trivia_question}"
+            message_body = f"\n{number_block}📷 IMAGE 📷{number_block}\n{trivia_question}"
         message_response = send_message(target_room_id, message_body)
 
         if message_response is None:
@@ -779,7 +779,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
 
     else:
         # Send the question to the chat
-        message_body = f"\n{number_block} Question {number_block}\n{trivia_question}"
+        message_body = f"\n{number_block} QUESTION {number_block}\n{trivia_question}"
         initialize_sync()
         response = send_message(target_room_id, message_body)
 

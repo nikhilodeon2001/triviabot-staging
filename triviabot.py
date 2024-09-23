@@ -86,7 +86,8 @@ first_place_bonus = 0
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
 upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
-sync_url = f"{matrix_base_url}/sync"
+#sync_url = f"{matrix_base_url}/sync"
+sync_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/sync"
 messages_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/messages"
 direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
 limit = 1000  # Max number of events to return (you can change this value)

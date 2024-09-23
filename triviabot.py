@@ -977,8 +977,9 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
             
             if since_token:
                 message_params["from"] = since_token
-
+            print("here")
             response = requests.get(messages_url, headers=message_headers, params=message_params)
+            print("now here")
             if response.status_code == 200:
                 response_data = response.json()
                 #print("Messages:", data.get("chunk", []))

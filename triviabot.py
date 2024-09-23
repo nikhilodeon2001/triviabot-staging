@@ -90,7 +90,7 @@ def messages_test():
     global from_token
     # Set up necessary variables
     direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
-    limit = 100  # Max number of events to return (you can change this value)
+    limit = 1000  # Max number of events to return (you can change this value)
     
     # Prepare the API request URL
     messages_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/messages"

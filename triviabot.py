@@ -102,8 +102,7 @@ def messages_test():
     }
     
     # Add 'from' parameter if available
-    if from_token:
-        message_params["from"] = from_token
+   
     
     # Set up the headers including the Authorization
     message_headers = {
@@ -115,6 +114,8 @@ def messages_test():
     print(message_headers)
     
     while(True):
+        if from_token:
+            message_params["from"] = from_token
         # Make the GET request to the Matrix API
         response = requests.get(messages_url, headers=message_headers, params=message_params)
     

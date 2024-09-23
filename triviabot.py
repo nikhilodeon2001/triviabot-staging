@@ -28,8 +28,10 @@ from PIL import Image, ImageDraw, ImageFont
 import openai
 
 
-
-
+# Define the base API URL for Matrix
+matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
+upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
+sync_url = f"{matrix_base_url}/sync"
 
 # Define global variables to store streaks and scores
 round_count = 0
@@ -52,10 +54,8 @@ question_start_time = None  # This will store the time the question is asked
 # Set up headers, including the authorization token
 headers = []
 headers_media = [] 
-message_headers = []
 
 params = []
-message_params = []
 filter_json = []
 
 # Initialize tokens
@@ -81,16 +81,6 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
-
-
-# Define the base API URL for Matrix
-matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
-upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
-#sync_url = f"{matrix_base_url}/sync"
-sync_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/sync"
-messages_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{target_room_id}/messages"
-direction = "b"  # 'b' for reverse-chronological order, 'f' for chronological
-limit = 1000  # Max number of events to return (you can change this value)
 
 
 def generate_scrambled_image(scrambled_text):
@@ -171,8 +161,8 @@ def generate_round_summary(round_data, winner):
     """
     # Construct the prompt with clear instructions
     prompt = (
-        "You are an arrogan, sarcastic, and jaded trivia game host. Insult the trivia winner's username and let them know they're not as good as you. "
-        "Vary your language, and make it sarcastic, ironic, and antagonistic. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+        "You are a overwhelmingly brown nosing trivia host to the point of it being disgusting. Overly compliment the trivia winner's username and let them how good they are at trivia and everything else in life. "
+        "Vary your language, and make it embarassing for anyone reading your compliments. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
         "Questions asked:\n"
     )
 
@@ -209,8 +199,8 @@ def generate_round_summary(round_data, winner):
     # Add specific instructions for generating the ribbons
     prompt += (
         f"\nThe winner of the trivia round is {winner}. "
-        "Insult their username and let them know that you're the best and you would crush them at trivia. Highlight any stupid or idiotic responses they gave during the round."
-        "Create no more than 5 sentences in total. Be creative, sarcastic, and antagonistic. Use emojis in your response to make it engaging."
+        "Compliment their username and let them know that they're the best and you would crush you at trivia. Highlight any stupid or idiotic responses they gave during the round and make it seem like the most intelligent thing ever."
+        "Create no more than 5 sentences in total. Be creative and funny. Use emojis in your response to make it engaging."
     )
 
 
@@ -423,6 +413,7 @@ def login_to_chat():
 
                 bearer_token = chat_login_response_json.get('access_token')
                 bot_user_id = chat_login_response_json.get('user_id')
+                print(bearer_token)
                 return bearer_token, bot_user_id
 
             else:
@@ -460,7 +451,7 @@ def connect_to_mongodb(max_retries=3, delay_between_retries=5):
             time.sleep(delay_between_retries)
 
 def load_global_variables():
-    global headers, headers_media, filter_json, params, message_headers, message_params
+    global headers, headers_media, filter_json, params
     
     headers = {
         "accept": "application/json",
@@ -494,16 +485,6 @@ def load_global_variables():
     params = {
         "timeout": "3000",  # Timeout to quickly retrieve messages
         "filter": json.dumps(filter_json),  # Filter JSON as a parameter
-    }
-
-    message_headers = {
-        "Authorization": f"Bearer {bearer_token}",
-        "Accept": "application/json"
-    }
-
-    message_params = {
-        "dir": direction,
-        "limit": limit
     }
 
     #print(f"target room id is: {target_room_id}")
@@ -772,16 +753,18 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
         if "polynomial" in trivia_url:
             image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image() #POLY
             image_size = 100
+            message_body = f"\n{number_block}∑ Math Question ∑{number_block}\n{trivia_question}"
         
         elif "scramble" in trivia_url:
             image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
             image_size = 100
+            message_body = f"\n{number_block}🧩 Scramble Question 🧩{number_block}\n{trivia_question}"
     
         else:
             image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
             image_mxc = upload_image_to_matrix(image_data)
             image_size = len(image_data)
-        message_body = f"\n{number_block}📷 Image Question 📷{number_block}\n{trivia_question}"
+            message_body = f"\n{number_block}📷 Image Question 📷{number_block}\n{trivia_question}"
         message_response = send_message(target_room_id, message_body)
 
         if message_response is None:
@@ -822,7 +805,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
 def initialize_sync():
     """Perform an initial sync to update the since_token without processing messages."""
     global since_token, filter_json, headers, params, max_retries, delay_between_retries
-    #sync_url = f"{matrix_base_url}/sync"
+    sync_url = f"{matrix_base_url}/sync"
         
     for attempt in range(max_retries):
         try:
@@ -963,7 +946,7 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
 def check_correct_responses(question_ask_time, trivia_answer_list, question_number):
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
-    #sync_url = f"{matrix_base_url}/sync"
+    sync_url = f"{matrix_base_url}/sync"
     
     # Define the first item in the list as trivia_answer
     trivia_answer = trivia_answer_list[0]  # The first item is the main answer
@@ -976,26 +959,10 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
             fastest_response_time = None
             
             if since_token:
-                message_params["from"] = since_token
-            print(message_params)
-            response = requests.get(messages_url, headers=message_headers, params=message_params)
-            if response.status_code == 200:
-                response_data = response.json()
-                since_token = response_data.get("end")
-                messages = response_data.get("chunk", [])
-                for message in messages:
-                    sender = message.get("sender", "Unknown sender")
-                    if sender == bot_user_id:
-                        continue
-                    content = message.get("content", {})
-                    body = content.get("body", "[No message body]")
-                    print(f"{sender} said: {body}")
-            else:
-                print(f"Failed to fetch messages. Status code: {response.status_code}")
-                print(response.text)
-            
+                params["since"] = since_token
 
-            '''
+            response = requests.get(sync_url, headers=headers, params=params)
+            
             if response.status_code == 200:
                 sync_data = response.json()
                 since_token = sync_data.get("next_batch")  # Update the since token
@@ -1133,7 +1100,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
             else:
                 print(f"Failed to fetch messages. Status code: {response.status_code}")
                 return None
-         '''
+         
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Attempt {attempt + 1} failed: {e}")
@@ -1145,6 +1112,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                 return None  
                     
     return None  
+
 
 def update_answer_streaks(user):
     """Update the current longest answer streak for the user who answered correctly."""
@@ -1613,7 +1581,7 @@ try:
 
     # Call this function at the start of the script to initialize the sync
     initialize_sync()
-    
+
     # Start the trivia round
     start_trivia_round()
 

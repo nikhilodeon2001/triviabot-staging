@@ -1,9 +1,6 @@
 # trivia_questions.py
 
 trivia_questions = [
-# trivia_questions.py
-
-trivia_questions = [
 ("Assume this is a regular polygon. What is θ?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/shapes/shapes-1-octagon-one.png", ["135"]),
 ("Assume this is a regular polygon. What is θ (all angles)?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/shapes/shapes-10-triangle-all.png", ["180"]),
 ("Assume this is a regular polygon. What is θ (all angles)?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/shapes/shapes-2-octagon-all.png", ["1080"]),

@@ -773,14 +773,6 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     number_block = numbered_blocks[question_number - 1]  # Get the corresponding numbered block
     new_solution = None #POLY
-
-    # Store the question being asked in round_data
-    round_data["questions"].append({
-        "question_number": question_number,
-        "question_text": trivia_question,
-        "correct_answers": trivia_answer_list,  # Store the possible correct answers
-        "user_responses": []  # Initialize a list to collect user responses
-    })
     
     if is_valid_url(trivia_url): 
         if "polynomial" in trivia_url:
@@ -792,6 +784,23 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
             image_size = 100
             message_body = f"\n{number_block}🧩 Scramble 🧩{number_block}\n{trivia_question}"
+
+        elif "dictionary-scramble" in trivia_url:
+            random_word = get_random_word()
+            trivia_answer_list.append(random_word)
+            trivia_question = get_word_definition(random_word)
+            print(f"{trivia_question}: {trivia_answer_list}")
+            image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(random_word))
+            image_size = 100
+            message_body = f"\n{number_block}📖🧩 Dictionary Scramble 🧩📖{number_block}\n{trivia_question}"
+
+        elif "crossword" in trivia_url:
+            random_word = get_random_word()
+            random_word_length = len(random_word)
+            trivia_answer_list.append(random_word)
+            trivia_question = f"[{random_word_length} letters] {get_word_definition(random_word)}"
+            print(f"{trivia_question}: {trivia_answer_list}")
+            message_body = f"\n{number_block}📖🧩 Crossword 🧩📖{number_block}\n{trivia_question}"
     
         else:
             image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
@@ -820,6 +829,14 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             print("Error: Failed to send the message.")
             return None, None  # Exit the function if sending the message failed
 
+     # Store the question being asked in round_data
+    round_data["questions"].append({
+        "question_number": question_number,
+        "question_text": trivia_question,
+        "correct_answers": trivia_answer_list,  # Store the possible correct answers
+        "user_responses": []  # Initialize a list to collect user responses
+    })
+    
     # Extracting the 'Date' field
     response_time = response.headers.get('Date')
 
@@ -1605,11 +1622,6 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
-    random_word = get_random_word()
-    random_word_definition = get_word_definition(random_word)
-    print(f"{random_word}: {random_word_definition}")
-    
-    asdf
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()
     login_to_chat()

@@ -2,7 +2,7 @@
 
 trivia_questions = [
 ("","https://dictionary1", []),
-("","https://crossword1", []),
+("1","crossword", []),
 ("","https://dictionary2", []),
-("","https://crossword2", [])
+("2","crossword", [])
 ]  

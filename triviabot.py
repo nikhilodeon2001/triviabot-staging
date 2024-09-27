@@ -161,8 +161,10 @@ def generate_round_summary(round_data, winner):
     """
     # Construct the prompt with clear instructions
     prompt = (
-        "You are a overwhelmingly brown nosing trivia host to the point of it being disgusting. Overly compliment the trivia winner's username and let them how good they are at trivia and everything else in life. "
-        "Vary your language, and make it embarassing for anyone reading your compliments. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+        f"The winner of the trivia round is {winner}. "
+        "Roast the winning player about their user name and be very specific in your roast. Also insult specific responses they gave during the round. "
+        "Create no more than 5 sentences in total. Be sarcastic, creative, and use emojis in your response. "
+        "Vary your language. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
         "Questions asked:\n"
     )
 
@@ -196,20 +198,13 @@ def generate_round_summary(round_data, winner):
         
         prompt += "\n"
 
-    # Add specific instructions for generating the ribbons
-    prompt += (
-        f"\nThe winner of the trivia round is {winner}. "
-        "Compliment their username and let them know that they're the best and you would crush you at trivia. Highlight any stupid or idiotic responses they gave during the round and make it seem like the most intelligent thing ever."
-        "Create no more than 5 sentences in total. Be creative and funny. Use emojis in your response to make it engaging."
-    )
-
 
     # Use OpenAI's API to generate the summary
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a sarcastic trivia game host who roasts the winning trivia player using specifics from the trivia round."},
+                {"role": "system", "content": "You are a dirty and raunchy comedian who is completely fed up with the world."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=200,
@@ -1065,7 +1060,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                             #if correct_responses_length > 1:
                             #    message += f"\n\n👥 The Rest"
                         else:
-                            message += f"\n🎉 {display_name}: {points} (+{round(time_diff, 1)}s)"
+                            message += f"\n👥 {display_name}: {points} (+{round(time_diff, 1)}s)"
                 elif has_responses:  # Only if there were responses but none correct
                     potential_messages = [
                         "\n🥴 We've got a bunch of geniuses here...\n",
@@ -1184,9 +1179,9 @@ def update_round_streaks(user):
         summary = generate_round_summary(round_data, user)
         # Determine the message to send
         if current_longest_round_streak["streak"] > 1:
-            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://livetriviastats.com\n"
+            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n{summary}\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n"
         else:
-            message = f"\n🏆 Winner: @{user}!\n\n\n{summary}\n\n▶️ Live trivia stats available at https://livetriviastats.com\n"
+            message = f"\n🏆 Winner: @{user}!\n\n{summary}\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n"
 
         # Send the message
         send_message(target_room_id, message)
@@ -1235,12 +1230,12 @@ def show_standings():
                     standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}  ⚡{fastest_count}"
                 else:
                     standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}"
-            #elif rank == len(standings) and rank > 5:
-            #    # For the last place person (who is not in the top 3), use the poop emoji
-            #    if fastest_count > 0:
-            #        standing_message += f"\n💩 {user}: {formatted_points} (*{fastest_count})"
-            #    else:
-            #        standing_message += f"\n💩 {user}: {formatted_points}"
+            elif rank == len(standings) and rank > 5:
+                # For the last place person (who is not in the top 3), use the poop emoji
+                if fastest_count > 0:
+                    standing_message += f"\n💩 {user}: {formatted_points} (*{fastest_count})"
+                else:
+                    standing_message += f"\n💩 {user}: {formatted_points}"
             else:
                 # Use numbers for 4th place and beyond
                 if fastest_count > 0:
@@ -1558,7 +1553,7 @@ def start_trivia_round():
         
             time.sleep(7)
             if round_count % 5 == 0:
-                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://livetriviamerch.com\n")
+                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 time.sleep(60)
             else:
                 send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")

@@ -81,6 +81,44 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
+wordnik_api_key = os.getenv("wordnik_api_key")  # Store your API key securely
+
+
+def get_random_word():
+    """
+    Fetch a random word from the Wordnik API.
+    """
+    url = f"https://api.wordnik.com/v4/words.json/randomWord?api_key={wordnik_api_key}&minLength=5&maxLength=10&hasDictionaryDef=true"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        return data['word']  # Return the random word
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching random word: {e}")
+        return None
+
+
+def get_word_definition(word):
+    """
+    Fetch the definition of a word from the Wordnik API.
+    """
+    url = f"https://api.wordnik.com/v4/word.json/{word}/definitions?limit=1&api_key={wordnik_api_key}"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        if data and 'text' in data[0]:
+            return data[0]['text']  # Return the definition of the word
+        else:
+            return "Definition not found."
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching word definition: {e}")
+        return "Error fetching definition."
+
+
 
 
 def generate_scrambled_image(scrambled_text):
@@ -1567,6 +1605,8 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
+    get_word_definition(get_random_word())
+    asdf
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()
     login_to_chat()

@@ -90,7 +90,7 @@ def get_random_word():
     """
     Fetch a random word from the Wordnik API.
     """
-    url = f"https://api.wordnik.com/v4/words.json/randomWord?api_key={wordnik_api_key}&includePartOfSpeech=noun&minLength=5&maxLength=10&minCorpusCount=1000000&hasDictionaryDef=true"
+    url = f"https://api.wordnik.com/v4/words.json/randomWord?api_key={wordnik_api_key}&includePartOfSpeech=noun&minLength=5&maxLength=10&minCorpusCount=100000&hasDictionaryDef=true"
     
     try:
         response = requests.get(url)

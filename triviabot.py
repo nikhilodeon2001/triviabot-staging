@@ -99,7 +99,7 @@ def get_random_word():
         return data['word']  # Return the random word
     except requests.exceptions.RequestException as e:
         print(f"Error fetching random word: {e}")
-        return None
+        return "okra"
 
 
 def get_word_definition(word):

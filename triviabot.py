@@ -812,7 +812,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             print("Error: Failed to send image.")
             return None, None  # Exit the function if sending the image failed
 
-    elif trivia_url = "crossword":
+    elif trivia_url == "crossword":
         random_word = get_random_word()
         random_word_length = len(random_word)
         trivia_answer_list.append(random_word)

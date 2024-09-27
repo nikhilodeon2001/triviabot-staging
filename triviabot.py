@@ -26,6 +26,7 @@ import io
 import hashlib 
 from PIL import Image, ImageDraw, ImageFont 
 import openai
+import re
 
 
 # Define the base API URL for Matrix
@@ -84,11 +85,19 @@ first_place_bonus = 0
 wordnik_api_key = os.getenv("wordnik_api_key")  # Store your API key securely
 
 
+def clean_xref_tags(definition):
+    """
+    Replace <xref> tags in the Wordnik definition with plain text.
+    """
+    # Use a regular expression to remove <xref> and </xref> tags
+    clean_definition = re.sub(r'</?xref>', '', definition)
+    return clean_definition
+
 def get_random_word():
     """
     Fetch a random word from the Wordnik API.
     """
-    url = f"https://api.wordnik.com/v4/words.json/randomWord?api_key={wordnik_api_key}&includePartOfSpeech=noun&minLength=5&maxLength=10&hasDictionaryDef=true"
+    url = f"https://api.wordnik.com/v4/words.json/randomWord?api_key={wordnik_api_key}&includePartOfSpeech=noun&minLength=5&maxLength=10&minCorpusCount=10000&hasDictionaryDef=true"
     
     try:
         response = requests.get(url)
@@ -111,7 +120,7 @@ def get_word_definition(word):
         response.raise_for_status()
         data = response.json()
         if data and 'text' in data[0]:
-            return data[0]['text']  # Return the definition of the word
+            return clean_xref_tags(data[0]['text'])  # Return the definition of the word
         else:
             return "Definition not found."
     except requests.exceptions.RequestException as e:

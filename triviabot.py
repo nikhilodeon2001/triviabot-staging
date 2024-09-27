@@ -110,7 +110,7 @@ def generate_median_question():
     # Adjust the font size based on the length of the numbers text
     numbers_text = ', '.join(map(str, random_numbers))
     if len(numbers_text) > 20:
-        font_size = 36  # Reduce font size for larger sets
+        font_size = 30  # Reduce font size for larger sets
     else:
         font_size = 48  # Use larger font for smaller sets
 
@@ -147,6 +147,10 @@ def generate_median_question():
     else:
         # If even, return the average of the two middle ones
         median = (sorted_numbers[mid_index - 1] + sorted_numbers[mid_index]) / 2
+    
+        # Check if the median is a whole number, and if so, convert to integer
+        if median.is_integer():
+            median = int(median)
     return content_uri, img_width, img_height, median
 
 

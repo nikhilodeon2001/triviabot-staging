@@ -785,7 +785,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             image_size = 100
             message_body = f"\n{number_block}🧩 Scramble 🧩{number_block}\n{trivia_question}"
 
-        elif "dictionary-scramble" in trivia_url:
+        elif "dictionary" in trivia_url:
             random_word = get_random_word()
             trivia_answer_list.append(random_word)
             trivia_question = get_word_definition(random_word)

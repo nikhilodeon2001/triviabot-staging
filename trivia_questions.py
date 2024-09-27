@@ -1,8 +1,6 @@
 # trivia_questions.py
 
 trivia_questions = [
-("Unscramble this TV show name:","https://scramble4", ["Lost"]),
-("Unscramble this movie name:","https://scramble4", ["Jaws"]),
 ("Unscramble this TV show name:","https://scramble5", ["Fargo"]),
 ("Unscramble this TV show name:","https://scramble5", ["Ozark"]),
 ("Unscramble this movie name:","https://scramble5", ["Rocky"]),
@@ -10,7 +8,6 @@ trivia_questions = [
 ("Unscramble this TV show name:","https://scramble6", ["Cheers"]),
 ("Unscramble this movie name:","https://scramble6", ["Avatar"]),
 ("Unscramble this TV show name:","https://scramble7", ["Friends"]),
-("Unscramble this TV show name:","https://scramble7", ["M*A*S*H"]),
 ("Unscramble this TV show name:","https://scramble7", ["Mad Men"]),
 ("Unscramble this TV show name:","https://scramble7", ["Friends"]),
 ("Unscramble this TV show name:","https://scramble7", ["Fleabag"]),
@@ -33,7 +30,7 @@ trivia_questions = [
 ("Unscramble this movie name:","https://scramble10", ["Casablanca"]),
 ("Unscramble this movie name:","https://scramble10", ["Braveheart"]),
 ("Unscramble this movie name:","https://scramble10", ["La La Land"]),
-("Unscramble this TV show name:","https://scramble11", ["The X-Files"]),
+("Unscramble this TV show name:","https://scramble11", ["The X Files"]),
 ("Unscramble this TV show name:","https://scramble11", ["I Love Lucy"]),
 ("Unscramble this movie name:","https://scramble11", ["The Shining"]),
 ("Unscramble this TV show name:","https://scramble12", ["Breaking Bad"]),

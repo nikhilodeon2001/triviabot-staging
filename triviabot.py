@@ -26,7 +26,6 @@ import io
 import hashlib 
 from PIL import Image, ImageDraw, ImageFont 
 import openai
-import re
 
 
 # Define the base API URL for Matrix
@@ -82,45 +81,6 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
-wordnik_api_key = os.getenv("wordnik_api_key")  # Store your API key securely
-
-
-
-def get_random_word():
-    """
-    Fetch a random word from the Wordnik API.
-    """
-    url = f"https://api.wordnik.com/v4/words.json/randomWord?api_key={wordnik_api_key}&includePartOfSpeech=noun&minLength=5&maxLength=10&minCorpusCount=50000&hasDictionaryDef=true"
-    
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        return data['word']  # Return the random word
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching random word: {e}")
-        return "okra"
-
-
-def get_word_definition(word):
-    """
-    Fetch the definition of a word from the Wordnik API.
-    """
-    url = f"https://api.wordnik.com/v4/word.json/{word}/definitions?limit=1&api_key={wordnik_api_key}"
-    
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        if data and 'text' in data[0]:
-            return data[0]['text']  # Return the definition of the word
-        else:
-            return "Definition not found."
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching word definition: {e}")
-        return "Error fetching definition."
-
-
 
 
 def generate_scrambled_image(scrambled_text):
@@ -775,6 +735,14 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     number_block = numbered_blocks[question_number - 1]  # Get the corresponding numbered block
     new_solution = None #POLY
+
+    # Store the question being asked in round_data
+    round_data["questions"].append({
+        "question_number": question_number,
+        "question_text": trivia_question,
+        "correct_answers": trivia_answer_list,  # Store the possible correct answers
+        "user_responses": []  # Initialize a list to collect user responses
+    })
     
     if is_valid_url(trivia_url): 
         if "polynomial" in trivia_url:
@@ -786,22 +754,12 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
             image_size = 100
             message_body = f"\n{number_block}🧩 Scramble 🧩{number_block}\n{trivia_question}"
-
-        elif "dictionary" in trivia_url:
-            random_word = get_random_word()
-            trivia_answer_list.append(random_word)
-            trivia_question = get_word_definition(random_word)
-            print(f"{trivia_question}: {trivia_answer_list}")
-            image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(random_word))
-            image_size = 100
-            message_body = f"\n{number_block}📖🧩 Dictionary Scramble 🧩📖{number_block}\n{trivia_question}"
     
         else:
             image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
             image_mxc = upload_image_to_matrix(image_data)
             image_size = len(image_data)
             message_body = f"\n{number_block}📷 Image 📷{number_block}\n{trivia_question}"
-        initialize_sync()
         message_response = send_message(target_room_id, message_body)
 
         if message_response is None:
@@ -814,20 +772,6 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             print("Error: Failed to send image.")
             return None, None  # Exit the function if sending the image failed
 
-    elif trivia_url == "crossword":
-        random_word = get_random_word()
-        random_word_length = len(random_word)
-        trivia_answer_list.append(random_word)
-        trivia_question = f"[{random_word_length} letters] {get_word_definition(random_word)}"
-        print(f"{trivia_question}: {trivia_answer_list}")
-        message_body = f"\n{number_block}◻️◼️ Crossword ◼️◻️{number_block}\n{trivia_question}"
-        initialize_sync()
-        response = send_message(target_room_id, message_body)
-
-        if response is None:
-            print("Error: Failed to send the message.")
-            return None, None  # Exit the function if sending the message failed
-    
     else:
         # Send the question to the chat
         message_body = f"\n{number_block}❓ Question ❓{number_block}\n{trivia_question}"
@@ -838,14 +782,6 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             print("Error: Failed to send the message.")
             return None, None  # Exit the function if sending the message failed
 
-     # Store the question being asked in round_data
-    round_data["questions"].append({
-        "question_number": question_number,
-        "question_text": trivia_question,
-        "correct_answers": trivia_answer_list,  # Store the possible correct answers
-        "user_responses": []  # Initialize a list to collect user responses
-    })
-    
     # Extracting the 'Date' field
     response_time = response.headers.get('Date')
 

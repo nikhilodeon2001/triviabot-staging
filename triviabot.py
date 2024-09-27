@@ -106,7 +106,14 @@ def generate_median_question():
 
     # Load the font
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
-    font_size = 48
+    
+    # Adjust the font size based on the length of the numbers text
+    numbers_text = ', '.join(map(str, random_numbers))
+    if len(numbers_text) > 20:
+        font_size = 36  # Reduce font size for larger sets
+    else:
+        font_size = 48  # Use larger font for smaller sets
+
     try:
         font = ImageFont.truetype(font_path, font_size)
     except IOError:

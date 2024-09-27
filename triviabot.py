@@ -109,7 +109,7 @@ def generate_median_question():
     
     # Adjust the font size based on the length of the numbers text
     numbers_text = ', '.join(map(str, random_numbers))
-    if len(numbers_text) > 20:
+    if len(numbers_text) > 15:
         font_size = 30  # Reduce font size for larger sets
     else:
         font_size = 48  # Use larger font for smaller sets

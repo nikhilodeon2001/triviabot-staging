@@ -800,7 +800,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             trivia_answer_list.append(random_word)
             trivia_question = f"[{random_word_length} letters] {get_word_definition(random_word)}"
             print(f"{trivia_question}: {trivia_answer_list}")
-            message_body = f"\n{number_block}📖🧩 Crossword 🧩📖{number_block}\n{trivia_question}"
+            message_body = f"\n{number_block}◻️◼️ Crossword ◼️◻️{number_block}\n{trivia_question}"
     
         else:
             image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE

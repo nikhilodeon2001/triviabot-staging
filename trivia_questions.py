@@ -60,5 +60,6 @@ trivia_questions = [
 ("Unscramble this TV show name:","https://scramble14", ["Rick and Morty"]),
 ("Unscramble this movie name:","https://scramble14", ["The Terminator"]),
 ("Unscramble this movie name:","https://scramble14", ["Apocalypse Now"]),
-("Unscramble this movie name:","https://scramble14", ["The Green Mile"])
+("Unscramble this movie name:","https://scramble14", ["The Green Mile"]),
+("Unscramble this actor's name:","https://scramble14", ["Shahrukh Khan", "Khan"])
 ]  

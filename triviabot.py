@@ -88,7 +88,7 @@ def get_random_word():
     """
     Fetch a random word from the Wordnik API.
     """
-    url = f"https://api.wordnik.com/v4/words.json/randomWord?api_key={wordnik_api_key}&minLength=5&maxLength=10&hasDictionaryDef=true"
+    url = f"https://api.wordnik.com/v4/words.json/randomWord?api_key={wordnik_api_key}&includePartOfSpeech=noun&minLength=5&maxLength=10&hasDictionaryDef=true"
     
     try:
         response = requests.get(url)
@@ -1605,7 +1605,10 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
-    print(get_word_definition(get_random_word()))
+    random_word = get_random_word()
+    random_word_definition = get_word_definition(random_word)
+    print(f"{random_word}: {random_word_definition}")
+    
     asdf
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()

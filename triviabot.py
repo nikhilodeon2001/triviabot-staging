@@ -129,9 +129,6 @@ def generate_median_question():
 
     # Upload the image to Matrix (assuming the upload function exists)
     content_uri = upload_image_to_matrix(image_buffer.read())
-    if content_uri:
-    else:
-        print("Failed to upload the image to Matrix.")
 
     # Calculate the median and return it for verification
     sorted_numbers = sorted(random_numbers)

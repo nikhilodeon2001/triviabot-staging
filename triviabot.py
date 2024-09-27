@@ -793,20 +793,13 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(random_word))
             image_size = 100
             message_body = f"\n{number_block}📖🧩 Dictionary Scramble 🧩📖{number_block}\n{trivia_question}"
-
-        elif "crossword" in trivia_url:
-            random_word = get_random_word()
-            random_word_length = len(random_word)
-            trivia_answer_list.append(random_word)
-            trivia_question = f"[{random_word_length} letters] {get_word_definition(random_word)}"
-            print(f"{trivia_question}: {trivia_answer_list}")
-            message_body = f"\n{number_block}◻️◼️ Crossword ◼️◻️{number_block}\n{trivia_question}"
     
         else:
             image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
             image_mxc = upload_image_to_matrix(image_data)
             image_size = len(image_data)
             message_body = f"\n{number_block}📷 Image 📷{number_block}\n{trivia_question}"
+        initialize_sync()
         message_response = send_message(target_room_id, message_body)
 
         if message_response is None:
@@ -819,6 +812,20 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
             print("Error: Failed to send image.")
             return None, None  # Exit the function if sending the image failed
 
+    elif trivia_url = "crossword":
+        random_word = get_random_word()
+        random_word_length = len(random_word)
+        trivia_answer_list.append(random_word)
+        trivia_question = f"[{random_word_length} letters] {get_word_definition(random_word)}"
+        print(f"{trivia_question}: {trivia_answer_list}")
+        message_body = f"\n{number_block}◻️◼️ Crossword ◼️◻️{number_block}\n{trivia_question}"
+        initialize_sync()
+        response = send_message(target_room_id, message_body)
+
+        if response is None:
+            print("Error: Failed to send the message.")
+            return None, None  # Exit the function if sending the message failed
+    
     else:
         # Send the question to the chat
         message_body = f"\n{number_block}❓ Question ❓{number_block}\n{trivia_question}"

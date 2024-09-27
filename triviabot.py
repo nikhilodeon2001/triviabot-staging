@@ -83,6 +83,69 @@ hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
 
+
+def generate_median_question():
+    """
+    Generate a question asking for the median of a set of random numbers.
+    The set will contain 3 to 7 numbers between 1 and 20, and the image
+    of the numbers will be sent to the user with the question.
+    """
+    # Generate a random n between 3 and 7
+    n = random.randint(3, 7)
+    
+    # Generate a random set of n numbers between 1 and 20
+    random_numbers = [random.randint(1, 20) for _ in range(n)]
+    
+    # Create the question text
+    question_text = f"What is the median of the following set of numbers?"
+    
+    # Create an image with the numbers
+    img_width, img_height = 400, 150
+    img = Image.new('RGB', (img_width, img_height), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Load the font
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    font_size = 48
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return None
+
+    # Convert numbers to a string and draw them on the image
+    numbers_text = ', '.join(map(str, random_numbers))
+    text_bbox = draw.textbbox((0, 0), numbers_text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2
+    draw.text((text_x, text_y), numbers_text, fill=(255, 255, 255), font=font)
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+
+    # Upload the image to Matrix (assuming the upload function exists)
+    content_uri = upload_image_to_matrix(image_buffer.read())
+    if content_uri:
+    else:
+        print("Failed to upload the image to Matrix.")
+
+    # Calculate the median and return it for verification
+    sorted_numbers = sorted(random_numbers)
+    mid_index = len(sorted_numbers) // 2
+    
+    if len(sorted_numbers) % 2 != 0:
+        # If odd number of elements, return the middle one
+        median = sorted_numbers[mid_index]
+    else:
+        # If even, return the average of the two middle ones
+        median = (sorted_numbers[mid_index - 1] + sorted_numbers[mid_index]) / 2
+    return content_uri, img_width, img_height, median
+
+
 def generate_scrambled_image(scrambled_text):
     """
     Generate an image with scrambled words using PIL (Pillow).
@@ -748,12 +811,17 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
         if "polynomial" in trivia_url:
             image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image() #POLY
             image_size = 100
-            message_body = f"\n{number_block}📊 Math 📊{number_block}\n{trivia_question}"
+            message_body = f"\n{number_block}🔢 Math 🔢{number_block}\n{trivia_question}"
         
         elif "scramble" in trivia_url:
             image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
             image_size = 100
             message_body = f"\n{number_block}🧩 Scramble 🧩{number_block}\n{trivia_question}"
+
+        elif "median" in trivia_url:
+            image_mxc, image_width, image_height, new_solution = generate_median_question()
+            image_size = 100
+            message_body = f"\n{number_block}📊 Statistics 📊{number_block}\n{trivia_question}"
     
         else:
             image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE

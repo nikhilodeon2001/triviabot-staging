@@ -928,8 +928,8 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
         return True
 
     # Step 3: Jaccard similarity (Character level)
-    if jaccard_similarity(user_answer, correct_answer) >= threshold:
-        return True
+    #if jaccard_similarity(user_answer, correct_answer) >= threshold:
+    #    return True
 
     # Step 4: Token-based matching
     if token_based_matching(user_answer, correct_answer) >= threshold:

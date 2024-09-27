@@ -951,9 +951,8 @@ def is_number(s):
         return False
 
 def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
-    # Check if the user's answer is 1, 2, or 3 characters long
-    # Check if the correct answer is numeric
-    # Check if either pre-normalized answer is empty
+    user_answer = str(user_answer)  # Ensure user_answer is also a string
+    correct_answer = str(correct_answer)  # Convert to string
     
     if not user_answer or not correct_answer:           #POLY
          return user_answer == correct_answer  # Only accept exact match if either are empty        #POLY

@@ -1605,7 +1605,7 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
-    get_word_definition(get_random_word())
+    print(get_word_definition(get_random_word()))
     asdf
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()

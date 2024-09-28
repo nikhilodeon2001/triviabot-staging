@@ -1464,10 +1464,12 @@ def load_streak_data():
 def print_selected_questions(selected_questions):
     """Prints the selected questions in a cleaner format."""
     for i, question_data in enumerate(selected_questions, start=1):
-        question = question_data[0]  # The question itself
-        answers = question_data[2]  # List of acceptable answers
+        category = question_data[0]  # Category
+        question = question_data[1]  # Question
+        question_type = question_data[2] # Question type
+        answers = question_data[3] # Answers
         # Format and print the question and answers
-        print(f"{i}. {question} [{', '.join(answers)}]")
+        print(f"{i}. [{category}] {question} [{', '.join(answers)}] *{question_type}*")
 
 
 def round_start_messages():

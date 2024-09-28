@@ -1293,7 +1293,7 @@ def show_standings():
     """Show the current standings after each question."""
     if scoreboard:
         standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
-        standing_message = "\n📈 Scoreboard"
+        standing_message = "\n📈 Scoreboard 📈"
         
         # Define the medals for the top 3 positions
         medals = ["🥇", "🥈", "🥉"]

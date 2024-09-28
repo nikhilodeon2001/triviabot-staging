@@ -1466,10 +1466,9 @@ def print_selected_questions(selected_questions):
     for i, question_data in enumerate(selected_questions, start=1):
         category = question_data[0]  # Category
         question = question_data[1]  # Question
-        question_type = question_data[2] # Question type
         answers = question_data[3] # Answers
         # Format and print the question and answers
-        print(f"{i}. [{category}] {question} [{', '.join(answers)}] *{question_type}*")
+        print(f"{i}. [{category}] {question} [{', '.join(answers)}]")
 
 
 def round_start_messages():

@@ -340,7 +340,8 @@ def download_image_from_url(url): #IMAGE CODE
 
                 image = Image.open(io.BytesIO(image_data))
                 image_width, image_height = image.size
-                return image_data, image_width, image_height  # Successfully downloaded the image, return the binary data
+                image_mxc = upload_image_to_matrix(image_data)
+                return image_mxc, image_width, image_height  # Successfully downloaded the image, return the binary data
                 
             else:
                 print(f"Failed to download image. Status code: {response.status_code}")
@@ -806,27 +807,34 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     number_block = numbered_blocks[question_number - 1]  # Get the corresponding numbered block
     new_solution = None #POLY
+    send_image = False
     
     if is_valid_url(trivia_url): 
-        image_data, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
-        image_mxc = upload_image_to_matrix(image_data)
-        image_size = len(image_data)
+        image_mxc, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
         message_body = f"\n{number_block}📷 Image 📷{number_block}\n{trivia_question}"
+        image_size = 100
+        send_image = True
         
     elif trivia_url == "polynomial":
         image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image() #POLY
-        image_size = 100
         message_body = f"\n{number_block}🔢 Math 🔢{number_block}\n{trivia_question}"
+        image_size = 100
+        send_image = True
         
     elif trivia_url == "scramble":
         image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
-        image_size = 100
         message_body = f"\n{number_block}🧩 Scramble 🧩{number_block}\n{trivia_question}"
+        image_size = 100
+        send_image = True
 
     elif trivia_url == "median":
         image_mxc, image_width, image_height, new_solution = generate_median_question()
-        image_size = 100
         message_body = f"\n{number_block}📊 Statistics 📊{number_block}\n{trivia_question}"
+        image_size = 100
+        send_image = True
+
+    else:
+         message_body = f"\n{number_block}❓ {trivia_category} ❓{number_block}\n{trivia_question}"
 
     message_response = send_message(target_room_id, message_body)
 
@@ -834,13 +842,15 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         print("Error: Failed to send the message.")
         return None, None  
             
-    if is_valid_url(trivia_url):  
+    if send_image:  
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
         if response is None:                      
             print("Error: Failed to send image.")
             return None, None 
-
+            
+    initialize_sync()
+    
     correct_answers = [new_solution] if new_solution else trivia_answer_list
     round_data["questions"].append({
         "question_number": question_number,
@@ -850,14 +860,6 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         "user_responses": [] 
     })
     
-    message_body = f"\n{number_block}❓ {trivia_category} ❓{number_block}\n{trivia_question}"
-    initialize_sync()
-    response = send_message(target_room_id, message_body)
-
-    if response is None:
-        print("Error: Failed to send the message.")
-        return None, None  # Exit the function if sending the message failed
-
     # Extracting the 'Date' field
     response_time = response.headers.get('Date')
 

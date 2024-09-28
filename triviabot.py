@@ -836,9 +836,9 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     else:
          message_body = f"\n{number_block}❓ {trivia_category} ❓{number_block}\n{trivia_question}"
 
-    message_response = send_message(target_room_id, message_body)
+    response = send_message(target_room_id, message_body)
 
-    if message_response is None:
+    if response is None:
         print("Error: Failed to send the message.")
         return None, None  
             

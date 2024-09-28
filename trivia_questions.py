@@ -2735,5 +2735,5 @@ trivia_questions = [
    ("Statistics", "What is the median of the following set of numbers?" ,"median", ["49"]),
    ("Statistics", "What is the median of the following set of numbers?" ,"median", ["50"]),
    ("Television", "What is the first name of the main character on the fictional medical drama 'House'?","", ["Gregory", "Greg"]),
-   ("Television", "Television", "What is this character's last name?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/famous-people/house.jpeg", ["House"])
+   ("Television", "What is this character's last name?","https://triviabotwebsite.s3.us-east-2.amazonaws.com/famous-people/house.jpeg", ["House"])
    ]  

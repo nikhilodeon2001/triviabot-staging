@@ -151,7 +151,7 @@ def generate_median_question():
         # Check if the median is a whole number, and if so, convert to integer
         if median.is_integer():
             median = int(median)
-    return content_uri, img_width, img_height, median
+    return content_uri, img_width, img_height, str(median)
 
 
 def generate_scrambled_image(scrambled_text):
@@ -244,6 +244,9 @@ def generate_round_summary(round_data, winner):
         question_number = question_data["question_number"]
         question_text = question_data["question_text"]
         correct_answers = question_data["correct_answers"]
+
+        # Convert all items in correct_answers to strings before joining
+        correct_answers_str = ', '.join(map(str, correct_answers))
         
         prompt += f"Question {question_number}: {question_text}\n"
         prompt += f"Correct Answers: {', '.join(correct_answers)}\n"

@@ -808,31 +808,31 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     number_block = numbered_blocks[question_number - 1]  # Get the corresponding numbered block
     new_solution = None
     new_question = None
-    send_image = False
+    send_image_flag = False
     
     if is_valid_url(trivia_url): 
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
         message_body = f"\n{number_block}📷 Image 📷{number_block}\n{trivia_question}"
         image_size = 100
-        send_image = True
+        send_image_flag = True
         
     elif trivia_url == "polynomial":
         image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image() #POLY
         message_body = f"\n{number_block}🔢 Math 🔢{number_block}\n{trivia_question}"
         image_size = 100
-        send_image = True
+        send_image_flag = True
         
     elif trivia_url == "scramble":
         image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
         message_body = f"\n{number_block}🧩 Scramble 🧩{number_block}\n{trivia_question}"
         image_size = 100
-        send_image = True
+        send_image_flag = True
 
     elif trivia_url == "median":
         image_mxc, image_width, image_height, new_solution = generate_median_question()
         message_body = f"\n{number_block}📊 Statistics 📊{number_block}\n{trivia_question}"
         image_size = 100
-        send_image = True
+        send_image_flag = True
 
     else:
          message_body = f"\n{number_block}❓ {trivia_category} ❓{number_block}\n{trivia_question}"
@@ -843,7 +843,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         print("Error: Failed to send the message.")
         return None, None, None
             
-    if send_image:  
+    if send_image_flag:  
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
         if response is None:                      

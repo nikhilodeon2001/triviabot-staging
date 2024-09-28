@@ -806,7 +806,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     # Define the numbered block emojis for questions 1 to 10
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     number_block = numbered_blocks[question_number - 1]  # Get the corresponding numbered block
-    new_solution = None #POLY
+    new_solution = None
+    new_question = None
     send_image = False
     
     if is_valid_url(trivia_url): 
@@ -840,14 +841,14 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     if response is None:
         print("Error: Failed to send the message.")
-        return None, None  
+        return None, None, None
             
     if send_image:  
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
         if response is None:                      
             print("Error: Failed to send image.")
-            return None, None 
+            return None, None, None
             
     initialize_sync()
     
@@ -873,7 +874,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     # Convert the datetime object to epoch time in seconds and microseconds (float)
     response_time = response_time.timestamp()
 
-    return response_time, new_solution
+    return response_time, new_question, new_solution
 
 def initialize_sync():
     """Perform an initial sync to update the since_token without processing messages."""

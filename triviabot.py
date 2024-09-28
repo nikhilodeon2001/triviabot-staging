@@ -800,7 +800,7 @@ def remove_diacritics(input_str):
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return ''.join([char for char in nfkd_form if not unicodedata.combining(char)])
 
-def ask_question(trivia_question, trivia_url, trivia_answer_list, question_number):
+def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number):
     """Ask the trivia question."""
     # Define the numbered block emojis for questions 1 to 10
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
@@ -810,6 +810,7 @@ def ask_question(trivia_question, trivia_url, trivia_answer_list, question_numbe
     # Store the question being asked in round_data
     round_data["questions"].append({
         "question_number": question_number,
+        "question_category": trivia_category,
         "question_text": trivia_question,
         "correct_answers": trivia_answer_list,  # Store the possible correct answers
         "user_responses": []  # Initialize a list to collect user responses
@@ -1600,9 +1601,9 @@ def start_trivia_round():
             print()
             
             question_number = 1
-            for trivia_question, trivia_url, trivia_answer_list in selected_questions:
+            for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
                 # Ask the trivia question and get start times
-                question_ask_time, new_solution = ask_question(trivia_question, trivia_url, trivia_answer_list, question_number)
+                question_ask_time, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
                 time.sleep(question_time)  # Wait for n seconds for answers
                 #fetch_all_responses(question_ask_time)  # Pass both local and server start times
                 send_message(target_room_id, f"\n🛑 TIME 🛑\n")

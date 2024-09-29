@@ -1,4 +1,5 @@
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -1387,7 +1388,7 @@ def show_standings():
             elif rank == len(standings) and rank > 4:
                 # For the last place person (who is not in the top 3), use the poop emoji
                 if fastest_count > 0:
-                    standing_message += f"\n💩 {user}: {formatted_points} (⚡{fastest_count})"
+                    standing_message += f"\n💩 {user}: {formatted_points}  ⚡{fastest_count}"
                 else:
                     standing_message += f"\n💩 {user}: {formatted_points}"
             else:
@@ -1635,7 +1636,7 @@ def generate_and_render_polynomial_image(): #POLY
         print("Failed to upload the image to Matrix.")
 
 def round_preview(selected_questions):
-    message = "🔮 Next Round Preview 🔮\n"
+    message = "\n🔮 Next Round Preview 🔮\n"
     for i, question_data in enumerate(selected_questions, start=1):
         category = question_data[0]  # Category of the question
         message += f"{i}. {category}\n"
@@ -1670,7 +1671,7 @@ def start_trivia_round():
             load_streak_data()
 
             """Start a round of n trivia questions."""
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions\n\n🏁 Get ready...\n")
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
             round_start_messages()
             time.sleep(5)
 

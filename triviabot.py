@@ -27,12 +27,15 @@ import io
 import hashlib 
 from PIL import Image, ImageDraw, ImageFont 
 import openai
+from nio import AsyncClient, MatrixRoom, RoomMessageText, LoginResponse
+import asyncio
 
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
 upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
 sync_url = f"{matrix_base_url}/sync"
+matrix_client = None
 
 # Define global variables to store streaks and scores
 round_count = 0
@@ -83,7 +86,27 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
+async def initiate_matrix_client():
+    global client
+    matrix_base_url = "https://matrix.redditspace.com"
+    
+    # Initialize the AsyncClient
+    client = AsyncClient(matrix_base_url, user=bot_user_id)
 
+    # Step 2: Restore the session using the access token and device ID (if you have it)
+    try:
+        # Use restore_login instead of login if you already have a token
+        await client.restore_login(
+            user_id=bot_user_id,
+            access_token=bearer_token,
+            device_id="YOUR_DEVICE_ID",  # Optional: use if you have a specific device ID
+            home_server=matrix_base_url
+        )
+        print(f"Logged in as {bot_user_id} using the access token.")
+    
+    except Exception as e:
+        print(f"Error logging into Matrix using token: {e}")
+        sentry_sdk.capture_exception(e)
 
 def generate_median_question():
     """
@@ -1644,7 +1667,7 @@ def round_preview(selected_questions):
     # Send the message to the chat
     send_message(target_room_id, message)
 
-def start_trivia_round():
+async def start_trivia_round():
 # Function to start the trivia round
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
@@ -1662,6 +1685,7 @@ def start_trivia_round():
                 print("Re-logging into Reddit and chat as one hour has passed...")
                 reddit_login()
                 login_to_chat()
+                await initiate_matrix_client()
                 last_login_time = current_time  # Reset the login time
 
             # Load global varaiables at the start of round
@@ -1739,15 +1763,18 @@ try:
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()
     login_to_chat()
+    await initiate_matrix_client()
     
     # Load needed variables for sync
     load_global_variables()
-
+    
+    await send_message(target_room_id, "Hello from Matrix SDK!")
+    
     # Call this function at the start of the script to initialize the sync
-    initialize_sync()
+    #initialize_sync()
 
     # Start the trivia round
-    start_trivia_round()
+    #start_trivia_round()
 
 except Exception as e:
     sentry_sdk.capture_exception(e)

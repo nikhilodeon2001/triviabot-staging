@@ -1562,6 +1562,7 @@ def generate_and_render_polynomial_image(): #POLY
         print("Failed to upload the image to Matrix.")
 
 def round_preview(selected_questions):
+    print(selected_questions)
     message = "🔮 Next Round Preview 🔮\n"
     for i, question_data in enumerate(selected_questions, start=1):
         category = question_data[0]  # Category of the question

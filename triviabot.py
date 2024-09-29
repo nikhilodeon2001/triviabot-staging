@@ -1049,8 +1049,8 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                     if room_id == target_room_id:  # Only process messages from the target room
                         for event in room_data.get("timeline", {}).get("events", []):
                             sender = event["sender"]
-                            #if sender == bot_user_id:
-                            #    continue
+                            if sender == bot_user_id:
+                                continue
                             display_name = get_display_name(event.get("content", {}).get("displayname", sender))  # Get the display name from content
                             
                             # Check if the user has already answered correctly, ignore if they have
@@ -1314,7 +1314,7 @@ def show_standings():
             elif rank == len(standings) and rank > 5:
                 # For the last place person (who is not in the top 3), use the poop emoji
                 if fastest_count > 0:
-                    standing_message += f"\n💩 {user}: {formatted_points} (*{fastest_count})"
+                    standing_message += f"\n💩 {user}: {formatted_points} (⚡{fastest_count})"
                 else:
                     standing_message += f"\n💩 {user}: {formatted_points}"
             else:

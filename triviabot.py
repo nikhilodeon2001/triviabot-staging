@@ -1763,12 +1763,12 @@ try:
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()
     login_to_chat()
-    await initiate_matrix_client()
+    initiate_matrix_client()
     
     # Load needed variables for sync
     load_global_variables()
     
-    await send_message(target_room_id, "Hello from Matrix SDK!")
+    send_message(target_room_id, "Hello from Matrix SDK!")
     
     # Call this function at the start of the script to initialize the sync
     #initialize_sync()

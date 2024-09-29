@@ -1561,6 +1561,14 @@ def generate_and_render_polynomial_image(): #POLY
     else:
         print("Failed to upload the image to Matrix.")
 
+def round_preview(selected_questions):
+    message = "🔮 Next Round Preview 🔮\n"
+    for i, question_data in enumerate(selected_questions, start=1):
+        category = question_data[0]  # Category of the question
+        message += f"{i}. {category}\n"
+    message = "\n"
+    # Send the message to the chat
+    send_message(target_room_id, message)
 
 def start_trivia_round():
 # Function to start the trivia round
@@ -1570,7 +1578,7 @@ def start_trivia_round():
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
-    
+    selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     try:
         while True:  # Endless loop
             # Check if it's been more than an hour since the last login
@@ -1601,7 +1609,6 @@ def start_trivia_round():
             round_data["questions"] = []
 
             # Randomly select n questions
-            selected_questions = select_trivia_questions(questions_per_round)  #DEDUP 
             print() 
             print_selected_questions(selected_questions)
             print()
@@ -1636,10 +1643,16 @@ def start_trivia_round():
             time.sleep(7)
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
-                time.sleep(60)
+                selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+                time.sleep(15)
+                round_preview(selected_questions)
+                time.sleep(45)
             else:
-                send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in ~{time_between_rounds} seconds...\n")
-                time.sleep(time_between_rounds)  # Adjust this time to whatever delay you need between rounds
+                send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in 30s.\n")
+                selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+                time.sleep(15)
+                round_preview(selected_questions)
+                time.sleep(15)  # Adjust this time to whatever delay you need between rounds
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

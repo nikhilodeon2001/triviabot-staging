@@ -154,6 +154,73 @@ def generate_median_question():
     return content_uri, img_width, img_height, str(median)
 
 
+
+
+def generate_mean_question():
+    """
+    Generate a question asking for the mean of a set of random numbers.
+    The set will contain 3 to 5 numbers between 1 and 10, and the image
+    of the numbers will be sent to the user with the question.
+    """
+    # Generate a random n between 3 and 5
+    n = random.randint(3, 5)
+    
+    # Keep generating random numbers until their mean is an integer
+    while True:
+        random_numbers = [random.randint(1, 10) for _ in range(n)]
+        mean_value = sum(random_numbers) / n
+        
+        # If the mean is an integer, break the loop
+        if mean_value.is_integer():
+            break
+    
+    # Create the question text
+    question_text = f"What is the mean of the following set of numbers?"
+    
+    # Create an image with the numbers
+    img_width, img_height = 400, 150
+    img = Image.new('RGB', (img_width, img_height), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Load the font
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    
+    # Adjust the font size based on the length of the numbers text
+    numbers_text = ', '.join(map(str, random_numbers))
+    if len(numbers_text) > 17:
+        font_size = 30  # Reduce font size for larger sets
+    else:
+        font_size = 48  # Use larger font for smaller sets
+
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return None
+
+    # Convert numbers to a string and draw them on the image
+    text_bbox = draw.textbbox((0, 0), numbers_text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2
+    draw.text((text_x, text_y), numbers_text, fill=(255, 92, 0), font=font)
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+
+    # Upload the image to Matrix (assuming the upload function exists)
+    content_uri = upload_image_to_matrix(image_buffer.read())
+
+    # Return the integer mean for verification
+    return content_uri, img_width, img_height, str(int(mean_value))
+
+
+
+
+
 def generate_scrambled_image(scrambled_text):
     """
     Generate an image with scrambled words using PIL (Pillow).
@@ -837,6 +904,12 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         image_size = 100
         send_image_flag = True
 
+    elif trivia_url == "mean":
+        image_mxc, image_width, image_height, new_solution = generate_mean_question()
+        message_body = f"\n{number_block}📊 {trivia_category} 📊{number_block}\n{trivia_question}"
+        image_size = 100
+        send_image_flag = True
+    
     else:
          message_body = f"\n{number_block}❓ {trivia_category} ❓{number_block}\n{trivia_question}"
 

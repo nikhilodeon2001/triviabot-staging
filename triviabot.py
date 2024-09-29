@@ -1311,7 +1311,7 @@ def show_standings():
                     standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}  ⚡{fastest_count}"
                 else:
                     standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}"
-            elif rank == len(standings) and rank > 5:
+            elif rank == len(standings) and rank > 4:
                 # For the last place person (who is not in the top 3), use the poop emoji
                 if fastest_count > 0:
                     standing_message += f"\n💩 {user}: {formatted_points} (⚡{fastest_count})"

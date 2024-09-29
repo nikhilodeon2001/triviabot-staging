@@ -1667,122 +1667,110 @@ def round_preview(selected_questions):
     # Send the message to the chat
     send_message(target_room_id, message)
 
-async def start_trivia_round():
+async def start_trivia():
 # Function to start the trivia round
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
     global headers, params, filter_json, since_token, round_count
 
-    # Track the initial time for hourly re-login
-    last_login_time = time.time()  # Store the current time when the script starts
-    selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
-    try:
-        while True:  # Endless loop
-            # Check if it's been more than an hour since the last login
-            current_time = time.time()
-            
-            if current_time - last_login_time >= 3600:  # 3600 seconds = 1 hour
-                print("Re-logging into Reddit and chat as one hour has passed...")
-                reddit_login()
-                login_to_chat()
-                await initiate_matrix_client()
-                last_login_time = current_time  # Reset the login time
-
-            # Load global varaiables at the start of round
-            load_global_variables()
-            
-            # Load existing streak data from the file
-            load_streak_data()
-
-            """Start a round of n trivia questions."""
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
-            round_start_messages()
-            time.sleep(5)
-
-            # Reset the scoreboard and fastest answers at the start of each round
-            scoreboard.clear()
-            fastest_answers_count.clear()
-            
-            # Reset round data for the next round
-            round_data["questions"] = []
-
-            # Randomly select n questions
-            print() 
-            print_selected_questions(selected_questions)
-            print()
-            
-            question_number = 1
-            for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
-                # Ask the trivia question and get start times
-                question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
-                time.sleep(question_time)  # Wait for n seconds for answers
-                #fetch_all_responses(question_ask_time)  # Pass both local and server start times
-                send_message(target_room_id, f"\n🛑 TIME 🛑\n")
-                
-                if new_solution is None:
-                    check_correct_responses(question_ask_time, trivia_answer_list, question_number)  # Check the answers     # POLY
-                else:
-                    check_correct_responses(question_ask_time, [new_solution], question_number)  # Check the answers     # LATENCY
-                
-                show_standings()  # Show the standings after each question
-                #save_trivia_data_answers()
-                time.sleep(time_between_questions)  # Small delay before the next question
-                question_number = question_number + 1
-                
-            #Determine the round winner
-            round_winner = determine_round_winner()
-
-            #Update round streaks
-            update_round_streaks(round_winner)
-            # Increment the round count
-
-            round_count += 1
-        
-            time.sleep(7)
-            if round_count % 5 == 0:
-                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
-                selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(15)
-                round_preview(selected_questions)
-                time.sleep(45)
-            else:
-                send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in 30s.\n")
-                selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(15)
-                round_preview(selected_questions)
-                time.sleep(15)  # Adjust this time to whatever delay you need between rounds
-
-    except Exception as e:
-        sentry_sdk.capture_exception(e)
-        print(f"Error occurred: {e}")
-        traceback.print_exc()  # Print the stack trace of the error
-        print("Restarting the trivia bot in 10 seconds...")
-        time.sleep(10)  
-
-try:
-    sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()
     login_to_chat()
-    initiate_matrix_client()
-    
+    print("Starting client...")
+    await initiate_matrix_client()
+    print("Client started.")
+
     # Load needed variables for sync
     load_global_variables()
     
     send_message(target_room_id, "Hello from Matrix SDK!")
+
+'''
     
-    # Call this function at the start of the script to initialize the sync
-    #initialize_sync()
+    # Track the initial time for hourly re-login
+    last_login_time = time.time()  # Store the current time when the script starts
+    selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
+    
+    while True:  # Endless loop
+        # Check if it's been more than an hour since the last login
+        current_time = time.time()
+        
+        if current_time - last_login_time >= 3600:  # 3600 seconds = 1 hour
+            print("Re-logging into Reddit and chat as one hour has passed...")
+            reddit_login()
+            login_to_chat()
+            await initiate_matrix_client()
+            last_login_time = current_time  # Reset the login time
 
-    # Start the trivia round
-    #start_trivia_round()
+        # Load global varaiables at the start of round
+        load_global_variables()
+        
+        # Load existing streak data from the file
+        load_streak_data()
 
-except Exception as e:
-    sentry_sdk.capture_exception(e)
-    print(f"Unhandled exception: {e}. Restarting in 5 seconds...")
-    traceback.print_exc()  # Print the stack trace for debugging
-    time.sleep(5)
-    reddit_login()
-    login_to_chat()
-    load_global_variables()
-    initialize_sync()
-    start_trivia_round()  # Restart the bot
+        """Start a round of n trivia questions."""
+        send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
+        round_start_messages()
+        time.sleep(5)
+
+        # Reset the scoreboard and fastest answers at the start of each round
+        scoreboard.clear()
+        fastest_answers_count.clear()
+        
+        # Reset round data for the next round
+        round_data["questions"] = []
+
+        # Randomly select n questions
+        print() 
+        print_selected_questions(selected_questions)
+        print()
+        
+        question_number = 1
+        for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
+            # Ask the trivia question and get start times
+            question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
+            time.sleep(question_time)  # Wait for n seconds for answers
+            #fetch_all_responses(question_ask_time)  # Pass both local and server start times
+            send_message(target_room_id, f"\n🛑 TIME 🛑\n")
+            
+            if new_solution is None:
+                check_correct_responses(question_ask_time, trivia_answer_list, question_number)  # Check the answers     # POLY
+            else:
+                check_correct_responses(question_ask_time, [new_solution], question_number)  # Check the answers     # LATENCY
+            
+            show_standings()  # Show the standings after each question
+            #save_trivia_data_answers()
+            time.sleep(time_between_questions)  # Small delay before the next question
+            question_number = question_number + 1
+            
+        #Determine the round winner
+        round_winner = determine_round_winner()
+
+        #Update round streaks
+        update_round_streaks(round_winner)
+        # Increment the round count
+
+        round_count += 1
+    
+        time.sleep(7)
+        if round_count % 5 == 0:
+            send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+            selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+            time.sleep(15)
+            round_preview(selected_questions)
+            time.sleep(45)
+        else:
+            send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in 30s.\n")
+            selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+            time.sleep(15)
+            round_preview(selected_questions)
+            time.sleep(15)  # Adjust this time to whatever delay you need between rounds
+
+
+'''
+
+#sentry_sdk.capture_message("Sentry initiatlized...", level="info")
+if __name__ == "__main__":
+    # asyncio.run() starts the event loop and runs the async code
+    asyncio.run(start_trivia())
+
+

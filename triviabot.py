@@ -85,19 +85,39 @@ first_place_bonus = 0
 
 
 def redact_message(event_id, room_id):
-    """Redact a message in the Matrix chatroom using the Matrix API."""
-    global headers
-    redact_url = f"{matrix_base_url}/rooms/{room_id}/redact/{event_id}/{int(time.time() * 1000)}"
+    """Redact a message from the Matrix room."""
+    global headers  # Assuming headers contain your authorization token and other required headers
+    
+    redact_url = "https://gql-fed.reddit.com/"
+    
+    # Prepare the JSON payload for the redaction request
+    payload = {
+        "variables": {
+            "input": {
+                "id": f"MATRIXCHAT_{room_id}_{event_id}",
+                "isSpam": False
+            }
+        },
+        "operationName": "ModRemove",
+        "extensions": {
+            "persistedQuery": {
+                "version": 1,
+                "sha256Hash": "38f732367e2193a050c90a3b71793d4133a54a49ce8a7c6cae65cd581d36ee26"
+            }
+        }
+    }
 
+    # Send the POST request to redact the message
     try:
-        response = requests.post(redact_url, headers=headers)
-
+        response = requests.post(redact_url, json=payload, headers=headers)
+        
         if response.status_code == 200:
-            print(f"Successfully redacted message {event_id} in room {room_id}")
+            print(f"Successfully redacted message {event_id}")
         else:
             print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
+            print(response.text)
+    
     except requests.exceptions.RequestException as e:
-        sentry_sdk.capture_exception(e)
         print(f"Error redacting message {event_id}: {e}")
 
 

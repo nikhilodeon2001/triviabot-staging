@@ -84,7 +84,21 @@ hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
 
+def redact_message(event_id, room_id):
+    """Redact a message in the Matrix chatroom using the Matrix API."""
+    global headers
+    redact_url = f"{matrix_base_url}/rooms/{room_id}/redact/{event_id}/{int(time.time() * 1000)}"
 
+    try:
+        response = requests.post(redact_url, headers=headers)
+
+        if response.status_code == 200:
+            print(f"Successfully redacted message {event_id} in room {room_id}")
+        else:
+            print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error redacting message {event_id}: {e}")
 
 
 
@@ -1137,6 +1151,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
 
                             # Log the user submission
                             #display_name = get_display_name(sender)
+                            event_id = event["event_id"]  # Capture the event ID
                             message_content = event.get("content", {}).get("body", "")
                             response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
                             
@@ -1146,6 +1161,8 @@ def collect_responses(question_ask_time, question_number, time_limit):
                                 "message_content": message_content,
                                 "response_time": response_time
                             })
+
+                            redact_message(event_id, target_room_id)
 
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)

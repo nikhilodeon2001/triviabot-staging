@@ -1131,7 +1131,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
                 for room_id, room_data in sync_data.get("rooms", {}).get("join", {}).items():
                     if room_id == target_room_id:
                         for event in room_data.get("timeline", {}).get("events", []):
-                            sender = event["user_id"]
+                            sender = event["sender"]
                             if sender == bot_user_id:  # Ignore messages from the bot itself
                                 continue
 

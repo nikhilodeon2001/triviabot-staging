@@ -81,6 +81,33 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
+
+def increase_bot_power_level():
+    url = f"https://matrix.yourserver.com/_matrix/client/v3/rooms/{target_room_id}/state/m.room.power_levels"
+    
+    headers = {
+        "Authorization": f"Bearer {bearer_token}",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "users": {
+            bot_user_id: 100  # Set your bot's power level to 100
+        }
+    }
+    
+    response = requests.put(url, json=data, headers=headers)
+    
+    if response.status_code == 200:
+        print("Successfully increased bot power level to 100.")
+    else:
+        print(f"Failed to update power level. Status code: {response.status_code}")
+        print(response.text)
+
+
+
+
+
 def get_room_power_levels(room_id):
     """Retrieve the power levels of the room and check the required levels for different actions."""
     url = f"{matrix_base_url}/rooms/{room_id}/state/m.room.power_levels"
@@ -1874,6 +1901,7 @@ try:
     # Start the trivia round
     get_bot_power_level(target_room_id)
     get_room_power_levels(target_room_id)
+    increase_bot_power_level()
     start_trivia_round()
 
 except Exception as e:

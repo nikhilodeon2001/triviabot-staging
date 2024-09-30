@@ -82,6 +82,33 @@ hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
 
+def set_send_message_power_level(room_id, level):
+    """
+    Adjust the power level for sending messages. A higher level makes messages hidden.
+    
+    Args:
+        room_id (str): The Matrix room ID.
+        level (int): The power level required to send messages.
+    """
+    url = f"{matrix_base_url}/rooms/{room_id}/state/m.room.power_levels"
+    headers = {"Authorization": f"Bearer {bearer_token}"}
+    
+    # Modify the power level settings
+    data = {
+        "users_default": level,  # Set default user power level (e.g., 50 to restrict, 0 to allow)
+        "events": {
+            "m.room.message": level  # Set power level required to send messages
+        }
+    }
+    
+    response = requests.put(url, json=data, headers=headers)
+    
+    if response.status_code == 200:
+        print(f"Power level for sending messages set to {level}.")
+    else:
+        print(f"Error setting power level: {response.status_code}")
+
+
 def redact_message(event_id, room_id):
     """Redact a message from the Matrix room."""
     global headers  # Assuming headers contain your authorization token and other required headers
@@ -1752,12 +1779,14 @@ def start_trivia_round():
             question_number = 1
             for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
                 # Ask the trivia question and get start times
+                set_send_message_power_level(target_room_id, 50)  # Prevent users from sending visible messages
                 question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
 
                 # Collect all responses during the question's active time
                 collected_responses = collect_responses(question_time, question_number, question_time)
 
                 send_message(target_room_id, f"\n🛑 TIME 🛑\n")
+                set_send_message_power_level(target_room_id, 0)  # Restore message visibility
                 
                 if new_solution is None:
                     check_correct_responses(question_ask_time, trivia_answer_list, question_number, collected_responses)  # Check the answers     # POLY

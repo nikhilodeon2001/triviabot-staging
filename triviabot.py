@@ -1169,48 +1169,51 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
 
     fastest_correct_user = None
     fastest_response_time = None
-    
-    display_name = get_display_name(sender)  # Get the display name from content
+
+    # Process collected responses
+    for response in collected_responses:
+        sender = response["sender"]
+        display_name = get_display_name(sender)  # Get the display name from content
                             
                             # Check if the user has already answered correctly, ignore if they have
-    if any(resp[0] == display_name for resp in correct_responses):
-        continue  # Ignore this response since the user has already answered correctly
-
-    # Log user submission (MongoDB operation)
-    log_user_submission(display_name)
+        if any(resp[0] == display_name for resp in correct_responses):
+            continue  # Ignore this response since the user has already answered correctly
+    
+        # Log user submission (MongoDB operation)
+        log_user_submission(display_name)
                             
-    message_content = event.get("content", {}).get("body", "")
-    normalized_message_content = normalize_text(message_content)
-
-    # Indicate that there was at least one response
-    has_responses = True
-                            
-    # Find the current question data to add responses
-    current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
-    if current_question_data:
-        current_question_data["user_responses"].append({
-            "username": display_name,
-            "response": message_content
-        })
+        message_content = event.get("content", {}).get("body", "")
+        normalized_message_content = normalize_text(message_content)
+    
+        # Indicate that there was at least one response
+        has_responses = True
                                 
-    # Check if the user's response is in the list of correct answers
-    if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
-        
-        timestamp = event.get("origin_server_ts", None) / 1000  # Extract the timestamp
-        if timestamp and question_ask_time:
-            # Convert timestamp to seconds
-            response_time = timestamp - question_ask_time
-        else:   
-            response_time = float('inf')
+        # Find the current question data to add responses
+        current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
+        if current_question_data:
+            current_question_data["user_responses"].append({
+                "username": display_name,
+                "response": message_content
+            })
+                                
+        # Check if the user's response is in the list of correct answers
+        if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
             
-        points = calculate_points(response_time)
-        correct_responses.append((display_name, points, response_time, message_content))
-
-        # Check if this is the fastest correct response so far
-        if fastest_correct_user is None or response_time < fastest_response_time:
-            fastest_correct_user = display_name
-            fastest_response_time = response_time
-        
+            timestamp = event.get("origin_server_ts", None) / 1000  # Extract the timestamp
+            if timestamp and question_ask_time:
+                # Convert timestamp to seconds
+                response_time = timestamp - question_ask_time
+            else:   
+                response_time = float('inf')
+                
+            points = calculate_points(response_time)
+            correct_responses.append((display_name, points, response_time, message_content))
+    
+            # Check if this is the fastest correct response so far
+            if fastest_correct_user is None or response_time < fastest_response_time:
+                fastest_correct_user = display_name
+                fastest_response_time = response_time
+            
              
     # Now that we know the fastest responder, iterate over correct_responses to:
     # - Assign the extra 500 points to the fastest user

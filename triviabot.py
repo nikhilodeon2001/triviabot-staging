@@ -1129,69 +1129,6 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
                           
 
 
-'''
-def collect_responses(question_ask_time, question_number, time_limit):
-    """
-    Collect all responses submitted by users during the time limit.
-    
-    Args:
-        question_ask_time: The timestamp when the question was asked.
-        question_number: The current question number.
-        time_limit: Time in seconds to allow for answers.
-    
-    Returns:
-        A list of collected responses with usernames, response times, and message content.
-    """
-    global since_token, headers, max_retries, delay_between_retries
-    sync_url = f"{matrix_base_url}/sync"
-
-    collected_responses = []  # Store all responses
-    start_time = time.time()  # Track when the question starts
-    
-    while time.time() - start_time < time_limit:
-        try:
-            if since_token:
-                params["since"] = since_token
-
-            response = requests.get(sync_url, headers=headers, params=params)
-            
-            if response.status_code == 200:
-                sync_data = response.json()
-                since_token = sync_data.get("next_batch")  # Update since_token to get new events next time
-                
-                # Process messages from the room
-                for room_id, room_data in sync_data.get("rooms", {}).get("join", {}).items():
-                    if room_id == target_room_id:
-                        for event in room_data.get("timeline", {}).get("events", []):
-                            sender = event["sender"]
-                            if sender == bot_user_id:  # Ignore messages from the bot itself
-                                continue
-
-                            # Log the user submission
-                            #display_name = get_display_name(sender)
-                            event_id = event["event_id"]  # Capture the event ID
-                            message_content = event.get("content", {}).get("body", "")
-                            response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
-                            
-                            # Store the response along with the username and response time
-                            collected_responses.append({
-                                "user_id": sender,
-                                "message_content": message_content,
-                                "response_time": response_time
-                            })
-
-                            redact_message(event_id, target_room_id)
-
-        except requests.exceptions.RequestException as e:
-            sentry_sdk.capture_exception(e)
-            print(f"Error collecting responses: {e}")
-        
-        #time.sleep(1)  # Small delay before fetching the next batch of messages
-
-    return collected_responses
-'''
-
-
 def collect_responses(question_ask_time, question_number, time_limit):
     """
     Collect all responses submitted by users during the time limit.

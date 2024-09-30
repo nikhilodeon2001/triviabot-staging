@@ -1175,14 +1175,14 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
         sender = response["user_id"]
         display_name = get_display_name(sender)  # Get the display name from content
                             
-                            # Check if the user has already answered correctly, ignore if they have
+        # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):
             continue  # Ignore this response since the user has already answered correctly
     
         # Log user submission (MongoDB operation)
         log_user_submission(display_name)
                             
-        message_content = event.get("content", {}).get("body", "")
+         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         normalized_message_content = normalize_text(message_content)
     
         # Indicate that there was at least one response
@@ -1199,7 +1199,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
         # Check if the user's response is in the list of correct answers
         if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
             
-            timestamp = event.get("origin_server_ts", None) / 1000  # Extract the timestamp
+            timestamp = response["response_time"]  # Use the response time from the collected data
             if timestamp and question_ask_time:
                 # Convert timestamp to seconds
                 response_time = timestamp - question_ask_time

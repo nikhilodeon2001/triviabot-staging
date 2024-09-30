@@ -111,9 +111,7 @@ def redact_message(event_id, room_id):
     try:
         response = requests.post(redact_url, json=payload, headers=headers)
         
-        if response.status_code == 200:
-            print(f"Successfully redacted message {event_id}")
-        else:
+        if response.status_code != 200:
             print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
             print(response.text)
     

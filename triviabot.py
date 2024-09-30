@@ -1182,7 +1182,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
         # Log user submission (MongoDB operation)
         log_user_submission(display_name)
                             
-         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
+        message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         normalized_message_content = normalize_text(message_content)
     
         # Indicate that there was at least one response

@@ -27,15 +27,12 @@ import io
 import hashlib 
 from PIL import Image, ImageDraw, ImageFont 
 import openai
-from nio import AsyncClient, MatrixRoom, RoomMessageText, LoginResponse
-import asyncio
 
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
 upload_url = "https://matrix.redditspace.com/_matrix/media/v3/upload"
 sync_url = f"{matrix_base_url}/sync"
-matrix_client = None
 
 # Define global variables to store streaks and scores
 round_count = 0
@@ -86,27 +83,10 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
-async def initiate_matrix_client():
-    global client
-    matrix_base_url = "https://matrix.redditspace.com"
-    
-    # Initialize the AsyncClient
-    client = AsyncClient(matrix_base_url, user=bot_user_id)
 
-    # Step 2: Restore the session using the access token and device ID (if you have it)
-    try:
-        # Use restore_login instead of login if you already have a token
-        await client.restore_login(
-            user_id=bot_user_id,
-            access_token=bearer_token,
-            device_id="YOUR_DEVICE_ID",  # Optional: use if you have a specific device ID
-            home_server=matrix_base_url
-        )
-        print(f"Logged in as {bot_user_id} using the access token.")
-    
-    except Exception as e:
-        print(f"Error logging into Matrix using token: {e}")
-        sentry_sdk.capture_exception(e)
+
+
+
 
 def generate_median_question():
     """
@@ -1115,22 +1095,29 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
 
     return False  # No match found
                           
-                
-def check_correct_responses(question_ask_time, trivia_answer_list, question_number):
-    """Check and respond to users who answered the trivia question correctly."""
-    global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
-    sync_url = f"{matrix_base_url}/sync"
+
+
+
+def collect_responses(question_ask_time, question_number, time_limit):
+    """
+    Collect all responses submitted by users during the time limit.
     
-    # Define the first item in the list as trivia_answer
-    trivia_answer = trivia_answer_list[0]  # The first item is the main answer
-    correct_responses = []  # To store users who answered correctly
-    has_responses = False  # Track if there are any responses
-   
-    for attempt in range(max_retries):
+    Args:
+        question_ask_time: The timestamp when the question was asked.
+        question_number: The current question number.
+        time_limit: Time in seconds to allow for answers.
+    
+    Returns:
+        A list of collected responses with usernames, response times, and message content.
+    """
+    global since_token, headers, max_retries, delay_between_retries
+    sync_url = f"{matrix_base_url}/sync"
+
+    collected_responses = []  # Store all responses
+    start_time = time.time()  # Track when the question starts
+    
+    while time.time() - start_time < time_limit:
         try:
-            fastest_correct_user = None
-            fastest_response_time = None
-            
             if since_token:
                 params["since"] = since_token
 
@@ -1138,153 +1125,171 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
             
             if response.status_code == 200:
                 sync_data = response.json()
-                since_token = sync_data.get("next_batch")  # Update the since token
+                since_token = sync_data.get("next_batch")  # Update since_token to get new events next time
                 
                 # Process messages from the room
-                responses.clear()
                 for room_id, room_data in sync_data.get("rooms", {}).get("join", {}).items():
-                    if room_id == target_room_id:  # Only process messages from the target room
+                    if room_id == target_room_id:
                         for event in room_data.get("timeline", {}).get("events", []):
                             sender = event["sender"]
-                            if sender == bot_user_id:
+                            if sender == bot_user_id:  # Ignore messages from the bot itself
                                 continue
-                            display_name = get_display_name(event.get("content", {}).get("displayname", sender))  # Get the display name from content
-                            
-                            # Check if the user has already answered correctly, ignore if they have
-                            if any(resp[0] == display_name for resp in correct_responses):
-                                continue  # Ignore this response since the user has already answered correctly
 
-                            # Log user submission (MongoDB operation)
-                            log_user_submission(display_name)
-                            
+                            # Log the user submission
+                            #display_name = get_display_name(sender)
                             message_content = event.get("content", {}).get("body", "")
-                            normalized_message_content = normalize_text(message_content)
-
-                            # Indicate that there was at least one response
-                            has_responses = True
+                            response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
                             
-                            # Find the current question data to add responses
-                            current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
-                            if current_question_data:
-                                current_question_data["user_responses"].append({
-                                    "username": display_name,
-                                    "response": message_content
-                                })
-                                
-                            # Check if the user's response is in the list of correct answers
-                            if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
-                                
-                                timestamp = event.get("origin_server_ts", None) / 1000  # Extract the timestamp
-                                if timestamp and question_ask_time:
-                                    # Convert timestamp to seconds
-                                    response_time = timestamp - question_ask_time
-                                else:   
-                                    response_time = float('inf')
-                                    
-                                points = calculate_points(response_time)
-                                correct_responses.append((display_name, points, response_time, message_content))
-                    
-                                # Check if this is the fastest correct response so far
-                                if fastest_correct_user is None or response_time < fastest_response_time:
-                                    fastest_correct_user = display_name
-                                    fastest_response_time = response_time
-        
-             
-                # Now that we know the fastest responder, iterate over correct_responses to:
-                # - Assign the extra 500 points to the fastest user
-                # - Update the scoreboard for all users
-                for i, (display_name, points, response_time, message_content) in enumerate(correct_responses):
-                    if display_name == fastest_correct_user:
-                        correct_responses[i] = (display_name, points + first_place_bonus, response_time, message_content)
-                      
-                        if display_name in fastest_answers_count:
-                            fastest_answers_count[display_name] += 1
-                        else:
-                            fastest_answers_count[display_name] = 1
-                            
-                        if display_name in scoreboard:
-                            scoreboard[display_name] += points + first_place_bonus
-                        else:
-                            scoreboard[display_name] = points + first_place_bonus
-                    else:
-                        if display_name in scoreboard:
-                            scoreboard[display_name] += points
-                        else:
-                            scoreboard[display_name] = points                    
-            
-                update_answer_streaks(fastest_correct_user)  # Update the correct answer streak for this user
-               
-                # Add the current state of the scoreboard to round_data
-                current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
-                if current_question_data:
-                    current_question_data["scoreboard_after_question"] = dict(scoreboard)
+                            # Store the response along with the username and response time
+                            collected_responses.append({
+                                "user_id": sender,
+                                "message_content": message_content,
+                                "response_time": response_time
+                            })
 
-                # Construct a single message for all the responses
-                message = ""
-                message += f"\n✅ Answer ✅\n{trivia_answer}\n"
-            
-                # Notify the chat
-                if correct_responses:    
-                    correct_responses_length = len(correct_responses)
-                    
-                    # Loop through the responses and append to the message
-                    for display_name, points, response_time, message_content in correct_responses:
-                        time_diff = response_time - fastest_response_time
-                        if time_diff == 0:
-                            message += f"\n⚡ {display_name}: {points}"
-                            if current_longest_answer_streak["streak"] > 1:
-                                message += f"  🔥{current_longest_answer_streak['streak']}"
-                            #message += f"\n💬 Answered: {message_content}"
-                            #if correct_responses_length > 1:
-                            #    message += f"\n\n👥 The Rest"
-                        else:
-                            message += f"\n👥 {display_name}: {points} (+{round(time_diff, 1)}s)"
-                elif has_responses:  # Only if there were responses but none correct
-                    potential_messages = [
-                        "\n🥴 We've got a bunch of geniuses here...\n",
-                        "\n🤔 Did someone hide the thinking cap?\n",
-                        "\n😅 Well, that went right...off a cliff!\n",
-                        "\n🙃 The silence is deafening...\n",
-                        "\n🤷‍♂️ Hello? Anyone here?\n",
-                        "\n🧠 The brains have officially left the chat.\n",
-                        "\n🤯 That clearly blew some minds...or all of them.\n",
-                        "\n🦗 *Crickets*\n",
-                        "\n🧐 Must’ve been a tough one...\n",
-                        "\n🤡 At least we’re all equally clueless!\n",
-                        "\n💤 ...that question was the nap break, right?\n",
-                        "\n🙈 Looks like nobody saw that one coming!\n",
-                        "\n😬 Well, yikes. That’s awkward...\n",
-                        "\n😵‍💫 I think we all just forgot how to trivia.\n",
-                        "\n💡 Lightbulb moment? More like a power outage!\n",
-                        "\n🎯 Missed by a mile! Anyone aiming?\n",
-                        "\n🚶‍♂️ Um wow. I'll just see myself out.\n",
-                        "\n🤪 What a brain twister...yikes!\n",
-                        "\n🎱 Outlook not so good...for all of us.\n"
-                    ]
-                    message += random.choice(potential_messages)
-            
-                # Send the entire message at once
-                if message:
-                    send_message(target_room_id, message)
-
-                flush_submission_queue()
-                
-                return None
-            else:
-                print(f"Failed to fetch messages. Status code: {response.status_code}")
-                return None
-         
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
-            print(f"Attempt {attempt + 1} failed: {e}")
+            print(f"Error collecting responses: {e}")
+        
+        #time.sleep(1)  # Small delay before fetching the next batch of messages
+
+    return collected_responses
+
+
+
+
+def check_correct_responses(question_ask_time, trivia_answer_list, question_number, collected_responses):
+    """Check and respond to users who answered the trivia question correctly."""
+    global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
+    
+    # Define the first item in the list as trivia_answer
+    trivia_answer = trivia_answer_list[0]  # The first item is the main answer
+    correct_responses = []  # To store users who answered correctly
+    has_responses = False  # Track if there are any responses
+
+    fastest_correct_user = None
+    fastest_response_time = None
+    
+    display_name = get_display_name(sender)  # Get the display name from content
+                            
+                            # Check if the user has already answered correctly, ignore if they have
+    if any(resp[0] == display_name for resp in correct_responses):
+        continue  # Ignore this response since the user has already answered correctly
+
+    # Log user submission (MongoDB operation)
+    log_user_submission(display_name)
+                            
+    message_content = event.get("content", {}).get("body", "")
+    normalized_message_content = normalize_text(message_content)
+
+    # Indicate that there was at least one response
+    has_responses = True
+                            
+    # Find the current question data to add responses
+    current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
+    if current_question_data:
+        current_question_data["user_responses"].append({
+            "username": display_name,
+            "response": message_content
+        })
+                                
+    # Check if the user's response is in the list of correct answers
+    if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
+        
+        timestamp = event.get("origin_server_ts", None) / 1000  # Extract the timestamp
+        if timestamp and question_ask_time:
+            # Convert timestamp to seconds
+            response_time = timestamp - question_ask_time
+        else:   
+            response_time = float('inf')
             
-            if attempt < max_retries - 1:
-                time.sleep(delay_between_retries)
+        points = calculate_points(response_time)
+        correct_responses.append((display_name, points, response_time, message_content))
+
+        # Check if this is the fastest correct response so far
+        if fastest_correct_user is None or response_time < fastest_response_time:
+            fastest_correct_user = display_name
+            fastest_response_time = response_time
+        
+             
+    # Now that we know the fastest responder, iterate over correct_responses to:
+    # - Assign the extra 500 points to the fastest user
+    # - Update the scoreboard for all users
+    for i, (display_name, points, response_time, message_content) in enumerate(correct_responses):
+        if display_name == fastest_correct_user:
+            correct_responses[i] = (display_name, points + first_place_bonus, response_time, message_content)
+          
+            if display_name in fastest_answers_count:
+                fastest_answers_count[display_name] += 1
             else:
-                print(f"Max retries reached. Failed to fetch messages.")
-                return None  
-                    
-    return None  
+                fastest_answers_count[display_name] = 1
+                
+            if display_name in scoreboard:
+                scoreboard[display_name] += points + first_place_bonus
+            else:
+                scoreboard[display_name] = points + first_place_bonus
+        else:
+            if display_name in scoreboard:
+                scoreboard[display_name] += points
+            else:
+                scoreboard[display_name] = points                    
+
+    update_answer_streaks(fastest_correct_user)  # Update the correct answer streak for this user
+   
+    # Add the current state of the scoreboard to round_data
+    current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
+    if current_question_data:
+        current_question_data["scoreboard_after_question"] = dict(scoreboard)
+
+    # Construct a single message for all the responses
+    message = f"\n✅ Answer ✅\n{trivia_answer}\n"
+            
+    # Notify the chat
+    if correct_responses:    
+        correct_responses_length = len(correct_responses)
+        
+        # Loop through the responses and append to the message
+        for display_name, points, response_time, message_content in correct_responses:
+            time_diff = response_time - fastest_response_time
+            if time_diff == 0:
+                message += f"\n⚡ {display_name}: {points}"
+                if current_longest_answer_streak["streak"] > 1:
+                    message += f"  🔥{current_longest_answer_streak['streak']}"
+                #message += f"\n💬 Answered: {message_content}"
+                #if correct_responses_length > 1:
+                #    message += f"\n\n👥 The Rest"
+            else:
+                message += f"\n👥 {display_name}: {points} (+{round(time_diff, 1)}s)"
+    elif has_responses:  # Only if there were responses but none correct
+        potential_messages = [
+            "\n🥴 We've got a bunch of geniuses here...\n",
+            "\n🤔 Did someone hide the thinking cap?\n",
+            "\n😅 Well, that went right...off a cliff!\n",
+            "\n🙃 The silence is deafening...\n",
+            "\n🤷‍♂️ Hello? Anyone here?\n",
+            "\n🧠 The brains have officially left the chat.\n",
+            "\n🤯 That clearly blew some minds...or all of them.\n",
+            "\n🦗 *Crickets*\n",
+            "\n🧐 Must’ve been a tough one...\n",
+            "\n🤡 At least we’re all equally clueless!\n",
+            "\n💤 ...that question was the nap break, right?\n",
+            "\n🙈 Looks like nobody saw that one coming!\n",
+            "\n😬 Well, yikes. That’s awkward...\n",
+            "\n😵‍💫 I think we all just forgot how to trivia.\n",
+            "\n💡 Lightbulb moment? More like a power outage!\n",
+            "\n🎯 Missed by a mile! Anyone aiming?\n",
+            "\n🚶‍♂️ Um wow. I'll just see myself out.\n",
+            "\n🤪 What a brain twister...yikes!\n",
+            "\n🎱 Outlook not so good...for all of us.\n"
+        ]
+        message += random.choice(potential_messages)
+            
+    # Send the entire message at once
+    if message:
+        send_message(target_room_id, message)
+
+    flush_submission_queue() 
+    return None
 
 
 def update_answer_streaks(user):
@@ -1667,110 +1672,120 @@ def round_preview(selected_questions):
     # Send the message to the chat
     send_message(target_room_id, message)
 
-async def start_trivia():
+def start_trivia_round():
 # Function to start the trivia round
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
     global headers, params, filter_json, since_token, round_count
 
-    reddit_login()
-    login_to_chat()
-    print("Starting client...")
-    await initiate_matrix_client()
-    print("Client started.")
-
-    # Load needed variables for sync
-    load_global_variables()
-    
-    send_message(target_room_id, "Hello from Matrix SDK!")
-
-'''
-    
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
     selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
-    
-    while True:  # Endless loop
-        # Check if it's been more than an hour since the last login
-        current_time = time.time()
-        
-        if current_time - last_login_time >= 3600:  # 3600 seconds = 1 hour
-            print("Re-logging into Reddit and chat as one hour has passed...")
-            reddit_login()
-            login_to_chat()
-            await initiate_matrix_client()
-            last_login_time = current_time  # Reset the login time
-
-        # Load global varaiables at the start of round
-        load_global_variables()
-        
-        # Load existing streak data from the file
-        load_streak_data()
-
-        """Start a round of n trivia questions."""
-        send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
-        round_start_messages()
-        time.sleep(5)
-
-        # Reset the scoreboard and fastest answers at the start of each round
-        scoreboard.clear()
-        fastest_answers_count.clear()
-        
-        # Reset round data for the next round
-        round_data["questions"] = []
-
-        # Randomly select n questions
-        print() 
-        print_selected_questions(selected_questions)
-        print()
-        
-        question_number = 1
-        for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
-            # Ask the trivia question and get start times
-            question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
-            time.sleep(question_time)  # Wait for n seconds for answers
-            #fetch_all_responses(question_ask_time)  # Pass both local and server start times
-            send_message(target_room_id, f"\n🛑 TIME 🛑\n")
+    try:
+        while True:  # Endless loop
+            # Check if it's been more than an hour since the last login
+            current_time = time.time()
             
-            if new_solution is None:
-                check_correct_responses(question_ask_time, trivia_answer_list, question_number)  # Check the answers     # POLY
+            if current_time - last_login_time >= 3600:  # 3600 seconds = 1 hour
+                print("Re-logging into Reddit and chat as one hour has passed...")
+                reddit_login()
+                login_to_chat()
+                last_login_time = current_time  # Reset the login time
+
+            # Load global varaiables at the start of round
+            load_global_variables()
+            
+            # Load existing streak data from the file
+            load_streak_data()
+
+            """Start a round of n trivia questions."""
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
+            round_start_messages()
+            time.sleep(5)
+
+            # Reset the scoreboard and fastest answers at the start of each round
+            scoreboard.clear()
+            fastest_answers_count.clear()
+            
+            # Reset round data for the next round
+            round_data["questions"] = []
+
+            # Randomly select n questions
+            print() 
+            print_selected_questions(selected_questions)
+            print()
+            
+            question_number = 1
+            for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
+                # Ask the trivia question and get start times
+                question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
+
+                # Collect all responses during the question's active time
+                collected_responses = collect_responses(question_time, question_number, question_time)
+
+                send_message(target_room_id, f"\n🛑 TIME 🛑\n")
+                
+                if new_solution is None:
+                    check_correct_responses(question_ask_time, trivia_answer_list, question_number, collected_responses)  # Check the answers     # POLY
+                else:
+                    check_correct_responses(question_ask_time, [new_solution], question_number, collected_responses)  # Check the answers     # LATENCY
+                
+                show_standings()  # Show the standings after each question
+                #save_trivia_data_answers()
+                time.sleep(time_between_questions)  # Small delay before the next question
+                question_number = question_number + 1
+                
+            #Determine the round winner
+            round_winner = determine_round_winner()
+
+            #Update round streaks
+            update_round_streaks(round_winner)
+            # Increment the round count
+
+            round_count += 1
+        
+            time.sleep(7)
+            if round_count % 5 == 0:
+                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+                time.sleep(15)
+                round_preview(selected_questions)
+                time.sleep(45)
             else:
-                check_correct_responses(question_ask_time, [new_solution], question_number)  # Check the answers     # LATENCY
-            
-            show_standings()  # Show the standings after each question
-            #save_trivia_data_answers()
-            time.sleep(time_between_questions)  # Small delay before the next question
-            question_number = question_number + 1
-            
-        #Determine the round winner
-        round_winner = determine_round_winner()
+                send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in 30s.\n")
+                selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+                time.sleep(15)
+                round_preview(selected_questions)
+                time.sleep(15)  # Adjust this time to whatever delay you need between rounds
 
-        #Update round streaks
-        update_round_streaks(round_winner)
-        # Increment the round count
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error occurred: {e}")
+        traceback.print_exc()  # Print the stack trace of the error
+        print("Restarting the trivia bot in 10 seconds...")
+        time.sleep(10)  
 
-        round_count += 1
+try:
+    sentry_sdk.capture_message("Sentry initiatlized...", level="info")
+    reddit_login()
+    login_to_chat()
     
-        time.sleep(7)
-        if round_count % 5 == 0:
-            send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
-            selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-            time.sleep(15)
-            round_preview(selected_questions)
-            time.sleep(45)
-        else:
-            send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in 30s.\n")
-            selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-            time.sleep(15)
-            round_preview(selected_questions)
-            time.sleep(15)  # Adjust this time to whatever delay you need between rounds
+    # Load needed variables for sync
+    load_global_variables()
 
+    # Call this function at the start of the script to initialize the sync
+    initialize_sync()
 
-'''
+    # Start the trivia round
+    start_trivia_round()
 
-#sentry_sdk.capture_message("Sentry initiatlized...", level="info")
-if __name__ == "__main__":
-    # asyncio.run() starts the event loop and runs the async code
-    asyncio.run(start_trivia())
-
-
+except Exception as e:
+    sentry_sdk.capture_exception(e)
+    print(f"Unhandled exception: {e}. Restarting in 5 seconds...")
+    traceback.print_exc()  # Print the stack trace for debugging
+    time.sleep(5)
+    reddit_login()
+    login_to_chat()
+    load_global_variables()
+    initialize_sync()
+    start_trivia_round()  # Restart the bot

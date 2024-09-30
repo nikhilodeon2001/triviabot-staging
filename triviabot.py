@@ -81,6 +81,22 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
 
+def get_bot_power_level(room_id):
+    """Check the bot's power level in the room."""
+    url = f"{matrix_base_url}/rooms/{room_id}/state/m.room.power_levels"
+    headers = {"Authorization": f"Bearer {bearer_token}"}
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        power_levels = response.json()
+        bot_power_level = power_levels.get("users", {}).get(bot_user_id, 0)  # Default to 0 if not found
+        print(f"Bot power level: {bot_power_level}")
+        return bot_power_level
+    else:
+        print(f"Failed to get power levels: {response.status_code}")
+        return None
+
 
 def set_send_message_power_level(room_id, level):
     """
@@ -1840,6 +1856,7 @@ try:
     initialize_sync()
 
     # Start the trivia round
+    print(get_bot_power_level(target_room_id))
     start_trivia_round()
 
 except Exception as e:

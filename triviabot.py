@@ -1172,7 +1172,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
 
     # Process collected responses
     for response in collected_responses:
-        sender = response["sender"]
+        sender = response["user_id"]
         display_name = get_display_name(sender)  # Get the display name from content
                             
                             # Check if the user has already answered correctly, ignore if they have

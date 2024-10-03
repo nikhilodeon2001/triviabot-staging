@@ -1,3 +1,5 @@
+
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -80,127 +82,6 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
-
-
-def increase_bot_power_level():
-    url = f"https://matrix.yourserver.com/_matrix/client/v3/rooms/{target_room_id}/state/m.room.power_levels"
-    
-    headers = {
-        "Authorization": f"Bearer {bearer_token}",
-        "Content-Type": "application/json"
-    }
-    
-    data = {
-        "users": {
-            bot_user_id: 100  # Set your bot's power level to 100
-        }
-    }
-    
-    response = requests.put(url, json=data, headers=headers)
-    
-    if response.status_code == 200:
-        print("Successfully increased bot power level to 100.")
-    else:
-        print(f"Failed to update power level. Status code: {response.status_code}")
-        print(response.text)
-
-
-
-
-
-def get_room_power_levels(room_id):
-    """Retrieve the power levels of the room and check the required levels for different actions."""
-    url = f"{matrix_base_url}/rooms/{room_id}/state/m.room.power_levels"
-    headers = {"Authorization": f"Bearer {bearer_token}"}
-    
-    response = requests.get(url, headers=headers)
-    
-    if response.status_code == 200:
-        power_levels = response.json()
-        print(power_levels)
-        return power_levels
-    else:
-        print(f"Failed to get room power levels: {response.status_code}")
-        return None
-
-
-def get_bot_power_level(room_id):
-    """Check the bot's power level in the room."""
-    url = f"{matrix_base_url}/rooms/{room_id}/state/m.room.power_levels"
-    headers = {"Authorization": f"Bearer {bearer_token}"}
-    
-    response = requests.get(url, headers=headers)
-    
-    if response.status_code == 200:
-        power_levels = response.json()
-        bot_power_level = power_levels.get("users", {}).get(bot_user_id, 0)  # Default to 0 if not found
-        print(f"Bot power level: {bot_power_level}")
-        return bot_power_level
-    else:
-        print(f"Failed to get power levels: {response.status_code}")
-        return None
-
-
-def set_send_message_power_level(room_id, level):
-    """
-    Adjust the power level for sending messages. A higher level makes messages hidden.
-    
-    Args:
-        room_id (str): The Matrix room ID.
-        level (int): The power level required to send messages.
-    """
-    url = f"{matrix_base_url}/rooms/{room_id}/state/m.room.power_levels"
-    headers = {"Authorization": f"Bearer {bearer_token}"}
-    
-    # Modify the power level settings
-    data = {
-        "users_default": level,  # Set default user power level (e.g., 50 to restrict, 0 to allow)
-        "events": {
-            "m.room.message": level  # Set power level required to send messages
-        }
-    }
-    
-    response = requests.put(url, json=data, headers=headers)
-    
-    if response.status_code == 200:
-        print(f"Power level for sending messages set to {level}.")
-    else:
-        print(f"Error setting power level: {response.status_code}")
-
-
-def redact_message(event_id, room_id):
-    """Redact a message from the Matrix room."""
-    global headers  # Assuming headers contain your authorization token and other required headers
-    
-    redact_url = "https://gql-fed.reddit.com/"
-    
-    # Prepare the JSON payload for the redaction request
-    payload = {
-        "variables": {
-            "input": {
-                "id": f"MATRIXCHAT_{room_id}_{event_id}",
-                "isSpam": False
-            }
-        },
-        "operationName": "ModRemove",
-        "extensions": {
-            "persistedQuery": {
-                "version": 1,
-                "sha256Hash": "38f732367e2193a050c90a3b71793d4133a54a49ce8a7c6cae65cd581d36ee26"
-            }
-        }
-    }
-
-    # Send the POST request to redact the message
-    try:
-        response = requests.post(redact_url, json=payload, headers=headers)
-        
-        if response.status_code != 200:
-            print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
-            print(response.text)
-    
-    except requests.exceptions.RequestException as e:
-        print(f"Error redacting message {event_id}: {e}")
 
 
 
@@ -1211,205 +1092,176 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
 
     return False  # No match found
                           
-
-
-def collect_responses(question_ask_time, question_number, time_limit):
-    """
-    Collect all responses submitted by users during the time limit.
-    
-    Args:
-        question_ask_time: The timestamp when the question was asked.
-        question_number: The current question number.
-        time_limit: Time in seconds to allow for answers.
-    
-    Returns:
-        A list of collected responses with usernames, response times, and message content.
-    """
-    global since_token, headers, max_retries, delay_between_retries
-    sync_url = f"{matrix_base_url}/sync"
-
-    collected_responses = []  # Store all responses
-    start_time = time.time()  # Track when the question starts
-    
-    while time.time() - start_time < time_limit:
-        try:
-            if since_token:
-                params["since"] = since_token
-
-            response = requests.get(sync_url, headers=headers, params=params)
-
-            if response.status_code != 200:
-                continue
-
-            sync_data = response.json()
-            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
-
-            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
-            
-            for event in room_events:
-                sender = event["sender"]
-
-                if sender == bot_user_id:  # Ignore bot's own messages
-                    continue
-
-                event_id = event["event_id"]
                 
-                # Redact the message immediately
-                redact_message(event_id, target_room_id)
-                
-                # Process message content and response time after redaction
-                message_content = event.get("content", {}).get("body", "")
-                response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
-
-                # Store response data
-                collected_responses.append({
-                    "user_id": sender,
-                    "message_content": message_content,
-                    "response_time": response_time
-                })
-
-        except requests.exceptions.RequestException as e:
-            sentry_sdk.capture_exception(e)
-            print(f"Error collecting responses: {e}")
-
-    return collected_responses
-
-
-def check_correct_responses(question_ask_time, trivia_answer_list, question_number, collected_responses):
+def check_correct_responses(question_ask_time, trivia_answer_list, question_number):
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
+    sync_url = f"{matrix_base_url}/sync"
     
     # Define the first item in the list as trivia_answer
     trivia_answer = trivia_answer_list[0]  # The first item is the main answer
     correct_responses = []  # To store users who answered correctly
     has_responses = False  # Track if there are any responses
-
-    fastest_correct_user = None
-    fastest_response_time = None
-
-    # Process collected responses
-    for response in collected_responses:
-        sender = response["user_id"]
-        display_name = get_display_name(sender)  # Get the display name from content
-                            
-        # Check if the user has already answered correctly, ignore if they have
-        if any(resp[0] == display_name for resp in correct_responses):
-            continue  # Ignore this response since the user has already answered correctly
-    
-        # Log user submission (MongoDB operation)
-        log_user_submission(display_name)
-                            
-        message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
-        normalized_message_content = normalize_text(message_content)
-    
-        # Indicate that there was at least one response
-        has_responses = True
-                                
-        # Find the current question data to add responses
-        current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
-        if current_question_data:
-            current_question_data["user_responses"].append({
-                "username": display_name,
-                "response": message_content
-            })
-                                
-        # Check if the user's response is in the list of correct answers
-        if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
-            
-            timestamp = response["response_time"]  # Use the response time from the collected data
-            if timestamp and question_ask_time:
-                # Convert timestamp to seconds
-                response_time = timestamp - question_ask_time
-            else:   
-                response_time = float('inf')
-                
-            points = calculate_points(response_time)
-            correct_responses.append((display_name, points, response_time, message_content))
-    
-            # Check if this is the fastest correct response so far
-            if fastest_correct_user is None or response_time < fastest_response_time:
-                fastest_correct_user = display_name
-                fastest_response_time = response_time
-            
-             
-    # Now that we know the fastest responder, iterate over correct_responses to:
-    # - Assign the extra 500 points to the fastest user
-    # - Update the scoreboard for all users
-    for i, (display_name, points, response_time, message_content) in enumerate(correct_responses):
-        if display_name == fastest_correct_user:
-            correct_responses[i] = (display_name, points + first_place_bonus, response_time, message_content)
-          
-            if display_name in fastest_answers_count:
-                fastest_answers_count[display_name] += 1
-            else:
-                fastest_answers_count[display_name] = 1
-                
-            if display_name in scoreboard:
-                scoreboard[display_name] += points + first_place_bonus
-            else:
-                scoreboard[display_name] = points + first_place_bonus
-        else:
-            if display_name in scoreboard:
-                scoreboard[display_name] += points
-            else:
-                scoreboard[display_name] = points                    
-
-    update_answer_streaks(fastest_correct_user)  # Update the correct answer streak for this user
    
-    # Add the current state of the scoreboard to round_data
-    current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
-    if current_question_data:
-        current_question_data["scoreboard_after_question"] = dict(scoreboard)
-
-    # Construct a single message for all the responses
-    message = f"\n✅ Answer ✅\n{trivia_answer}\n"
+    for attempt in range(max_retries):
+        try:
+            fastest_correct_user = None
+            fastest_response_time = None
             
-    # Notify the chat
-    if correct_responses:    
-        correct_responses_length = len(correct_responses)
+            if since_token:
+                params["since"] = since_token
+
+            response = requests.get(sync_url, headers=headers, params=params)
+            
+            if response.status_code == 200:
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update the since token
+                
+                # Process messages from the room
+                responses.clear()
+                for room_id, room_data in sync_data.get("rooms", {}).get("join", {}).items():
+                    if room_id == target_room_id:  # Only process messages from the target room
+                        for event in room_data.get("timeline", {}).get("events", []):
+                            sender = event["sender"]
+                            if sender == bot_user_id:
+                                continue
+                            display_name = get_display_name(event.get("content", {}).get("displayname", sender))  # Get the display name from content
+                            
+                            # Check if the user has already answered correctly, ignore if they have
+                            if any(resp[0] == display_name for resp in correct_responses):
+                                continue  # Ignore this response since the user has already answered correctly
+
+                            # Log user submission (MongoDB operation)
+                            log_user_submission(display_name)
+                            
+                            message_content = event.get("content", {}).get("body", "")
+                            normalized_message_content = normalize_text(message_content)
+
+                            # Indicate that there was at least one response
+                            has_responses = True
+                            
+                            # Find the current question data to add responses
+                            current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
+                            if current_question_data:
+                                current_question_data["user_responses"].append({
+                                    "username": display_name,
+                                    "response": message_content
+                                })
+                                
+                            # Check if the user's response is in the list of correct answers
+                            if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
+                                
+                                timestamp = event.get("origin_server_ts", None) / 1000  # Extract the timestamp
+                                if timestamp and question_ask_time:
+                                    # Convert timestamp to seconds
+                                    response_time = timestamp - question_ask_time
+                                else:   
+                                    response_time = float('inf')
+                                    
+                                points = calculate_points(response_time)
+                                correct_responses.append((display_name, points, response_time, message_content))
+                    
+                                # Check if this is the fastest correct response so far
+                                if fastest_correct_user is None or response_time < fastest_response_time:
+                                    fastest_correct_user = display_name
+                                    fastest_response_time = response_time
         
-        # Loop through the responses and append to the message
-        for display_name, points, response_time, message_content in correct_responses:
-            time_diff = response_time - fastest_response_time
-            if time_diff == 0:
-                message += f"\n⚡ {display_name}: {points}"
-                if current_longest_answer_streak["streak"] > 1:
-                    message += f"  🔥{current_longest_answer_streak['streak']}"
-                #message += f"\n💬 Answered: {message_content}"
-                #if correct_responses_length > 1:
-                #    message += f"\n\n👥 The Rest"
-            else:
-                message += f"\n👥 {display_name}: {points} (+{round(time_diff, 1)}s)"
-    elif has_responses:  # Only if there were responses but none correct
-        potential_messages = [
-            "\n🥴 We've got a bunch of geniuses here...\n",
-            "\n🤔 Did someone hide the thinking cap?\n",
-            "\n😅 Well, that went right...off a cliff!\n",
-            "\n🙃 The silence is deafening...\n",
-            "\n🤷‍♂️ Hello? Anyone here?\n",
-            "\n🧠 The brains have officially left the chat.\n",
-            "\n🤯 That clearly blew some minds...or all of them.\n",
-            "\n🦗 *Crickets*\n",
-            "\n🧐 Must’ve been a tough one...\n",
-            "\n🤡 At least we’re all equally clueless!\n",
-            "\n💤 ...that question was the nap break, right?\n",
-            "\n🙈 Looks like nobody saw that one coming!\n",
-            "\n😬 Well, yikes. That’s awkward...\n",
-            "\n😵‍💫 I think we all just forgot how to trivia.\n",
-            "\n💡 Lightbulb moment? More like a power outage!\n",
-            "\n🎯 Missed by a mile! Anyone aiming?\n",
-            "\n🚶‍♂️ Um wow. I'll just see myself out.\n",
-            "\n🤪 What a brain twister...yikes!\n",
-            "\n🎱 Outlook not so good...for all of us.\n"
-        ]
-        message += random.choice(potential_messages)
+             
+                # Now that we know the fastest responder, iterate over correct_responses to:
+                # - Assign the extra 500 points to the fastest user
+                # - Update the scoreboard for all users
+                for i, (display_name, points, response_time, message_content) in enumerate(correct_responses):
+                    if display_name == fastest_correct_user:
+                        correct_responses[i] = (display_name, points + first_place_bonus, response_time, message_content)
+                      
+                        if display_name in fastest_answers_count:
+                            fastest_answers_count[display_name] += 1
+                        else:
+                            fastest_answers_count[display_name] = 1
+                            
+                        if display_name in scoreboard:
+                            scoreboard[display_name] += points + first_place_bonus
+                        else:
+                            scoreboard[display_name] = points + first_place_bonus
+                    else:
+                        if display_name in scoreboard:
+                            scoreboard[display_name] += points
+                        else:
+                            scoreboard[display_name] = points                    
             
-    # Send the entire message at once
-    if message:
-        send_message(target_room_id, message)
+                update_answer_streaks(fastest_correct_user)  # Update the correct answer streak for this user
+               
+                # Add the current state of the scoreboard to round_data
+                current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
+                if current_question_data:
+                    current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
-    flush_submission_queue() 
-    return None
+                # Construct a single message for all the responses
+                message = ""
+                message += f"\n✅ Answer ✅\n{trivia_answer}\n"
+            
+                # Notify the chat
+                if correct_responses:    
+                    correct_responses_length = len(correct_responses)
+                    
+                    # Loop through the responses and append to the message
+                    for display_name, points, response_time, message_content in correct_responses:
+                        time_diff = response_time - fastest_response_time
+                        if time_diff == 0:
+                            message += f"\n⚡ {display_name}: {points}"
+                            if current_longest_answer_streak["streak"] > 1:
+                                message += f"  🔥{current_longest_answer_streak['streak']}"
+                            #message += f"\n💬 Answered: {message_content}"
+                            #if correct_responses_length > 1:
+                            #    message += f"\n\n👥 The Rest"
+                        else:
+                            message += f"\n👥 {display_name}: {points} (+{round(time_diff, 1)}s)"
+                elif has_responses:  # Only if there were responses but none correct
+                    potential_messages = [
+                        "\n🥴 We've got a bunch of geniuses here...\n",
+                        "\n🤔 Did someone hide the thinking cap?\n",
+                        "\n😅 Well, that went right...off a cliff!\n",
+                        "\n🙃 The silence is deafening...\n",
+                        "\n🤷‍♂️ Hello? Anyone here?\n",
+                        "\n🧠 The brains have officially left the chat.\n",
+                        "\n🤯 That clearly blew some minds...or all of them.\n",
+                        "\n🦗 *Crickets*\n",
+                        "\n🧐 Must’ve been a tough one...\n",
+                        "\n🤡 At least we’re all equally clueless!\n",
+                        "\n💤 ...that question was the nap break, right?\n",
+                        "\n🙈 Looks like nobody saw that one coming!\n",
+                        "\n😬 Well, yikes. That’s awkward...\n",
+                        "\n😵‍💫 I think we all just forgot how to trivia.\n",
+                        "\n💡 Lightbulb moment? More like a power outage!\n",
+                        "\n🎯 Missed by a mile! Anyone aiming?\n",
+                        "\n🚶‍♂️ Um wow. I'll just see myself out.\n",
+                        "\n🤪 What a brain twister...yikes!\n",
+                        "\n🎱 Outlook not so good...for all of us.\n"
+                    ]
+                    message += random.choice(potential_messages)
+            
+                # Send the entire message at once
+                if message:
+                    send_message(target_room_id, message)
+
+                flush_submission_queue()
+                
+                return None
+            else:
+                print(f"Failed to fetch messages. Status code: {response.status_code}")
+                return None
+         
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Attempt {attempt + 1} failed: {e}")
+            
+            if attempt < max_retries - 1:
+                time.sleep(delay_between_retries)
+            else:
+                print(f"Max retries reached. Failed to fetch messages.")
+                return None  
+                    
+    return None  
 
 
 def update_answer_streaks(user):
@@ -1838,19 +1690,15 @@ def start_trivia_round():
             question_number = 1
             for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
                 # Ask the trivia question and get start times
-                set_send_message_power_level(target_room_id, 50)  # Prevent users from sending visible messages
                 question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
-
-                # Collect all responses during the question's active time
-                collected_responses = collect_responses(question_time, question_number, question_time)
-
+                time.sleep(question_time)  # Wait for n seconds for answers
+                #fetch_all_responses(question_ask_time)  # Pass both local and server start times
                 send_message(target_room_id, f"\n🛑 TIME 🛑\n")
-                set_send_message_power_level(target_room_id, 0)  # Restore message visibility
                 
                 if new_solution is None:
-                    check_correct_responses(question_ask_time, trivia_answer_list, question_number, collected_responses)  # Check the answers     # POLY
+                    check_correct_responses(question_ask_time, trivia_answer_list, question_number)  # Check the answers     # POLY
                 else:
-                    check_correct_responses(question_ask_time, [new_solution], question_number, collected_responses)  # Check the answers     # LATENCY
+                    check_correct_responses(question_ask_time, [new_solution], question_number)  # Check the answers     # LATENCY
                 
                 show_standings()  # Show the standings after each question
                 #save_trivia_data_answers()
@@ -1899,9 +1747,6 @@ try:
     initialize_sync()
 
     # Start the trivia round
-    get_bot_power_level(target_room_id)
-    get_room_power_levels(target_room_id)
-    increase_bot_power_level()
     start_trivia_round()
 
 except Exception as e:

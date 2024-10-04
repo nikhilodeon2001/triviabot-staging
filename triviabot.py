@@ -1789,13 +1789,72 @@ def get_recent_question_hashes_from_mongo():    #DEDUP
     recent_hashes = questions_collection.find().sort("timestamp", -1).limit(hash_limit)
     return {doc["hash"] for doc in recent_hashes}
 
+
+
+def select_trivia_questions_mongo(questions_per_round):
+    """
+    Select trivia questions, ensuring no recent duplicates based on stored hashes in MongoDB.
+    """
+    try:
+        # Connect to MongoDB
+        db = connect_to_mongodb()
+        collection = db["trivia_questions"]
+
+        # Get recent hashes from MongoDB
+        recent_hashes = get_recent_question_hashes_from_mongo()
+
+        # Use aggregation to exclude questions whose hash is in the recent hashes
+        pipeline = [
+            {
+                "$match": {
+                    "hash": {"$nin": list(recent_hashes)}  # Exclude recent hashes
+                }
+            },
+            {
+                "$sample": {"size": questions_per_round}  # Randomly select questions
+            }
+        ]
+
+        # Execute the pipeline
+        trivia_documents = list(collection.aggregate(pipeline))
+
+        # If not enough unique questions were found, select additional questions from recent hashes
+        if len(trivia_documents) < questions_per_round:
+            remaining_needed = questions_per_round - len(trivia_documents)
+            recycled_pipeline = [
+                {"$sample": {"size": remaining_needed}}  # Select additional random questions
+            ]
+            recycled_questions = list(collection.aggregate(recycled_pipeline))
+            trivia_documents.extend(recycled_questions)
+
+        # Convert the documents to a list of tuples for use in the trivia game
+        selected_questions = [
+            (doc["category"], doc["question"], doc["url"], doc["answers"])
+            for doc in trivia_documents
+        ]
+
+        # Store the selected question hashes in MongoDB to prevent duplicates in future rounds
+        selected_question_hashes = [doc["hash"] for doc in trivia_documents]
+        store_question_hashes_in_mongo(selected_question_hashes)
+
+        return selected_questions
+
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error selecting trivia questions from MongoDB: {e}")
+        return []  # Return an empty list in case of failure
+
+
+
+
+
 def select_trivia_questions(questions_per_round):   #DEDUP
     """
     Select trivia questions, ensuring no recent duplicates based on stored hashes in MongoDB.
     """
     # Load and shuffle trivia questions
     trivia_questions = load_trivia_questions()
-    insert_trivia_questions_into_mongo(trivia_questions)
+    #insert_trivia_questions_into_mongo(trivia_questions)
     random.shuffle(trivia_questions)
 
     # Get recent hashes from MongoDB
@@ -1998,7 +2057,7 @@ def start_trivia_round():
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
-    selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
+    selected_questions = select_trivia_questions_mongo(questions_per_round)  #Pick the initial question set
     try:
         while True:  # Endless loop
             # Check if it's been more than an hour since the last login

@@ -93,67 +93,84 @@ def process_round_options(round_winner):
     # Send the message to the round winner asking for a delay
     message = (
         f"\n @{round_winner}: As a reward for your victory, you have the option to control the time between questions for the next round. "
-        "Please give me a number from 5 to 15 seconds. You have 5 seconds to respond."
+        "Please give me a number from 5 to 20 seconds. You have 5 seconds to respond."
     )
     send_message(target_room_id, message)
     
     # Call initialize_sync to set since_token
     initialize_sync()
     
-    # Wait for 15 seconds to collect responses
+    # Wait for 5 seconds
     time.sleep(5)
 
-    # Collect responses in a single pass
-    collected_responses = collect_responses(time.time(), 1, 15)
+    # After the waiting period, fetch all responses
+    sync_url = f"{matrix_base_url}/sync"
+    params_with_since = params.copy()  # Use the existing params but include the since token
+    if since_token:
+        params_with_since["since"] = since_token
 
-    # Initialize a flag to track if the time has been set
-    time_set = False
+    try:
+        response = requests.get(sync_url, headers=headers, params=params_with_since)
+        if response.status_code != 200:
+            print(f"Failed to fetch responses. Status code: {response.status_code}")
+            return
 
-    # Process all responses
-    for response in reversed(collected_responses):  # Loop through responses in reverse to get the latest response first
-        sender = response["user_id"]
-        message_content = response["message_content"].strip()
+        # Parse the response to get the timeline events
+        sync_data = response.json()
+        since_token = sync_data.get("next_batch")  # Update the since_token for future requests
+        room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
-        # Fetch the display name for the current user
-        sender_display_name = get_display_name(sender)
-        
-        # If the round winner responded with a number, use that response
-        if sender_display_name == round_winner and not time_set:
-            if message_content.isdigit():  # Check if the response is a number
-                delay_value = int(message_content)
+        # Initialize a flag to track if the time has been set
+        time_set = False
 
-                # Ensure the delay value is within the allowed range (5-15)
-                if delay_value < 5:
-                    delay_value = 5
-                elif delay_value > 15:
-                    delay_value = 15
-                
-                # Set time_between_questions to the new value
-                time_between_questions = delay_value
-                time_set = True  # Mark that the time has been set
+        # Process all responses in reverse order (latest response first)
+        for event in reversed(room_events):
+            sender = event["sender"]
+            message_content = event.get("content", {}).get("body", "").strip()
 
-                # Send a confirmation message
-                send_message(
-                    target_room_id, 
-                    f"Ugh. @{round_winner} has set the time between questions to {time_between_questions} seconds. "
-                )
-        
-        # If the bot user gave the delete mode command
-        elif sender == bot_user_id:
-            if message_content.lower() == "delete mode on":
-                delete_messages_mode = 1
-                send_message(target_room_id, "Delete mode has been turned on.")
-            elif message_content.lower() == "delete mode off":
-                delete_messages_mode = 0
-                send_message(target_room_id, "Delete mode has been turned off.")
-    
-    # If no valid response from the round winner, reset to default
-    if not time_set:
-        time_between_questions = time_between_questions_default
-        send_message(
-            target_room_id, 
-            f"Nothing? Fine. Time between questions reset to {time_between_questions_default} seconds."
-        )
+            # Fetch the display name for the current user
+            sender_display_name = get_display_name(sender)
+            
+            # If the round winner responded with a number, use that response
+            if sender_display_name == round_winner and not time_set:
+                if message_content.isdigit():  # Check if the response is a number
+                    delay_value = int(message_content)
+
+                    # Ensure the delay value is within the allowed range (5-15)
+                    if delay_value < 5:
+                        delay_value = 5
+                    elif delay_value > 20:
+                        delay_value = 20
+                    
+                    # Set time_between_questions to the new value
+                    time_between_questions = delay_value
+                    time_set = True  # Mark that the time has been set
+
+                    # Send a confirmation message
+                    send_message(
+                        target_room_id, 
+                        f"Ugh. @{round_winner} has set the time between questions to {time_between_questions} seconds. Thanks a lot jerk. "
+                    )
+
+            # If the bot user gave the delete mode command
+            elif sender == bot_user_id:
+                if message_content.lower() == "delete mode on":
+                    delete_messages_mode = 1
+                    send_message(target_room_id, "Delete mode has been turned on.")
+                elif message_content.lower() == "delete mode off":
+                    delete_messages_mode = 0
+                    send_message(target_room_id, "Delete mode has been turned off.")
+
+        # If no valid response from the round winner, reset to default
+        if not time_set:
+            time_between_questions = time_between_questions_default
+            send_message(
+                target_room_id, 
+                f"Nothing? Wow, fine. Time between questions reset to {time_between_questions_default} seconds."
+            )
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching responses: {e}")
 
 def redact_message(event_id, room_id):
     """Redact a message from the Matrix room."""

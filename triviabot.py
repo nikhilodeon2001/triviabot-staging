@@ -211,7 +211,7 @@ def prompt_user_for_response(round_winner, selected_award):
                         send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.\n")
                     elif message_content.lower() == "off":
                         delete_messages_mode = 0
-                        send_message(target_room_id, f"Ghost mode is now off. Answers will remain visible active questions. Thanks for ruining it for everyone @{round_winner}.\n")
+                        send_message(target_room_id, f"Ghost mode is now off. Answers will remain visible during active questions. Thanks for ruining it for everyone @{round_winner}.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")

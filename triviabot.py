@@ -2031,7 +2031,7 @@ def start_trivia_round():
         
             time.sleep(7)
 
-            process_round_options()
+            process_round_options(round_winner)
             time.sleep(2)
 
             if round_count % 5 == 0:

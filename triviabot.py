@@ -24,7 +24,6 @@ import difflib
 import string
 from urllib.parse import urlparse 
 import io            
-import hashlib 
 from PIL import Image, ImageDraw, ImageFont 
 import openai
 
@@ -81,7 +80,7 @@ time_between_questions_default = time_between_questions
 questions_module = os.getenv("questions_module", "trivia_questions")
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-hash_limit = 2000 #DEDUP
+id_limit = 2000 #DEDUP
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 
@@ -1753,25 +1752,16 @@ def load_trivia_questions():
     return trivia_module.trivia_questions
 
 
-def generate_question_hash(question_tuple):  # Use the entire tuple for hashing
-    """Generate a SHA-256 hash for the entire question tuple (question text, URL, and answers)."""
-    # Convert the tuple to a string and encode it for hashing
-    question_tuple_str = json.dumps(question_tuple, sort_keys=True)  # Convert tuple to a string, sort keys to ensure consistency
-    return hashlib.sha256(question_tuple_str.encode('utf-8')).hexdigest()
-
-def store_question_hashes_in_mongo(question_hashes):    #DEDUP
-    """Store new question hashes in MongoDB and enforce a limit of stored hashes."""
+def store_question_ids_in_mongo(selected_question_ids):    #DEDUP
     db = connect_to_mongodb()
     questions_collection = db["asked_questions"]
 
-    # Insert the new question hashes
-    for question_hash in question_hashes:
-        questions_collection.insert_one({"hash": question_hash, "timestamp": time.time()})
+    for question_id in question_ids:
+        questions_collection.insert_one({"_id": question_id, "timestamp": time.time()})
 
-    # Ensure the collection only contains the last 'limit' number of hashes
-    total_hashes = questions_collection.count_documents({})
-    if total_hashes > hash_limit:
-        excess = total_hashes - hash_limit
+    total_ids = questions_collection.count_documents({})
+    if total_ids > id_limit:
+        excess = total_ids - id_limit
         
         # Find the oldest excess entries
         oldest_entries = questions_collection.find().sort("timestamp", 1).limit(excess)
@@ -1780,34 +1770,32 @@ def store_question_hashes_in_mongo(question_hashes):    #DEDUP
         for entry in oldest_entries:
             questions_collection.delete_one({"_id": entry["_id"]})
 
-def get_recent_question_hashes_from_mongo():    #DEDUP
-    """Retrieve the most recent question hashes from MongoDB."""
+def get_recent_question_ids_from_mongo():    #DEDUP
     db = connect_to_mongodb()
     questions_collection = db["asked_questions"]
 
-    # Retrieve the most recent hashes up to the limit
-    recent_hashes = questions_collection.find().sort("timestamp", -1).limit(hash_limit)
-    return {doc["hash"] for doc in recent_hashes}
+    recent_ids = questions_collection.find().sort("timestamp", -1).limit(id_limit)
+    return {doc["_id"] for doc in recent_ids}
 
 
 
 def select_trivia_questions_mongo(questions_per_round):
     """
-    Select trivia questions, ensuring no recent duplicates based on stored hashes in MongoDB.
+    Select trivia questions, ensuring no recent duplicates based on stored ids in MongoDB.
     """
     try:
         # Connect to MongoDB
         db = connect_to_mongodb()
         collection = db["trivia_questions"]
 
-        # Get recent hashes from MongoDB
-        recent_hashes = get_recent_question_hashes_from_mongo()
+        # Get recent ids from MongoDB
+        recent_ids = get_recent_question_ids_from_mongo()
 
-        # Use aggregation to exclude questions whose hash is in the recent hashes
+        # Use aggregation to exclude questions whose id is in the recent ids
         pipeline = [
             {
                 "$match": {
-                    "hash": {"$nin": list(recent_hashes)}  # Exclude recent hashes
+                    "_id": {"$nin": list(recent_ids)}  # Exclude recent ids
                 }
             },
             {
@@ -1818,7 +1806,6 @@ def select_trivia_questions_mongo(questions_per_round):
         # Execute the pipeline
         trivia_documents = list(collection.aggregate(pipeline))
 
-        # If not enough unique questions were found, select additional questions from recent hashes
         if len(trivia_documents) < questions_per_round:
             remaining_needed = questions_per_round - len(trivia_documents)
             recycled_pipeline = [
@@ -1833,9 +1820,9 @@ def select_trivia_questions_mongo(questions_per_round):
             for doc in trivia_documents
         ]
 
-        # Store the selected question hashes in MongoDB to prevent duplicates in future rounds
-        selected_question_hashes = [doc["hash"] for doc in trivia_documents]
-        store_question_hashes_in_mongo(selected_question_hashes)
+        # Store the selected question ids in MongoDB to prevent duplicates in future rounds
+        selected_question_ids = [doc["_id"] for doc in trivia_documents]
+        store_question_ids_in_mongo(selected_question_ids)
 
         return selected_questions
 
@@ -1848,54 +1835,6 @@ def select_trivia_questions_mongo(questions_per_round):
 
 
 
-def select_trivia_questions(questions_per_round):   #DEDUP
-    """
-    Select trivia questions, ensuring no recent duplicates based on stored hashes in MongoDB.
-    """
-    # Load and shuffle trivia questions
-    trivia_questions = load_trivia_questions()
-    #insert_trivia_questions_into_mongo(trivia_questions)
-    random.shuffle(trivia_questions)
-
-    # Get recent hashes from MongoDB
-    recent_hashes = get_recent_question_hashes_from_mongo()
-
-    # Filter out any questions whose hash is in the recent hashes
-    selected_questions = []
-    selected_question_hashes = []
-    
-    for question_tuple in trivia_questions:
-        question_hash = generate_question_hash(question_tuple)
-
-        # If the question's hash is not in the recent hashes, select it
-        if question_hash not in recent_hashes:
-            selected_questions.append(question_tuple)
-            selected_question_hashes.append(question_hash)
-        
-        # Stop once we've selected enough questions
-        if len(selected_questions) == questions_per_round:
-            break
-
-   # If we don't have enough unique questions, select additional questions
-    if len(selected_questions) < questions_per_round:
-        remaining_questions = [q for q in trivia_questions if generate_question_hash(q[0]) not in selected_question_hashes]
-        
-        # Check if we still have enough remaining questions
-        if len(remaining_questions) >= questions_per_round - len(selected_questions):
-            # Select enough remaining questions to fill the quota
-            selected_questions += random.sample(remaining_questions, questions_per_round - len(selected_questions))
-        else:
-            # If not enough remaining questions, select all available and recycle some from recent hashes
-            selected_questions += remaining_questions
-            
-            # Now recycle recently used questions by selecting from `recent_hashes`
-            recycled_questions = [q for q in trivia_questions if generate_question_hash(q[0]) in recent_hashes and generate_question_hash(q[0]) not in selected_question_hashes]
-            selected_questions += random.sample(recycled_questions, questions_per_round - len(selected_questions))
-
-    # Store the selected question hashes in MongoDB
-    store_question_hashes_in_mongo(selected_question_hashes)
-
-    return selected_questions
 
 
 def load_streak_data():

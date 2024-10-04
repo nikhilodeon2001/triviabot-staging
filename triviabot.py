@@ -1779,7 +1779,7 @@ def get_recent_question_ids_from_mongo():    #DEDUP
 
 
 
-def select_trivia_questions_mongo(questions_per_round):
+def select_trivia_questions(questions_per_round):
     """
     Select trivia questions, ensuring no recent duplicates based on stored ids in MongoDB.
     """
@@ -1996,7 +1996,7 @@ def start_trivia_round():
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
-    selected_questions = select_trivia_questions_mongo(questions_per_round)  #Pick the initial question set
+    selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     try:
         while True:  # Endless loop
             # Check if it's been more than an hour since the last login

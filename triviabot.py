@@ -221,7 +221,7 @@ def generate_okra_joke(winner_name):
     """
     # Construct the prompt for ChatGPT
     prompt = (
-        f"Create a sarcastic, dirty joke involving okra, and make sure to involve the winner's username {winner_name} in your joke. "
+        f"Create a sarcastic, crude joke involving okra, and make sure to involve the winner's username {winner_name} in your joke. "
         "It should include an exaggerated pun or ridiculous statement about okra."
     )
 
@@ -230,7 +230,7 @@ def generate_okra_joke(winner_name):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a sarcastic, dirty comedian who makes jokes about okra."},
+                {"role": "system", "content": "You are a sarcastic, crude comedian who makes jokes about okra."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=50,

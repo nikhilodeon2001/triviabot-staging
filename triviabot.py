@@ -77,11 +77,13 @@ question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
 time_between_rounds = int(os.getenv("time_between_rounds"))
 time_between_questions = int(os.getenv("time_between_questions"))
+time_between_questions_default = time_between_questions
 questions_module = os.getenv("questions_module", "trivia_questions")
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
+delete_messages_mode = False
 
 
 
@@ -1881,7 +1883,7 @@ def start_trivia_round():
 # Function to start the trivia round
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
-    global headers, params, filter_json, since_token, round_count
+    global headers, params, filter_json, since_token, round_count, delete_messages_mode
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts

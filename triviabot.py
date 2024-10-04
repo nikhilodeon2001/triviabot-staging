@@ -1756,7 +1756,7 @@ def store_question_ids_in_mongo(selected_question_ids):    #DEDUP
     db = connect_to_mongodb()
     questions_collection = db["asked_questions"]
 
-    for question_id in question_ids:
+    for question_id in selected_question_ids:
         questions_collection.insert_one({"_id": question_id, "timestamp": time.time()})
 
     total_ids = questions_collection.count_documents({})

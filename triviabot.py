@@ -92,11 +92,8 @@ def process_round_options(round_winner):
     
     # Send the message to the round winner asking for a delay
     message = (
-        f"@{round_winner}: You have the option to control the time between questions. "
-        f"Right now the value is set to {time_between_questions}. "
-        "Give me a number from 5-15 in the form of 'delay n'. "
-        "Numbers on either side of the range will be set at the bound."
-        "You have ~15 seconds to decide."
+        f"\n @{round_winner}: As a reward for your victory, you have the option to control the time between questions for the next round. "
+        "Please give me a number from 5 to 15 seconds. You have 5 seconds to respond."
     )
     send_message(target_room_id, message)
     
@@ -104,63 +101,59 @@ def process_round_options(round_winner):
     initialize_sync()
     
     # Wait for 15 seconds to collect responses
-    time.sleep(15)
+    time.sleep(5)
 
     # Collect responses in a single pass
     collected_responses = collect_responses(time.time(), 1, 15)
 
-    # Process responses
-    round_winner_response = None
-    for response in collected_responses:
+    # Initialize a flag to track if the time has been set
+    time_set = False
+
+    # Process all responses
+    for response in reversed(collected_responses):  # Loop through responses in reverse to get the latest response first
         sender = response["user_id"]
-        message_content = response["message_content"].lower()
+        message_content = response["message_content"].strip()
 
         # Fetch the display name for the current user
         sender_display_name = get_display_name(sender)
         
-        # If the round winner responded
-        if sender_display_name == round_winner:
-            # Check if they gave a valid delay command in the form 'delay n'
-            if message_content.startswith("delay"):
-                try:
-                    # Extract the number after 'delay' and convert to an integer
-                    _, delay_value = message_content.split()
-                    delay_value = int(delay_value)
+        # If the round winner responded with a number, use that response
+        if sender_display_name == round_winner and not time_set:
+            if message_content.isdigit():  # Check if the response is a number
+                delay_value = int(message_content)
 
-                    # Ensure the delay value is within the allowed range (5-15)
-                    if delay_value < 5:
-                        delay_value = 5
-                    elif delay_value > 15:
-                        delay_value = 15
-                    
-                    # Set time_between_questions to the new value
-                    time_between_questions = delay_value
-                    
-                    # Send a confirmation message
-                    send_message(
-                        target_room_id, 
-                        f"@{round_winner} has set the time_between_questions to {time_between_questions} seconds."
-                    )
-                    return
-                except (ValueError, IndexError):
-                    pass  # Ignore invalid responses
+                # Ensure the delay value is within the allowed range (5-15)
+                if delay_value < 5:
+                    delay_value = 5
+                elif delay_value > 15:
+                    delay_value = 15
+                
+                # Set time_between_questions to the new value
+                time_between_questions = delay_value
+                time_set = True  # Mark that the time has been set
+
+                # Send a confirmation message
+                send_message(
+                    target_room_id, 
+                    f"Ugh. @{round_winner} has set the time between questions to {time_between_questions} seconds. "
+                )
         
         # If the bot user gave the delete mode command
         elif sender == bot_user_id:
-            if message_content == "delete mode on":
+            if message_content.lower() == "delete mode on":
                 delete_messages_mode = 1
                 send_message(target_room_id, "Delete mode has been turned on.")
-            elif message_content == "delete mode off":
+            elif message_content.lower() == "delete mode off":
                 delete_messages_mode = 0
                 send_message(target_room_id, "Delete mode has been turned off.")
     
     # If no valid response from the round winner, reset to default
-    time_between_questions = time_between_questions_default
-    send_message(
-        target_room_id, 
-        f"Nothing? Fine. Time between questions reset to {time_between_questions_default} seconds."
-    )
-
+    if not time_set:
+        time_between_questions = time_between_questions_default
+        send_message(
+            target_room_id, 
+            f"Nothing? Fine. Time between questions reset to {time_between_questions_default} seconds."
+        )
 
 def redact_message(event_id, room_id):
     """Redact a message from the Matrix room."""

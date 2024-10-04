@@ -87,6 +87,80 @@ delete_messages_mode = int(os.getenv("delete_messages_mode"))
 
 
 
+def process_round_options(round_winner):
+    global time_between_questions, time_between_questions_default, delete_messages_mode
+    
+    # Send the message to the round winner asking for a delay
+    message = (
+        f"@{round_winner}: You have the option to control the time between questions. "
+        f"Right now the value is set to {time_between_questions}. "
+        "Give me a number from 5-15 in the form of 'delay n'. "
+        "Numbers on either side of the range will be set at the bound."
+        "You have ~15 seconds to decide."
+    )
+    send_message(target_room_id, message)
+    
+    # Call initialize_sync to set since_token
+    initialize_sync()
+    
+    # Wait for 15 seconds to collect responses
+    time.sleep(15)
+
+    # Collect responses in a single pass
+    collected_responses = collect_responses(time.time(), 1, 15)
+
+    # Process responses
+    round_winner_response = None
+    for response in collected_responses:
+        sender = response["user_id"]
+        message_content = response["message_content"].lower()
+
+        # Fetch the display name for the current user
+        sender_display_name = get_display_name(sender)
+        
+        # If the round winner responded
+        if sender_display_name == round_winner:
+            # Check if they gave a valid delay command in the form 'delay n'
+            if message_content.startswith("delay"):
+                try:
+                    # Extract the number after 'delay' and convert to an integer
+                    _, delay_value = message_content.split()
+                    delay_value = int(delay_value)
+
+                    # Ensure the delay value is within the allowed range (5-15)
+                    if delay_value < 5:
+                        delay_value = 5
+                    elif delay_value > 15:
+                        delay_value = 15
+                    
+                    # Set time_between_questions to the new value
+                    time_between_questions = delay_value
+                    
+                    # Send a confirmation message
+                    send_message(
+                        target_room_id, 
+                        f"@{round_winner} has set the time_between_questions to {time_between_questions} seconds."
+                    )
+                    return
+                except (ValueError, IndexError):
+                    pass  # Ignore invalid responses
+        
+        # If the bot user gave the delete mode command
+        elif sender == bot_user_id:
+            if message_content == "delete mode on":
+                delete_messages_mode = 1
+                send_message(target_room_id, "Delete mode has been turned on.")
+            elif message_content == "delete mode off":
+                delete_messages_mode = 0
+                send_message(target_room_id, "Delete mode has been turned off.")
+    
+    # If no valid response from the round winner, reset to default
+    time_between_questions = time_between_questions_default
+    send_message(
+        target_room_id, 
+        f"Nothing? Fine. Time between questions reset to {time_between_questions_default} seconds."
+    )
+
 
 def redact_message(event_id, room_id):
     """Redact a message from the Matrix room."""
@@ -1907,6 +1981,10 @@ def start_trivia_round():
             load_streak_data()
 
             """Start a round of n trivia questions."""
+            process_round_options()
+            time.sleep(2)
+
+            
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
             round_start_messages()
             time.sleep(5)

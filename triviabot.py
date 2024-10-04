@@ -85,6 +85,150 @@ first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 
 
+# Define the awards and their associated weights
+awards = [
+    "🕒 The Timer 🕒",
+    "❌ The Excluder ❌",
+    "👻 The Ghoster 👻",
+    "🥒 A TOJ (Terrible Okra Joke) 🥒",
+    "nothing. Enjoy it."
+]
+
+# Define the corresponding weights (these should sum up to 1.0 or can be normalized)
+weights = [0.20, 0.20, 0.20, 0.20, 0.20]
+
+def process_round_options(round_winner):
+    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token
+    time_between_questions = time_between_questions_default
+    
+    if round_winner is None:
+        return
+    
+    # Select a random award based on the weights
+    selected_award = random.choices(awards, weights, k=1)[0]
+    
+    # Notify the round winner about their award
+    message = f"🎁 @{round_winner}, you've been awarded {selected_award} 🎉\n"
+
+    if selected_award == "🕒 The Timer 🕒":
+        message += (
+            f"\n🕒 @{round_winner}: You can choose the time between questions for the next round. \n\n"
+            "🕒 Please give me a number from 3 to 15 seconds. You have ~10 seconds to respond."
+        )
+        prompt_user_for_response(round_winner, selected_award)
+
+    elif selected_award == "❌ The Excluder ❌":
+        message += (
+            f"\n❌ @{round_winner}, you can choose to exclude a category from the next round. "
+            "Please give me a category name. Spelling matters. You have ~10 seconds to respond."
+        )   
+        prompt_user_for_response(round_winner, selected_award)
+
+    elif selected_award == "👻 The Ghoster 👻":
+        message += (
+            f"\n👻 @{round_winner}, you can enable disappearing messages mode for the next round. Type 'on' to enable or 'off' to disable. "
+            "You have ~10 seconds to respond."
+        )   
+        prompt_user_for_response(round_winner, selected_award)
+        
+    elif selected_award == "🥒 A TOJ (Terrible Okra Joke) 🥒":
+        joke = generate_okra_joke(round_winner)  # Generate a custom okra joke using ChatGPT
+        message += f"🎤 {joke}"
+
+    send_message(target_room_id, message)
+
+
+def prompt_user_for_response(round_winner, selected_award):
+    global since_token, time_between_questions, delete_messages_mode
+    
+    # Call initialize_sync to set since_token
+    initialize_sync()
+    
+    # Wait for 10 seconds to gather responses
+    time.sleep(10)
+
+    # Fetch responses
+    sync_url = f"{matrix_base_url}/sync"
+    params_with_since = params.copy()  # Use the existing params but include the since token
+    if since_token:
+        params_with_since["since"] = since_token
+
+    try:
+        response = requests.get(sync_url, headers=headers, params=params_with_since)
+        if response.status_code != 200:
+            print(f"Failed to fetch responses. Status code: {response.status_code}")
+            return
+
+        # Parse the response to get the timeline events
+        sync_data = response.json()
+        since_token = sync_data.get("next_batch")  # Update the since_token for future requests
+        room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+        # Process all responses in reverse order (latest response first)
+        for event in reversed(room_events):
+            sender = event["sender"]
+            message_content = event.get("content", {}).get("body", "").strip()
+
+            # Fetch the display name for the current user
+            sender_display_name = get_display_name(sender)
+            
+            # If the round winner responded, process the award accordingly
+            if sender_display_name == round_winner:
+                if selected_award == "🕒 The Timer 🕒" and message_content.isdigit():
+                    try:
+                        delay_value = int(message_content)
+
+                        # Ensure the delay value is within the allowed range (3-15)
+                        if delay_value < 3:
+                            delay_value = 3
+                        elif delay_value > 15:
+                            delay_value = 15
+                        
+                        # Set time_between_questions to the new value
+                        time_between_questions = delay_value
+
+                        # Send a confirmation message
+                        send_message(
+                            target_room_id, 
+                            f"Ugh. @{round_winner} has set the time between questions to {time_between_questions} seconds. Thanks a lot jerk.\n"
+                        )
+                    except ValueError:
+                        pass
+
+                elif selected_award == "❌ The Excluder ❌":
+                    if message_content.lower() != "no":
+                        send_message(target_room_id, f"Category '{message_content}' will be excluded from the next round.")
+                        # Implement logic to exclude this category in the next round
+
+                elif selected_award == "👻 The Ghoster 👻":
+                    if message_content.lower() == "on":
+                        delete_messages_mode = 1
+                        send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.")
+                    elif message_content.lower() == "off":
+                        delete_messages_mode = 0
+                        send_message(target_room_id, f"Ghost mode is now on. Answers will remain visible active questions. Thanks for ruining it for everyone @{round_winner}.")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching responses: {e}")
+
+def generate_okra_joke(winner_name):
+    prompt = (
+        f"Create a dirty and sarcastic joke that involves okra and includes the username {winner_name}. "
+        "Make it silly and brief!"
+    )
+
+    try:
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo",
+            prompt=prompt,
+            max_tokens=50,
+            temperature=0.7,
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        return "Sorry, I couldn't come up with an okra joke this time!"
+
 def insert_trivia_questions_into_mongo(trivia_questions):
     try:
         db = connect_to_mongodb()  # Connect to the MongoDB database
@@ -121,7 +265,7 @@ def process_round_options(round_winner):
     
     if round_winner is None:
         return
-        
+    
     # Send the message to the round winner asking for a delay
     message = (
         f"\n🎁 @{round_winner}: As a reward, you can choose the time between questions for the next round. \n\n"

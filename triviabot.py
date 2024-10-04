@@ -1192,6 +1192,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
 
 
 def check_correct_responses_delete(question_ask_time, trivia_answer_list, question_number, collected_responses):
+    print("here")
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
     

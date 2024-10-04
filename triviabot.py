@@ -216,23 +216,35 @@ def prompt_user_for_response(round_winner, selected_award):
         print(f"Error fetching responses: {e}")
 
 def generate_okra_joke(winner_name):
+    """
+    Generate a custom okra joke for the trivia winner using ChatGPT.
+    """
+    # Construct the prompt for ChatGPT
     prompt = (
-        f"Create a dirty and sarcastic joke that involves okra and includes the username {winner_name}. "
-        "Make it silly and brief!"
+        f"Create a sarcastic, dirty joke involving okra, and make sure to involve the winner's username {winner_name} in your joke. "
+        "It should include an exaggerated pun or ridiculous statement about okra."
     )
 
     try:
-        response = openai.Completion.create(
+        # Use OpenAI's ChatCompletion to generate a response
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            prompt=prompt,
+            messages=[
+                {"role": "system", "content": "You are a sarcastic, dirty comedian who makes jokes about okra."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=50,
-            temperature=0.7,
+            temperature=0.8,
         )
-        return response.choices[0].text.strip()
-    except Exception as e:
+
+        # Extract the generated joke from the response
+        joke = response.choices[0].message['content'].strip()
+        return joke
+
+    except openai.OpenAIError as e:
+        # Capture any errors with Sentry and return a default message
         sentry_sdk.capture_exception(e)
         return "Sorry, I couldn't come up with an okra joke this time!"
-
 def insert_trivia_questions_into_mongo(trivia_questions):
     try:
         db = connect_to_mongodb()  # Connect to the MongoDB database

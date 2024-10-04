@@ -83,6 +83,7 @@ delay_between_retries = int(os.getenv("delay_between_retries"))
 id_limit = 2000 #DEDUP
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
+delete_messages_mode_default = delete_messages_mode
 
 
 # Define the awards and their associated weights
@@ -98,8 +99,9 @@ awards = [
 weights = [0.20, 0.20, 0.20, 0.20, 0.20]
 
 def process_round_options(round_winner):
-    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token
+    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default
     time_between_questions = time_between_questions_default
+    delete_messages_mode = delete_messages_mode_default
     
     if round_winner is None:
         return
@@ -108,32 +110,35 @@ def process_round_options(round_winner):
     selected_award = random.choices(awards, weights, k=1)[0]
     
     # Notify the round winner about their award
-    message = f"🎁 @{round_winner}, you've been awarded {selected_award} 🎉\n"
+    message = f"🎁 @{round_winner}, you've been awarded:\n {selected_award}\n"
 
     if selected_award == "🕒 The Timer 🕒":
         message += (
-            f"\n🕒 @{round_winner}: You can choose the time between questions for the next round. \n\n"
-            "🕒 Please give me a number from 3 to 15 seconds. You have ~10 seconds to respond."
+            "\n🕒 Choose the time (seconds) between questions for the next round. \n\n"
+            "🕒 Enter a number from 3 to 15. You have ~10 seconds to respond."
         )
+        send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
 
     elif selected_award == "❌ The Excluder ❌":
         message += (
-            f"\n❌ @{round_winner}, you can choose to exclude a category from the next round. "
-            "Please give me a category name. Spelling matters. You have ~10 seconds to respond."
+            "\n❌ Exclude a category from the next round. \n\n "
+            "Enter a category name. Spelling matters. You have ~10 seconds to respond."
         )   
+        send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
 
     elif selected_award == "👻 The Ghoster 👻":
         message += (
-            f"\n👻 @{round_winner}, you can enable disappearing messages mode for the next round. Type 'on' to enable or 'off' to disable. "
-            "You have ~10 seconds to respond."
+            "\n👻 Enable ghosting messages mode for the next round. Type 'on' to enable or 'off' to disable. \n\n"
+            "👻 You have ~10 seconds to respond."
         )   
+        send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
         
     elif selected_award == "🥒 A TOJ (Terrible Okra Joke) 🥒":
         joke = generate_okra_joke(round_winner)  # Generate a custom okra joke using ChatGPT
-        message += f"🎤 {joke}"
+        message += f"\n🎤 {joke}"
 
     send_message(target_room_id, message)
 
@@ -206,7 +211,7 @@ def prompt_user_for_response(round_winner, selected_award):
                         send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.")
                     elif message_content.lower() == "off":
                         delete_messages_mode = 0
-                        send_message(target_room_id, f"Ghost mode is now on. Answers will remain visible active questions. Thanks for ruining it for everyone @{round_winner}.")
+                        send_message(target_room_id, f"Ghost mode is now off. Answers will remain visible active questions. Thanks for ruining it for everyone @{round_winner}.")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")

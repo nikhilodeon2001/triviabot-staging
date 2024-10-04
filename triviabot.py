@@ -1980,11 +1980,7 @@ def start_trivia_round():
             # Load existing streak data from the file
             load_streak_data()
 
-            """Start a round of n trivia questions."""
-            process_round_options()
-            time.sleep(2)
-
-            
+            """Start a round of n trivia questions."""   
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
             round_start_messages()
             time.sleep(5)
@@ -2034,6 +2030,10 @@ def start_trivia_round():
             round_count += 1
         
             time.sleep(7)
+
+            process_round_options()
+            time.sleep(2)
+
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set

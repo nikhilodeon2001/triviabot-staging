@@ -2037,7 +2037,7 @@ def start_trivia_round():
             time.sleep(2)
 
             if round_count % 5 == 0:
-                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 time.sleep(15)
                 round_preview(selected_questions)

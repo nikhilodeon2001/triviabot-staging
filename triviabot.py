@@ -89,11 +89,15 @@ delete_messages_mode = int(os.getenv("delete_messages_mode"))
 
 def process_round_options(round_winner):
     global time_between_questions, time_between_questions_default, delete_messages_mode, since_token
+    time_between_questions = time_between_questions_default
     
+    if round_winner is None:
+        return
+        
     # Send the message to the round winner asking for a delay
     message = (
         f"\n @{round_winner}: As a reward for your victory, you have the option to control the time between questions for the next round. "
-        "Please give me a number from 3 to 20 seconds. You have ~10 seconds to respond."
+        "Please give me a number from 3 to 15 seconds. You have ~10 seconds to respond."
     )
     send_message(target_room_id, message)
     
@@ -120,9 +124,6 @@ def process_round_options(round_winner):
         since_token = sync_data.get("next_batch")  # Update the since_token for future requests
         room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
-        # Initialize a flag to track if the time has been set
-        time_set = False
-
         # Process all responses in reverse order (latest response first)
         for event in reversed(room_events):
             sender = event["sender"]
@@ -139,12 +140,11 @@ def process_round_options(round_winner):
                     # Ensure the delay value is within the allowed range (5-15)
                     if delay_value < 3:
                         delay_value = 3
-                    elif delay_value > 20:
-                        delay_value = 20
+                    elif delay_value > 15:
+                        delay_value = 15
                     
                     # Set time_between_questions to the new value
                     time_between_questions = delay_value
-                    time_set = True  # Mark that the time has been set
 
                     # Send a confirmation message
                     send_message(
@@ -160,14 +160,6 @@ def process_round_options(round_winner):
                 elif message_content.lower() == "delete mode off":
                     delete_messages_mode = 0
                     send_message(target_room_id, "Delete mode has been turned off.")
-
-        # If no valid response from the round winner, reset to default
-        if not time_set:
-            time_between_questions = time_between_questions_default
-            send_message(
-                target_room_id, 
-                f"Nothing? Wow, fine. Time between questions reset to {time_between_questions_default} seconds."
-            )
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")

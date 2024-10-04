@@ -1923,6 +1923,7 @@ def start_trivia_round():
             print()
             
             question_number = 1
+            print(delete_messages_mode)
             for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
                 # Ask the trivia question and get start times
                 question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)

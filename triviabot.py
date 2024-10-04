@@ -86,6 +86,35 @@ first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 
 
+def insert_trivia_questions_into_mongo(trivia_questions):
+    try:
+        db = connect_to_mongodb()  # Connect to the MongoDB database
+        collection = db["trivia_questions"]  # Use the 'trivia_questions' collection
+        
+        # Prepare the documents to insert
+        documents = []
+        for trivia_question in trivia_questions:
+            category, question, url, answers = trivia_question
+            
+            # Create a document for each question
+            document = {
+                "category": category,
+                "question": question,
+                "url": url,
+                "answers": answers
+            }
+            
+            documents.append(document)
+        
+        # Insert all the trivia questions in a single batch
+        collection.insert_many(documents)
+        print(f"Successfully inserted {len(documents)} trivia questions into MongoDB.")
+    
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error inserting trivia questions into MongoDB: {e}")
+
+
 
 def process_round_options(round_winner):
     global time_between_questions, time_between_questions_default, delete_messages_mode, since_token
@@ -1766,6 +1795,7 @@ def select_trivia_questions(questions_per_round):   #DEDUP
     """
     # Load and shuffle trivia questions
     trivia_questions = load_trivia_questions()
+    insert_trivia_questions_into_mongo(trivia_questions)
     random.shuffle(trivia_questions)
 
     # Get recent hashes from MongoDB

@@ -1931,6 +1931,7 @@ def start_trivia_round():
                 question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
                 
                 if delete_messages_mode == True:
+                    print("down this path")
                     collected_responses = collect_responses(question_time, question_number, question_time)
                 else:
                     time.sleep(question_time)  # Wait for n seconds for answers

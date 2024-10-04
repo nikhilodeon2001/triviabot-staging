@@ -93,7 +93,7 @@ def process_round_options(round_winner):
     # Send the message to the round winner asking for a delay
     message = (
         f"\n @{round_winner}: As a reward for your victory, you have the option to control the time between questions for the next round. "
-        "Please give me a number from 5 to 20 seconds. You have 5 seconds to respond."
+        "Please give me a number from 3 to 20 seconds. You have ~10 seconds to respond."
     )
     send_message(target_room_id, message)
     
@@ -101,7 +101,7 @@ def process_round_options(round_winner):
     initialize_sync()
     
     # Wait for 5 seconds
-    time.sleep(5)
+    time.sleep(10)
 
     # After the waiting period, fetch all responses
     sync_url = f"{matrix_base_url}/sync"
@@ -137,8 +137,8 @@ def process_round_options(round_winner):
                     delay_value = int(message_content)
 
                     # Ensure the delay value is within the allowed range (5-15)
-                    if delay_value < 5:
-                        delay_value = 5
+                    if delay_value < 3:
+                        delay_value = 3
                     elif delay_value > 20:
                         delay_value = 20
                     

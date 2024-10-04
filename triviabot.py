@@ -96,7 +96,7 @@ def process_round_options(round_winner):
         
     # Send the message to the round winner asking for a delay
     message = (
-        f"\n🎁 @{round_winner}: As a reward, you can choose the time between questions for the next round. \n"
+        f"\n🎁 @{round_winner}: As a reward, you can choose the time between questions for the next round. \n\n"
         "🕒 Please give me a number from 3 to 15 seconds. You have ~10 seconds to respond."
     )
     send_message(target_room_id, message)
@@ -135,22 +135,26 @@ def process_round_options(round_winner):
             # If the round winner responded with a number, use that response
             if sender_display_name == round_winner:
                 if message_content.isdigit():  # Check if the response is a number
-                    delay_value = int(message_content)
+                    try:
+                        delay_value = int(message_content)
+    
+                        # Ensure the delay value is within the allowed range (5-15)
+                        if delay_value < 3:
+                            delay_value = 3
+                        elif delay_value > 15:
+                            delay_value = 15
+                        
+                        # Set time_between_questions to the new value
+                        time_between_questions = delay_value
+    
+                        # Send a confirmation message
+                        send_message(
+                            target_room_id, 
+                            f"Ugh. @{round_winner} has set the time between questions to {time_between_questions} seconds. Thanks a lot jerk.\n "
+                        )
 
-                    # Ensure the delay value is within the allowed range (5-15)
-                    if delay_value < 3:
-                        delay_value = 3
-                    elif delay_value > 15:
-                        delay_value = 15
-                    
-                    # Set time_between_questions to the new value
-                    time_between_questions = delay_value
-
-                    # Send a confirmation message
-                    send_message(
-                        target_room_id, 
-                        f"Ugh. @{round_winner} has set the time between questions to {time_between_questions} seconds. Thanks a lot jerk. "
-                    )
+                    except ValueError:
+                        pass
 
             # If the bot user gave the delete mode command
             elif sender == bot_user_id:

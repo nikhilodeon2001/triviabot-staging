@@ -108,6 +108,7 @@ def process_round_options(round_winner):
     
     # Select a random award based on the weights
     selected_award = random.choices(awards, weights, k=1)[0]
+    print(selected_award)
     
     # Notify the round winner about their award
     message = f"\n🎁 @{round_winner}, you've been awarded:\n\n {selected_award}\n"
@@ -201,16 +202,16 @@ def prompt_user_for_response(round_winner, selected_award):
 
                 elif selected_award == "❌ The Excluder ❌":
                     if message_content.lower() != "no":
-                        send_message(target_room_id, f"Category '{message_content}' will be excluded from the next round.")
+                        send_message(target_room_id, f"Category '{message_content}' will be excluded from the next round.\n")
                         # Implement logic to exclude this category in the next round
 
                 elif selected_award == "👻 The Ghoster 👻":
                     if message_content.lower() == "on":
                         delete_messages_mode = 1
-                        send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.")
+                        send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.\n")
                     elif message_content.lower() == "off":
                         delete_messages_mode = 0
-                        send_message(target_room_id, f"Ghost mode is now off. Answers will remain visible active questions. Thanks for ruining it for everyone @{round_winner}.")
+                        send_message(target_room_id, f"Ghost mode is now off. Answers will remain visible active questions. Thanks for ruining it for everyone @{round_winner}.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")

@@ -91,12 +91,12 @@ awards = [
     "🕒 The Timer 🕒",
     "❌ The Excluder ❌",
     "👻 The Ghoster 👻",
-    "🥒 A TOJ (Terrible Okra Joke) 🥒",
-    "nothing. Enjoy it."
+    "🥒 A DOJ (Dirty Okra Joke) 🥒",
+    "Nothing. Enjoy."
 ]
 
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0, 0, 0, 0, 1]
+weights = [0.1, 0.0, 0.1, 0.3, 0.5]
 
 def process_round_options(round_winner):
     global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default
@@ -108,7 +108,6 @@ def process_round_options(round_winner):
     
     # Select a random award based on the weights
     selected_award = random.choices(awards, weights, k=1)[0]
-    print(selected_award)
     
     # Notify the round winner about their award
     message = f"\n🎁 @{round_winner}, you've been awarded:\n\n {selected_award}\n"
@@ -137,7 +136,7 @@ def process_round_options(round_winner):
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
         
-    elif selected_award == "🥒 A TOJ (Terrible Okra Joke) 🥒":
+    elif selected_award == "🥒 A DOJ (Dirty Okra Joke) 🥒":
         joke = generate_okra_joke(round_winner)  # Generate a custom okra joke using ChatGPT
         message += f"\n🎤 {joke}\n"
         send_message(target_room_id, message)

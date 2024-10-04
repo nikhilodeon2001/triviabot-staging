@@ -96,7 +96,7 @@ awards = [
 ]
 
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0.0, 0.0, 0.0, 1, 0.0]
+weights = [0.25, 0.0, 0.25, 0.25, 0.25]
 
 def process_round_options(round_winner):
     global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default

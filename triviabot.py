@@ -1193,7 +1193,6 @@ def collect_responses(question_ask_time, question_number, time_limit):
 
 
 def check_correct_responses_delete(question_ask_time, trivia_answer_list, question_number, collected_responses):
-    print("here")
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
     
@@ -1925,13 +1924,11 @@ def start_trivia_round():
             print()
             
             question_number = 1
-            print(delete_messages_mode)
             for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
                 # Ask the trivia question and get start times
                 question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
                 
                 if delete_messages_mode == 1:
-                    print("down this path")
                     collected_responses = collect_responses(question_time, question_number, question_time)
                 else:
                     time.sleep(question_time)  # Wait for n seconds for answers

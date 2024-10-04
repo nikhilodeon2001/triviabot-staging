@@ -156,10 +156,10 @@ def process_round_options(round_winner):
             elif sender == bot_user_id:
                 if message_content.lower() == "delete mode on":
                     delete_messages_mode = 1
-                    send_message(target_room_id, "Delete mode has been turned on.")
+                    send_message(target_room_id, "OKRA ALERT: Answer delete mode is now on.")
                 elif message_content.lower() == "delete mode off":
                     delete_messages_mode = 0
-                    send_message(target_room_id, "Delete mode has been turned off.")
+                    send_message(target_room_id, "OKRA ALERT: Answer delete mode is now off.")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")

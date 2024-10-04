@@ -88,7 +88,7 @@ delete_messages_mode = int(os.getenv("delete_messages_mode"))
 
 
 def process_round_options(round_winner):
-    global time_between_questions, time_between_questions_default, delete_messages_mode
+    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token
     
     # Send the message to the round winner asking for a delay
     message = (

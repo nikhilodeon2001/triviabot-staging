@@ -96,7 +96,7 @@ awards = [
 ]
 
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0.25, 0.0, 0.25, 0.25, 0.25]
+weights = [0, 0, 0, 0, 1]
 
 def process_round_options(round_winner):
     global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default
@@ -140,6 +140,9 @@ def process_round_options(round_winner):
     elif selected_award == "🥒 A TOJ (Terrible Okra Joke) 🥒":
         joke = generate_okra_joke(round_winner)  # Generate a custom okra joke using ChatGPT
         message += f"\n🎤 {joke}\n"
+        send_message(target_room_id, message)
+
+    elif selected_award == "nothing. Enjoy it.":
         send_message(target_room_id, message)
 
 

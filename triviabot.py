@@ -83,7 +83,7 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 hash_limit = 2000 #DEDUP
 first_place_bonus = 0
-delete_messages_mode = False
+delete_messages_mode = os.getenv("delete_messages_mode")
 
 
 

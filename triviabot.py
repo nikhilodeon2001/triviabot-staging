@@ -110,7 +110,7 @@ def process_round_options(round_winner):
     selected_award = random.choices(awards, weights, k=1)[0]
     
     # Notify the round winner about their award
-    message = f"🎁 @{round_winner}, you've been awarded:\n {selected_award}\n"
+    message = f"\n🎁 @{round_winner}, you've been awarded:\n\n {selected_award}\n"
 
     if selected_award == "🕒 The Timer 🕒":
         message += (
@@ -138,7 +138,7 @@ def process_round_options(round_winner):
         
     elif selected_award == "🥒 A TOJ (Terrible Okra Joke) 🥒":
         joke = generate_okra_joke(round_winner)  # Generate a custom okra joke using ChatGPT
-        message += f"\n🎤 {joke}"
+        message += f"\n🎤 {joke}\n"
         send_message(target_room_id, message)
 
 

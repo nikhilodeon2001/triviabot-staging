@@ -96,8 +96,8 @@ def process_round_options(round_winner):
         
     # Send the message to the round winner asking for a delay
     message = (
-        f"\n @{round_winner}: As a reward for your victory, you have the option to control the time between questions for the next round. "
-        "Please give me a number from 3 to 15 seconds. You have ~10 seconds to respond."
+        f"\n🎁 @{round_winner}: As a reward, you can choose the time between questions for the next round. \n"
+        "🕒 Please give me a number from 3 to 15 seconds. You have ~10 seconds to respond."
     )
     send_message(target_room_id, message)
     
@@ -133,7 +133,7 @@ def process_round_options(round_winner):
             sender_display_name = get_display_name(sender)
             
             # If the round winner responded with a number, use that response
-            if sender_display_name == round_winner and not time_set:
+            if sender_display_name == round_winner:
                 if message_content.isdigit():  # Check if the response is a number
                     delay_value = int(message_content)
 

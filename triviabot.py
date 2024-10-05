@@ -89,7 +89,7 @@ delete_messages_mode_default = delete_messages_mode
 # Define the awards and their associated weights
 awards = [
     "🕒 The Timer 🕒",
-    "❌ The Anti-DEI ❌",
+    "❌ The Miser ❌",
     "👻 The Ghoster 👻",
     "🥒 A DOJ (Dirty Okra Joke) 🥒",
     "Nothing. Enjoy."
@@ -217,7 +217,7 @@ def prompt_user_for_response(round_winner, selected_award):
                     except ValueError:
                         pass
 
-                elif selected_award == "❌ The Anti-DEI ❌":
+                elif selected_award == "❌ The Miser ❌":
                     matched_category = cross_reference_category(message_content)
                     if matched_category:
                         categories_to_exclude[:1] = [matched_category]

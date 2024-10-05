@@ -129,31 +129,31 @@ def process_round_options(round_winner):
 
     if selected_award == "🕒 The Timer 🕒":
         message += (
-            "\n🕒 Choose the time (seconds) between questions for the next round. \n\n"
-            "🕒 Enter a number from 3 to 15. You have ~10 seconds to respond."
+            "\nTick-Tock. Set how many seconds between questions for the next round. \n\n"
+            "Enter a number from 3 to 15. You have ~10 seconds to respond."
         )
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
 
-    elif selected_award == "❌ The Anti-DEI ❌":
+    elif selected_award == "❌ The Miser ❌":
         message += (
-            "\n❌ You may exclude a category from the next round. \n\n "
-            "Enter a category name. Spelling matters. You have ~10 seconds to respond."
+            "\nI know you want to exclude a category from the next round. \n\n "
+            "Enter a category name. You have ~10 seconds to respond."
         )   
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
 
     elif selected_award == "👻 The Ghoster 👻":
         message += (
-            "\n👻 Enable ghosting messages mode for the next round. Type 'on' to enable or 'off' to disable. \n\n"
-            "👻 You have ~10 seconds to respond."
+            "\nBoo! Enable Ghost Messages for the next round. Type 'on' if you dare. \n\n"
+            "You have ~10 seconds to respond."
         )   
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
         
     elif selected_award == "🥒 A DOJ (Dirty Okra Joke) 🥒":
         joke = generate_okra_joke(round_winner)  # Generate a custom okra joke using ChatGPT
-        message += f"\n🎤 {joke}\n"
+        message += f"\n{joke}\n"
         send_message(target_room_id, message)
 
     elif selected_award == "Nothing. Enjoy.":

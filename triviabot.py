@@ -2096,6 +2096,14 @@ def round_preview(selected_questions):
     send_message(target_room_id, message)
 
 def start_trivia_round():
+    okra_gif_urls = [
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra2.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra3.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra4.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra5.gif"
+    ]
+    
 # Function to start the trivia round
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
@@ -2123,6 +2131,16 @@ def start_trivia_round():
 
             """Start a round of n trivia questions."""   
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
+            
+            # Select a random GIF URL
+            selected_gif_url = random.choice(okra_gif_urls)
+
+            # Send the selected GIF
+            image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
+            if image_mxc:
+                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+
+            
             round_start_messages()
             time.sleep(5)
 

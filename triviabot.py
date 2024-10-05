@@ -2103,7 +2103,7 @@ def start_trivia_round():
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
-    print(f"categories to exclude are: {categories_to_exclude")
+    print(f"categories to exclude are: {categories_to_exclude}")
     selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     try:
         while True:  # Endless loop

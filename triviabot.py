@@ -129,24 +129,24 @@ def process_round_options(round_winner):
 
     if selected_award == "🕒 The Timer 🕒":
         message += (
-            "\nTick-Tock. Set how many seconds between questions for the next round. \n\n"
-            "Enter a number from 3 to 15. You have ~10 seconds to respond."
+            "\nSet how many seconds between questions for the next round. \n\n"
+            "Enter a number from 3 to 15. You have ~10s."
         )
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
 
     elif selected_award == "❌ The Miser ❌":
         message += (
-            "\nI know you want to exclude a category from the next round. \n\n "
-            "Enter a category name. You have ~10 seconds to respond."
+            "\nExclude a category from the next round. \n\n "
+            "Enter a category name. You have ~10s."
         )   
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
 
     elif selected_award == "👻 The Ghoster 👻":
         message += (
-            "\nBoo! Enable Ghost Messages for the next round. Type 'on' if you dare. \n\n"
-            "You have ~10 seconds to respond."
+            "\nEnable Ghost Messages for the next round. \n\n"
+            " Type 'on' if you dare. You have ~10s."
         )   
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)

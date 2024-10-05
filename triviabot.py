@@ -89,7 +89,7 @@ delete_messages_mode_default = delete_messages_mode
 # Define the awards and their associated weights
 awards = [
     "🕒 The Timer 🕒",
-    "❌ The Excluder ❌",
+    "❌ The Anti-DEI ❌",
     "👻 The Ghoster 👻",
     "🥒 A DOJ (Dirty Okra Joke) 🥒",
     "Nothing. Enjoy."
@@ -98,10 +98,24 @@ awards = [
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
 weights = [0.25, 0.0, 0.25, 0.25, 0.25]
 
+
+question_categories = [
+    "Anatomy", "Art", "Astronomy", "Biology", "Characters", "Chemistry", 
+    "Economics & Government", "English Grammar", "Famous People", "Flags", 
+    "Geography", "Geology", "Literature", "Logos", "Math", "Miscellaneous", 
+    "Movies", "Music", "Nature", "Physics", "Pop Culture", "Sports", 
+    "Statistics", "Superheroes", "Television", "The World", "World Culture", 
+    "World Flags", "World History"
+]
+
+categories_to_exclude = []  
+
+
 def process_round_options(round_winner):
-    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default
+    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude
     time_between_questions = time_between_questions_default
     delete_messages_mode = delete_messages_mode_default
+    categories_to_exclude.clear
     
     if round_winner is None:
         return
@@ -121,9 +135,9 @@ def process_round_options(round_winner):
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
 
-    elif selected_award == "❌ The Excluder ❌":
+    elif selected_award == "❌ The Anti-DEI ❌":
         message += (
-            "\n❌ Exclude a category from the next round. \n\n "
+            "\n❌ You may exclude a category from the next round. \n\n "
             "Enter a category name. Spelling matters. You have ~10 seconds to respond."
         )   
         send_message(target_room_id, message)
@@ -203,10 +217,11 @@ def prompt_user_for_response(round_winner, selected_award):
                     except ValueError:
                         pass
 
-                elif selected_award == "❌ The Excluder ❌":
-                    if message_content.lower() != "no":
-                        send_message(target_room_id, f"Category '{message_content}' will be excluded from the next round.\n")
-                        # Implement logic to exclude this category in the next round
+                elif selected_award == "❌ The Anti-DEI ❌":
+                    matched_category = cross_reference_category(message_content)
+                    if matched_category:
+                        categories_to_exclude[:1] = [matched_category]
+                        send_message(target_room_id, f"@{round_winner} has decided to exclude {matched_category}. Let's cancel this piece of work.\n")
 
                 elif selected_award == "👻 The Ghoster 👻":
                     if message_content.lower() == "on":
@@ -218,6 +233,16 @@ def prompt_user_for_response(round_winner, selected_award):
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
+
+def cross_reference_category(message_content):
+    for category in known_categories:
+        if category.lower() == message_content.lower():
+            return category
+    return None
+
+
+
+
 
 def generate_okra_joke(winner_name):
     """
@@ -1863,9 +1888,7 @@ def get_recent_question_ids_from_mongo():    #DEDUP
 
 
 def select_trivia_questions(questions_per_round):
-    """
-    Select trivia questions, ensuring no recent duplicates based on stored ids in MongoDB.
-    """
+    global categories_to_exclude
     try:
         # Connect to MongoDB
         db = connect_to_mongodb()
@@ -1879,6 +1902,7 @@ def select_trivia_questions(questions_per_round):
             {
                 "$match": {
                     "_id": {"$nin": list(recent_ids)}  # Exclude recent ids
+                    "category": {"$nin": categories_to_exclude}  # Exclude specified categories
                 }
             },
             {

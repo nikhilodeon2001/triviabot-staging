@@ -1901,7 +1901,7 @@ def select_trivia_questions(questions_per_round):
         pipeline = [
             {
                 "$match": {
-                    "_id": {"$nin": list(recent_ids)}  # Exclude recent ids
+                    "_id": {"$nin": list(recent_ids)},  # Exclude recent ids
                     "category": {"$nin": categories_to_exclude}  # Exclude specified categories
                 }
             },

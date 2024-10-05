@@ -684,10 +684,33 @@ def download_image_from_url(url): #IMAGE CODE
     return None, None, None
     
 
-def upload_image_to_matrix(image_data): #IMAGE CODE
+def upload_image_to_matrix(image_data):  # IMAGE CODE
     global max_retries, delay_between_retries
 
-    """Upload an image to Matrix with retry logic."""
+    """Upload an image to Matrix with retry logic and content type detection."""
+    
+    def get_image_content_type(image_data):
+        """Detect the content type of the image (JPEG, PNG, GIF) based on its format."""
+        try:
+            img = Image.open(io.BytesIO(image_data))
+            image_format = img.format.lower()
+            if image_format == "jpeg":
+                return "image/jpeg"
+            elif image_format == "png":
+                return "image/png"
+            elif image_format == "gif":
+                return "image/gif"
+            else:
+                return "application/octet-stream"  # Default/fallback
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            return "application/octet-stream"  # Fallback in case of detection error
+    
+    # Detect content type
+    content_type = get_image_content_type(image_data)
+    
+    headers_media['content-type'] = content_type  # Update the content type in headers
+
     for attempt in range(max_retries):
         try:
             # Attempt to upload the image data to Matrix

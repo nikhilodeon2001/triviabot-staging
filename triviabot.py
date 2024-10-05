@@ -2165,7 +2165,7 @@ def start_trivia_round():
 
             
             round_start_messages()
-            time.sleep(5)
+            time.sleep(8)
 
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()

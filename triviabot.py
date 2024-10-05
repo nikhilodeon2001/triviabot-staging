@@ -96,7 +96,7 @@ awards = [
 ]
 
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0.1, 0.0, 0.1, 0.3, 0.5]
+weights = [0.25, 0.0, 0.25, 0.25, 0.25]
 
 def process_round_options(round_winner):
     global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default
@@ -108,6 +108,7 @@ def process_round_options(round_winner):
     
     # Select a random award based on the weights
     selected_award = random.choices(awards, weights, k=1)[0]
+    print(selected_award)
     
     # Notify the round winner about their award
     message = f"\n🎁 @{round_winner}, you've been awarded:\n\n {selected_award}\n"
@@ -141,7 +142,7 @@ def process_round_options(round_winner):
         message += f"\n🎤 {joke}\n"
         send_message(target_room_id, message)
 
-    elif selected_award == "nothing. Enjoy it.":
+    elif selected_award == "Nothing. Enjoy.":
         send_message(target_room_id, message)
 
 
@@ -236,7 +237,7 @@ def generate_okra_joke(winner_name):
                 {"role": "system", "content": "You are a sarcastic, dirty comedian who makes jokes about okra."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=50,
+            max_tokens=100,
             temperature=0.8,
         )
 

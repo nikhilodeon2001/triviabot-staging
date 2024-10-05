@@ -2103,7 +2103,6 @@ def start_trivia_round():
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
-    print(f"categories to exclude are: {categories_to_exclude}")
     selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     try:
         while True:  # Endless loop
@@ -2175,7 +2174,9 @@ def start_trivia_round():
 
             process_round_options(round_winner)
             time.sleep(2)
-
+            
+            print(f"categories to exclude are: {categories_to_exclude}")
+            
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set

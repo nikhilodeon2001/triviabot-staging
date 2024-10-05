@@ -92,11 +92,11 @@ awards = [
     "❌ The Miser ❌",
     "👻 The Ghoster 👻",
     "🥒 A DOJ (Dirty Okra Joke) 🥒",
-    "Nothing. Enjoy."
+    "🍲 No soup for you 🍲"
 ]
 
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0, 1, 0, 0, 0]
+weights = [0.25, 0.25, 0.25, 0, 0.25]
 
 
 question_categories = [
@@ -156,7 +156,7 @@ def process_round_options(round_winner):
         message += f"\n{joke}\n"
         send_message(target_room_id, message)
 
-    elif selected_award == "Nothing. Enjoy.":
+    elif selected_award == "🍲 No soup for you 🍲":
         send_message(target_room_id, message)
 
 

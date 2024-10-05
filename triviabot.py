@@ -235,7 +235,7 @@ def prompt_user_for_response(round_winner, selected_award):
         print(f"Error fetching responses: {e}")
 
 def cross_reference_category(message_content):
-    for category in known_categories:
+    for category in question_categories:
         if category.lower() == message_content.lower():
             return category
     return None

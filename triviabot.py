@@ -115,7 +115,7 @@ def process_round_options(round_winner):
     global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude
     time_between_questions = time_between_questions_default
     delete_messages_mode = delete_messages_mode_default
-    categories_to_exclude.clear
+    categories_to_exclude.clear()
     
     if round_winner is None:
         return

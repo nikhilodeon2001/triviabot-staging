@@ -187,7 +187,7 @@ def prompt_user_for_response(round_winner, selected_award):
         room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
         # Process all responses in reverse order (latest response first)
-        for event in reversed(room_events):
+        for event in room_events:
             sender = event["sender"]
             message_content = event.get("content", {}).get("body", "").strip()
 

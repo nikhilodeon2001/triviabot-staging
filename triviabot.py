@@ -107,7 +107,6 @@ question_categories = [
 ]
 
 categories_to_exclude = []  
-max_crossword_clues = 2
 
 
 def process_round_options(round_winner):
@@ -121,6 +120,7 @@ def process_round_options(round_winner):
     
     # Select a random award based on the weights
     selected_award = random.choices(awards, weights, k=1)[0]
+    print(selected_award)
     
     # Notify the round winner about their award
     message = f"\n🎁 @{round_winner}, you've been awarded:\n\n {selected_award}\n"
@@ -1886,12 +1886,8 @@ def store_question_ids_in_mongo(selected_question_ids):    #DEDUP
     questions_collection = db["asked_questions"]
 
     for question_id in selected_question_ids:
-        questions_collection.update_one(
-            {"_id": question_id},  # Filter to find the document by _id
-            {"$set": {"timestamp": time.time()}},  # Update operation
-            upsert=True  # Create a new document if no match is found
-        )
-       
+        questions_collection.insert_one({"_id": question_id, "timestamp": time.time()})
+
     total_ids = questions_collection.count_documents({})
     if total_ids > id_limit:
         excess = total_ids - id_limit
@@ -1922,55 +1918,29 @@ def select_trivia_questions(questions_per_round):
         # Get recent ids from MongoDB
         recent_ids = get_recent_question_ids_from_mongo()
 
-        # Step 1: Pick crossword clues, capped by max_crossword_clues
-        crossword_pipeline = [
+        # Use aggregation to exclude questions whose id is in the recent ids
+        pipeline = [
             {
                 "$match": {
                     "_id": {"$nin": list(recent_ids)},  # Exclude recent ids
-                    "category": "Crossword",  # Select only "Crossword" category
-                    "category": {"$nin": categories_to_exclude}  # Ensure Crossword isn't excluded
+                    "category": {"$nin": categories_to_exclude}  # Exclude specified categories
                 }
             },
             {
-                "$sample": {"size": max_crossword_clues}  # Randomly select max_crossword_clues crossword clues
+                "$sample": {"size": questions_per_round}  # Randomly select questions
             }
         ]
 
-        # Execute the pipeline for crossword clues
-        crossword_documents = list(collection.aggregate(crossword_pipeline))
+        # Execute the pipeline
+        trivia_documents = list(collection.aggregate(pipeline))
 
-        # Step 2: Pick the remaining questions from other categories
-        remaining_questions_needed = questions_per_round - len(crossword_documents)
-
-        if remaining_questions_needed > 0:
-            remaining_pipeline = [
-                {
-                    "$match": {
-                        "_id": {"$nin": list(recent_ids)},  # Exclude recent ids
-                        "category": {"$nin": ["Crossword"] + categories_to_exclude}  # Exclude "Crossword" and other categories to exclude
-                    }
-                },
-                {
-                    "$sample": {"size": remaining_questions_needed}  # Randomly select remaining needed questions
-                }
-            ]
-
-            # Execute the pipeline for non-crossword questions
-            remaining_documents = list(collection.aggregate(remaining_pipeline))
-        else:
-            remaining_documents = []
-
-        # Combine both sets of selected documents
-        trivia_documents = crossword_documents + remaining_documents
-
-        # If there are still not enough questions, pick random ones (including Crossword if necessary)
         if len(trivia_documents) < questions_per_round:
-            recycled_needed = questions_per_round - len(trivia_documents)
+            remaining_needed = questions_per_round - len(trivia_documents)
             recycled_pipeline = [
-                {"$sample": {"size": recycled_needed}}  # Select additional random questions
+                {"$sample": {"size": remaining_needed}}  # Select additional random questions
             ]
-            recycled_documents = list(collection.aggregate(recycled_pipeline))
-            trivia_documents.extend(recycled_documents)
+            recycled_questions = list(collection.aggregate(recycled_pipeline))
+            trivia_documents.extend(recycled_questions)
 
         # Convert the documents to a list of tuples for use in the trivia game
         selected_questions = [
@@ -2244,6 +2214,8 @@ def start_trivia_round():
 
             process_round_options(round_winner)
             time.sleep(2)
+            
+            print(f"categories to exclude are: {categories_to_exclude}")
             
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")

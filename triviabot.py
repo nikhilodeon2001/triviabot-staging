@@ -120,7 +120,6 @@ def process_round_options(round_winner):
     
     # Select a random award based on the weights
     selected_award = random.choices(awards, weights, k=1)[0]
-    print(selected_award)
     
     # Notify the round winner about their award
     message = f"\n🎁 @{round_winner}, you've been awarded:\n\n {selected_award}\n"
@@ -2218,8 +2217,6 @@ def start_trivia_round():
 
             process_round_options(round_winner)
             time.sleep(2)
-            
-            print(f"categories to exclude are: {categories_to_exclude}")
             
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")

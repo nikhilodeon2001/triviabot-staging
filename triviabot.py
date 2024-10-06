@@ -1886,8 +1886,12 @@ def store_question_ids_in_mongo(selected_question_ids):    #DEDUP
     questions_collection = db["asked_questions"]
 
     for question_id in selected_question_ids:
-        questions_collection.insert_one({"_id": question_id, "timestamp": time.time()})
-
+        questions_collection.update_one(
+            {"_id": question_id},  # Filter to find the document by _id
+            {"$set": {"timestamp": time.time()}},  # Update operation
+            upsert=True  # Create a new document if no match is found
+        )
+       
     total_ids = questions_collection.count_documents({})
     if total_ids > id_limit:
         excess = total_ids - id_limit

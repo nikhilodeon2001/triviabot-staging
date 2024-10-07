@@ -296,7 +296,7 @@ def prompt_user_for_response(round_winner, selected_award):
                         delete_messages_mode = 1
                         send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.\n")
 
-                 elif selected_award == "📰 The Newspaper 📰":
+                elif selected_award == "📰 The Newspaper 📰":
                     if message_content.lower() == "crossword":
                         num_crossword_clues = 10
                         send_message(target_room_id, f"YUCK! @{round_winner} has enabled a round filled with crossword clues. Might be time for a ban.\n")
@@ -345,6 +345,7 @@ def generate_okra_joke(winner_name):
         # Capture any errors with Sentry and return a default message
         sentry_sdk.capture_exception(e)
         return "Sorry, I couldn't come up with an okra joke this time!"
+
 def insert_trivia_questions_into_mongo(trivia_questions):
     try:
         db = connect_to_mongodb()  # Connect to the MongoDB database

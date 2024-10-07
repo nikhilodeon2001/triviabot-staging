@@ -78,7 +78,7 @@ time_between_questions_default = time_between_questions
 questions_module = os.getenv("questions_module", "trivia_questions")
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limit = 2000 #DEDUP
+id_limits = {"general": 2000, "crossword": 500}
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 delete_messages_mode_default = delete_messages_mode
@@ -1882,95 +1882,73 @@ def load_trivia_questions():
     return trivia_module.trivia_questions
 
 
-def store_question_ids_in_mongo(selected_question_ids):    #DEDUP
+def store_question_ids_in_mongo(question_ids, question_type):
     db = connect_to_mongodb()
-    questions_collection = db["asked_questions"]
+    collection_name = f"asked_{question_type}_questions"
+    questions_collection = db[collection_name]
 
     # Insert the new IDs directly into the collection
-    questions_collection.insert_many([{"_id": combined_id} for combined_id in selected_question_ids])
+    questions_collection.insert_many([{"_id": _id} for _id in question_ids])
 
+    # Check if the collection exceeds its limit and delete old entries if necessary
+    limit = id_limits[question_type]
     total_ids = questions_collection.count_documents({})
-    if total_ids > id_limit:
-        excess = total_ids - id_limit
-        
-        # Find the oldest excess entries
+    if total_ids > limit:
+        excess = total_ids - limit
         oldest_entries = questions_collection.find().sort("timestamp", 1).limit(excess)
-
-        # Delete those entries
         for entry in oldest_entries:
             questions_collection.delete_one({"_id": entry["_id"]})
 
-def get_recent_question_ids_from_mongo():    #DEDUP
-    db = connect_to_mongodb()
-    questions_collection = db["asked_questions"]
 
-    recent_ids = questions_collection.find().sort("timestamp", -1).limit(id_limit)
-    print("1")
-    return {doc["combined_id"] for doc in recent_ids}
+def get_recent_question_ids_from_mongo(question_type):
+    db = connect_to_mongodb()
+    collection_name = f"asked_{question_type}_questions"
+    questions_collection = db[collection_name]
+
+    recent_ids = questions_collection.find().sort("timestamp", -1).limit(id_limits[question_type])
+    return {doc["_id"] for doc in recent_ids}
 
 
 
 def select_trivia_questions(questions_per_round):
-    """
-    Select a given number of crossword clues and the rest from trivia questions,
-    ensuring no duplicate questions between collections and checking against recent combined IDs.
-    """
     global categories_to_exclude
     try:
-        # Connect to MongoDB
         db = connect_to_mongodb()
-        recent_ids = get_recent_question_ids_from_mongo()  # Get combined recent IDs
+        
+        # Fetch recent IDs separately for each type
+        recent_general_ids = get_recent_question_ids_from_mongo("general")
+        recent_crossword_ids = get_recent_question_ids_from_mongo("crossword")
+
         selected_questions = []
 
-        # Step 1: Fetch questions from crossword_questions
+        # Fetch crossword questions, checking against crossword IDs
         crossword_collection = db["crossword_questions"]
         pipeline_crossword = [
-            {
-                "$match": {
-                    "_id": {"$nin": list(recent_ids)},  # Exclude recent combined IDs
-                }
-            },
-            {
-                "$sort": {"random": 1}  # Sort by random value to get random questions
-            },
-            {
-                "$limit": num_crossword_clues  # Limit based on num_crossword_clues
-            }
+            {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
+            {"$sort": {"random": 1}},
+            {"$limit": num_crossword_clues}
         ]
-        print("2")
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
-        for doc in crossword_questions:
-            print("here")
-            doc["combined_id"] = f"Crossword_{doc['_id']}"
-        selected_questions.extend(crossword_questions)  # Add crossword questions to the selection
+        selected_questions.extend(crossword_questions)
 
-        # Step 2: Fetch remaining questions from trivia_questions
+        # Fetch general trivia questions, checking against general IDs
         trivia_collection = db["trivia_questions"]
         remaining_needed = questions_per_round - len(crossword_questions)
         pipeline_trivia = [
-            {
-                "$match": {
-                    "_id": {"$nin": list(recent_ids)},  # Exclude recent combined IDs
-                    "category": {"$nin": categories_to_exclude}  # Exclude unwanted categories
-                }
-            },
-            {
-                "$sort": {"random": 1}  # Sort by random value to get random questions
-            },
-            {
-                "$limit": remaining_needed  # Limit to fill remaining questions
-            }
+            {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
+            {"$sort": {"random": 1}},
+            {"$limit": remaining_needed}
         ]
         trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
-        for doc in trivia_questions:
-            doc["combined_id"] = f"Trivia_{doc['_id']}"
-        selected_questions.extend(trivia_questions)  # Add trivia questions to the selection
+        selected_questions.extend(trivia_questions)
 
-        # Store the selected combined IDs in MongoDB to prevent duplicates
-        selected_question_ids = [doc["combined_id"] for doc in selected_questions]
-        store_question_ids_in_mongo(selected_question_ids)  # Save combined IDs to avoid duplicates
+        # Store separate sets of IDs in MongoDB
+        crossword_question_ids = [doc["_id"] for doc in crossword_questions]
+        general_question_ids = [doc["_id"] for doc in trivia_questions]
+        
+        store_question_ids_in_mongo(crossword_question_ids, "crossword")
+        store_question_ids_in_mongo(general_question_ids, "general")
 
-        # Convert documents to the required tuple format for the game
         final_selected_questions = [
             (doc["category"], doc["question"], doc["url"], doc["answers"])
             for doc in selected_questions
@@ -1982,9 +1960,6 @@ def select_trivia_questions(questions_per_round):
         sentry_sdk.capture_exception(e)
         print(f"Error selecting trivia and crossword questions: {e}")
         return []  # Return an empty list in case of failure
-
-
-
 
 
 

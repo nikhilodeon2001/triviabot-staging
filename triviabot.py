@@ -1986,10 +1986,7 @@ def select_trivia_questions(questions_per_round):
         # Fetch crossword questions using the random subset method
         crossword_collection = db["crossword_questions"]
         pipeline_crossword = [
-            {"$match": {
-                "_id": {"$nin": list(recent_crossword_ids)},
-                "random": {"$mod": [modulo_range, random_modulo]}  # Apply modulo filtering
-            }},
+            {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
             {"$sample": {"size": num_crossword_clues}}  # Apply sampling on the filtered subset
         ]
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))

@@ -78,7 +78,7 @@ time_between_questions_default = time_between_questions
 questions_module = os.getenv("questions_module", "trivia_questions")
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "crossword": 500}
+id_limits = {"general": 2000, "crossword": 50000}
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 delete_messages_mode_default = delete_messages_mode
@@ -128,7 +128,7 @@ def generate_crossword_image(answer):
 
     # Determine prefilled letter count and positions
     if answer_length > 3:
-        prefill_count = max(1, int(answer_length * .33))  # At least 1 letter should be filled in
+        prefill_count = max(1, int(answer_length * .4))  # At least 1 letter should be filled in
         prefill_positions = random.sample(range(answer_length), prefill_count)
     else:
         prefill_positions = []

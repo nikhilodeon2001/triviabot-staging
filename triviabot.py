@@ -110,6 +110,58 @@ categories_to_exclude = []
 num_crossword_clues = 2
 
 
+def generate_crossword_image(answer):
+    answer_length = len(answer)
+    
+    # Define the grid size
+    cell_size = 60  # Each cell is 60x60 pixels
+    img_width = cell_size * answer_length
+    img_height = cell_size
+
+    # Create a blank image
+    img = Image.new('RGB', (img_width, img_height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    # Load the font
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    font = ImageFont.truetype(font_path, 30)
+
+    # Determine prefilled letter count and positions
+    if answer_length > 3:
+        prefill_count = max(1, answer_length // 4)  # At least 1 letter should be filled in
+        prefill_positions = random.sample(range(answer_length), prefill_count)
+    else:
+        prefill_positions = []
+
+    # Draw the crossword grid
+    for i, char in enumerate(answer):
+        x = i * cell_size
+        y = 0
+
+        # Draw the cell border
+        draw.rectangle([x, y, x + cell_size, y + cell_size], outline="black")
+
+        # Place the character if in prefill positions, otherwise leave it blank
+        if i in prefill_positions:
+            draw.text((x + 20, y + 10), char.upper(), fill="black", font=font)
+        else:
+            draw.text((x + 20, y + 10), '_', fill="black", font=font)
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+
+    # Upload the image to Matrix or your media server
+    content_uri = upload_image_to_matrix(image_buffer.read())
+
+    # Return the content_uri, image width, height, and the answer
+    return content_uri, img_width, img_height
+
+
+
+
+
 def process_round_options(round_winner):
     global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude
     time_between_questions = time_between_questions_default
@@ -1184,6 +1236,12 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     elif trivia_url == "mean":
         image_mxc, image_width, image_height, new_solution = generate_mean_question()
         message_body = f"\n{number_block}📊 {trivia_category} 📊{number_block}\n{trivia_question}"
+        image_size = 100
+        send_image_flag = True
+
+    elif trivia_category == "Crossword":
+        image_mxc, image_width, image_height = generate_crossword_image(trivia_answer_list[0])
+        message_body = f"\n{number_block}✏️ {trivia_category} ✏️{number_block}\n{trivia_question}"
         image_size = 100
         send_image_flag = True
     

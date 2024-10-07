@@ -2008,12 +2008,14 @@ def select_trivia_questions(questions_per_round):
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
 
-            # Store separate sets of IDs in MongoDB
+            # Store separate sets of IDs in MongoDB only if they are non-empty
             crossword_question_ids = [doc["_id"] for doc in crossword_questions]
-            general_question_ids = [doc["_id"] for doc in trivia_questions]
+            if crossword_question_ids:
+                store_question_ids_in_mongo(crossword_question_ids, "crossword")
 
-            store_question_ids_in_mongo(crossword_question_ids, "crossword")
-            store_question_ids_in_mongo(general_question_ids, "general")
+            general_question_ids = [doc["_id"] for doc in trivia_questions]
+            if general_question_ids:
+                store_question_ids_in_mongo(general_question_ids, "general")
         else:
             print("No general trivia questions needed for this round.")
 
@@ -2031,7 +2033,6 @@ def select_trivia_questions(questions_per_round):
         sentry_sdk.capture_exception(e)
         print(f"Error selecting trivia and crossword questions: {e}")
         return []  # Return an empty list in case of failure
-
 def load_streak_data():
     global current_longest_answer_streak, current_longest_round_streak
     

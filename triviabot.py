@@ -210,7 +210,7 @@ def process_round_options(round_winner):
     elif selected_award == "📰 The Newspaper 📰":
         message += (
             "\nChoose how many crossword clues in the next round.\n\n"
-             "Enter a number from 0 to 10. You have ~10s."
+             f"Enter a number from 0 to {questions_per_round}. You have ~10s."
         )   
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
@@ -302,8 +302,8 @@ def prompt_user_for_response(round_winner, selected_award):
                         
                         if crossword_value < 0:
                             delay_value = 0
-                        elif crossword_value > 10:
-                            delay_value = 10
+                        elif crossword_value > questions_per_round:
+                            delay_value = questions_per_round
                         
                         num_crossword_clues = crossword_value
 

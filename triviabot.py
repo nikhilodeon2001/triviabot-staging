@@ -107,6 +107,7 @@ question_categories = [
 ]
 
 categories_to_exclude = []  
+num_crossword_clues = 2
 
 
 def process_round_options(round_winner):
@@ -1885,8 +1886,8 @@ def store_question_ids_in_mongo(selected_question_ids):    #DEDUP
     db = connect_to_mongodb()
     questions_collection = db["asked_questions"]
 
-    for question_id in selected_question_ids:
-        questions_collection.insert_one({"_id": question_id, "timestamp": time.time()})
+    # Insert the new IDs directly into the collection
+    questions_collection.insert_many([{"_id": combined_id} for combined_id in selected_question_ids])
 
     total_ids = questions_collection.count_documents({})
     if total_ids > id_limit:
@@ -1904,61 +1905,81 @@ def get_recent_question_ids_from_mongo():    #DEDUP
     questions_collection = db["asked_questions"]
 
     recent_ids = questions_collection.find().sort("timestamp", -1).limit(id_limit)
-    return {doc["_id"] for doc in recent_ids}
+    return {doc["combined_id"] for doc in recent_ids}
 
 
 
 def select_trivia_questions(questions_per_round):
+    """
+    Select a given number of crossword clues and the rest from trivia questions,
+    ensuring no duplicate questions between collections and checking against recent combined IDs.
+    """
     global categories_to_exclude
     try:
         # Connect to MongoDB
         db = connect_to_mongodb()
-        collection = db["trivia_questions"]
+        recent_ids = get_recent_question_ids_from_mongo()  # Get combined recent IDs
 
-        # Get recent ids from MongoDB
-        recent_ids = get_recent_question_ids_from_mongo()
+        selected_questions = []
 
-        # Use aggregation to exclude questions whose id is in the recent ids
-        pipeline = [
+        # Step 1: Fetch questions from crossword_questions
+        crossword_collection = db["crossword_questions"]
+        pipeline_crossword = [
             {
                 "$match": {
-                    "_id": {"$nin": list(recent_ids)},  # Exclude recent ids
-                    "category": {"$nin": categories_to_exclude}  # Exclude specified categories
+                    "_id": {"$nin": list(recent_ids)},  # Exclude recent combined IDs
                 }
             },
             {
-                "$sample": {"size": questions_per_round}  # Randomly select questions
+                "$sort": {"random": 1}  # Sort by random value to get random questions
+            },
+            {
+                "$limit": num_crossword_clues  # Limit based on num_crossword_clues
             }
         ]
+        crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
+        for doc in crossword_questions:
+            doc["combined_id"] = f"Crossword_{doc['_id']}"
+        selected_questions.extend(crossword_questions)  # Add crossword questions to the selection
 
-        # Execute the pipeline
-        trivia_documents = list(collection.aggregate(pipeline))
+        # Step 2: Fetch remaining questions from trivia_questions
+        trivia_collection = db["trivia_questions"]
+        remaining_needed = questions_per_round - len(crossword_questions)
+        pipeline_trivia = [
+            {
+                "$match": {
+                    "_id": {"$nin": list(recent_ids)},  # Exclude recent combined IDs
+                    "category": {"$nin": categories_to_exclude}  # Exclude unwanted categories
+                }
+            },
+            {
+                "$sort": {"random": 1}  # Sort by random value to get random questions
+            },
+            {
+                "$limit": remaining_needed  # Limit to fill remaining questions
+            }
+        ]
+        trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
+        for doc in trivia_questions:
+            doc["combined_id"] = f"Trivia_{doc['_id']}"
+        selected_questions.extend(trivia_questions)  # Add trivia questions to the selection
 
-        if len(trivia_documents) < questions_per_round:
-            remaining_needed = questions_per_round - len(trivia_documents)
-            recycled_pipeline = [
-                {"$sample": {"size": remaining_needed}}  # Select additional random questions
-            ]
-            recycled_questions = list(collection.aggregate(recycled_pipeline))
-            trivia_documents.extend(recycled_questions)
+        # Store the selected combined IDs in MongoDB to prevent duplicates
+        selected_question_ids = [doc["combined_id"] for doc in selected_questions]
+        store_question_ids_in_mongo(selected_question_ids)  # Save combined IDs to avoid duplicates
 
-        # Convert the documents to a list of tuples for use in the trivia game
-        selected_questions = [
+        # Convert documents to the required tuple format for the game
+        final_selected_questions = [
             (doc["category"], doc["question"], doc["url"], doc["answers"])
-            for doc in trivia_documents
+            for doc in selected_questions
         ]
 
-        # Store the selected question ids in MongoDB to prevent duplicates in future rounds
-        selected_question_ids = [doc["_id"] for doc in trivia_documents]
-        store_question_ids_in_mongo(selected_question_ids)
-
-        return selected_questions
+        return final_selected_questions
 
     except Exception as e:
         sentry_sdk.capture_exception(e)
-        print(f"Error selecting trivia questions from MongoDB: {e}")
+        print(f"Error selecting trivia and crossword questions: {e}")
         return []  # Return an empty list in case of failure
-
 
 
 

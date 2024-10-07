@@ -97,7 +97,7 @@ awards = [
 ]
 
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0.2, 0.2, 0.2, 0.2, 0.2, 0]
+weights = [0, 0, 0, 1, 0, 0]
 
 
 question_categories = [

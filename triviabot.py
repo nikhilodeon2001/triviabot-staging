@@ -1905,6 +1905,7 @@ def get_recent_question_ids_from_mongo():    #DEDUP
     questions_collection = db["asked_questions"]
 
     recent_ids = questions_collection.find().sort("timestamp", -1).limit(id_limit)
+    print("1")
     return {doc["combined_id"] for doc in recent_ids}
 
 
@@ -1918,9 +1919,7 @@ def select_trivia_questions(questions_per_round):
     try:
         # Connect to MongoDB
         db = connect_to_mongodb()
-        print("1")
         recent_ids = get_recent_question_ids_from_mongo()  # Get combined recent IDs
-        print("2")
         selected_questions = []
 
         # Step 1: Fetch questions from crossword_questions

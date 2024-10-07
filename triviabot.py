@@ -1910,7 +1910,6 @@ def get_recent_question_ids_from_mongo():    #DEDUP
 
 
 def select_trivia_questions(questions_per_round):
-    print("1")
     """
     Select a given number of crossword clues and the rest from trivia questions,
     ensuring no duplicate questions between collections and checking against recent combined IDs.
@@ -1919,8 +1918,9 @@ def select_trivia_questions(questions_per_round):
     try:
         # Connect to MongoDB
         db = connect_to_mongodb()
+        print("1")
         recent_ids = get_recent_question_ids_from_mongo()  # Get combined recent IDs
-
+        print("2")
         selected_questions = []
 
         # Step 1: Fetch questions from crossword_questions

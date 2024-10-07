@@ -82,7 +82,7 @@ id_limits = {"general": 2000, "crossword": 50000}
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 delete_messages_mode_default = delete_messages_mode
-num_crossword_clues_default = 10
+num_crossword_clues_default = 3
 num_crossword_clues = num_crossword_clues_default
 
 
@@ -309,7 +309,7 @@ def prompt_user_for_response(round_winner, selected_award):
 
                         send_message(
                             target_room_id, 
-                            f"WTF?! @{round_winner} has chosen {num_crossword_clues} clues. Wow. Just wow.\n"
+                            f"WTF?! @{round_winner} has chosen {num_crossword_clues} clue(s). Wow. Just wow.\n"
                         )
                     except ValueError:
                         pass

@@ -82,6 +82,8 @@ id_limits = {"general": 2000, "crossword": 50000}
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 delete_messages_mode_default = delete_messages_mode
+num_crossword_clues_default = 10
+num_crossword_clues = num_crossword_clues_default
 
 
 # Define the awards and their associated weights
@@ -89,12 +91,13 @@ awards = [
     "🕒 The Timer 🕒",
     "❌ The Miser ❌",
     "👻 The Ghoster 👻",
-    "🥒 A DOJ (Dirty Okra Joke) 🥒",
-    "🍲 No soup for you 🍲"
+    "📰 The Newspaper 📰",
+    "🍲 No soup for you 🍲",
+    "🥒 A DOJ (Dirty Okra Joke) 🥒"
 ]
 
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0.25, 0.25, 0.25, 0, 0.25]
+weights = [0.2, 0.2, 0.2, 0.2, 0.2, 0]
 
 
 question_categories = [
@@ -107,7 +110,7 @@ question_categories = [
 ]
 
 categories_to_exclude = []  
-num_crossword_clues = 10
+
 
 
 def generate_crossword_image(answer):
@@ -167,6 +170,7 @@ def process_round_options(round_winner):
     time_between_questions = time_between_questions_default
     delete_messages_mode = delete_messages_mode_default
     categories_to_exclude.clear()
+    num_crossword_clues = num_crossword_clues_default
     
     if round_winner is None:
         return
@@ -201,6 +205,15 @@ def process_round_options(round_winner):
         )   
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
+
+
+    elif selected_award == "📰 The Newspaper 📰":
+        message += (
+            "\nEnable a round full of Crossword clues.\n\n"
+            " Type 'crossword' you nerd. You have ~10s."
+        )   
+        send_message(target_room_id, message)
+        prompt_user_for_response(round_winner, selected_award)
         
     elif selected_award == "🥒 A DOJ (Dirty Okra Joke) 🥒":
         joke = generate_okra_joke(round_winner)  # Generate a custom okra joke using ChatGPT
@@ -212,7 +225,7 @@ def process_round_options(round_winner):
 
 
 def prompt_user_for_response(round_winner, selected_award):
-    global since_token, time_between_questions, delete_messages_mode
+    global since_token, time_between_questions, delete_messages_mode, num_crossword_clues
     
     # Call initialize_sync to set since_token
     initialize_sync()
@@ -273,15 +286,22 @@ def prompt_user_for_response(round_winner, selected_award):
                     if matched_category:
                         categories_to_exclude[:1] = [matched_category]
                         send_message(target_room_id, f"@{round_winner} has decided to exclude {matched_category}. Let's cancel this piece of work.\n")
+                    if message_content.lower() = "crossword":
+                        num_crossword_clues = 0;
+                        categories_to_exclude.clear()
+                        send_message(target_room_id, f"@{round_winner} has decided to exclude Crossword. Let's cancel this piece of work.\n")
 
                 elif selected_award == "👻 The Ghoster 👻":
                     if message_content.lower() == "on":
                         delete_messages_mode = 1
                         send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.\n")
-                    elif message_content.lower() == "off":
-                        delete_messages_mode = 0
-                        send_message(target_room_id, f"Ghost mode is now off. Answers will remain visible during active questions. Thanks for ruining it for everyone @{round_winner}.\n")
 
+                 elif selected_award == "📰 The Newspaper 📰":
+                    if message_content.lower() == "crossword":
+                        num_crossword_clues = 10
+                        send_message(target_room_id, f"YUCK! @{round_winner} has enabled a round filled with crossword clues. Might be time for a ban.\n")
+
+    
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
 

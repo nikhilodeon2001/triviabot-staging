@@ -1989,26 +1989,32 @@ def select_trivia_questions(questions_per_round):
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
         selected_questions.extend(crossword_questions)
 
-        # Fetch general trivia questions, checking against general IDs
-        trivia_collection = db["trivia_questions"]
-        remaining_needed = questions_per_round - len(crossword_questions)
-        pipeline_trivia = [
-            {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
-            {"$sort": {"random": 1}},
-            {"$limit": remaining_needed}
-        ]
-        trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
-        selected_questions.extend(trivia_questions)
+        # Calculate the remaining questions needed for general trivia
+        remaining_needed = max(questions_per_round - len(crossword_questions), 0)
 
-        # Store separate sets of IDs in MongoDB
-        crossword_question_ids = [doc["_id"] for doc in crossword_questions]
-        general_question_ids = [doc["_id"] for doc in trivia_questions]
-        
-        store_question_ids_in_mongo(crossword_question_ids, "crossword")
-        store_question_ids_in_mongo(general_question_ids, "general")
+        if remaining_needed > 0:
+            # Fetch general trivia questions, checking against general IDs
+            trivia_collection = db["trivia_questions"]
+            pipeline_trivia = [
+                {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
+                {"$sort": {"random": 1}},
+                {"$limit": remaining_needed}
+            ]
+            trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
+            selected_questions.extend(trivia_questions)
 
+            # Store separate sets of IDs in MongoDB
+            crossword_question_ids = [doc["_id"] for doc in crossword_questions]
+            general_question_ids = [doc["_id"] for doc in trivia_questions]
+
+            store_question_ids_in_mongo(crossword_question_ids, "crossword")
+            store_question_ids_in_mongo(general_question_ids, "general")
+        else:
+            print("No general trivia questions needed for this round.")
+
+        # Shuffle the combined list of selected questions
         random.shuffle(selected_questions)
-        
+
         final_selected_questions = [
             (doc["category"], doc["question"], doc["url"], doc["answers"])
             for doc in selected_questions
@@ -2020,7 +2026,6 @@ def select_trivia_questions(questions_per_round):
         sentry_sdk.capture_exception(e)
         print(f"Error selecting trivia and crossword questions: {e}")
         return []  # Return an empty list in case of failure
-
 
 
 def load_streak_data():

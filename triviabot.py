@@ -301,15 +301,15 @@ def prompt_user_for_response(round_winner, selected_award):
                         crossword_value = int(message_content)
                         
                         if crossword_value < 0:
-                            delay_value = 0
+                            crossword_value = 0
                         elif crossword_value > questions_per_round:
-                            delay_value = questions_per_round
+                            crossword_value = questions_per_round
                         
                         num_crossword_clues = crossword_value
 
                         send_message(
                             target_room_id, 
-                            f"WTF?! @{round_winner} has chosen {num_crossword_clues} clue(s). Wow. Just wow.\n"
+                            f"WTF?! @{round_winner} chose {num_crossword_clues} clue(s). Wow. Just wow.\n"
                         )
                     except ValueError:
                         pass

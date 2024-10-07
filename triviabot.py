@@ -2007,6 +2007,8 @@ def select_trivia_questions(questions_per_round):
         store_question_ids_in_mongo(crossword_question_ids, "crossword")
         store_question_ids_in_mongo(general_question_ids, "general")
 
+        random.shuffle(selected_questions)
+        
         final_selected_questions = [
             (doc["category"], doc["question"], doc["url"], doc["answers"])
             for doc in selected_questions

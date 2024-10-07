@@ -1979,12 +1979,18 @@ def select_trivia_questions(questions_per_round):
 
         selected_questions = []
 
-        # Fetch crossword questions, checking against crossword IDs
+        # Define a modulo range and select a random modulo value for filtering
+        modulo_range = 10  # Adjust this range based on performance testing
+        random_modulo = random.randint(0, modulo_range - 1)
+
+        # Fetch crossword questions using the random subset method
         crossword_collection = db["crossword_questions"]
         pipeline_crossword = [
-            {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
-            {"$sort": {"random": 1}},
-            {"$limit": num_crossword_clues}
+            {"$match": {
+                "_id": {"$nin": list(recent_crossword_ids)},
+                "random": {"$mod": [modulo_range, random_modulo]}  # Apply modulo filtering
+            }},
+            {"$sample": {"size": num_crossword_clues}}  # Apply sampling on the filtered subset
         ]
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
         selected_questions.extend(crossword_questions)
@@ -1997,8 +2003,7 @@ def select_trivia_questions(questions_per_round):
             trivia_collection = db["trivia_questions"]
             pipeline_trivia = [
                 {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
-                {"$sort": {"random": 1}},
-                {"$limit": remaining_needed}
+                {"$sample": {"size": remaining_needed}}  # Directly apply $sample for general trivia
             ]
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
@@ -2026,7 +2031,6 @@ def select_trivia_questions(questions_per_round):
         sentry_sdk.capture_exception(e)
         print(f"Error selecting trivia and crossword questions: {e}")
         return []  # Return an empty list in case of failure
-
 
 def load_streak_data():
     global current_longest_answer_streak, current_longest_round_streak

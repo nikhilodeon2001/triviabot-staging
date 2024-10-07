@@ -1939,6 +1939,7 @@ def select_trivia_questions(questions_per_round):
         ]
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
         for doc in crossword_questions:
+            print("here")
             doc["combined_id"] = f"Crossword_{doc['_id']}"
         selected_questions.extend(crossword_questions)  # Add crossword questions to the selection
 

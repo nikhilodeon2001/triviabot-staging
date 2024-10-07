@@ -1910,6 +1910,7 @@ def get_recent_question_ids_from_mongo():    #DEDUP
 
 
 def select_trivia_questions(questions_per_round):
+    print("1")
     """
     Select a given number of crossword clues and the rest from trivia questions,
     ensuring no duplicate questions between collections and checking against recent combined IDs.
@@ -1937,6 +1938,7 @@ def select_trivia_questions(questions_per_round):
                 "$limit": num_crossword_clues  # Limit based on num_crossword_clues
             }
         ]
+        print("2")
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
         for doc in crossword_questions:
             print("here")

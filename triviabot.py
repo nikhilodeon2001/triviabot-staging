@@ -286,7 +286,7 @@ def prompt_user_for_response(round_winner, selected_award):
                     if matched_category:
                         categories_to_exclude[:1] = [matched_category]
                         send_message(target_room_id, f"@{round_winner} has decided to exclude {matched_category}. Let's cancel this piece of work.\n")
-                    if message_content.lower() = "crossword":
+                    if message_content.lower() == "crossword":
                         num_crossword_clues = 0;
                         categories_to_exclude.clear()
                         send_message(target_room_id, f"@{round_winner} has decided to exclude Crossword. Let's cancel this piece of work.\n")

@@ -201,7 +201,7 @@ def process_round_options(round_winner):
     elif selected_award == "👻 The Ghoster 👻":
         message += (
             "\nEnable Ghost Messages for the next round.\n\n"
-            " Type 'on' if you dare. You have ~10s."
+            "Type 'on' if you dare. You have ~10s."
         )   
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
@@ -209,8 +209,8 @@ def process_round_options(round_winner):
 
     elif selected_award == "📰 The Newspaper 📰":
         message += (
-            "\nEnable a round full of Crossword clues.\n\n"
-            " Type 'crossword' you nerd. You have ~10s."
+            "\nChoose how many crossword clues in the next round.\n\n"
+             "Enter a number from 0 to 10. You have ~10s."
         )   
         send_message(target_room_id, message)
         prompt_user_for_response(round_winner, selected_award)
@@ -296,11 +296,24 @@ def prompt_user_for_response(round_winner, selected_award):
                         delete_messages_mode = 1
                         send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.\n")
 
-                elif selected_award == "📰 The Newspaper 📰":
-                    if message_content.lower() == "crossword":
-                        num_crossword_clues = 10
-                        send_message(target_room_id, f"YUCK! @{round_winner} has enabled a round filled with crossword clues. Might be time for a ban.\n")
+                elif selected_award == "📰 The Newspaper 📰" and message_content.isdigit():
+                    try:
+                        crossword_value = int(message_content)
+                        
+                        if crossword_value < 0:
+                            delay_value = 0
+                        elif crossword_value > 10:
+                            delay_value = 10
+                        
+                        num_crossword_clues = crossword_value
 
+                        send_message(
+                            target_room_id, 
+                            f"WTF?! @{round_winner} has chosen {num_crossword_clues} clues. Wow. Just wow.\n"
+                        )
+                    except ValueError:
+                        pass
+    
     
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
@@ -2034,8 +2047,6 @@ def select_trivia_questions(questions_per_round):
             general_question_ids = [doc["_id"] for doc in trivia_questions]
             if general_question_ids:
                 store_question_ids_in_mongo(general_question_ids, "general")
-        else:
-            print("No general trivia questions needed for this round.")
 
         # Shuffle the combined list of selected questions
         random.shuffle(selected_questions)

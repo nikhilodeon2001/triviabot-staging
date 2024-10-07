@@ -2317,15 +2317,15 @@ def start_trivia_round():
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ 60s breather. Meet your fellow trivians!\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(15)
+                #time.sleep(15)
                 round_preview(selected_questions)
-                time.sleep(45)
+                time.sleep(30)
             else:
                 send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round in 30s.\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(15)
+                #time.sleep(15)
                 round_preview(selected_questions)
-                time.sleep(15)  # Adjust this time to whatever delay you need between rounds
+                #time.sleep(15)  # Adjust this time to whatever delay you need between rounds
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

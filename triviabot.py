@@ -107,7 +107,7 @@ question_categories = [
 ]
 
 categories_to_exclude = []  
-num_crossword_clues = 2
+num_crossword_clues = 10
 
 
 def generate_crossword_image(answer):

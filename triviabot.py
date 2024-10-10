@@ -1397,8 +1397,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         send_image_flag = True
 
     elif trivia_url == "Jeopardy":
-        image_mxc, image_width, image_height = generate_jeopardy_image(trivia_answer_list[0])
-        message_body = f"\n{number_block}🧔‍♂️ {trivia_category} 🧔‍♂️{number_block}\n{trivia_question}"
+        image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
+        message_body = f"\n{number_block}🧔‍♂️ {trivia_category} 🧔‍♂️{number_block}\n"
         image_size = 100
         send_image_flag = True
     

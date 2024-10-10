@@ -166,14 +166,11 @@ def generate_jeopardy_image(question_text):
         return None
 
 def draw_text_wrapper(text, font, max_width):
-    """
-    Wrap text to fit within a specified width using the given font.
-    """
     lines = []
     words = text.split()
     while words:
         line = ""
-        while words and font.getsize(line + words[0])[0] <= max_width:
+        while words and font.getbbox(line + words[0])[2] <= max_width:
             line += (words.pop(0) + " ")
         lines.append(line)
     return lines

@@ -82,7 +82,7 @@ id_limits = {"general": 2000, "crossword": 50000}
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 delete_messages_mode_default = delete_messages_mode
-num_crossword_clues_default = 3
+num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
 
 
@@ -93,11 +93,12 @@ awards = [
     "👻 The Ghoster 👻",
     "📰 The Newspaper 📰",
     "🍲 No soup for you 🍲",
-    "🥒 A DOJ (Dirty Okra Joke) 🥒"
+    "🥒 A DOJ (Dirty Okra Joke) 🥒",
+    "🥒 Okranator Turbo 5000 🥒"
 ]
 
 # Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0, 1, 0, 0, 0, 0]
+weights = [0, 0, 0, 0, 0, 0, 1]
 
 
 question_categories = [
@@ -166,7 +167,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner):
-    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude
+    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude, num_crossword_clues
     time_between_questions = time_between_questions_default
     delete_messages_mode = delete_messages_mode_default
     categories_to_exclude.clear()
@@ -180,7 +181,14 @@ def process_round_options(round_winner):
     print(selected_award)
     
     # Notify the round winner about their award
-    message = f"\n🎁 @{round_winner}, you've been awarded:\n\n {selected_award}\n"
+    message = (
+        f"\n@{round_winner}, you're the boss:\n\n"
+        "<3-15>: Time between questions\n"
+        "<category>: Exclude 1 category\n"
+        "<crossword>: Include 3 crossword clues\n"
+        "<ghost>: Vanishing answers \n\n"
+        "You have 10 seconds."
+    )
 
     if selected_award == "🕒 The Timer 🕒":
         message += (
@@ -223,6 +231,10 @@ def process_round_options(round_winner):
     elif selected_award == "🍲 No soup for you 🍲":
         send_message(target_room_id, message)
 
+    elif selected_award == "🥒 Okranator Turbo 5000 🥒":
+        send_message(target_room_id, message)
+        prompt_user_for_response(round_winner, selected_award)
+
 
 def prompt_user_for_response(round_winner, selected_award):
     global since_token, time_between_questions, delete_messages_mode, num_crossword_clues
@@ -259,7 +271,7 @@ def prompt_user_for_response(round_winner, selected_award):
             sender_display_name = get_display_name(sender)
             
             # If the round winner responded, process the award accordingly
-            if sender_display_name == round_winner:
+            if sender_display_name == round_winner or sender_display_name == username:
                 if selected_award == "🕒 The Timer 🕒" and message_content.isdigit():
                     try:
                         delay_value = int(message_content)
@@ -276,25 +288,63 @@ def prompt_user_for_response(round_winner, selected_award):
                         # Send a confirmation message
                         send_message(
                             target_room_id, 
-                            f"Ugh. @{round_winner} has set the time between questions to {time_between_questions} seconds. Thanks a lot jerk.\n"
+                            f"@{round_winner} has set the time between questions to {time_between_questions} seconds.\n"
                         )
                     except ValueError:
                         pass
 
+                elif selected_award == "🥒 Okranator Turbo 5000 🥒":
+                    if message_content.isdigit():
+                        try:
+                            delay_value = int(message_content)
+                
+                            # Ensure the delay value is within the allowed range (3-15)
+                            if delay_value < 3:
+                                delay_value = 3
+                            elif delay_value > 15:
+                                delay_value = 15
+                            
+                            # Set time_between_questions to the new value
+                            time_between_questions = delay_value
+                
+                            # Send a confirmation message
+                            send_message(
+                                target_room_id, 
+                                f"@{round_winner} has set the time between questions to {time_between_questions} seconds.\n"
+                            )
+                        except ValueError:
+                            pass
+                    
+                    matched_category = cross_reference_category(message_content)
+                    
+                    if matched_category:
+                        categories_to_exclude[:1] = [matched_category]
+                        send_message(target_room_id, f"@{round_winner} has excluded {matched_category}.\n")
+                        
+                    if "crossword" in message_content.lower():
+                        num_crossword_clues = 3
+                        categories_to_exclude.clear()
+                        send_message(target_room_id, f"@{round_winner} has included 3 Crossword clues.\n")
+
+                    if "ghost" in message_content.lower():
+                        delete_messages_mode = 1
+                        send_message(target_room_id, f"Boo! @{round_winner} turned 'Ghost Mode' on. All answers will disappear.\n")
+
+                
                 elif selected_award == "❌ The Miser ❌":
                     matched_category = cross_reference_category(message_content)
                     if matched_category:
                         categories_to_exclude[:1] = [matched_category]
-                        send_message(target_room_id, f"@{round_winner} has decided to exclude {matched_category}. Let's cancel this piece of work.\n")
-                    if message_content.lower() == "crossword":
-                        num_crossword_clues = 0;
+                        send_message(target_room_id, f"@{round_winner} has excluded {matched_category}.\n")
+                    if "crossword" in message_content.lower():
+                        num_crossword_clues = 0
                         categories_to_exclude.clear()
-                        send_message(target_room_id, f"@{round_winner} has decided to exclude Crossword. Let's cancel this piece of work.\n")
+                        send_message(target_room_id, f"@{round_winner} has excluded Crossword.\n")
 
                 elif selected_award == "👻 The Ghoster 👻":
-                    if message_content.lower() == "on":
+                    if "ghost" in message_content.lower():
                         delete_messages_mode = 1
-                        send_message(target_room_id, f"Ghost mode is now on. Answers will dissapear during active questions. Let's all 'thank' @{round_winner} for the pleasure.\n")
+                        send_message(target_room_id, f"Boo! @{round_winner} turned 'Ghost Mode' on. All answers will disappear.\n")
 
                 elif selected_award == "📰 The Newspaper 📰" and message_content.isdigit():
                     try:
@@ -309,21 +359,22 @@ def prompt_user_for_response(round_winner, selected_award):
 
                         send_message(
                             target_room_id, 
-                            f"WTF?! @{round_winner} chose {num_crossword_clues} clue(s). Wow. Just wow.\n"
+                            f"@{round_winner} has included {num_crossword_clues} clue(s).\n"
                         )
                     except ValueError:
                         pass
-    
+
+                
+                    
     
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
 
 def cross_reference_category(message_content):
     for category in question_categories:
-        if category.lower() == message_content.lower():
+        if category.lower() in message_content.lower():
             return category
     return None
-
 
 
 
@@ -640,8 +691,8 @@ def generate_round_summary(round_data, winner):
     # Construct the prompt with clear instructions
     prompt = (
         f"The winner of the trivia round is {winner}. "
-        "Roast the winning player about their user name and be very specific in your roast. Also insult specific responses they gave during the round. "
-        "Create no more than 5 sentences in total. Be sarcastic, creative, and use emojis in your response. "
+        "Roast the winning player about their user name and be very specific in your roast. Write a haiku about their name and them winning. "
+        "Be creative, and use emojis in your response. "
         "Vary your language. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
         "Questions asked:\n"
     )
@@ -685,7 +736,7 @@ def generate_round_summary(round_data, winner):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a dirty and raunchy comedian who is completely fed up with the world."},
+                {"role": "system", "content": "You are a poet who writes haikus for the winner."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=200,
@@ -1609,7 +1660,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
     # Construct a single message for all the responses
-    message = f"\n✅ Answer ✅\n{trivia_answer}\n"
+    message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
             
     # Notify the chat
     if correct_responses:    
@@ -2131,16 +2182,16 @@ def round_start_messages():
         # If the user is in the Hall of Sovereigns, only show the message if top_count == 6
         if username in sovereigns:
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across all leaderboards. They are our Sovereign. We must bow down.")
+                send_message(target_room_id, f"👑  {username} is #1 across all leaderboards. They are our Sovereign. We all bow to you.")
                 time.sleep(5)
         else:
             # For users not in the Hall of Sovereigns, show all applicable messages
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We must bow down.")
+                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n")
             elif top_count == 5:
-                send_message(target_room_id, f"⚔️  {username} is getting too close. Only one leaderboard left. Who will mount the defense?")
+                send_message(target_room_id, f"🔥​  {username} is on fire! Only 1 leaderboard left.\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n")
             elif top_count == 4:
-                send_message(target_room_id, f"🌡️  {username} is heating up. Only two leaderboards left. Stay safe.")
+                send_message(target_room_id, f"🌡️  {username} is heating up! Only 2 leaderboards left.\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n")
     return None
 
 def generate_and_render_polynomial_image(): #POLY
@@ -2315,7 +2366,7 @@ def start_trivia_round():
             print(f"categories to exclude are: {categories_to_exclude}")
             
             if round_count % 5 == 0:
-                send_message(target_room_id, f"\n🧘‍♂️ Let's take a breather. Relax, stretch, meditate.\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 time.sleep(30)
                 round_preview(selected_questions)

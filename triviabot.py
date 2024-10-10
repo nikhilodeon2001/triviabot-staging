@@ -2163,7 +2163,7 @@ def select_trivia_questions(questions_per_round):
         selected_questions.extend(jeopardy_questions)
 
         # Calculate the remaining questions needed for general trivia
-        remaining_needed = max(questions_per_round - len(crossword_questions - len(jeopardy_questions), 0)
+        remaining_needed = max(questions_per_round - len(crossword_questions) - len(jeopardy_questions), 0)
 
         if remaining_needed > 0:
             # Fetch general trivia questions, checking against general IDs

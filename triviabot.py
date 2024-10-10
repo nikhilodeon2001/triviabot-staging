@@ -82,7 +82,7 @@ id_limits = {"general": 2000, "crossword": 50000, "jeopardy": 50000}
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 delete_messages_mode_default = delete_messages_mode
-num_crossword_clues_default = 0
+num_crossword_clues_default = 2
 num_crossword_clues = num_crossword_clues_default
 num_jeopardy_clues_default = 4
 num_jeopardy_clues = num_jeopardy_clues_default
@@ -2449,10 +2449,10 @@ def start_trivia_round():
 
             round_count += 1
         
-            time.sleep(7)
+            time.sleep(10)
 
-            process_round_options(round_winner)
-            time.sleep(2)
+            #process_round_options(round_winner)
+            #time.sleep(2)
             
             print(f"categories to exclude are: {categories_to_exclude}")
             

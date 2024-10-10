@@ -84,6 +84,8 @@ delete_messages_mode = int(os.getenv("delete_messages_mode"))
 delete_messages_mode_default = delete_messages_mode
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
+num_jeopardy_clues_default = 4
+num_jeopardy_clues = num_jeopardy_clues_default
 
 
 # Define the awards and their associated weights
@@ -111,6 +113,73 @@ question_categories = [
 ]
 
 categories_to_exclude = []  
+
+
+
+def generate_jeopardy_image(question_text):
+    # Define the background color and text properties
+    background_color = (0, 0, 128)  # Blue color similar to Jeopardy screen
+    text_color = (255, 255, 255)    # White text
+    
+    # Define image size and font properties
+    img_width, img_height = 800, 600
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    font_size = 32
+
+    # Create a blank image with blue background
+    img = Image.new('RGB', (img_width, img_height), color=background_color)
+    draw = ImageDraw.Draw(img)
+    
+    # Load the font
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return None
+    
+    # Prepare the text for drawing (wrap text if too long)
+    wrapped_text = "\n".join(draw_text_wrapper(question_text, font, img_width - 40))
+    
+    # Calculate text position for centering
+    text_bbox = draw.textbbox((0, 0), wrapped_text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2
+    
+    # Draw the question text on the image
+    draw.multiline_text((text_x, text_y), wrapped_text, fill=text_color, font=font, align="center")
+    
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+    
+    # Upload the image and send to the chat
+    image_mxc = upload_image_to_matrix(image_buffer.read())
+    
+    if image_mxc:
+        # Return image_mxc, image_width, and image_height
+        return image_mxc, img_width, img_height
+    else:
+        print("Failed to upload the image to Matrix.")
+        return None
+
+def draw_text_wrapper(text, font, max_width):
+    """
+    Wrap text to fit within a specified width using the given font.
+    """
+    lines = []
+    words = text.split()
+    while words:
+        line = ""
+        while words and font.getsize(line + words[0])[0] <= max_width:
+            line += (words.pop(0) + " ")
+        lines.append(line)
+    return lines
+
+
+
 
 
 
@@ -1329,6 +1398,12 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         message_body = f"\n{number_block}✏️ {trivia_category} ✏️{number_block}\n{trivia_question}"
         image_size = 100
         send_image_flag = True
+
+    elif trivia_url == "Jeopardy":
+        image_mxc, image_width, image_height = generate_jeopardy_image(trivia_answer_list[0])
+        message_body = f"\n{number_block}🧔‍♂️ {trivia_category} 🧔‍♂️{number_block}\n{trivia_question}"
+        image_size = 100
+        send_image_flag = True
     
     else:
          message_body = f"\n{number_block}❓ {trivia_category} ❓{number_block}\n{trivia_question}"
@@ -2061,6 +2136,7 @@ def select_trivia_questions(questions_per_round):
         # Fetch recent IDs separately for each type
         recent_general_ids = get_recent_question_ids_from_mongo("general")
         recent_crossword_ids = get_recent_question_ids_from_mongo("crossword")
+        recent_jeopardy_ids = get_recent_question_ids_from_mongo("jeopardy")
 
         selected_questions = []
 
@@ -2077,8 +2153,17 @@ def select_trivia_questions(questions_per_round):
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
         selected_questions.extend(crossword_questions)
 
+        # Fetch jeopardy questions using the random subset method
+        jeopardy_collection = db["jeopardy_questions"]
+        pipeline_jeopardy = [
+            {"$match": {"_id": {"$nin": list(recent_jeopardy_ids)}}},
+            {"$sample": {"size": num_jeopardy_clues}}  # Apply sampling on the filtered subset
+        ]
+        jeopardy_questions = list(jeopardy_collection.aggregate(pipeline_jeopardy))
+        selected_questions.extend(jeopardy_questions)
+
         # Calculate the remaining questions needed for general trivia
-        remaining_needed = max(questions_per_round - len(crossword_questions), 0)
+        remaining_needed = max(questions_per_round - len(crossword_questions - len(jeopardy_questions), 0)
 
         if remaining_needed > 0:
             # Fetch general trivia questions, checking against general IDs
@@ -2094,6 +2179,10 @@ def select_trivia_questions(questions_per_round):
             crossword_question_ids = [doc["_id"] for doc in crossword_questions]
             if crossword_question_ids:
                 store_question_ids_in_mongo(crossword_question_ids, "crossword")
+
+            jeopardy_question_ids = [doc["_id"] for doc in jeopardy_questions]
+            if jeopardy_question_ids:
+                store_question_ids_in_mongo(jeopardy_question_ids, "jeopardy")
 
             general_question_ids = [doc["_id"] for doc in trivia_questions]
             if general_question_ids:
@@ -2113,6 +2202,7 @@ def select_trivia_questions(questions_per_round):
         sentry_sdk.capture_exception(e)
         print(f"Error selecting trivia and crossword questions: {e}")
         return []  # Return an empty list in case of failure
+        
 def load_streak_data():
     global current_longest_answer_streak, current_longest_round_streak
     

@@ -124,7 +124,7 @@ def generate_jeopardy_image(question_text):
     # Define image size and font properties
     img_width, img_height = 800, 600
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
-    font_size = 32
+    font_size = 64
 
     # Create a blank image with blue background
     img = Image.new('RGB', (img_width, img_height), color=background_color)

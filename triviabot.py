@@ -1569,8 +1569,8 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
     if correct_answer in user_answer:
         return True
 
-        # Step 1: Exact match or Partial match
-    if user_answer in correct_answer:
+    # Step 1: Exact match or Partial match
+    if user_answer in correct_answer and len(user_answer) >= min(5, len(correct_answer)):
         return True
     
     # Step 2: Levenshtein similarity

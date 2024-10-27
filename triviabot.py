@@ -2408,7 +2408,11 @@ def get_random_trivia_question():
         else:
             print("No available questions found.")
             return None
-
+            
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error selecting trivia and crossword questions: {e}")
+        return None  # Return an empty list in case of failure
 
 
 def start_trivia_round():

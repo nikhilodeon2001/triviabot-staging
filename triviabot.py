@@ -2364,7 +2364,7 @@ def get_player_selected_question(questions, round_winner):
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")  
 
-    return 0
+    return 1
 
 
 def refill_question_slot(questions, old_question):

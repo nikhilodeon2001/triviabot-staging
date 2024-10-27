@@ -263,7 +263,7 @@ def process_round_options(round_winner, winner_points):
 
 
 def prompt_user_for_response(round_winner):
-    global since_token, time_between_questions, delete_messages_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues
+    global since_token, time_between_questions, delete_messages_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, yolo_mode
     
     # Call initialize_sync to set since_token
     initialize_sync()
@@ -2337,7 +2337,7 @@ def get_player_selected_question(questions, round_winner):
     # Display categories for user selection
     categories = [q[0] for q in questions]
     
-    message = "\n" f"{round_winner} Choose a number: \n\n"
+    message = "\n" f"@{round_winner} nhoose a number: \n\n"
 
 
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]

@@ -2297,7 +2297,7 @@ def get_category_title(trivia_category, trivia_url):
 
 
 
-def get_player_selected_question(questions, round_winner, original_question_number):
+def get_player_selected_question(questions, round_winner:
     global since_token
 
     # Display categories for user selection
@@ -2351,7 +2351,7 @@ def get_player_selected_question(questions, round_winner, original_question_numb
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")  
 
-    return original_question_number
+    return 0
 
 
 def refill_question_slot(questions, old_question):
@@ -2490,7 +2490,7 @@ def start_trivia_round():
             while question_number <= questions_per_round:
                 
                 if god_mode and round_winner:
-                    selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner, question_number) - 1]
+                    selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner) - 1]
                     
                 else:
                     # Normal mode - sequential questions

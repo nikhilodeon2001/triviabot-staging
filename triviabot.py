@@ -2438,6 +2438,7 @@ def start_trivia_round():
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
+    round_winner = None
     
     try:
         while True:  # Endless loop
@@ -2480,7 +2481,6 @@ def start_trivia_round():
             #time.sleep(8)
             
             selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
-            round_winner = None
 
             # Randomly select n questions
             print() 
@@ -2490,7 +2490,7 @@ def start_trivia_round():
             question_number = 1
             while question_number <= questions_per_round:
                 
-                if god_mode:
+                if god_mode and round_winner:
                     selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner, question_number) - 1]
                     
                 else:

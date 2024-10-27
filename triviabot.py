@@ -244,7 +244,7 @@ def process_round_options(round_winner, winner_points):
         "jeopardy> Five Jeopardy questions 🟦✋\n"
         "trebek: Zero Jeopardy questions 🟦❌\n"
         "<category>: Exclude one category 🚫⛔\n"
-        "'yolo: No scores shown until the end 🤘🔥\n"
+        "yolo: No scores shown until the end 🤘🔥\n"
         "\nYou have 10 seconds."
     )
 
@@ -1941,7 +1941,7 @@ def update_round_streaks(user):
 def determine_round_winner():
     """Determine the round winner based on points and response times."""
     if not scoreboard:
-        return None
+        return None, None
 
     # Find the user(s) with the most points
     max_points = max(scoreboard.values())
@@ -1950,7 +1950,7 @@ def determine_round_winner():
     # If there's a tie, return None (no clear-cut winner)
     if len(potential_winners) > 1:
         send_message(target_room_id, "No clear-cut winner this round due to a tie.")
-        return None
+        return None, None
     else:
         return potential_winners[0], max_points  # Clear-cut winner
 

@@ -256,7 +256,7 @@ def process_round_options(round_winner, winner_points):
         message = (
         f"\n💼 @{round_winner}, your last performance has earned:\n\n"
         "🪖🫡🎖️ Dictator Mode 🎖️🫡🪖\n\n"
-        "You tell OkraStrut what to ask next round.\n.
+        "You tell OkraStrut what to ask next round.\n."
         )
         send_message(target_room_id, message)
         time.sleep(3)

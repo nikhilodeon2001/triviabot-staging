@@ -256,7 +256,7 @@ def process_round_options(round_winner, winner_points):
         message = (
         f"\n💼 @{round_winner}, your last performance has earned:\n\n"
         "🪖🫡🎖️ Dictator Mode 🎖️🫡🪖\n\n"
-        "You tell OkraStrut what to ask next round.\n."
+        "You tell OkraStrut what to ask next round.\n"
         )
         send_message(target_room_id, message)
         time.sleep(3)
@@ -1673,17 +1673,17 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         
             # Display the formatted message based on yolo_mode
             if time_diff == 0:
-                message += f"\n⚡ {display_name}:"
+                message += f"\n⚡ {display_name}"
                 if not yolo_mode:
-                    message += f" {points}"
+                    message += f": {points}"
                 if points == 420:
                     message += "🌿"
                 if current_longest_answer_streak["streak"] > 1:
                     message += f"  🔥{current_longest_answer_streak['streak']}"
             else:
-                message += f"\n👥 {display_name}:"
+                message += f"\n👥 {display_name}"
                 if not yolo_mode:
-                    message += f" {points}"
+                    message += f": {points}"
                 if points == 420:
                     message += "🌿"
 
@@ -1815,17 +1815,17 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                     
                         # Display the formatted message based on yolo_mode
                         if time_diff == 0:
-                            message += f"\n⚡ {display_name}:"
+                            message += f"\n⚡ {display_name}"
                             if not yolo_mode:
-                                message += f" {points}"
+                                message += f": {points}"
                             if points == 420:
                                 message += "🌿"
                             if current_longest_answer_streak["streak"] > 1:
                                 message += f"  🔥{current_longest_answer_streak['streak']}"
                         else:
-                            message += f"\n👥 {display_name}:"
+                            message += f"\n👥 {display_name}"
                             if not yolo_mode:
-                                message += f" {points}"
+                                message += f": {points}"
                             if points == 420:
                                 message += "🌿"
             
@@ -2337,7 +2337,7 @@ def get_player_selected_question(questions, round_winner):
     # Display categories for user selection
     categories = [q[0] for q in questions]
     
-    message = "\n" f"@{round_winner} nhoose a number: \n\n"
+    message = "\n" f"@{round_winner} choose a number: \n\n"
 
 
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
@@ -2582,20 +2582,20 @@ def start_trivia_round():
             time.sleep(10)
 
             process_round_options(round_winner, winner_points)
-            time.sleep(2)
+            time.sleep(3)
             
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 time.sleep(30)
-                round_(selected_questions)
+                round_preview(selected_questions)
                 time.sleep(30)
             else:
                 send_message(target_room_id, f"🛟 Help Okra keep it up\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(10)
+                time.sleep(15)
                 round_preview(selected_questions)
-                time.sleep(10)  # Adjust this time to whatever delay you need between rounds
+                time.sleep(15)  # Adjust this time to whatever delay you need between rounds
 
 
 

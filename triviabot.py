@@ -239,12 +239,12 @@ def process_round_options(round_winner, winner_points):
 
     # Notify the round winner about their award
     message = (
-        f"\n💼 @{round_winner}, you're the boss:\n\n"
-        "<int 3 to 15>: Time between questions ⏱️⏳\n"
-        "jeopardy> Five Jeopardy questions 🟦✋\n"
-        "trebek: Zero Jeopardy questions 🟦❌\n"
-        "<category>: Exclude one category 🚫⛔\n"
-        "yolo: No scores shown until the end 🤘🔥\n"
+        f"\n💼😎 @{round_winner}, you're the boss:\n\n"
+        "⏱️⏳ <3 - 15>: Time (s) between questions\n"
+        "🟦✋ 'Jeopardy': 5 Jeopardy questions\n"
+        "🟦❌ 'Trebek': 0 Jeopardy questions\n"
+        "🚫⛔ <Category>: Exclude one category\n"
+        "🤘🔥 'Yolo': No scores shown until the end\n"
         "\nYou have 10 seconds."
     )
 

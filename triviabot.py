@@ -2297,7 +2297,7 @@ def get_category_title(trivia_category, trivia_url):
 
 
 
-def get_player_selected_question(questions, round_winner:
+def get_player_selected_question(questions, round_winner):
     global since_token
 
     # Display categories for user selection

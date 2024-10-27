@@ -88,7 +88,7 @@ num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
 num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
-god_mode_default = False
+god_mode_default = True
 god_mode = god_mode_default
 
 

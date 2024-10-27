@@ -88,6 +88,9 @@ num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
 num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
+god_mode_default = False
+god_mode = god_mode_default
+
 
 
 question_categories = [
@@ -1996,9 +1999,6 @@ def select_trivia_questions(questions_per_round):
 
         selected_questions = []
 
-        # Define a modulo range and select a random modulo value for filtering
-        modulo_range = 10  # Adjust this range based on performance testing
-        random_modulo = random.randint(0, modulo_range - 1)
 
 
          # Fetch mysterybox questions using the random subset method
@@ -2297,6 +2297,118 @@ def get_category_title(trivia_category, trivia_url):
 
 
 
+def get_player_selected_question(questions, round_winner, original_question_number):
+    global since_token
+
+    # Display categories for user selection
+    categories = [q[0] for q in questions]
+    
+    send_message(target_room_id, f"{round_winner} Choose a number: {', '.join(categories)}")
+    initialize_sync()
+    time.sleep(7)
+
+     # Fetch responses
+    sync_url = f"{matrix_base_url}/sync"
+    params_with_since = params.copy()  # Use the existing params but include the since token
+    
+    if since_token:
+        params_with_since["since"] = since_token
+
+    try:
+        response = requests.get(sync_url, headers=headers, params=params_with_since)
+        if response.status_code != 200:
+            print(f"Failed to fetch responses. Status code: {response.status_code}")
+            return
+
+        # Parse the response to get the timeline events
+        sync_data = response.json()
+        since_token = sync_data.get("next_batch")  # Update the since_token for future requests
+        room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+        # Process all responses in reverse order (latest response first)
+        for event in room_events:
+            sender = event["sender"]
+            message_content = event.get("content", {}).get("body", "").strip()
+        
+            # Proceed only if message_content is not empty
+            if message_content:
+                # Fetch the display name for the current user
+                sender_display_name = get_display_name(sender)
+        
+                # If the round winner responded, process the award accordingly
+                if sender_display_name == round_winner or sender_display_name == "OkraStrut":
+                    if any(str(i) in message_content for i in range(1, 11)):
+                        try:
+                            question_number = int(''.join(filter(str.isdigit, message_content)))
+        
+                            # Ensure the delay value is within the allowed range (1-10)
+                            question_number = max(1, min(delay_value, 10))
+                            return question_number
+                            
+    return original_question_number
+                            
+                        except ValueError:
+                            pass
+                            
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching responses: {e}")                       
+
+
+def refill_question_slot(questions, old_question):
+    """Replace the old question with a new random question."""
+    # Remove the old question
+    questions.remove(old_question)
+    
+    # Get a random new question from the database
+    new_question = get_random_trivia_question()
+    
+    # Append the new question to the end of the list to maintain order
+    questions.append(new_question)
+
+
+def get_random_trivia_question():
+    global categories_to_exclude
+    """Fetch a random question from the trivia_questions collection."""
+    try:
+        db = connect_to_mongodb()
+        trivia_collection = db["trivia_questions"]
+        
+        recent_general_ids = get_recent_question_ids_from_mongo("general")
+        max_questions_per_category = 2
+            
+        pipeline = [
+            {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
+            {
+                "$group": {
+                    "_id": "$category",
+                    "questions": {"$push": "$$ROOT"}  # Push full document to each category group
+                }
+            },
+            {
+                "$project": {
+                    "category": "$_id",
+                    "questions": {"$slice": ["$questions", max_questions_per_category]}  # Limit number of questions per category
+                }
+            },
+            {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
+            {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
+            {"$sample": {"size": 1}}  # Sample from the resulting limited set
+        ]
+        
+        result = list(trivia_collection.aggregate(pipeline))
+
+        if result:
+            selected_question = result[0]
+            question_id = selected_question["_id"]
+        
+            # Store the ID in MongoDB to avoid re-selection in future rounds
+            store_question_ids_in_mongo([question_id], "general")
+        
+            return selected_question
+        else:
+            print("No available questions found.")
+            return None
+
 
 
 def start_trivia_round():
@@ -2315,7 +2427,7 @@ def start_trivia_round():
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
-    selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
+    
     try:
         while True:  # Endless loop
             # Check if it's been more than an hour since the last login
@@ -2333,22 +2445,6 @@ def start_trivia_round():
             # Load existing streak data from the file
             load_streak_data()
 
-            # Select a random GIF URL
-            selected_gif_url = random.choice(okra_gif_urls)
-
-            # Send the selected GIF
-            image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
-
-            
-            """Start a round of n trivia questions."""   
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
-            
-            if image_mxc:
-                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-
-            round_start_messages()
-            time.sleep(8)
-
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
             fastest_answers_count.clear()
@@ -2356,13 +2452,42 @@ def start_trivia_round():
             # Reset round data for the next round
             round_data["questions"] = []
 
+            # Select a random GIF URL
+            selected_gif_url = random.choice(okra_gif_urls)
+
+            # Send the selected GIF
+            image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
+
+            """Start a round of n trivia questions."""   
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
+            
+            if image_mxc:
+                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+
+            round_start_messages()
+
+            #time.sleep(8)
+            
+            selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
+            round_winner = None
+
             # Randomly select n questions
             print() 
             print_selected_questions(selected_questions)
             print()
             
             question_number = 1
-            for trivia_category, trivia_question, trivia_url, trivia_answer_list in selected_questions:
+            while question_number <= question_per_round:
+                
+                if god_mode and round_winner:
+                    selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner, question_number) - 1]
+                    
+                else:
+                    # Normal mode - sequential questions
+                    selected_question = selected_questions[question_number - 1]
+
+                trivia_category, trivia_question, trivia_url, trivia_answer_list = selected_question
+                
                 # Ask the trivia question and get start times
                 question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
                 
@@ -2380,7 +2505,11 @@ def start_trivia_round():
                     check_correct_responses(question_ask_time, solution_list, question_number)
                 
                 show_standings()  # Show the standings after each question
-                #save_trivia_data_answers()
+
+                # If god_mode, refill the question slot with a new random question from trivia_questions
+                if god_mode:
+                    refill_question_slot(selected_questions, selected_question)
+
                 time.sleep(time_between_questions)  # Small delay before the next question
                 question_number = question_number + 1
                 

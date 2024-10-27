@@ -88,8 +88,10 @@ num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
 num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
-god_mode_default = True
+god_mode_default = False
 god_mode = god_mode_default
+god_mode_points = 1000
+
 
 
 
@@ -217,17 +219,20 @@ def generate_crossword_image(answer):
 
 
 
-def process_round_options(round_winner):
-    global since_token, time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues
+def process_round_options(round_winner, winner_points):
+    global since_token, time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, god_mode
     time_between_questions = time_between_questions_default
     delete_messages_mode = delete_messages_mode_default
     categories_to_exclude.clear()
     num_crossword_clues = num_crossword_clues_default
     num_jeopardy_clues = num_jeopardy_clues_default
     num_mysterybox_clues = num_mysterybox_clues_default
+    god_mode = god_mode_default
     
     if round_winner is None:
         return
+   
+
 
     # Notify the round winner about their award
     message = (
@@ -236,12 +241,21 @@ def process_round_options(round_winner):
         "'jeopardy'> Five Jeopardy questions\n"
         "'trebek': Zero Jeopardy questions\n"
         "<category>: Exclude one category\n"
-        "'ghost': Vanishing answers \n\n"
-        "You have 10 seconds."
+        "\nYou have 10 seconds."
     )
 
     send_message(target_room_id, message)
     prompt_user_for_response(round_winner)
+
+    if winner_points >= god_mode_points:
+        god_mode = True
+        message = (
+        f"\n💼 @{round_winner}, your last performance has earned:\n\n"
+        "👑🕹️ *God Mode Controls* 🕹️👑\n\n"
+        "You will tell OkraStrut what to ask in the next round\n.
+    )
+        send_message(target_room_id, message)
+        time.sleep(3)
 
 
 def prompt_user_for_response(round_winner):
@@ -316,9 +330,9 @@ def prompt_user_for_response(round_winner):
                         num_jeopardy_clues = 0
                         send_message(target_room_id, f"@{round_winner} has removed all Jeopardy questions.\n")
         
-                    if "ghost" in message_content.lower():
-                        delete_messages_mode = 1
-                        send_message(target_room_id, f"Boo! @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
+                    #if "ghost" in message_content.lower():
+                    #    delete_messages_mode = 1
+                    #    send_message(target_room_id, f"Boo! @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
@@ -1918,7 +1932,7 @@ def determine_round_winner():
         send_message(target_room_id, "No clear-cut winner this round due to a tie.")
         return None
     else:
-        return potential_winners[0]  # Clear-cut winner
+        return potential_winners[0], max_points  # Clear-cut winner
 
 
 def show_standings():
@@ -2537,7 +2551,7 @@ def start_trivia_round():
                 question_number = question_number + 1
                 
             #Determine the round winner
-            round_winner = determine_round_winner()
+            round_winner, winner_points = determine_round_winner()
 
             #Update round streaks
             update_round_streaks(round_winner)
@@ -2547,7 +2561,7 @@ def start_trivia_round():
         
             time.sleep(10)
 
-            process_round_options(round_winner)
+            process_round_options(round_winner, winner_points)
             time.sleep(2)
             
             if round_count % 5 == 0:

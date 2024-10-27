@@ -2342,7 +2342,7 @@ def get_player_selected_question(questions, round_winner, original_question_numb
                             question_number = int(''.join(filter(str.isdigit, message_content)))
         
                             # Ensure the delay value is within the allowed range (1-10)
-                            question_number = max(1, min(delay_value, 10))
+                            question_number = max(1, min(question_number, 10))
                             return question_number
                             
                         except ValueError:
@@ -2434,11 +2434,12 @@ def start_trivia_round():
 # Function to start the trivia round
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
-    global headers, params, filter_json, since_token, round_count, delete_messages_mode
+    global headers, params, filter_json, since_token, round_count, delete_messages_mode, selected_questions
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
     round_winner = None
+    selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     
     try:
         while True:  # Endless loop
@@ -2479,8 +2480,6 @@ def start_trivia_round():
             round_start_messages()
 
             #time.sleep(8)
-            
-            selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
 
             # Randomly select n questions
             print() 
@@ -2542,7 +2541,7 @@ def start_trivia_round():
                 send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 time.sleep(30)
-                round_preview(selected_questions)
+                round_(selected_questions)
                 time.sleep(30)
             else:
                 send_message(target_room_id, f"🛟 Help Okra keep it up\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")

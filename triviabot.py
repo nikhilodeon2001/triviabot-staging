@@ -91,6 +91,9 @@ num_jeopardy_clues = num_jeopardy_clues_default
 god_mode_default = False
 god_mode = god_mode_default
 god_mode_points = 1000
+yolo_mode_default = False
+yolo_mode = yolo_mode_default
+
 
 
 
@@ -220,7 +223,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, god_mode
+    global since_token, time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, god_mode, yolo_mode
     time_between_questions = time_between_questions_default
     delete_messages_mode = delete_messages_mode_default
     categories_to_exclude.clear()
@@ -228,19 +231,20 @@ def process_round_options(round_winner, winner_points):
     num_jeopardy_clues = num_jeopardy_clues_default
     num_mysterybox_clues = num_mysterybox_clues_default
     god_mode = god_mode_default
+    yolo_mode = yolo_mode_default
     
     if round_winner is None:
         return
    
 
-
     # Notify the round winner about their award
     message = (
         f"\n💼 @{round_winner}, you're the boss:\n\n"
-        "<int 3 to 15>: Time between questions\n"
-        "'jeopardy'> Five Jeopardy questions\n"
-        "'trebek': Zero Jeopardy questions\n"
-        "<category>: Exclude one category\n"
+        "<int 3 to 15>: Time between questions ⏱️⏳\n"
+        "jeopardy> Five Jeopardy questions 🟦✋\n"
+        "trebek: Zero Jeopardy questions 🟦❌\n"
+        "<category>: Exclude one category 🚫⛔\n"
+        "'yolo: No scores shown until the end 🤘🔥\n"
         "\nYou have 10 seconds."
     )
 
@@ -251,9 +255,9 @@ def process_round_options(round_winner, winner_points):
         god_mode = True
         message = (
         f"\n💼 @{round_winner}, your last performance has earned:\n\n"
-        "👑🕹️ *God Mode Controls* 🕹️👑\n\n"
-        "You will tell OkraStrut what to ask in the next round\n.
-    )
+        "🪖🫡🎖️ Dictator Mode 🎖️🫡🪖\n\n"
+        "You tell OkraStrut what to ask next round.\n.
+        )
         send_message(target_room_id, message)
         time.sleep(3)
 
@@ -309,7 +313,7 @@ def prompt_user_for_response(round_winner):
                             # Send a confirmation message
                             send_message(
                                 target_room_id,
-                                f"@{round_winner} has set the time between questions to {time_between_questions} seconds.\n"
+                                f"⏱️⏳ @{round_winner} has set {time_between_questions}s between questions.\n"
                             )
                         except ValueError:
                             pass
@@ -320,19 +324,23 @@ def prompt_user_for_response(round_winner):
                         categories_to_exclude[:1] = [matched_category]  # Add matched_category to exclude list
         
                         # Send message after handling special cases
-                        send_message(target_room_id, f"@{round_winner} has excluded {matched_category}.\n")
+                        send_message(target_room_id, f"🚫⛔ @{round_winner} has excluded {matched_category}.\n")
         
                     if "jeopardy" in message_content.lower():
                         num_jeopardy_clues = 5
-                        send_message(target_room_id, f"@{round_winner} has added 5 Jeopardy questions.\n")
+                        send_message(target_room_id, f"🟦✋ @{round_winner} has added 5 Jeopardy questions.\n")
         
                     if "trebek" in message_content.lower():
                         num_jeopardy_clues = 0
-                        send_message(target_room_id, f"@{round_winner} has removed all Jeopardy questions.\n")
+                        send_message(target_room_id, f"🟦❌ @{round_winner} has removed all Jeopardy questions.\n")
+
+                    if "yolo" in message_content.lower():
+                        yolo_mode = True
+                        send_message(target_room_id, f"🤘🔥 @{round_winner} has nixed all scores.\n")
         
                     #if "ghost" in message_content.lower():
                     #    delete_messages_mode = 1
-                    #    send_message(target_room_id, f"Boo! @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
+                    #    send_message(target_room_id, f"👻👻 @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
@@ -1662,14 +1670,20 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         # Loop through the responses and append to the message
         for display_name, points, response_time, message_content in correct_responses:
             time_diff = response_time - fastest_response_time
+        
+            # Display the formatted message based on yolo_mode
             if time_diff == 0:
-                message += f"\n⚡ {display_name}: {points}"
+                message += f"\n⚡ {display_name}:"
+                if not yolo_mode:
+                    message += f" {points}"
                 if points == 420:
                     message += "🌿"
                 if current_longest_answer_streak["streak"] > 1:
                     message += f"  🔥{current_longest_answer_streak['streak']}"
             else:
-                message += f"\n👥 {display_name}: {points}"
+                message += f"\n👥 {display_name}:"
+                if not yolo_mode:
+                    message += f" {points}"
                 if points == 420:
                     message += "🌿"
 
@@ -1798,14 +1812,20 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                     # Loop through the responses and append to the message
                     for display_name, points, response_time, message_content in correct_responses:
                         time_diff = response_time - fastest_response_time
+                    
+                        # Display the formatted message based on yolo_mode
                         if time_diff == 0:
-                            message += f"\n⚡ {display_name}: {points}"
+                            message += f"\n⚡ {display_name}:"
+                            if not yolo_mode:
+                                message += f" {points}"
                             if points == 420:
                                 message += "🌿"
                             if current_longest_answer_streak["streak"] > 1:
                                 message += f"  🔥{current_longest_answer_streak['streak']}"
                         else:
-                            message += f"\n👥 {display_name}: {points}"
+                            message += f"\n👥 {display_name}:"
+                            if not yolo_mode:
+                                message += f" {points}"
                             if points == 420:
                                 message += "🌿"
             
@@ -2541,7 +2561,8 @@ def start_trivia_round():
                 else:
                     check_correct_responses(question_ask_time, solution_list, question_number)
                 
-                show_standings()  # Show the standings after each question
+                if not yolo_mode or question_number == questions_per_round:
+                    show_standings()
 
                 # If god_mode, refill the question slot with a new random question from trivia_questions
                 if god_mode:

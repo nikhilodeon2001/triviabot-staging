@@ -90,7 +90,7 @@ num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
 god_mode_default = False
 god_mode = god_mode_default
-god_mode_points = 5000
+god_mode_points = 6000
 yolo_mode_default = False
 yolo_mode = yolo_mode_default
 

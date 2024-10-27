@@ -2564,9 +2564,8 @@ def start_trivia_round():
                 if not yolo_mode or question_number == questions_per_round:
                     show_standings()
 
-                # If god_mode, refill the question slot with a new random question from trivia_questions
-                if god_mode:
-                    refill_question_slot(selected_questions, selected_question)
+                #Refill the question slot with a new random question from trivia_questions
+                refill_question_slot(selected_questions, selected_question)
 
                 time.sleep(time_between_questions)  # Small delay before the next question
                 question_number = question_number + 1

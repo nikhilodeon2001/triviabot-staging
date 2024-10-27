@@ -240,11 +240,11 @@ def process_round_options(round_winner, winner_points):
     # Notify the round winner about their award
     message = (
         f"\n🍔🍟 @{round_winner}, what's your order?\n\n"
-        "<3 - 15>  ⏱️⏳  Time (s) between questions\n"
-        "Jeopardy  🟦✋  5 Jeopardy questions\n"
-        "Trebek  🟦❌  0 Jeopardy questions\n"
-        "<Category> 🚫⛔  Exclude one category\n"
-        "Yolo 🤘🔥  No scores shown until the end\n"
+        "⏱️⏳ <3 - 15>:  Time (s) between questions\n"
+        "🟦✋ Jeopardy:  5 Jeopardy questions\n"
+        "🟦❌ Trebek:  0 Jeopardy questions\n"
+        "🚫👆 <Category>:  Exclude one category\n"
+        "🔥🤘 Yolo:  No scores shown until the end\n"
         "\nYou have 10 seconds."
     )
 

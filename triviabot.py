@@ -2481,7 +2481,7 @@ def start_trivia_round():
             print()
             
             question_number = 1
-            while question_number <= question_per_round:
+            while question_number <= questions_per_round:
                 
                 if god_mode and round_winner:
                     selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner, question_number) - 1]

@@ -2345,7 +2345,7 @@ def get_player_selected_question(questions, round_winner, original_question_numb
                             question_number = max(1, min(delay_value, 10))
                             return question_number
                             
-        return original_question_number
+    return original_question_number
                             
                         except ValueError:
                             pass

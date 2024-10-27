@@ -2303,7 +2303,20 @@ def get_player_selected_question(questions, round_winner:
     # Display categories for user selection
     categories = [q[0] for q in questions]
     
-    send_message(target_room_id, f"{round_winner} Choose a number: {', '.join(categories)}")
+    message = "\n" f"{round_winner} Choose a number: \n\n"
+
+
+    numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    for i, question_data in enumerate(questions):
+        trivia_category = question_data[0]
+        trivia_url = question_data[2]
+        number_block = numbered_blocks[i] if i < len(numbered_blocks) else f"{i + 1}️⃣"  # Use fallback if needed
+        message += f"{number_block} {get_category_title(trivia_category, trivia_url)}\n"
+    
+    message += "\n"
+    # Send the message to the chat
+    send_message(target_room_id, message)
+
     initialize_sync()
     time.sleep(7)
 

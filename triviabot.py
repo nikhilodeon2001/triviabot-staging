@@ -2490,12 +2490,12 @@ def start_trivia_round():
             question_number = 1
             while question_number <= questions_per_round:
                 
-                if god_mode and round_winner:
+                if god_mode:
                     selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner, question_number) - 1]
                     
                 else:
                     # Normal mode - sequential questions
-                    selected_question = selected_questions[question_number - 1]
+                    selected_question = selected_questions[0]
 
                 trivia_category, trivia_question, trivia_url, trivia_answer_list = selected_question
                 

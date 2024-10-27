@@ -78,38 +78,24 @@ time_between_questions_default = time_between_questions
 questions_module = os.getenv("questions_module", "trivia_questions")
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "crossword": 50000, "jeopardy": 50000}
+id_limits = {"general": 20000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
 first_place_bonus = 0
 delete_messages_mode = int(os.getenv("delete_messages_mode"))
 delete_messages_mode_default = delete_messages_mode
-num_crossword_clues_default = 2
+num_mysterybox_clues_default = 0
+num_mysterybox_clues = num_mysterybox_clues_default
+num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 4
+num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
 
 
-# Define the awards and their associated weights
-awards = [
-    "🕒 The Timer 🕒",
-    "❌ The Miser ❌",
-    "👻 The Ghoster 👻",
-    "📰 The Newspaper 📰",
-    "🍲 No soup for you 🍲",
-    "🥒 A DOJ (Dirty Okra Joke) 🥒",
-    "🥒 Okranator Turbo 5000 🥒"
-]
-
-# Define the corresponding weights (these should sum up to 1.0 or can be normalized)
-weights = [0, 0, 0, 0, 0, 0, 1]
-
-
 question_categories = [
-    "Anatomy", "Art", "Astronomy", "Biology", "Characters", "Chemistry", 
-    "Economics & Government", "English Grammar", "Famous People", "Flags", 
-    "Geography", "Geology", "Literature", "Logos", "Math", "Miscellaneous", 
-    "Movies", "Music", "Nature", "Physics", "Pop Culture", "Sports", 
-    "Statistics", "Superheroes", "Television", "The World", "World Culture", 
-    "World Flags", "World History"
+    "Mystery Box or Boat", "Famous People", "Anatomy", "Characters", "Music", "Art & Literature", 
+    "Chemistry", "Geography", "Mathematics", "Physics", "Science & Nature", "Language", "English Grammar", 
+    "Astronomy", "Logos", "The World", "Economics & Government", "Toys & Games", "Food & Drinks", "Geology", 
+    "Tech & Video Games", "Flags", "Miscellaneous", "Biology", "Superheroes", "Television", "Pop Culture", 
+    "History", "Movies", "Religion & Mythology", "Sports & Leisure", "World Culture", "General Knowledge"
 ]
 
 categories_to_exclude = []  
@@ -118,13 +104,13 @@ categories_to_exclude = []
 
 def generate_jeopardy_image(question_text):
     # Define the background color and text properties
-    background_color = (0, 0, 128)  # Blue color similar to Jeopardy screen
+    background_color = (6, 12, 233)  # Blue color similar to Jeopardy screen
     text_color = (255, 255, 255)    # White text
     
     # Define image size and font properties
     img_width, img_height = 800, 600
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
-    font_size = 48
+    font_size = 60
 
     # Create a blank image with blue background
     img = Image.new('RGB', (img_width, img_height), color=background_color)
@@ -174,10 +160,6 @@ def draw_text_wrapper(text, font, max_width):
             line += (words.pop(0) + " ")
         lines.append(line)
     return lines
-
-
-
-
 
 
 def generate_crossword_image(answer):
@@ -233,83 +215,40 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner):
-    global time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude, num_crossword_clues
+    global since_token, time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues
     time_between_questions = time_between_questions_default
     delete_messages_mode = delete_messages_mode_default
     categories_to_exclude.clear()
     num_crossword_clues = num_crossword_clues_default
+    num_jeopardy_clues = num_jeopardy_clues_default
+    num_mysterybox_clues = num_mysterybox_clues_default
     
     if round_winner is None:
         return
-    
-    # Select a random award based on the weights
-    selected_award = random.choices(awards, weights, k=1)[0]
-    print(selected_award)
-    
+
     # Notify the round winner about their award
     message = (
-        f"\n@{round_winner}, you're the boss:\n\n"
-        "<3-15>: Time between questions\n"
-        "<category>: Exclude 1 category\n"
-        "<crossword>: Include 3 crossword clues\n"
-        "<ghost>: Vanishing answers \n\n"
+        f"\n💼 @{round_winner}, you're the boss:\n\n"
+        "<int 3 to 15>: Time between questions\n"
+        "'jeopardy'> Five Jeopardy questions\n"
+        "'trebek': Zero Jeopardy questions\n"
+        "<category>: Exclude one category\n"
+        "'ghost': Vanishing answers \n\n"
         "You have 10 seconds."
     )
 
-    if selected_award == "🕒 The Timer 🕒":
-        message += (
-            "\nSet how many seconds between questions for the next round.\n\n"
-            "Enter a number from 3 to 15. You have ~10s."
-        )
-        send_message(target_room_id, message)
-        prompt_user_for_response(round_winner, selected_award)
-
-    elif selected_award == "❌ The Miser ❌":
-        message += (
-            "\nExclude a category from the next round.\n\n "
-            "Enter a category name. You have ~10s."
-        )   
-        send_message(target_room_id, message)
-        prompt_user_for_response(round_winner, selected_award)
-
-    elif selected_award == "👻 The Ghoster 👻":
-        message += (
-            "\nEnable Ghost Messages for the next round.\n\n"
-            "Type 'on' if you dare. You have ~10s."
-        )   
-        send_message(target_room_id, message)
-        prompt_user_for_response(round_winner, selected_award)
+    send_message(target_room_id, message)
+    prompt_user_for_response(round_winner)
 
 
-    elif selected_award == "📰 The Newspaper 📰":
-        message += (
-            "\nChoose how many crossword clues in the next round.\n\n"
-             f"Enter a number from 0 to {questions_per_round}. You have ~10s."
-        )   
-        send_message(target_room_id, message)
-        prompt_user_for_response(round_winner, selected_award)
-        
-    elif selected_award == "🥒 A DOJ (Dirty Okra Joke) 🥒":
-        joke = generate_okra_joke(round_winner)  # Generate a custom okra joke using ChatGPT
-        message += f"\n{joke}\n"
-        send_message(target_room_id, message)
-
-    elif selected_award == "🍲 No soup for you 🍲":
-        send_message(target_room_id, message)
-
-    elif selected_award == "🥒 Okranator Turbo 5000 🥒":
-        send_message(target_room_id, message)
-        prompt_user_for_response(round_winner, selected_award)
-
-
-def prompt_user_for_response(round_winner, selected_award):
-    global since_token, time_between_questions, delete_messages_mode, num_crossword_clues
+def prompt_user_for_response(round_winner):
+    global since_token, time_between_questions, delete_messages_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues
     
     # Call initialize_sync to set since_token
     initialize_sync()
     
     # Wait for 10 seconds to gather responses
-    time.sleep(10)
+    time.sleep(13)
 
     # Fetch responses
     sync_url = f"{matrix_base_url}/sync"
@@ -332,113 +271,58 @@ def prompt_user_for_response(round_winner, selected_award):
         for event in room_events:
             sender = event["sender"]
             message_content = event.get("content", {}).get("body", "").strip()
-
-            # Fetch the display name for the current user
-            sender_display_name = get_display_name(sender)
-            
-            # If the round winner responded, process the award accordingly
-            if sender_display_name == round_winner or sender_display_name == username:
-                if selected_award == "🕒 The Timer 🕒" and message_content.isdigit():
-                    try:
-                        delay_value = int(message_content)
-
-                        # Ensure the delay value is within the allowed range (3-15)
-                        if delay_value < 3:
-                            delay_value = 3
-                        elif delay_value > 15:
-                            delay_value = 15
-                        
-                        # Set time_between_questions to the new value
-                        time_between_questions = delay_value
-
-                        # Send a confirmation message
-                        send_message(
-                            target_room_id, 
-                            f"@{round_winner} has set the time between questions to {time_between_questions} seconds.\n"
-                        )
-                    except ValueError:
-                        pass
-
-                elif selected_award == "🥒 Okranator Turbo 5000 🥒":
-                    if message_content.isdigit():
+        
+            # Proceed only if message_content is not empty
+            if message_content:
+                # Fetch the display name for the current user
+                sender_display_name = get_display_name(sender)
+        
+                # If the round winner responded, process the award accordingly
+                if sender_display_name == round_winner or sender_display_name == "OkraStrut":
+                    if any(str(i) in message_content for i in range(3, 16)):
                         try:
-                            delay_value = int(message_content)
-                
+                            delay_value = int(''.join(filter(str.isdigit, message_content)))
+        
                             # Ensure the delay value is within the allowed range (3-15)
-                            if delay_value < 3:
-                                delay_value = 3
-                            elif delay_value > 15:
-                                delay_value = 15
+                            delay_value = max(3, min(delay_value, 15))
                             
                             # Set time_between_questions to the new value
                             time_between_questions = delay_value
-                
+        
                             # Send a confirmation message
                             send_message(
-                                target_room_id, 
+                                target_room_id,
                                 f"@{round_winner} has set the time between questions to {time_between_questions} seconds.\n"
                             )
                         except ValueError:
                             pass
-                    
+        
                     matched_category = cross_reference_category(message_content)
-                    
+        
                     if matched_category:
-                        categories_to_exclude[:1] = [matched_category]
+                        categories_to_exclude[:1] = [matched_category]  # Add matched_category to exclude list
+        
+                        # Send message after handling special cases
                         send_message(target_room_id, f"@{round_winner} has excluded {matched_category}.\n")
-                        
-                    if "crossword" in message_content.lower():
-                        num_crossword_clues = 3
-                        categories_to_exclude.clear()
-                        send_message(target_room_id, f"@{round_winner} has included 3 Crossword clues.\n")
-
+        
+                    if "jeopardy" in message_content.lower():
+                        num_jeopardy_clues = 5
+                        send_message(target_room_id, f"@{round_winner} has added 5 Jeopardy questions.\n")
+        
+                    if "trebek" in message_content.lower():
+                        num_jeopardy_clues = 0
+                        send_message(target_room_id, f"@{round_winner} has removed all Jeopardy questions.\n")
+        
                     if "ghost" in message_content.lower():
                         delete_messages_mode = 1
-                        send_message(target_room_id, f"Boo! @{round_winner} turned 'Ghost Mode' on. All answers will disappear.\n")
+                        send_message(target_room_id, f"Boo! @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
 
-                
-                elif selected_award == "❌ The Miser ❌":
-                    matched_category = cross_reference_category(message_content)
-                    if matched_category:
-                        categories_to_exclude[:1] = [matched_category]
-                        send_message(target_room_id, f"@{round_winner} has excluded {matched_category}.\n")
-                    if "crossword" in message_content.lower():
-                        num_crossword_clues = 0
-                        categories_to_exclude.clear()
-                        send_message(target_room_id, f"@{round_winner} has excluded Crossword.\n")
-
-                elif selected_award == "👻 The Ghoster 👻":
-                    if "ghost" in message_content.lower():
-                        delete_messages_mode = 1
-                        send_message(target_room_id, f"Boo! @{round_winner} turned 'Ghost Mode' on. All answers will disappear.\n")
-
-                elif selected_award == "📰 The Newspaper 📰" and message_content.isdigit():
-                    try:
-                        crossword_value = int(message_content)
-                        
-                        if crossword_value < 0:
-                            crossword_value = 0
-                        elif crossword_value > questions_per_round:
-                            crossword_value = questions_per_round
-                        
-                        num_crossword_clues = crossword_value
-
-                        send_message(
-                            target_room_id, 
-                            f"@{round_winner} has included {num_crossword_clues} clue(s).\n"
-                        )
-                    except ValueError:
-                        pass
-
-                
-                    
-    
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
 
 def cross_reference_category(message_content):
     for category in question_categories:
-        if category.lower() in message_content.lower():
+       if category.lower() in message_content.lower() or message_content.lower() in category.lower():
             return category
     return None
 
@@ -754,14 +638,24 @@ def generate_round_summary(round_data, winner):
     """
     Generate a summary of the trivia round using OpenAI's API.
     """
-    # Construct the prompt with clear instructions
-    prompt = (
-        f"The winner of the trivia round is {winner}. "
-        "Roast the winning player about their user name and be very specific in your roast. Write a haiku about their name and them winning. "
-        "Be creative, and use emojis in your response. "
-        "Vary your language. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-        "Questions asked:\n"
-    )
+
+    # Construct the base prompt with different instructions if the winner is "username"
+    if winner == "OkraStrut":
+        prompt = (
+            f"You are OkraStrut. You played trivia against everyone and dominated by a huge margin. "
+            "Roast everyone except OkraStrut about how terrible they are and how easily you beat them. Rudely call out specific players except OkraStrut in your roast and call our specific wrong answers they gave. "
+            "Create no more than 5 sentences in total. Be sarcastic, angry, offensive, and use emojis in your comments. End by complimenting yourself, OkraStrut, on how great you are. "
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+    else:
+        prompt = (
+            f"The winner of the trivia round is {winner}. "
+            "Roast the winning player about their username and be very specific and negative in your roast. Insult specific responses they gave during the round. "
+            "Create no more than 5 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner using angry and rough language. "
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
 
     # Add questions, their correct answers, users' responses, and scoreboard status after each question
     for question_data in round_data["questions"]:
@@ -802,7 +696,7 @@ def generate_round_summary(round_data, winner):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a poet who writes haikus for the winner."},
+                {"role": "system", "content": "You are a bitter, dirty, and raunchy old man who is completely fed up with all the trivia players."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=200,
@@ -1362,48 +1256,49 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     
     if is_valid_url(trivia_url): 
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
-        message_body = f"\n{number_block}📷 {trivia_category} 📷{number_block}\n{trivia_question}"
+        message_body = f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
         
     elif trivia_url == "polynomial":
         image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image() #POLY
-        message_body = f"\n{number_block}🔢 {trivia_category} 🔢{number_block}\n{trivia_question}"
+        message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
         
     elif trivia_url == "scramble":
         image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
-        message_body = f"\n{number_block}🧩 {trivia_category} 🧩{number_block}\n{trivia_question}"
+        message_body = f"\n{number_block}🧩 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
 
     elif trivia_url == "median":
         image_mxc, image_width, image_height, new_solution = generate_median_question()
-        message_body = f"\n{number_block}📊 {trivia_category} 📊{number_block}\n{trivia_question}"
+        message_body = f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
 
     elif trivia_url == "mean":
         image_mxc, image_width, image_height, new_solution = generate_mean_question()
-        message_body = f"\n{number_block}📊 {trivia_category} 📊{number_block}\n{trivia_question}"
+        message_body = f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        image_size = 100
+        send_image_flag = True
+
+
+    elif trivia_url == "jeopardy":
+        image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
+        message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
         image_size = 100
         send_image_flag = True
 
     elif trivia_category == "Crossword":
         image_mxc, image_width, image_height = generate_crossword_image(trivia_answer_list[0])
-        message_body = f"\n{number_block}✏️ {trivia_category} ✏️{number_block}\n{trivia_question}"
+        message_body = f"\n{number_block}✏️ {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
 
-    elif trivia_url == "Jeopardy":
-        image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
-        message_body = f"\n{number_block}🧔‍♂️ {trivia_category} 🧔‍♂️{number_block}\n"
-        image_size = 100
-        send_image_flag = True
-    
     else:
-         message_body = f"\n{number_block}❓ {trivia_category} ❓{number_block}\n{trivia_question}"
+         message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
 
     response = send_message(target_room_id, message_body)
 
@@ -1477,6 +1372,7 @@ def initialize_sync():
 def calculate_points(response_time):  
     # Max points is 1000, min points is 100. Points decrease linearly over n seconds
     points = max(1000 - int(response_time * (900 / question_time)), 100)  # Linearly decrease
+    points = round(points / 5) * 5  # Round to the nearest 5
     return points
 
 # List of filler words to remove
@@ -1564,6 +1460,10 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
     # Ensure correct_answer_words is not empty
     if correct_answer_words and user_answer == correct_answer_words[0] and len(correct_answer_words[0]) > 3:
         return True
+
+    #Check if user's answer is a substring of the correct answer after normalization
+    if user_answer in correct_answer:
+        return True
     
     # Step 1: Exact match or Partial match
     if correct_answer in user_answer:
@@ -1623,16 +1523,16 @@ def collect_responses(question_ask_time, question_number, time_limit):
             for event in room_events:
                 sender = event["sender"]
 
-                if sender == bot_user_id:  # Ignore bot's own messages
-                    continue
-
                 event_id = event["event_id"]
                 
+                emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
+                message_content = event.get("content", {}).get("body", "")
+           
+                if sender == bot_user_id and any(emoji in message_content for emoji in emojis):
+                    continue
+
                 # Redact the message immediately
                 redact_message(event_id, target_room_id)
-                
-                # Process message content and response time after redaction
-                message_content = event.get("content", {}).get("body", "")
                 response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
 
                 # Store response data
@@ -1747,37 +1647,15 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
             time_diff = response_time - fastest_response_time
             if time_diff == 0:
                 message += f"\n⚡ {display_name}: {points}"
+                if points == 420:
+                    message += "🌿"
                 if current_longest_answer_streak["streak"] > 1:
                     message += f"  🔥{current_longest_answer_streak['streak']}"
-                #message += f"\n💬 Answered: {message_content}"
-                #if correct_responses_length > 1:
-                #    message += f"\n\n👥 The Rest"
             else:
-                message += f"\n👥 {display_name}: {points} (+{round(time_diff, 1)}s)"
-    elif has_responses:  # Only if there were responses but none correct
-        potential_messages = [
-            "\n🥴 We've got a bunch of geniuses here...\n",
-            "\n🤔 Did someone hide the thinking cap?\n",
-            "\n😅 Well, that went right...off a cliff!\n",
-            "\n🙃 The silence is deafening...\n",
-            "\n🤷‍♂️ Hello? Anyone here?\n",
-            "\n🧠 The brains have officially left the chat.\n",
-            "\n🤯 That clearly blew some minds...or all of them.\n",
-            "\n🦗 *Crickets*\n",
-            "\n🧐 Must’ve been a tough one...\n",
-            "\n🤡 At least we’re all equally clueless!\n",
-            "\n💤 ...that question was the nap break, right?\n",
-            "\n🙈 Looks like nobody saw that one coming!\n",
-            "\n😬 Well, yikes. That’s awkward...\n",
-            "\n😵‍💫 I think we all just forgot how to trivia.\n",
-            "\n💡 Lightbulb moment? More like a power outage!\n",
-            "\n🎯 Missed by a mile! Anyone aiming?\n",
-            "\n🚶‍♂️ Um wow. I'll just see myself out.\n",
-            "\n🤪 What a brain twister...yikes!\n",
-            "\n🎱 Outlook not so good...for all of us.\n"
-        ]
-        message += random.choice(potential_messages)
-            
+                message += f"\n👥 {display_name}: {points}"
+                if points == 420:
+                    message += "🌿"
+
     # Send the entire message at once
     if message:
         send_message(target_room_id, message)
@@ -1816,8 +1694,6 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                     if room_id == target_room_id:  # Only process messages from the target room
                         for event in room_data.get("timeline", {}).get("events", []):
                             sender = event["sender"]
-                            if sender == bot_user_id:
-                                continue
                             display_name = get_display_name(event.get("content", {}).get("displayname", sender))  # Get the display name from content
                             
                             # Check if the user has already answered correctly, ignore if they have
@@ -1826,10 +1702,15 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
 
                             # Log user submission (MongoDB operation)
                             log_user_submission(display_name)
-                            
+
+                            emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
                             message_content = event.get("content", {}).get("body", "")
                             normalized_message_content = normalize_text(message_content)
-
+                        
+                            # Continue loop only if sender is bot_user_id and message contains one of the specified emojis
+                            if sender == bot_user_id and any(emoji in message_content for emoji in emojis):
+                                continue
+                                
                             # Indicate that there was at least one response
                             has_responses = True
                             
@@ -1902,36 +1783,14 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                         time_diff = response_time - fastest_response_time
                         if time_diff == 0:
                             message += f"\n⚡ {display_name}: {points}"
+                            if points == 420:
+                                message += "🌿"
                             if current_longest_answer_streak["streak"] > 1:
                                 message += f"  🔥{current_longest_answer_streak['streak']}"
-                            #message += f"\n💬 Answered: {message_content}"
-                            #if correct_responses_length > 1:
-                            #    message += f"\n\n👥 The Rest"
                         else:
-                            message += f"\n👥 {display_name}: {points} (+{round(time_diff, 1)}s)"
-                elif has_responses:  # Only if there were responses but none correct
-                    potential_messages = [
-                        "\n🥴 We've got a bunch of geniuses here...\n",
-                        "\n🤔 Did someone hide the thinking cap?\n",
-                        "\n😅 Well, that went right...off a cliff!\n",
-                        "\n🙃 The silence is deafening...\n",
-                        "\n🤷‍♂️ Hello? Anyone here?\n",
-                        "\n🧠 The brains have officially left the chat.\n",
-                        "\n🤯 That clearly blew some minds...or all of them.\n",
-                        "\n🦗 *Crickets*\n",
-                        "\n🧐 Must’ve been a tough one...\n",
-                        "\n🤡 At least we’re all equally clueless!\n",
-                        "\n💤 ...that question was the nap break, right?\n",
-                        "\n🙈 Looks like nobody saw that one coming!\n",
-                        "\n😬 Well, yikes. That’s awkward...\n",
-                        "\n😵‍💫 I think we all just forgot how to trivia.\n",
-                        "\n💡 Lightbulb moment? More like a power outage!\n",
-                        "\n🎯 Missed by a mile! Anyone aiming?\n",
-                        "\n🚶‍♂️ Um wow. I'll just see myself out.\n",
-                        "\n🤪 What a brain twister...yikes!\n",
-                        "\n🎱 Outlook not so good...for all of us.\n"
-                    ]
-                    message += random.choice(potential_messages)
+                            message += f"\n👥 {display_name}: {points}"
+                            if points == 420:
+                                message += "🌿"
             
                 # Send the entire message at once
                 if message:
@@ -2027,9 +1886,9 @@ def update_round_streaks(user):
         summary = generate_round_summary(round_data, user)
         # Determine the message to send
         if current_longest_round_streak["streak"] > 1:
-            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n{summary}\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n"
+            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n{summary}\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n"
         else:
-            message = f"\n🏆 Winner: @{user}!\n\n{summary}\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n"
+            message = f"\n🏆 Winner: @{user}!\n\n{summary}\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n"
 
         # Send the message
         send_message(target_room_id, message)
@@ -2072,24 +1931,19 @@ def show_standings():
             formatted_points = f"{points:,}"  # Format points with commas
             fastest_count = fastest_answers_count.get(user, 0)  # Get the user's fastest answer count, default to 0
             
-            if rank <= 3:
-                # Use medals for the top 3
-                if fastest_count > 0:
-                    standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}  ⚡{fastest_count}"
-                else:
-                    standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}"
+            lightning_display = f" ⚡{fastest_count}" if fastest_count > 1 else " ⚡" if fastest_count == 1 else ""
+            
+            if points == 420:
+                standing_message += f"\n🥴 {user}: {formatted_points}{lightning_display}"
+                
+            elif rank <= 3:
+                standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}{lightning_display}"
+                
             elif rank == len(standings) and rank > 4:
-                # For the last place person (who is not in the top 3), use the poop emoji
-                if fastest_count > 0:
-                    standing_message += f"\n💩 {user}: {formatted_points}  ⚡{fastest_count}"
-                else:
-                    standing_message += f"\n💩 {user}: {formatted_points}"
+                standing_message += f"\n💩 {user}: {formatted_points}{lightning_display}"
+                
             else:
-                # Use numbers for 4th place and beyond
-                if fastest_count > 0:
-                    standing_message += f"\n{rank}. {user}: {formatted_points}  ⚡{fastest_count}"
-                else:
-                    standing_message += f"\n{rank}. {user}: {formatted_points}"
+                standing_message += f"\n{rank}. {user}: {formatted_points}{lightning_display}"
         
         send_message(target_room_id, standing_message)
 
@@ -2138,6 +1992,7 @@ def select_trivia_questions(questions_per_round):
         recent_general_ids = get_recent_question_ids_from_mongo("general")
         recent_crossword_ids = get_recent_question_ids_from_mongo("crossword")
         recent_jeopardy_ids = get_recent_question_ids_from_mongo("jeopardy")
+        recent_mysterybox_ids = get_recent_question_ids_from_mongo("mysterybox")
 
         selected_questions = []
 
@@ -2145,6 +2000,17 @@ def select_trivia_questions(questions_per_round):
         modulo_range = 10  # Adjust this range based on performance testing
         random_modulo = random.randint(0, modulo_range - 1)
 
+
+         # Fetch mysterybox questions using the random subset method
+        mysterybox_collection = db["mysterybox_questions"]
+        pipeline_mysterybox = [
+            {"$match": {"_id": {"$nin": list(recent_mysterybox_ids)}}},
+            {"$sample": {"size": num_mysterybox_clues}}  # Apply sampling on the filtered subset
+        ]
+        mysterybox_questions = list(mysterybox_collection.aggregate(pipeline_mysterybox))
+        selected_questions.extend(mysterybox_questions)
+
+        
         # Fetch crossword questions using the random subset method
         crossword_collection = db["crossword_questions"]
         pipeline_crossword = [
@@ -2164,19 +2030,41 @@ def select_trivia_questions(questions_per_round):
         selected_questions.extend(jeopardy_questions)
 
         # Calculate the remaining questions needed for general trivia
-        remaining_needed = max(questions_per_round - len(crossword_questions) - len(jeopardy_questions), 0)
+        remaining_needed = max(questions_per_round - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions), 0)
 
         if remaining_needed > 0:
-            # Fetch general trivia questions, checking against general IDs
+
             trivia_collection = db["trivia_questions"]
+            # Define the maximum number of questions per category
+            max_questions_per_category = 2
+            
             pipeline_trivia = [
                 {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
-                {"$sample": {"size": remaining_needed}}  # Directly apply $sample for general trivia
+                {
+                    "$group": {
+                        "_id": "$category",
+                        "questions": {"$push": "$$ROOT"}  # Push full document to each category group
+                    }
+                },
+                {
+                    "$project": {
+                        "category": "$_id",
+                        "questions": {"$slice": ["$questions", max_questions_per_category]}  # Limit number of questions per category
+                    }
+                },
+                {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
+                {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
+                {"$sample": {"size": remaining_needed}}  # Sample from the resulting limited set
             ]
+            
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
 
             # Store separate sets of IDs in MongoDB only if they are non-empty
+            mysterybox_question_ids = [doc["_id"] for doc in mysterybox_questions]
+            if mysterybox_question_ids:
+                store_question_ids_in_mongo(mysterybox_question_ids, "mysterybox")
+            
             crossword_question_ids = [doc["_id"] for doc in crossword_questions]
             if crossword_question_ids:
                 store_question_ids_in_mongo(crossword_question_ids, "crossword")
@@ -2278,11 +2166,11 @@ def round_start_messages():
         else:
             # For users not in the Hall of Sovereigns, show all applicable messages
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n")
+                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
             elif top_count == 5:
-                send_message(target_room_id, f"🔥​  {username} is on fire! Only 1 leaderboard left.\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n")
+                send_message(target_room_id, f"🔥​  {username} is on fire! Only 1 leaderboard left.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
             elif top_count == 4:
-                send_message(target_room_id, f"🌡️  {username} is heating up! Only 2 leaderboards left.\n\n▶️ Live trivia stats available at https://stats.redditlivetrivia.com\n")
+                send_message(target_room_id, f"🌡️  {username} is heating up! Only 2 leaderboards left.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
     return None
 
 def generate_and_render_polynomial_image(): #POLY
@@ -2346,14 +2234,70 @@ def generate_and_render_polynomial_image(): #POLY
     else:
         print("Failed to upload the image to Matrix.")
 
+
 def round_preview(selected_questions):
+    numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     message = "\n🔮 Next Round Preview 🔮\n"
-    for i, question_data in enumerate(selected_questions, start=1):
-        category = question_data[0]  # Category of the question
-        message += f"{i}. {category}\n"
+    
+    for i, question_data in enumerate(selected_questions):
+        trivia_category = question_data[0]
+        trivia_url = question_data[2]
+        number_block = numbered_blocks[i] if i < len(numbered_blocks) else f"{i + 1}️⃣"  # Use fallback if needed
+        message += f"{number_block} {get_category_title(trivia_category, trivia_url)}\n"
+    
     message += "\n"
     # Send the message to the chat
     send_message(target_room_id, message)
+
+
+def get_category_title(trivia_category, trivia_url):
+    # Define the emoji lookup table
+    emoji_lookup = {
+        "Mystery Box or Boat": "🎁🛳️",
+        "Famous People": "👑🧑‍🎤",
+        "Anatomy": "🧠🫀",
+        "Characters": "🧙‍♂️🧛",
+        "Music": "🎶🎸",
+        "Art & Literature": "🎨📚",
+        "Chemistry": "🧪⚗️",
+        "Geography": "🧭🗺️",
+        "Mathematics": "➕➗",
+        "Physics": "⚛️🍎",
+        "Science & Nature": "🔬🌺",
+        "Language": "🗣️🔤",
+        "English Grammar": "📝✏️",
+        "Astronomy": "🪐🌙",
+        "Logos": "🏷️🔍",
+        "The World": "🌎🌍",
+        "Economics & Government": "💵⚖️",
+        "Toys & Games": "🧸🎲",
+        "Food & Drinks": "🍕🍹",
+        "Geology": "🪨🌋",
+        "Tech & Video Games": "💻🎮",
+        "Flags": "🏳️🏴",
+        "Miscellaneous": "🔀✨",
+        "Biology": "🧬🦠",
+        "Superheroes": "🦸‍♀️🦸",
+        "Television": "📺🎥",
+        "Pop Culture": "🎉🌟",
+        "History": "📜🕰️",
+        "Movies": "🎬🍿",
+        "Religion & Mythology": "🛐🐉",
+        "Sports & Leisure": "⚽🌴",
+        "World Culture": "🎭🗿",
+        "General Knowledge": "📚💡"
+    }
+
+    # Check if the question URL is "jeopardy"
+    if trivia_url.lower() == "jeopardy":
+        return f"{trivia_category} 🟦🇯"
+    # Otherwise, get the emojis based on the lookup table, defaulting to the category itself if not found
+    emojis = emoji_lookup.get(trivia_category, "😊😞")
+    return f"{trivia_category} {emojis}"
+
+
+
+
 
 def start_trivia_round():
     okra_gif_urls = [
@@ -2451,23 +2395,23 @@ def start_trivia_round():
         
             time.sleep(10)
 
-            #process_round_options(round_winner)
-            #time.sleep(2)
-            
-            print(f"categories to exclude are: {categories_to_exclude}")
+            process_round_options(round_winner)
+            time.sleep(2)
             
             if round_count % 5 == 0:
-                send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 This game has been a pure hobby effort.\n🛟 Help keep it going.\n\n☕ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 time.sleep(30)
                 round_preview(selected_questions)
                 time.sleep(30)
             else:
-                send_message(target_room_id, f"💡 Help me improve Live Trivia: https://forms.gle/iWvmN24pfGEGSy7n7\n\n⏳ Next round coming up.\n")
+                send_message(target_room_id, f"🛟 Help Okra keep it up\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 time.sleep(10)
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
+
+
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

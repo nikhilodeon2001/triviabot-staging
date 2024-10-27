@@ -2403,8 +2403,15 @@ def get_random_trivia_question():
         
             # Store the ID in MongoDB to avoid re-selection in future rounds
             store_question_ids_in_mongo([question_id], "general")
-        
-            return selected_question
+
+            final_selected_question = (
+                selected_question["category"],
+                selected_question["question"],
+                selected_question["url"],
+                selected_question["answers"]
+            )
+            
+            return final_selected_question
         else:
             print("No available questions found.")
             return None

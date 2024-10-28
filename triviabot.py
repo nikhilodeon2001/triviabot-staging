@@ -2389,6 +2389,10 @@ def get_player_selected_question(questions, round_winner):
         
                             # Ensure the delay value is within the allowed range (1-10)
                             question_number = max(1, min(question_number, 10))
+                            
+                            print(sender_display_name)
+                            print(message_content)
+                            print(question_number)
                             return question_number
                             
                         except ValueError:

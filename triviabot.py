@@ -2382,7 +2382,7 @@ def get_player_selected_question(questions, round_winner):
                 sender_display_name = get_display_name(sender)
         
                 # If the round winner responded, process the award accordingly
-                if sender_display_name == round_winner or sender_display_name == "OkraStrut":
+                if sender_display_name == round_winner or sender_display_name == "ChatBotTester":
                     if any(str(i) in message_content for i in range(1, 11)):
                         try:
                             question_number = int(''.join(filter(str.isdigit, message_content)))

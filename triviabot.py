@@ -90,7 +90,7 @@ num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
 god_mode_default = False
 god_mode = god_mode_default
-god_mode_points = 1000
+god_mode_points = 5000
 yolo_mode_default = False
 yolo_mode = yolo_mode_default
 
@@ -2382,7 +2382,7 @@ def get_player_selected_question(questions, round_winner):
                 sender_display_name = get_display_name(sender)
         
                 # If the round winner responded, process the award accordingly
-                if sender_display_name == round_winner or sender_display_name == "ChatBotTester":
+                if sender_display_name == round_winner or sender_display_name == "OkraStrut":
                     if any(str(i) in message_content for i in range(1, 11)):
                         try:
                             question_number = int(''.join(filter(str.isdigit, message_content)))

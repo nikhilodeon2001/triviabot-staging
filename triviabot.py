@@ -2422,6 +2422,7 @@ def get_player_selected_question(questions, round_winner):
 
     # Display categories for user selection
     categories = [q[0] for q in questions]
+    num_of_questions = len(questions)
     
     message = "\n" f"@{round_winner} choose a number: \n\n"
 
@@ -2470,12 +2471,12 @@ def get_player_selected_question(questions, round_winner):
         
                 # If the round winner responded, process the award accordingly
                 if sender_display_name == round_winner:
-                    if any(str(i) in message_content for i in range(1, 11)):
+                    if any(str(i) in message_content for i in range(1, num_of_questions + 1)):
                         try:
                             question_number = int(''.join(filter(str.isdigit, message_content)))
         
                             # Ensure the delay value is within the allowed range (1-10)
-                            question_number = max(1, min(question_number, 10))
+                            question_number = max(1, min(question_number, num_of_questions))
                             
                             print(sender_display_name)
                             print(message_content)
@@ -2497,10 +2498,10 @@ def refill_question_slot(questions, old_question):
     questions.remove(old_question)
     
     # Get a random new question from the database
-    new_question = get_random_trivia_question()
+    #new_question = get_random_trivia_question()
     
     # Append the new question to the end of the list to maintain order
-    questions.append(new_question)
+    #questions.append(new_question)
 
 
 def get_random_trivia_question():

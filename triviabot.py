@@ -463,7 +463,11 @@ def react_to_message(event_id, room_id, emoji_type):
         reaction_key = "8r21ukpfa7081.gif"
     elif emoji_type == "fastest":
         reaction_key = "foyijyyga7081.gif"
-
+    elif emoji_type == "okra":
+        reaction_key = "2o3aooqfa7081.gif"
+    else:
+        reaction_key = "2o3aooqfa7081.gif"
+        
     unique_event_id = f"m{int(time.time() * 1000)}"
     
     # Construct the URL for sending a reaction in Matrix
@@ -1647,6 +1651,9 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                             
         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         normalized_message_content = normalize_text(message_content)
+
+        if "okra" in message_content.lower():
+            react_to_message(event_id, target_room_id, "okra")
     
         # Indicate that there was at least one response
         has_responses = True

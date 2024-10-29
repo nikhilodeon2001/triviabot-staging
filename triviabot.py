@@ -1559,7 +1559,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
     Returns:
         A list of collected responses with usernames, response times, and message content.
     """
-    global since_token, headers, max_retries, delay_between_retries
+    global since_token, params, headers, max_retries, delay_between_retries
     sync_url = f"{matrix_base_url}/sync"
 
     collected_responses = []  # Store all responses

@@ -1584,7 +1584,9 @@ def collect_responses(question_ask_time, question_number, time_limit):
                 sender = event["sender"]
 
                 event_id = event["event_id"]
-                react_to_message(event_id, target_room_id)
+                #react_to_message(event_id, target_room_id)
+                print(f"eventid = {event_id}")
+                
                 
                 emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
                 message_content = event.get("content", {}).get("body", "")

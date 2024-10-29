@@ -255,8 +255,8 @@ def process_round_options(round_winner, winner_points):
     if winner_points >= god_mode_points:
         god_mode = True
         message = (
-        f"\n@{round_winner} has earned 🪖🫡🎖️ Dictator Mode 🎖️🫡🪖\n\n"
-        "You tell OkraStrut what to ask next round.\n"
+        f"\n@{round_winner} is 🍆🌭🎖Dick-tator🎖🌭🍆\n\n"
+        "Order OkraStrut on the order next round.\n"
         )
         send_message(target_room_id, message)
         time.sleep(3)

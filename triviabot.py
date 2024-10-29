@@ -459,14 +459,41 @@ def react_to_message(event_id, room_id, emoji_type):
     """React to a message in the Matrix room with a specified reaction."""
     global headers  # Assuming headers contain your authorization token and other required headers
 
-    if emoji_type == "correct":
-        reaction_key = "8r21ukpfa7081.gif"
-    elif emoji_type == "fastest":
-        reaction_key = "foyijyyga7081.gif"
-    elif emoji_type == "okra":
-        reaction_key = "2o3aooqfa7081.gif"
-    else:
-        reaction_key = "2o3aooqfa7081.gif"
+    emoji_reaction_map = {
+        "correct": "8r21ukpfa7081.gif",
+        "fastest": "foyijyyga7081.gif",
+        "okra1": "2o3aooqfa7081.gif",
+        "okra2": "jvuspmbga7081.gif",
+        "okra3": "ytv3x0sfa7081.png",
+        "okra4": "av9z8iiga7081.gif",
+        "okra5": "00brcfjga7081.gif",
+        "okra6": "ul2w17ega7081.gif",
+        "okra7": "t1djdguga7081.gif",
+        "okra8": "19b5q4vga7081.gif",
+        "okra9": "b5s6cohga7081.gif",
+        "okra10": "mag7v6tfa7081.gif",
+        "okra11": "iuqmp7ufa7081.gif",
+        "okra12": "zn7iubvfa7081.gif",
+        "okra13": "qzl5vyxfa7081.gif",
+        "okra14": "mi2jolzfa7081.gif",
+        "okra15": "k7ry7t1ga7081.gif",
+        "okra16": "tspuf53ga7081.gif",
+        "okra17": "evwks24ga7081.gif",
+        "okra18": "dfxygs4ga7081.gif",
+        "okra19": "ax7wu47ga7081.gif",
+        "okra20": "uy83aa8ga7081.gif",
+        "okra21": "t2r5xc9ga7081.gif",
+        "okra22": "ksz4fmaga7081.gif",
+        "okra23": "mp9zclcga7081.gif",
+        "okra24": "wbrgz1nga7081.gif",
+        "okra25": "pleyoikga7081.gif",
+        "okra26": "8kw138jyt7081.gif",
+        "okra27": "d2kn6yxga7081.gif",
+        "okra28": "79opsq0ha7081.gif"
+    }
+
+    # Retrieve the reaction_key based on emoji_type
+    reaction_key = emoji_reaction_map.get(emoji_type)
         
     unique_event_id = f"m{int(time.time() * 1000)}"
     
@@ -1654,8 +1681,11 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         normalized_message_content = normalize_text(message_content)
         
         if "okra" in message_content.lower():
-            react_to_message(event_id, target_room_id, "okra")
-    
+            # Loop through emoji types from "okra1" to "okra28"
+            for i in range(1, 29):
+                emoji_type = f"okra{i}"
+                react_to_message(event_id, target_room_id, emoji_type)
+            
         # Indicate that there was at least one response
         has_responses = True
                                 

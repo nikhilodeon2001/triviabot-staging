@@ -1566,6 +1566,8 @@ def collect_responses(question_ask_time, question_number, time_limit):
 
     collected_responses = []  # Store all responses
     start_time = time.time()  # Track when the question starts
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+
     
     while time.time() - start_time < time_limit:
         try:
@@ -1583,19 +1585,24 @@ def collect_responses(question_ask_time, question_number, time_limit):
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
             
             for event in room_events:
-                sender = event["sender"]
-
                 event_id = event["event_id"]
+
+                # Skip processing if this event_id was already processed
+                if event_id in processed_events:
+                    continue
+
+                # Add event_id to the set of processed events
+                processed_events.add(event_id)
+                
                 print(f"eventid = {event_id}")
                 print(event)
                 print("\n\n")
                 #react_to_message(event_id, target_room_id)
                 
-                
-                
-                emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
+                sender = event["sender"]
                 message_content = event.get("content", {}).get("body", "")
            
+                emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
                 if sender == bot_user_id and any(emoji in message_content for emoji in emojis):
                     continue
 

@@ -463,9 +463,11 @@ def react_to_message(event_id, room_id, emoji_type):
         reaction_key = "8r21ukpfa7081.gif"
     elif emoji_type == "fastest":
         reaction_key = "foyijyyga7081.gif"
+
+    unique_event_id = f"m{int(time.time() * 1000)}"
     
     # Construct the URL for sending a reaction in Matrix
-    reaction_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{room_id}/send/m.reaction/{event_id}"
+    reaction_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{room_id}/send/m.reaction/{unique_event_id}"
     
     # Prepare the JSON payload for the reaction
     payload = {
@@ -1680,8 +1682,6 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 fastest_correct_event_id = event_id
             
     if emoji_mode == True and fastest_correct_event_id is not None:
-        print("Reacting")
-        time.sleep(0.5)
         react_to_message(event_id, target_room_id, "fastest")
     
     # Now that we know the fastest responder, iterate over correct_responses to:

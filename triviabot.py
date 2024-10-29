@@ -2629,7 +2629,7 @@ def start_trivia_round():
             question_number = 1
             while question_number <= questions_per_round:
                 
-                if god_mode and round_winner:
+                if god_mode and round_winner and len(selected_questions)>1:
                     selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner) - 1]
                     
                 else:

@@ -511,9 +511,7 @@ def react_to_message(event_id, room_id, emoji_type):
     try:
         response = requests.put(reaction_url, json=payload, headers=headers)
         
-        if response.status_code == 200:
-            print(f"Successfully reacted to message {event_id} in room {room_id} with '{reaction_key}'")
-        else:
+        if response.status_code != 200:
             print(f"Failed to react to message {event_id}. Status code: {response.status_code}")
             print(response.text)
     

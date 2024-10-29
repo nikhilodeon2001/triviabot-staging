@@ -80,8 +80,9 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 id_limits = {"general": 20000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
 first_place_bonus = 0
-delete_messages_mode = int(os.getenv("delete_messages_mode"))
-delete_messages_mode_default = delete_messages_mode
+#delete_messages_mode = int(os.getenv("delete_messages_mode"))
+delete_messages_mode_default = 1
+delete_messages_mode = delete_messages_mode_default
 num_mysterybox_clues_default = 0
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
@@ -450,42 +451,38 @@ def redact_message(event_id, room_id):
 
 
 
+import requests
+
 def react_to_message(event_id, room_id):
-    """Redact a message from the Matrix room."""
+    """React to a message in the Matrix room with a specified reaction."""
     global headers  # Assuming headers contain your authorization token and other required headers
+
+    reaction_key="👍"
     
-    redact_url = "https://gql-fed.reddit.com/"
+    # Construct the URL for sending a reaction in Matrix
+    reaction_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{room_id}/send/m.reaction/{event_id}"
     
-    # Prepare the JSON payload for the redaction request
+    # Prepare the JSON payload for the reaction
     payload = {
-        "variables": {
-            "input": {
-                "id": f"MATRIXCHAT_{room_id}_{event_id}",
-                "isSpam": False
-            }
-        },
-        "operationName": "ModRemove",
-        "extensions": {
-            "persistedQuery": {
-                "version": 1,
-                "sha256Hash": "38f732367e2193a050c90a3b71793d4133a54a49ce8a7c6cae65cd581d36ee26"
-            }
+        "m.relates_to": {
+            "event_id": event_id,  # The event ID you are reacting to
+            "key": reaction_key,   # The emoji or reaction content
+            "rel_type": "m.annotation"  # Defines this as a reaction
         }
     }
 
-    # Send the POST request to redact the message
+    # Send the PUT request to react to the message
     try:
-        response = requests.post(redact_url, json=payload, headers=headers)
+        response = requests.put(reaction_url, json=payload, headers=headers)
         
-        if response.status_code != 200:
-            print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
+        if response.status_code == 200:
+            print(f"Successfully reacted to message {event_id} in room {room_id} with '{reaction_key}'")
+        else:
+            print(f"Failed to react to message {event_id}. Status code: {response.status_code}")
             print(response.text)
     
     except requests.exceptions.RequestException as e:
-        print(f"Error redacting message {event_id}: {e}")
-
-
-
+        print(f"Error reacting to message {event_id}: {e}")
 
 
 def generate_median_question():
@@ -1587,6 +1584,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
                 sender = event["sender"]
 
                 event_id = event["event_id"]
+                react_to_message(event_id, target_room_id)
                 
                 emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
                 message_content = event.get("content", {}).get("body", "")
@@ -1595,7 +1593,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
                     continue
 
                 # Redact the message immediately
-                redact_message(event_id, target_room_id)
+                #redact_message(event_id, target_room_id)
                 response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
 
                 # Store response data

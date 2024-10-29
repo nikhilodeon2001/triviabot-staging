@@ -1680,6 +1680,8 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 fastest_correct_event_id = event_id
             
     if emoji_mode == True and fastest_correct_event_id is not None:
+        print("Reacting")
+        time.sleep(0.5)
         react_to_message(event_id, target_room_id, "fastest")
     
     # Now that we know the fastest responder, iterate over correct_responses to:

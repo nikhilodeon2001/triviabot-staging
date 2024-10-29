@@ -1585,6 +1585,8 @@ def collect_responses(question_ask_time, question_number, time_limit):
 
                 event_id = event["event_id"]
                 print(f"eventid = {event_id}")
+                print(event)
+                print("\n\n")
                 react_to_message(event_id, target_room_id)
                 
                 

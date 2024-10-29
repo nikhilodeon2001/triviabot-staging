@@ -1601,7 +1601,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
                     print(f"eventid = {event_id}")
                     print(event)
                     print("\n\n")
-                    #react_to_message(event_id, target_room_id)
+                    react_to_message(event_id, target_room_id)
                     
                     sender = event["sender"]
                     message_content = event.get("content", {}).get("body", "")
@@ -1611,7 +1611,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
                         continue
     
                     # Redact the message immediately
-                    redact_message(event_id, target_room_id)
+                    #redact_message(event_id, target_room_id)
                     response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
     
                     # Store response data

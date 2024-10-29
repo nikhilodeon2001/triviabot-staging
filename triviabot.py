@@ -1714,7 +1714,10 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
     # Construct a single message for all the responses
-    message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
+    if ghost_mode == True:
+        message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
+    else:
+        message = f"\n✅ Answer ✅\n{trivia_answer}\n"
             
     # Notify the chat
     if correct_responses:    
@@ -1855,8 +1858,7 @@ def check_correct_responses(question_ask_time, trivia_answer_list, question_numb
                     current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
                 # Construct a single message for all the responses
-                message = ""
-                message += f"\n✅ Answer ✅\n{trivia_answer}\n"
+                message = f"\n✅ Answer ✅\n{trivia_answer}\n"
             
                 # Notify the chat
                 if correct_responses:    

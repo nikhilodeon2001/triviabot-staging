@@ -1681,10 +1681,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         normalized_message_content = normalize_text(message_content)
         
         if "okra" in message_content.lower():
-            # Loop through emoji types from "okra1" to "okra28"
-            for i in range(1, 29):
-                emoji_type = f"okra{i}"
-                react_to_message(event_id, target_room_id, emoji_type)
+            react_to_message(event_id, target_room_id, "okra1")
             
         # Indicate that there was at least one response
         has_responses = True

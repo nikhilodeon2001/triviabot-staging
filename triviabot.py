@@ -459,9 +459,9 @@ def react_to_message(event_id, room_id, emoji_type):
     """React to a message in the Matrix room with a specified reaction."""
     global headers  # Assuming headers contain your authorization token and other required headers
 
-    if emoji_type = "correct":
+    if emoji_type == "correct":
         reaction_key = "8r21ukpfa7081.gif"
-    elif emoji_type = "fastest":
+    elif emoji_type == "fastest":
         reaction_key = "foyijyyga7081.gif"
     
     # Construct the URL for sending a reaction in Matrix

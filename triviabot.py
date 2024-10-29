@@ -445,6 +445,8 @@ def redact_message(event_id, room_id):
         if response.status_code != 200:
             print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
             print(response.text)
+        else:
+            print(f"Successfully redacted message {event_id}.")
     
     except requests.exceptions.RequestException as e:
         print(f"Error redacting message {event_id}: {e}")
@@ -1587,7 +1589,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
                 print(f"eventid = {event_id}")
                 print(event)
                 print("\n\n")
-                react_to_message(event_id, target_room_id)
+                #react_to_message(event_id, target_room_id)
                 
                 
                 
@@ -1598,7 +1600,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
                     continue
 
                 # Redact the message immediately
-                #redact_message(event_id, target_room_id)
+                redact_message(event_id, target_room_id)
                 response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
 
                 # Store response data

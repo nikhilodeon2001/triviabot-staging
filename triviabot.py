@@ -80,23 +80,23 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 id_limits = {"general": 20000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
 first_place_bonus = 0
-#delete_messages_mode = int(os.getenv("delete_messages_mode"))
-delete_messages_mode_default = 1
-delete_messages_mode = delete_messages_mode_default
+
+
 num_mysterybox_clues_default = 0
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
 num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
+ghost_mode_default = False
+ghost_mode = ghost_mode_default
 god_mode_default = False
 god_mode = god_mode_default
 god_mode_points = 5000
 yolo_mode_default = False
 yolo_mode = yolo_mode_default
-
-
-
+emoji_mode_default = True
+emoji_mode = emoji_mode_default
 
 
 question_categories = [
@@ -224,9 +224,9 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, delete_messages_mode, since_token, delete_messages_mode_default, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, god_mode, yolo_mode
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, god_mode, yolo_mode
     time_between_questions = time_between_questions_default
-    delete_messages_mode = delete_messages_mode_default
+    ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
     num_crossword_clues = num_crossword_clues_default
     num_jeopardy_clues = num_jeopardy_clues_default
@@ -263,7 +263,7 @@ def process_round_options(round_winner, winner_points):
 
 
 def prompt_user_for_response(round_winner):
-    global since_token, time_between_questions, delete_messages_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, yolo_mode
+    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, yolo_mode
     
     # Call initialize_sync to set since_token
     initialize_sync()
@@ -339,7 +339,7 @@ def prompt_user_for_response(round_winner):
                         send_message(target_room_id, f"🤘🔥 @{round_winner} has nixed all scores.\n")
         
                     #if "ghost" in message_content.lower():
-                    #    delete_messages_mode = 1
+                    #    ghost_mode = 1
                     #    send_message(target_room_id, f"👻👻 @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
 
     except requests.exceptions.RequestException as e:
@@ -455,11 +455,14 @@ def redact_message(event_id, room_id):
 
 import requests
 
-def react_to_message(event_id, room_id):
+def react_to_message(event_id, room_id, emoji_type):
     """React to a message in the Matrix room with a specified reaction."""
     global headers  # Assuming headers contain your authorization token and other required headers
 
-    reaction_key = "jvuspmbga7081.gif"
+    if emoji_type = "correct":
+        reaction_key = "8r21ukpfa7081.gif"
+    elif emoji_type = "fastest":
+        reaction_key = "foyijyyga7081.gif"
     
     # Construct the URL for sending a reaction in Matrix
     reaction_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{room_id}/send/m.reaction/{event_id}"
@@ -1550,17 +1553,6 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
     return False  # No match found
 
 def collect_responses(question_ask_time, question_number, time_limit):
-    """
-    Collect all responses submitted by users during the time limit.
-    
-    Args:
-        question_ask_time: The timestamp when the question was asked.
-        question_number: The current question number.
-        time_limit: Time in seconds to allow for answers.
-    
-    Returns:
-        A list of collected responses with usernames, response times, and message content.
-    """
     global since_token, params, headers, max_retries, delay_between_retries
     sync_url = f"{matrix_base_url}/sync"
 
@@ -1597,13 +1589,8 @@ def collect_responses(question_ask_time, question_number, time_limit):
     
                     # Add event_id to the set of processed events
                     processed_events.add(event_id)
-                    
-                    print(f"eventid = {event_id}")
-                    print(event)
-                    print("\n\n")
-                    react_to_message(event_id, target_room_id)
-                    
                     sender = event["sender"]
+                    
                     message_content = event.get("content", {}).get("body", "")
                
                     emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
@@ -1611,14 +1598,17 @@ def collect_responses(question_ask_time, question_number, time_limit):
                         continue
     
                     # Redact the message immediately
-                    #redact_message(event_id, target_room_id)
+                    if ghost_mode == True:
+                        redact_message(event_id, target_room_id)
+                        
                     response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
     
                     # Store response data
                     collected_responses.append({
                         "user_id": sender,
                         "message_content": message_content,
-                        "response_time": response_time
+                        "response_time": response_time,
+                        "event_id": event_id
                     })
 
         except requests.exceptions.RequestException as e:
@@ -1639,6 +1629,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
 
     fastest_correct_user = None
     fastest_response_time = None
+    fastest_correct_event_id = None
 
     # Process collected responses
     for response in collected_responses:
@@ -1668,6 +1659,9 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                                 
         # Check if the user's response is in the list of correct answers
         if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
+            event_id = response["event_id"]
+            if emoji_mode == True:
+                react_to_message(event_id, target_room_id, "correct")
             
             timestamp = response["response_time"]  # Use the response time from the collected data
             if timestamp and question_ask_time:
@@ -1683,8 +1677,11 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
             if fastest_correct_user is None or response_time < fastest_response_time:
                 fastest_correct_user = display_name
                 fastest_response_time = response_time
+                fastest_correct_event_id = event_id
             
-             
+    if emoji_mode == True and fastest_correct_event_id is not None:
+        react_to_message(event_id, target_room_id, "fastest")
+    
     # Now that we know the fastest responder, iterate over correct_responses to:
     # - Assign the extra 500 points to the fastest user
     # - Update the scoreboard for all users
@@ -2546,7 +2543,7 @@ def start_trivia_round():
 # Function to start the trivia round
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
-    global headers, params, filter_json, since_token, round_count, delete_messages_mode, selected_questions
+    global headers, params, filter_json, since_token, round_count, selected_questions
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
@@ -2613,18 +2610,13 @@ def start_trivia_round():
                 # Ask the trivia question and get start times
                 question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
                 
-                if delete_messages_mode == 1:
-                    collected_responses = collect_responses(question_time, question_number, question_time)
-                else:
-                    time.sleep(question_time)  # Wait for n seconds for answers
-
+                collected_responses = collect_responses(question_time, question_number, question_time)
+                
                 send_message(target_room_id, f"\n🛑 TIME 🛑\n")
+                
                 solution_list = trivia_answer_list if new_solution is None else [new_solution]
                 
-                if delete_messages_mode == 1:
-                    check_correct_responses_delete(question_ask_time, trivia_answer_list, question_number, collected_responses)
-                else:
-                    check_correct_responses(question_ask_time, solution_list, question_number)
+                check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses)
                 
                 if not yolo_mode or question_number == questions_per_round:
                     show_standings()
@@ -2633,6 +2625,7 @@ def start_trivia_round():
                 refill_question_slot(selected_questions, selected_question)
 
                 time.sleep(time_between_questions)  # Small delay before the next question
+                
                 question_number = question_number + 1
                 
             #Determine the round winner
@@ -2645,24 +2638,21 @@ def start_trivia_round():
             round_count += 1
         
             time.sleep(10)
-
             process_round_options(round_winner, winner_points)
             time.sleep(3)
             
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(30)
+                time.sleep(10)
                 round_preview(selected_questions)
-                time.sleep(30)
+                time.sleep(10)
             else:
                 send_message(target_room_id, f"🛟 Help Okra keep it up\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(15)
+                time.sleep(10)
                 round_preview(selected_questions)
-                time.sleep(15)  # Adjust this time to whatever delay you need between rounds
-
-
+                time.sleep(10)  # Adjust this time to whatever delay you need between rounds
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

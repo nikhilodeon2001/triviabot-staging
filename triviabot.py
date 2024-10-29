@@ -92,7 +92,7 @@ ghost_mode_default = False
 ghost_mode = ghost_mode_default
 god_mode_default = False
 god_mode = god_mode_default
-god_mode_points = 100
+god_mode_points = 5000
 yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
@@ -2473,10 +2473,6 @@ def get_player_selected_question(questions, round_winner):
         
                             # Ensure the delay value is within the allowed range (1-10)
                             question_number = max(1, min(question_number, num_of_questions))
-                            print(sender_display_name)
-                            print(num_of_questions)                           
-                            print(message_content)
-                            print(question_number)
                             return question_number
                             
                         except ValueError:

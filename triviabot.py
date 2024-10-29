@@ -1680,7 +1680,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         normalized_message_content = normalize_text(message_content)
         
-        if "okra" in message_content.lower():
+        if "okra" in message_content.lower() and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra1")
             
         # Indicate that there was at least one response
@@ -1695,10 +1695,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
             })
                                 
         # Check if the user's response is in the list of correct answers
-        if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
-            if emoji_mode == True:
-                react_to_message(event_id, target_room_id, "correct")
-            
+        if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):            
             timestamp = response["response_time"]  # Use the response time from the collected data
             if timestamp and question_ask_time:
                 # Convert timestamp to seconds
@@ -1716,7 +1713,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 fastest_correct_event_id = event_id
             
     if emoji_mode == True and fastest_correct_event_id is not None:
-        react_to_message(event_id, target_room_id, "fastest")
+        react_to_message(fastest_correct_event_id, target_room_id, "fastest")
     
     # Now that we know the fastest responder, iterate over correct_responses to:
     # - Assign the extra 500 points to the fastest user
@@ -2569,13 +2566,9 @@ def start_trivia_round():
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra3.gif",
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra4.gif",
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra5.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra6.gif",
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra7.gif",
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra8.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra9.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra10.gif"
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra11.gif"
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra12.gif"
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra11.gif",
     ]
     
 # Function to start the trivia round
@@ -2614,6 +2607,7 @@ def start_trivia_round():
 
             # Select a random GIF URL
             selected_gif_url = random.choice(okra_gif_urls)
+            print(selected_gif_url)
 
             # Send the selected GIF
             image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
@@ -2626,7 +2620,7 @@ def start_trivia_round():
 
             round_start_messages()
 
-            time.sleep(8)
+            time.sleep(5)
 
             # Randomly select n questions
             print() 

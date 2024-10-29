@@ -445,8 +445,6 @@ def redact_message(event_id, room_id):
         if response.status_code != 200:
             print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
             print(response.text)
-        else:
-            print(f"Successfully redacted message {event_id}.")
     
     except requests.exceptions.RequestException as e:
         print(f"Error redacting message {event_id}: {e}")
@@ -2477,10 +2475,6 @@ def get_player_selected_question(questions, round_winner):
         
                             # Ensure the delay value is within the allowed range (1-10)
                             question_number = max(1, min(question_number, num_of_questions))
-                            
-                            print(sender_display_name)
-                            print(message_content)
-                            print(question_number)
                             return question_number
                             
                         except ValueError:

@@ -457,7 +457,7 @@ def react_to_message(event_id, room_id):
     """React to a message in the Matrix room with a specified reaction."""
     global headers  # Assuming headers contain your authorization token and other required headers
 
-    reaction_key="👍"
+    reaction_key = "jvuspmbga7081.gif"
     
     # Construct the URL for sending a reaction in Matrix
     reaction_url = f"https://matrix.redditspace.com/_matrix/client/v3/rooms/{room_id}/send/m.reaction/{event_id}"

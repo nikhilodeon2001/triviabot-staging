@@ -1586,36 +1586,40 @@ def collect_responses(question_ask_time, question_number, time_limit):
             
             for event in room_events:
                 event_id = event["event_id"]
+                event_type = event.get("type")  # Get the type of the event
 
-                # Skip processing if this event_id was already processed
-                if event_id in processed_events:
-                    continue
-
-                # Add event_id to the set of processed events
-                processed_events.add(event_id)
-                
-                print(f"eventid = {event_id}")
-                print(event)
-                print("\n\n")
-                #react_to_message(event_id, target_room_id)
-                
-                sender = event["sender"]
-                message_content = event.get("content", {}).get("body", "")
-           
-                emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
-                if sender == bot_user_id and any(emoji in message_content for emoji in emojis):
-                    continue
-
-                # Redact the message immediately
-                redact_message(event_id, target_room_id)
-                response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
-
-                # Store response data
-                collected_responses.append({
-                    "user_id": sender,
-                    "message_content": message_content,
-                    "response_time": response_time
-                })
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    
+                    print(f"eventid = {event_id}")
+                    print(event)
+                    print("\n\n")
+                    #react_to_message(event_id, target_room_id)
+                    
+                    sender = event["sender"]
+                    message_content = event.get("content", {}).get("body", "")
+               
+                    emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
+                    if sender == bot_user_id and any(emoji in message_content for emoji in emojis):
+                        continue
+    
+                    # Redact the message immediately
+                    redact_message(event_id, target_room_id)
+                    response_time = event.get("origin_server_ts") / 1000  # Convert to seconds
+    
+                    # Store response data
+                    collected_responses.append({
+                        "user_id": sender,
+                        "message_content": message_content,
+                        "response_time": response_time
+                    })
 
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)

@@ -1640,8 +1640,9 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     # Process collected responses
     for response in collected_responses:
         sender = response["user_id"]
+        event_id = response["event_id"]
         display_name = get_display_name(sender)  # Get the display name from content
-                            
+        
         # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):
             continue  # Ignore this response since the user has already answered correctly
@@ -1651,7 +1652,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                             
         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         normalized_message_content = normalize_text(message_content)
-
+        
         if "okra" in message_content.lower():
             react_to_message(event_id, target_room_id, "okra")
     
@@ -1668,7 +1669,6 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                                 
         # Check if the user's response is in the list of correct answers
         if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
-            event_id = response["event_id"]
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "correct")
             

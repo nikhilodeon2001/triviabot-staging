@@ -449,6 +449,45 @@ def redact_message(event_id, room_id):
         print(f"Error redacting message {event_id}: {e}")
 
 
+
+def react_to_message(event_id, room_id):
+    """Redact a message from the Matrix room."""
+    global headers  # Assuming headers contain your authorization token and other required headers
+    
+    redact_url = "https://gql-fed.reddit.com/"
+    
+    # Prepare the JSON payload for the redaction request
+    payload = {
+        "variables": {
+            "input": {
+                "id": f"MATRIXCHAT_{room_id}_{event_id}",
+                "isSpam": False
+            }
+        },
+        "operationName": "ModRemove",
+        "extensions": {
+            "persistedQuery": {
+                "version": 1,
+                "sha256Hash": "38f732367e2193a050c90a3b71793d4133a54a49ce8a7c6cae65cd581d36ee26"
+            }
+        }
+    }
+
+    # Send the POST request to redact the message
+    try:
+        response = requests.post(redact_url, json=payload, headers=headers)
+        
+        if response.status_code != 200:
+            print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
+            print(response.text)
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Error redacting message {event_id}: {e}")
+
+
+
+
+
 def generate_median_question():
     """
     Generate a question asking for the median of a set of random numbers.

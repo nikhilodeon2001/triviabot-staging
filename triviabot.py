@@ -298,7 +298,7 @@ def prompt_user_for_response(round_winner):
                 sender_display_name = get_display_name(sender)
         
                 # If the round winner responded, process the award accordingly
-                if sender_display_name == round_winner or sender_display_name == "OkraStrut":
+                if sender_display_name == round_winner:
                     if any(str(i) in message_content for i in range(3, 16)):
                         try:
                             delay_value = int(''.join(filter(str.isdigit, message_content)))
@@ -2351,7 +2351,7 @@ def get_player_selected_question(questions, round_winner):
     send_message(target_room_id, message)
 
     initialize_sync()
-    time.sleep(7)
+    time.sleep(10)
 
      # Fetch responses
     sync_url = f"{matrix_base_url}/sync"
@@ -2382,7 +2382,7 @@ def get_player_selected_question(questions, round_winner):
                 sender_display_name = get_display_name(sender)
         
                 # If the round winner responded, process the award accordingly
-                if sender_display_name == round_winner or sender_display_name == "OkraStrut":
+                if sender_display_name == round_winner:
                     if any(str(i) in message_content for i in range(1, 11)):
                         try:
                             question_number = int(''.join(filter(str.isdigit, message_content)))
@@ -2478,7 +2478,14 @@ def start_trivia_round():
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra2.gif",
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra3.gif",
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra4.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra5.gif"
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra5.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra6.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra7.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra8.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra9.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra10.gif"
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra11.gif"
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra12.gif"
     ]
     
 # Function to start the trivia round
@@ -2529,7 +2536,7 @@ def start_trivia_round():
 
             round_start_messages()
 
-            #time.sleep(8)
+            time.sleep(8)
 
             # Randomly select n questions
             print() 

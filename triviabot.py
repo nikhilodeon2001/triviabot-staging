@@ -2404,7 +2404,8 @@ def print_selected_questions(selected_questions):
 
 
 def round_start_messages():
-        
+
+    print("entering round start")
     db = connect_to_mongodb()
     top_users = list(db.top_users.find())
     sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
@@ -2747,7 +2748,6 @@ def start_trivia_round():
             
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
             round_start_messages()
-            time.sleep(2)
 
             if random.random() < 0.5:  # random.random() generates a float between 0 and 1
                 magic_number = random_number = random.randint(1000, 9999)

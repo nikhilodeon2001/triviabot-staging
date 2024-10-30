@@ -119,7 +119,7 @@ categories_to_exclude = []
 
 
 def generate_magic_image(input_text):
-global since_token, params, headers, max_retries, delay_between_retries, magic_users
+    global since_token, params, headers, max_retries, delay_between_retries, magic_users
 
     command = [
         "python", "main.py", 

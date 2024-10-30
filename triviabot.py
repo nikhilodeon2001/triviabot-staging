@@ -85,6 +85,8 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 id_limits = {"general": 20000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
 first_place_bonus = 0
+magic_time = 10
+magic_users = []
 
 
 num_mysterybox_clues_default = 0
@@ -117,7 +119,8 @@ categories_to_exclude = []
 
 
 def generate_magic_image(input_text):
-# Command to run main.py with the required arguments
+global since_token, params, headers, max_retries, delay_between_retries, magic_users
+
     command = [
         "python", "main.py", 
         "--text", str(input_text), 
@@ -146,6 +149,60 @@ def generate_magic_image(input_text):
     
         if response is None:                      
             print("Error: Failed to send image.")
+
+        sync_url = f"{matrix_base_url}/sync"
+    
+        collected_responses = []  # Store all responses
+        
+        processed_events = set()  # Track processed event IDs to avoid duplicates
+    
+        start_time = time.time()  # Track when the question starts
+        while time.time() - start_time < magic_time:
+            try:
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+    
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+                
+                for event in room_events:
+                    event_id = event["event_id"]
+                    event_type = event.get("type")  # Get the type of the event
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+
+                        if sender == bot_user_id:
+                            continue
+
+                        if input_text.lower() in message_content.lower():
+                            magic_users.append(sender_display_name)
+                            print(f"{sender_display_name} sent {input_text}")
+                        
+
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting responses: {e}")
+
+    return collected_responses
+        
     
 
     except subprocess.CalledProcessError as e:
@@ -2647,7 +2704,6 @@ def start_trivia_round():
 
             """Start a round of n trivia questions."""   
             generate_magic_image(1234)
-            time.sleep(5)
             
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
             

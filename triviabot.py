@@ -194,7 +194,8 @@ def generate_magic_image(input_text):
 
                         if str(input_text).lower() in str(message_content).lower():
                             magic_users.append(sender_display_name)
-                            print(f"{sender_display_name} sent {input_text}")    
+                            print(f"{sender_display_name} sent {input_text}")  
+                            print(magic_users)
 
             except requests.exceptions.RequestException as e:
                 sentry_sdk.capture_exception(e)
@@ -834,6 +835,15 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
+    elif winner in magic_users:
+         prompt = (
+            f"The winner of the trivia round is {winner}. "
+            "Love bomb the winning player about their username and be very specific, positive, and loving. Compliment specific responses they gave during the round and talk about how much beter they are than eveyone else, including OkraStrut."
+            "Create no more than 5 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+    
     else:
         prompt = (
             f"The winner of the trivia round is {winner}. "
@@ -879,17 +889,43 @@ def generate_round_summary(round_data, winner):
 
     # Use OpenAI's API to generate the summary
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a bitter, dirty, and raunchy old man who is completely fed up with all the trivia players."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=200,
-            n=1,
-            stop=None,
-            temperature=0.8,
-        )
+        if winner == "OkraStrut":
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are OkraStrut, an arrogant trivia master who always wins."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=200,
+                n=1,
+                stop=None,
+                temperature=0.8,
+
+        elif winner in magic_users:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a loving old man who is completely in love with the winning trivia player."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=200,
+                n=1,
+                stop=None,
+                temperature=0.8,
+            )
+            
+        else:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a bitter, dirty, and raunchy old curmudgeon who is completely fed up with all the trivia players."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=200,
+                n=1,
+                stop=None,
+                temperature=0.8,
+            )
 
         # Extract the generated summary from the response
         summary = response.choices[0].message['content'].strip()

@@ -1,3 +1,4 @@
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -246,24 +247,19 @@ def process_round_options(round_winner, winner_points):
         "🟦❌ Trebek:  0 Jeopardy questions\n"
         "🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
-        "\nYou have 10 seconds."
     )
 
-    send_message(target_room_id, message)
-    prompt_user_for_response(round_winner)
-
     if winner_points >= god_mode_points:
-        god_mode = True
-        message = (
-        f"\n@{round_winner} is 🍆🌭🎖Dick-tator🎖🌭🍆\n\n"
-        "Order OkraStrut in the order next round.\n"
-        )
-        send_message(target_room_id, message)
-        time.sleep(3)
+        message += "🎖🍆 Dicktator: Control the question order\n"
+
+    message += "\nYou have 10 seconds."
+
+    send_message(target_room_id, message)
+    prompt_user_for_response(round_winner, winner_points)
 
 
-def prompt_user_for_response(round_winner):
-    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, yolo_mode
+def prompt_user_for_response(round_winner, winner_points):
+    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, yolo_mode, god_mode
     
     # Call initialize_sync to set since_token
     initialize_sync()
@@ -337,6 +333,10 @@ def prompt_user_for_response(round_winner):
                     if "yolo" in message_content.lower():
                         yolo_mode = True
                         send_message(target_room_id, f"🤘🔥 @{round_winner} has nixed all scores.\n")
+
+                    if "dicktator" in message_content.lower() and winner_points >= god_mode_points:
+                        god_mode = True
+                        send_message(target_room_id, f"🎖🍆 @{round_winner} is a dick.\n")
         
                     #if "ghost" in message_content.lower():
                     #    ghost_mode = 1

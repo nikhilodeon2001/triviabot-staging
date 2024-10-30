@@ -2758,7 +2758,7 @@ def start_trivia_round():
                 print(selected_gif_url)
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-                time.sleep(3)
+                time.sleep(7)
                 
             # Randomly select n questions
             print() 

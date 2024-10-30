@@ -497,8 +497,14 @@ def main():
     parsed_args = obtain_args()
     t0 = time.time()
     i = make_stereogram(parsed_args)
-    return i
 
+    # Convert the image to bytes
+    img_byte_arr = io.BytesIO()
+    i.save(img_byte_arr, format="PNG")
+    img_byte_arr = img_byte_arr.getvalue()
+
+    # Write the bytes to stdout
+    sys.stdout.buffer.write(img_byte_arr)
 
 if __name__ == "__main__":
     main()

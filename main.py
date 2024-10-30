@@ -9,6 +9,7 @@ import re
 import codecs
 import time
 from random import choice, random
+import io
 
 # This "PIL" refers to Pillow, the PIL fork. Check https://pillow.readthedocs.io/en/
 from PIL import Image as im

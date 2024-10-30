@@ -118,38 +118,38 @@ categories_to_exclude = []
 
 def generate_magic_image(input_text):
 # Command to run main.py with the required arguments
-command = [
-    "python", "main.py", 
-    "--text", input_text, 
-    "--dots", 
-    "--wall", 
-    "--output", ".", 
-    "--font", "/Library/Fonts/Arial.ttf"
-]
-
-# Run the command using subprocess
-try:
-    image_data = subprocess.run(command, capture_output=True, text=True, check=True)
-
-    image_width, image_height = image_data.size
-    image_mxc = upload_image_to_matrix(image_data)
-    image_size = 100
+    command = [
+        "python", "main.py", 
+        "--text", input_text, 
+        "--dots", 
+        "--wall", 
+        "--output", ".", 
+        "--font", "/Library/Fonts/Arial.ttf"
+    ]
     
+    # Run the command using subprocess
+    try:
+        image_data = subprocess.run(command, capture_output=True, text=True, check=True)
     
-    message = "\nWhat's the secret code below?\n"
-    send_message(target_room_id, message)
+        image_width, image_height = image_data.size
+        image_mxc = upload_image_to_matrix(image_data)
+        image_size = 100
+        
+        
+        message = "\nWhat's the secret code below?\n"
+        send_message(target_room_id, message)
+    
+        response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
+    
+        if response is None:                      
+            print("Error: Failed to send image.")
+    
+        # Return the content_uri, image width, height, and the answer
+        return content_uri, img_width, img_height
 
-    response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
-
-    if response is None:                      
-        print("Error: Failed to send image.")
-
-    # Return the content_uri, image width, height, and the answer
-    return content_uri, img_width, img_height
-
-except subprocess.CalledProcessError as e:
-    print(f"Error occurred while running main.py: {e}")
-    print("Error output:", e.stderr)
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred while running main.py: {e}")
+        print("Error output:", e.stderr)
 
 def generate_jeopardy_image(question_text):
     # Define the background color and text properties

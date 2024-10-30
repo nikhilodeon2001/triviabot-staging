@@ -1441,7 +1441,9 @@ def send_image(room_id, image_mxc, image_width, image_height, image_size): #IMAG
                 
             else:
                 print(f"Failed to send message. Status code: {response.status_code}")
-                
+                print("Response content:", response.content.decode())  # Decodes bytes to string if necessary
+                print("Response JSON:", response.json())  # Prints JSON if available
+        
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Error: {e}")

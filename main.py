@@ -324,7 +324,7 @@ def make_depth_text(text, font=DEFAULT_DEPTHTEXT_FONT, canvas_size=(800, 600)):
     fnt = imf.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
     while fnt.getbbox(text)[2] < canvas_size[0]*0.9 and fnt.getbbox(text)[3] < canvas_size[1]*0.9:
         font_size += 1
-        fnt = imf.truetype(fontpath, font_size)
+        fnt = imf.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
     imd.Draw(i).text(
         ((canvas_size[0] / 2 - fnt.getbbox(text)[2] / 2,
         canvas_size[1] / 2 - fnt.getbbox(text)[3] / 2)),

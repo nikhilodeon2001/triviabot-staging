@@ -126,19 +126,19 @@ def generate_magic_image(input_text):
         "--output", ".", 
         "--font", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
     ]
-
-
-
-
-    
+  
     # Run the command using subprocess
     try:
-        image_data = subprocess.run(command, capture_output=True, text=True, check=True)
-    
+        result = subprocess.Popen(command, stdout=subprocess.PIPE)
+        image_data, _ = result.communicate()  # Capture binary image data from stdout
+
+        # Convert the binary data to an Image object
+        image = Image.open(io.BytesIO(image_data))
+        image_width, image_height = image.size
+        
         image_width, image_height = image_data.size
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
-        
         
         message = "\nWhat's the secret code below?\n"
         send_message(target_room_id, message)

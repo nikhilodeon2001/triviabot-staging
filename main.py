@@ -496,27 +496,10 @@ def return_http_response(code, text):
 
 
 def main():
-    log.i("--- Started generation ---")
     parsed_args = obtain_args()
-    #log.d("Arguments: ")
-    #for key in vars(parsed_args):
-        #log.d("\t {}: {}".format(key, getattr(parsed_args, key)))
     t0 = time.time()
     i = make_stereogram(parsed_args)
-    if not parsed_args.output:
-        #log.i("Process finished successfully after {0:.2f}s".format(time.time() - t0))
-        #log.i("No output file specified. Showing in temporary preview")
-        show_img(i)
-        return
-    # print "Saving..."
-    success, additional_info = save_to_file(i, parsed_args.output)
-    #log.d("Finished. Success: {}, Additional info: {}".format(success, additional_info))
-    if not success:
-        #log.e("Process finished with errors: '{}'".format(additional_info))
-        return_http_response(_HTTPCode.INTERNAL_SERVER_ERROR, additional_info)
-    else:
-        #log.i("Process finished successfully after {0:.2f}s".format(time.time() - t0))
-        return_http_response(_HTTPCode.OK, os.path.basename(additional_info))
+    return i
 
 
 if __name__ == "__main__":

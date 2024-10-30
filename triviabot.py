@@ -197,9 +197,9 @@ def generate_magic_image(input_text):
                             print(f"{sender_display_name} sent {input_text}")
                         
 
-        except requests.exceptions.RequestException as e:
-            sentry_sdk.capture_exception(e)
-            print(f"Error collecting responses: {e}")
+    except requests.exceptions.RequestException as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error collecting responses: {e}")
 
     return collected_responses
         

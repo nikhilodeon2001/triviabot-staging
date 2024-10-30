@@ -503,6 +503,7 @@ def main():
     # Convert the image to bytes
     img_byte_arr = io.BytesIO()
     i.save(img_byte_arr, format="PNG")
+    img_byte_arr.seek(0)
     img_byte_arr = img_byte_arr.getvalue()
 
     # Write the bytes to stdout

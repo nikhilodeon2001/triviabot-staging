@@ -142,7 +142,7 @@ def generate_magic_image(input_text):
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
         
-        message = "\n🕵️‍♂️🔍💎❓\n"
+        message = "\n🔍❓\n"
         send_message(target_room_id, message)
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -2739,25 +2739,28 @@ def start_trivia_round():
             round_data["questions"] = []
 
             # Select a random GIF URL
-            #selected_gif_url = random.choice(okra_gif_urls)
-            #print(selected_gif_url)
-
+            
+                
             # Send the selected GIF
-            #image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
+            #
 
-            """Start a round of n trivia questions."""   
-            magic_number = random_number = random.randint(1000, 9999)
-            generate_magic_image(magic_number)
-            
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
-            
-            #if image_mxc:
-            #    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
+            
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
             round_start_messages()
 
-            time.sleep(3)
-
+            
+            if random.random() < 0.5:  # random.random() generates a float between 0 and 1
+                magic_number = random_number = random.randint(1000, 9999)
+                print(f"Magic number is {magic_number}")
+                generate_magic_image(magic_number)
+            else:
+                selected_gif_url = random.choice(okra_gif_urls)
+                print(selected_gif_url)
+                image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
+                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+                time.sleep(3)
+                
             # Randomly select n questions
             print() 
             print_selected_questions(selected_questions)

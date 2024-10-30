@@ -900,6 +900,7 @@ def generate_round_summary(round_data, winner):
                 n=1,
                 stop=None,
                 temperature=0.8,
+            )
 
         elif winner in magic_users:
             response = openai.ChatCompletion.create(

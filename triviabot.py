@@ -135,8 +135,7 @@ def generate_magic_image(input_text):
         # Convert the binary data to an Image object
         image = Image.open(io.BytesIO(image_data))
         image_width, image_height = image.size
-        
-        image_width, image_height = image_data.size
+
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
         

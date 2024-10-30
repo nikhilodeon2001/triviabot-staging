@@ -147,8 +147,6 @@ def generate_magic_image(input_text):
         if response is None:                      
             print("Error: Failed to send image.")
     
-        # Return the content_uri, image width, height, and the answer
-        return content_uri, img_width, img_height
 
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running main.py: {e}")

@@ -2181,16 +2181,21 @@ def show_standings():
             lightning_display = f" ⚡{fastest_count}" if fastest_count > 1 else " ⚡" if fastest_count == 1 else ""
             
             if points == 420:
-                standing_message += f"\n🥴 {user}: {formatted_points}{lightning_display}"
+                standing_message += f"\n🥴 {user}: {formatted_points}"
                 
             elif rank <= 3:
-                standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}{lightning_display}"
+                standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}"
                 
             elif rank == len(standings) and rank > 4:
-                standing_message += f"\n💩 {user}: {formatted_points}{lightning_display}"
+                standing_message += f"\n💩 {user}: {formatted_points}"
                 
             else:
-                standing_message += f"\n{rank}. {user}: {formatted_points}{lightning_display}"
+                standing_message += f"\n{rank}. {user}: {formatted_points}"
+
+            standing_message += lightning_display
+
+        if  user in magic_users:
+            standing_message += " ✨"
         
         send_message(target_room_id, standing_message)
 

@@ -157,7 +157,8 @@ def generate_magic_image(input_text):
         collected_responses = []  # Store all responses
         
         processed_events = set()  # Track processed event IDs to avoid duplicates
-    
+
+        initialize_sync()
         start_time = time.time()  # Track when the question starts
         while time.time() - start_time < magic_time:
             try:

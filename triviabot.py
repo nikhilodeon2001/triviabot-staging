@@ -358,7 +358,7 @@ def prompt_user_for_response(round_winner, winner_points):
     initialize_sync()
     
     # Wait for 10 seconds to gather responses
-    time.sleep(13)
+    time.sleep(10)
 
     # Fetch responses
     sync_url = f"{matrix_base_url}/sync"
@@ -2802,20 +2802,17 @@ def start_trivia_round():
         
             time.sleep(10)
             process_round_options(round_winner, winner_points)
-            time.sleep(3)
             
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(10)
                 round_preview(selected_questions)
-                time.sleep(7)
+                time.sleep(10)
             else:
                 send_message(target_room_id, f"🛟 Help Okra keep it up\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                time.sleep(10)
                 round_preview(selected_questions)
-                time.sleep(7)  # Adjust this time to whatever delay you need between rounds
+                time.sleep(10)  # Adjust this time to whatever delay you need between rounds
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

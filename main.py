@@ -499,7 +499,7 @@ def main():
     log.i("--- Started generation ---")
     parsed_args = obtain_args()
     #log.d("Arguments: ")
-    for key in vars(parsed_args):
+    #for key in vars(parsed_args):
         #log.d("\t {}: {}".format(key, getattr(parsed_args, key)))
     t0 = time.time()
     i = make_stereogram(parsed_args)

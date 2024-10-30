@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#main.py
+
 """Main project file, contains everything to generate stereograms."""
 
 import argparse

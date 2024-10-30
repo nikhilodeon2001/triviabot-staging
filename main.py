@@ -317,13 +317,11 @@ def make_depth_text(text, font=DEFAULT_DEPTHTEXT_FONT, canvas_size=(800, 600)):
     # TODO: Support for multiline text
     # TODO: Fix font size only, derive canvas size later
 
-
-    fontpath = font if os.path.isabs(font) else "{}/{}.ttf".format(FONT_ROOT, font)
     # Create image (grayscale)
     i = im.new('L', canvas_size, "black")
     # Draw text with appropriate gray level
     font_size = 1
-    fnt = imf.truetype(fontpath, font_size)
+    fnt = imf.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
     while fnt.getbbox(text)[2] < canvas_size[0]*0.9 and fnt.getbbox(text)[3] < canvas_size[1]*0.9:
         font_size += 1
         fnt = imf.truetype(fontpath, font_size)

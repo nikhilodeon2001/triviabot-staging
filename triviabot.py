@@ -1567,7 +1567,7 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
-    if len(user_answer) < 3 or len(correct_answer) < 3:
+    if len(user_answer) < 5 or len(correct_answer) < 5:
         return user_answer.lower() == correct_answer.lower()  # Only accept an exact match for short answers
 
     # Normalize both user and correct answers

@@ -2417,8 +2417,7 @@ def round_start_messages():
         # If the user is in the Hall of Sovereigns, only show the message if top_count == 6
         if username in sovereigns:
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across all leaderboards. They are our Sovereign. We all bow to you.")
-                time.sleep(5)
+                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
         else:
             # For users not in the Hall of Sovereigns, show all applicable messages
             if top_count == 6:
@@ -2748,8 +2747,8 @@ def start_trivia_round():
             
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
             round_start_messages()
+            time.sleep(2)
 
-            
             if random.random() < 0.5:  # random.random() generates a float between 0 and 1
                 magic_number = random_number = random.randint(1000, 9999)
                 print(f"Magic number is {magic_number}")

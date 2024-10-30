@@ -85,7 +85,7 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 id_limits = {"general": 20000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
 first_place_bonus = 0
-magic_time = 12
+magic_time = 10
 magic_users = []
 
 
@@ -142,7 +142,7 @@ def generate_magic_image(input_text):
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
         
-        message = "\n🔍❓\n"
+        message = "🔍❓\n"
         send_message(target_room_id, message)
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -2758,7 +2758,7 @@ def start_trivia_round():
                 print(selected_gif_url)
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-                time.sleep(3)
+                time.sleep()
                 
             # Randomly select n questions
             print() 

@@ -2728,6 +2728,7 @@ def start_trivia_round():
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
             fastest_answers_count.clear()
+            magic_users.clear()
             
             # Reset round data for the next round
             round_data["questions"] = []
@@ -2808,13 +2809,13 @@ def start_trivia_round():
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 time.sleep(10)
                 round_preview(selected_questions)
-                time.sleep(10)
+                time.sleep(7)
             else:
                 send_message(target_room_id, f"🛟 Help Okra keep it up\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 time.sleep(10)
                 round_preview(selected_questions)
-                time.sleep(10)  # Adjust this time to whatever delay you need between rounds
+                time.sleep(7)  # Adjust this time to whatever delay you need between rounds
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

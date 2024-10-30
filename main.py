@@ -16,7 +16,7 @@ from PIL import ImageDraw as imd
 from PIL import ImageFilter as imflt
 from PIL import ImageFont as imf
 
-from log import Log as log
+#from log import Log as log
 
 # Program info
 PROGRAM_VERSION = "2.0"
@@ -81,7 +81,7 @@ def make_background(size, filename="", dots_prob=None, bg_color="000", dot_color
     Returns
     -------
     """
-    log.d("colors string: {}".format(dot_colors_string))
+    #log.d("colors string: {}".format(dot_colors_string))
     pattern_width = (int)(size[0] / PATTERN_FRACTION)
     # Pattern is a little bit longer than original picture, so everything fits on 3D (eye crossing shrinks the picture horizontally!)
     i = im.new("RGB", (size[0] + pattern_width, size[1]), color=_hex_color_to_tuple(bg_color))
@@ -93,7 +93,7 @@ def make_background(size, filename="", dots_prob=None, bg_color="000", dot_color
     if filename != "" and filename != "dots":
         pattern = load_file((get_random("pattern") if filename == "R" else filename))
         if pattern is None:
-            log.w("Error loading patter '{}'. Will generate using random dots".format(filename))
+            #log.w("Error loading patter '{}'. Will generate using random dots".format(filename))
             filename = ""
         else:
             is_image = True
@@ -256,7 +256,7 @@ def make_stereogram(parsed_args):
             color_tuples = [_hex_color_to_tuple(hex) for hex in hex_tuples]
         else:
             color_tuples = [(255, 0, 0), (255, 255, 0), (200, 0, 255)]
-        log.d("Colors to use for dots: {}".format(color_tuples))
+        #log.d("Colors to use for dots: {}".format(color_tuples))
         for y in range(pattern_strip_img.size[1]):
             for x in range(pattern_width):
                 if random() < dot_prob:
@@ -363,7 +363,7 @@ def save_to_file(img_object, output_dir=None):
         try:
             os.mkdir(savefolder)
         except IOError as e:
-            log.e("Cannot create file: {}".format(e))
+            #log.e("Cannot create file: {}".format(e))
             return False, "Could not create output directory '{}': {}".format(savefolder, e)
     outfile_name = u"{date}{ext}".format(
         date=time.strftime("%Y%m%d-%H%M%S", time.localtime()),
@@ -372,10 +372,10 @@ def save_to_file(img_object, output_dir=None):
     out_path = os.path.join(savefolder, outfile_name)
     try:
         r = img_object.save(out_path)
-        log.d("Saved file in {}".format(out_path))
+        #log.d("Saved file in {}".format(out_path))
         return True, out_path
     except IOError as e:
-        log.e("Error trying to save image: {}".format(e))
+        #log.e("Error trying to save image: {}".format(e))
         return False, "Could not create file '{}': {}".format(out_path, e)
 
 
@@ -385,7 +385,7 @@ def load_file(name, type=''):
         if type != "":
             i = i.convert(type)
     except IOError as msg:
-        log.e("Picture couln't be loaded '{}': {}".format(name, msg))
+        #log.e("Picture couln't be loaded '{}': {}".format(name, msg))
         return None
     # Resize if too big
     if max(i.size) > MAX_DIMENSION:
@@ -393,7 +393,7 @@ def load_file(name, type=''):
         old_max = i.size[max_dim]
         new_max = MAX_DIMENSION
         factor = new_max/float(old_max)
-        log.d("Image is big: {}. Resizing by a factor of {}".format(i.size, factor))
+        #log.d("Image is big: {}. Resizing by a factor of {}".format(i.size, factor))
         i = i.resize((int(i.size[0]*factor), int(i.size[1]*factor)))
     return i
 
@@ -498,24 +498,24 @@ def return_http_response(code, text):
 def main():
     log.i("--- Started generation ---")
     parsed_args = obtain_args()
-    log.d("Arguments: ")
+    #log.d("Arguments: ")
     for key in vars(parsed_args):
-        log.d("\t {}: {}".format(key, getattr(parsed_args, key)))
+        #log.d("\t {}: {}".format(key, getattr(parsed_args, key)))
     t0 = time.time()
     i = make_stereogram(parsed_args)
     if not parsed_args.output:
-        log.i("Process finished successfully after {0:.2f}s".format(time.time() - t0))
-        log.i("No output file specified. Showing in temporary preview")
+        #log.i("Process finished successfully after {0:.2f}s".format(time.time() - t0))
+        #log.i("No output file specified. Showing in temporary preview")
         show_img(i)
         return
     # print "Saving..."
     success, additional_info = save_to_file(i, parsed_args.output)
-    log.d("Finished. Success: {}, Additional info: {}".format(success, additional_info))
+    #log.d("Finished. Success: {}, Additional info: {}".format(success, additional_info))
     if not success:
-        log.e("Process finished with errors: '{}'".format(additional_info))
+        #log.e("Process finished with errors: '{}'".format(additional_info))
         return_http_response(_HTTPCode.INTERNAL_SERVER_ERROR, additional_info)
     else:
-        log.i("Process finished successfully after {0:.2f}s".format(time.time() - t0))
+        #log.i("Process finished successfully after {0:.2f}s".format(time.time() - t0))
         return_http_response(_HTTPCode.OK, os.path.basename(additional_info))
 
 

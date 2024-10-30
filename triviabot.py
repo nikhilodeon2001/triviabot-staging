@@ -177,6 +177,7 @@ def generate_magic_image(input_text):
                 
                 for event in room_events:
                     event_id = event["event_id"]
+                    redact_message(event_id, target_room_id)
                     event_type = event.get("type")  # Get the type of the event
     
                     # Only process and redact if the event type is "m.room.message"
@@ -187,8 +188,6 @@ def generate_magic_image(input_text):
                             continue
         
                         # Add event_id to the set of processed events
-                        redact_message(event_id, target_room_id)
-                        print("message redacted")
                         processed_events.add(event_id)
                         sender = event["sender"]
                         sender_display_name = get_display_name(sender)

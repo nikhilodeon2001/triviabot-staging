@@ -120,7 +120,7 @@ def generate_magic_image(input_text):
 # Command to run main.py with the required arguments
     command = [
         "python", "main.py", 
-        "--text", input_text, 
+        "--text", str(input_text), 
         "--dots", 
         "--wall", 
         "--output", ".", 

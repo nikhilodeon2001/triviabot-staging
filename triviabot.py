@@ -194,16 +194,7 @@ def generate_magic_image(input_text):
 
                         if input_text.lower() in message_content.lower():
                             magic_users.append(sender_display_name)
-                            print(f"{sender_display_name} sent {input_text}")
-                        
-
-    except requests.exceptions.RequestException as e:
-        sentry_sdk.capture_exception(e)
-        print(f"Error collecting responses: {e}")
-
-    return collected_responses
-        
-    
+                            print(f"{sender_display_name} sent {input_text}")    
 
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running main.py: {e}")

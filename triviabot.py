@@ -192,7 +192,7 @@ def generate_magic_image(input_text):
                         if sender == bot_user_id:
                             continue
 
-                        if input_text.lower() in message_content.lower():
+                        if str(input_text).lower() in str(message_content).lower():
                             magic_users.append(sender_display_name)
                             print(f"{sender_display_name} sent {input_text}")    
 

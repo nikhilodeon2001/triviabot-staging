@@ -146,9 +146,11 @@ def generate_magic_image(input_text):
         send_message(target_room_id, message)
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
-    
-        if response is None:                      
+
+
+        if response.status_code != 200:                      
             print("Error: Failed to send image.")
+            print(response)
 
         sync_url = f"{matrix_base_url}/sync"
     

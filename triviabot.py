@@ -176,6 +176,7 @@ def generate_magic_image(input_text):
                 
                 for event in room_events:
                     event_id = event["event_id"]
+                    redact_message(event_id)
                     event_type = event.get("type")  # Get the type of the event
     
                     # Only process and redact if the event type is "m.room.message"

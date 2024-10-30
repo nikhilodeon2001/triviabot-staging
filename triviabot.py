@@ -27,6 +27,8 @@ from PIL import Image, ImageDraw, ImageFont
 import openai
 
 import main
+import subprocess
+
 
 
 # Define the base API URL for Matrix

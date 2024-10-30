@@ -2691,23 +2691,24 @@ def start_trivia_round():
             round_data["questions"] = []
 
             # Select a random GIF URL
-            selected_gif_url = random.choice(okra_gif_urls)
-            print(selected_gif_url)
+            #selected_gif_url = random.choice(okra_gif_urls)
+            #print(selected_gif_url)
 
             # Send the selected GIF
-            image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
+            #image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
 
             """Start a round of n trivia questions."""   
-            generate_magic_image(1234)
+            magic_number = random_number = random.randint(1000, 9999)
+            generate_magic_image(magic_number)
             
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n")
             
-            if image_mxc:
-                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+            #if image_mxc:
+            #    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
             round_start_messages()
 
-            time.sleep(5)
+            time.sleep(3)
 
             # Randomly select n questions
             print() 

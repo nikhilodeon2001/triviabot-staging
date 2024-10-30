@@ -124,8 +124,12 @@ def generate_magic_image(input_text):
         "--dots", 
         "--wall", 
         "--output", ".", 
-        "--font", "/Library/Fonts/Arial.ttf"
+        "--font", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
     ]
+
+
+
+
     
     # Run the command using subprocess
     try:

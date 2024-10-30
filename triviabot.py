@@ -26,6 +26,8 @@ import io
 from PIL import Image, ImageDraw, ImageFont 
 import openai
 
+import main
+
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"

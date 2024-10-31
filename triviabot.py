@@ -147,7 +147,6 @@ def generate_magic_image(input_text):
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
-
         if response.status_code != 200:                      
             print("Error: Failed to send image.")
             print(response)
@@ -160,6 +159,7 @@ def generate_magic_image(input_text):
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts
+        magic_message = "😉\n"
         while time.time() - start_time < magic_time:
             try:
                 if since_token:
@@ -174,6 +174,7 @@ def generate_magic_image(input_text):
                 since_token = sync_data.get("next_batch")  # Update since_token for the next batch
     
                 room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
                 
                 for event in room_events:
                     event_id = event["event_id"]
@@ -200,10 +201,13 @@ def generate_magic_image(input_text):
                             magic_users.append(sender_display_name)
                             print(f"{sender_display_name} sent {input_text}")  
                             print(magic_users)
+                            magic_message += f"sender_display_name ✨\n
 
             except requests.exceptions.RequestException as e:
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")
+        
+        send_message(target_room_id, magic_message)
 
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running main.py: {e}")
@@ -1397,7 +1401,7 @@ def send_disappearing_message(room_id, message):
                 response_json = response.json()
                 message_id = response_json.get("event_id")
                 #distinguish_host(room_id, message_id)
-                time.sleep(event_id)
+                time.sleep(2)
                 redact_message(message_id)
                 return response  # Successfully sent the message, return the response
             

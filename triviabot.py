@@ -142,7 +142,7 @@ def generate_magic_image(input_text):
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
         
-        #message = "🔍❓\n"
+        message = "🔍❓\n"
         send_message(target_room_id, message)
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -344,6 +344,7 @@ def process_round_options(round_winner, winner_points):
         "🟦❌ Trebek:  0 Jeopardy questions\n"
         "🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
+        "👻🫥 Ghost: Responses and answers vanish\n"
     )
 
     if winner_points >= god_mode_points:
@@ -435,9 +436,9 @@ def prompt_user_for_response(round_winner, winner_points):
                         god_mode = True
                         send_message(target_room_id, f"🎖🍆 @{round_winner} is a dick.\n")
         
-                    #if "ghost" in message_content.lower():
-                    #    ghost_mode = 1
-                    #    send_message(target_room_id, f"👻👻 @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
+                    if "ghost" in message_content.lower():
+                        ghost_mode = 1
+                        send_message(target_room_id, f"👻👻 @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
@@ -1379,6 +1380,43 @@ def send_message(room_id, message):
     return response  # Return the last response, even if it failed
 
 
+
+def send_disappearing_message(room_id, message):
+    global headers, max_retries, delay_between_retries
+
+    """Send a message to the room with retry logic."""
+    event_id = f"m{int(time.time() * 1000)}"
+    url = f"{matrix_base_url}/rooms/{room_id}/send/m.room.message/{event_id}"
+    message_body = {"msgtype": "m.text", "body": message}
+
+    for attempt in range(max_retries):
+        try:
+            response = requests.put(url, json=message_body, headers=headers)
+
+            if response.status_code == 200:
+                response_json = response.json()
+                message_id = response_json.get("event_id")
+                #distinguish_host(room_id, message_id)
+                time.sleep(event_id)
+                redact_message(message_id)
+                return response  # Successfully sent the message, return the response
+            
+            else:
+                print(f"Failed to send message. Status code: {response.status_code}")
+                
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error: {e}")
+        
+        # If the message was not sent, wait for a bit before retrying
+        if attempt < max_retries - 1:
+            print(f"Retrying in {delay_between_retries} seconds... (Attempt {attempt + 1} of {max_retries})")
+            time.sleep(delay_between_retries)
+
+    print(f"Failed to send the message after {max_retries} attempts.")
+    return response  # Return the last response, even if it failed
+
+
 def distinguish_host(room_id, message_id):     # DISTINGUISH
     global headers, max_retries, delay_between_retries
 
@@ -1662,7 +1700,7 @@ def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
-    if len(user_answer) < 5 or len(correct_answer) < 5:
+    if len(user_answer) < 4 or len(correct_answer) < 4:
         return user_answer.lower() == correct_answer.lower()  # Only accept an exact match for short answers
 
     # Normalize both user and correct answers
@@ -1876,10 +1914,12 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
     # Construct a single message for all the responses
-    if ghost_mode == True:
-        message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
-    else:
-        message = f"\n✅ Answer ✅\n{trivia_answer}\n"
+    #if ghost_mode == True:
+    #    message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
+    #else:
+    #    message = f"\n✅ Answer ✅\n{trivia_answer}\n"
+
+    message = f"\n✅ Answer ✅\n{trivia_answer}\n"
             
     # Notify the chat
     if correct_responses:    
@@ -1907,7 +1947,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
 
     # Send the entire message at once
     if message:
-        send_message(target_room_id, message)
+        send_disappearing_message(target_room_id, message)
 
     flush_submission_queue() 
     return None
@@ -2201,8 +2241,8 @@ def show_standings():
 
             standing_message += lightning_display
 
-        if  user in magic_users:
-            standing_message += " ✨"
+            if  user in magic_users:
+                standing_message += " ✨"
         
         send_message(target_room_id, standing_message)
 
@@ -2749,7 +2789,7 @@ def start_trivia_round():
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
             round_start_messages()
 
-            if random.random() < 0.5:  # random.random() generates a float between 0 and 1
+            if random.random() < 1.0:  # random.random() generates a float between 0 and 1
                 magic_number = random_number = random.randint(1000, 9999)
                 print(f"Magic number is {magic_number}")
                 generate_magic_image(magic_number)

@@ -1408,7 +1408,7 @@ def send_disappearing_message(room_id, message):
                 message_id = response_json.get("event_id")
                 #distinguish_host(room_id, message_id)
                 time.sleep(2)
-                redact_message(target_room_id, message_id)
+                redact_message(target_room_id, event_id)
                 print("message redacted")
                 return response  # Successfully sent the message, return the response
             

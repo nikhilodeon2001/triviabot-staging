@@ -142,7 +142,7 @@ def generate_magic_image(input_text):
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
         
-        message = "🔍❓\n"
+        message = "🔍❓⬇\n"
         send_message(target_room_id, message)
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)

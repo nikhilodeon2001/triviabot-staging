@@ -201,6 +201,8 @@ def generate_magic_image(input_text):
 
                         if str(input_text).lower() in str(message_content).lower():
                             redact_message(event_id, target_room_id)
+                            if sender_display_name in magic_users:
+                                continue
                             magic_users.append(sender_display_name)
                             print(f"{sender_display_name} sent {input_text}")  
                             print(magic_users)
@@ -352,7 +354,7 @@ def process_round_options(round_winner, winner_points):
         "🟦❌ Trebek:  0 Jeopardy questions\n"
         "🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
-        "👻🎃 Ghost: Happy Halloween! Vanishing responses & answers\n"
+        "👻🎃 Ghost: Boo! Vanishing answers\n"
     )
 
     if winner_points >= god_mode_points:
@@ -446,7 +448,7 @@ def prompt_user_for_response(round_winner, winner_points):
         
                     if "ghost" in message_content.lower():
                         ghost_mode = 1
-                        send_message(target_room_id, f"👻👻 @{round_winner} turned on 'Ghost Mode'. All answers will disappear.\n")
+                        send_message(target_room_id, f"👻🎃 @{round_winner} says Happy Halloween. Answers will disappear.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")

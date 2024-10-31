@@ -206,8 +206,9 @@ def generate_magic_image(input_text):
             except requests.exceptions.RequestException as e:
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")
-        
-        send_message(target_room_id, magic_message)
+
+        if magic_users:
+            send_message(target_room_id, magic_message)
 
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running main.py: {e}")

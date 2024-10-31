@@ -178,7 +178,6 @@ def generate_magic_image(input_text):
                 
                 for event in room_events:
                     event_id = event["event_id"]
-                    redact_message(event_id, target_room_id)
                     event_type = event.get("type")  # Get the type of the event
     
                     # Only process and redact if the event type is "m.room.message"
@@ -198,6 +197,7 @@ def generate_magic_image(input_text):
                             continue
 
                         if str(input_text).lower() in str(message_content).lower():
+                            redact_message(event_id, target_room_id)
                             magic_users.append(sender_display_name)
                             print(f"{sender_display_name} sent {input_text}")  
                             print(magic_users)

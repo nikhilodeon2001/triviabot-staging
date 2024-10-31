@@ -95,7 +95,7 @@ num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
 num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
-ghost_mode_default = False
+ghost_mode_default = True
 ghost_mode = ghost_mode_default
 god_mode_default = False
 god_mode = god_mode_default
@@ -352,7 +352,7 @@ def process_round_options(round_winner, winner_points):
         "🟦❌ Trebek:  0 Jeopardy questions\n"
         "🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
-        "👻🫥 Ghost: Responses and answers vanish\n"
+        "👻🎃 Ghost: Happy Halloween! Vanishing responses & answers\n"
     )
 
     if winner_points >= god_mode_points:
@@ -551,6 +551,8 @@ def redact_message(event_id, room_id):
         if response.status_code != 200:
             print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
             print(response.text)
+        else:
+            print("message redacted")
     
     except requests.exceptions.RequestException as e:
         print(f"Error redacting message {event_id}: {e}")
@@ -1407,6 +1409,7 @@ def send_disappearing_message(room_id, message):
                 #distinguish_host(room_id, message_id)
                 time.sleep(2)
                 redact_message(target_room_id, message_id)
+                print("message redacted")
                 return response  # Successfully sent the message, return the response
             
             else:

@@ -159,7 +159,7 @@ def generate_magic_image(input_text):
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts
-        magic_message = "😉\n"
+        magic_message = "\n"
         while time.time() - start_time < magic_time:
             try:
                 if since_token:
@@ -201,7 +201,7 @@ def generate_magic_image(input_text):
                             magic_users.append(sender_display_name)
                             print(f"{sender_display_name} sent {input_text}")  
                             print(magic_users)
-                            magic_message += f"sender_display_name ✨\n"
+                            magic_message += f"{sender_display_name} ✨\n"
 
             except requests.exceptions.RequestException as e:
                 sentry_sdk.capture_exception(e)

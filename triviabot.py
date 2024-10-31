@@ -1390,44 +1390,6 @@ def send_message(room_id, message):
     return response  # Return the last response, even if it failed
 
 
-
-def send_disappearing_message(room_id, message):
-    global headers, max_retries, delay_between_retries
-
-    """Send a message to the room with retry logic."""
-    event_id = f"m{int(time.time() * 1000)}"
-    url = f"{matrix_base_url}/rooms/{room_id}/send/m.room.message/{event_id}"
-    message_body = {"msgtype": "m.text", "body": message}
-
-    for attempt in range(max_retries):
-        try:
-            response = requests.put(url, json=message_body, headers=headers)
-
-            if response.status_code == 200:
-                response_json = response.json()
-                message_id = response_json.get("event_id")
-                #distinguish_host(room_id, message_id)
-                time.sleep(2)
-                redact_message(target_room_id, event_id)
-                print("message redacted")
-                return response  # Successfully sent the message, return the response
-            
-            else:
-                print(f"Failed to send message. Status code: {response.status_code}")
-                
-        except requests.exceptions.RequestException as e:
-            sentry_sdk.capture_exception(e)
-            print(f"Error: {e}")
-        
-        # If the message was not sent, wait for a bit before retrying
-        if attempt < max_retries - 1:
-            print(f"Retrying in {delay_between_retries} seconds... (Attempt {attempt + 1} of {max_retries})")
-            time.sleep(delay_between_retries)
-
-    print(f"Failed to send the message after {max_retries} attempts.")
-    return response  # Return the last response, even if it failed
-
-
 def distinguish_host(room_id, message_id):     # DISTINGUISH
     global headers, max_retries, delay_between_retries
 
@@ -1925,12 +1887,10 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
     # Construct a single message for all the responses
-    #if ghost_mode == True:
-    #    message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
-    #else:
-    #    message = f"\n✅ Answer ✅\n{trivia_answer}\n"
-
-    message = f"\n✅ Answer ✅\n{trivia_answer}\n"
+    if ghost_mode == True:
+        message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
+    else:
+        message = f"\n✅ Answer ✅\n{trivia_answer}\n"
             
     # Notify the chat
     if correct_responses:    
@@ -1958,7 +1918,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
 
     # Send the entire message at once
     if message:
-        send_disappearing_message(target_room_id, message)
+        send_message(target_room_id, message)
 
     flush_submission_queue() 
     return None

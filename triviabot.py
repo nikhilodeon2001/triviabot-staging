@@ -193,7 +193,7 @@ def generate_magic_image(input_text):
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
 
-                        if sender_display_name in magic_users
+                        if sender_display_name in magic_users:
                             continue
 
                         if sender == bot_user_id:

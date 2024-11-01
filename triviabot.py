@@ -2827,8 +2827,6 @@ def start_trivia_round():
             # Reset round data for the next round
             round_data["questions"] = []
 
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
-            round_start_messages()
 
             if random.random() < 1.0:  # random.random() generates a float between 0 and 1
                 magic_number = random_number = random.randint(1000, 9999)
@@ -2840,6 +2838,9 @@ def start_trivia_round():
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
                 time.sleep(7)
+
+            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
+            round_start_messages()
                 
             # Randomly select n questions
             print() 

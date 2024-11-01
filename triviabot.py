@@ -159,67 +159,65 @@ def send_magic_image(input_text):
 def ask_magic_number(winner):
     global since_token, params, headers, max_retries, delay_between_retries, magic_number_correct
 
-        sync_url = f"{matrix_base_url}/sync"
-    
-        collected_responses = []  # Store all responses
-        
-        processed_events = set()  # Track processed event IDs to avoid duplicates
+    sync_url = f"{matrix_base_url}/sync"
 
-        initialize_sync()
-        magic_number_correct = False
-        start_time = time.time()  # Track when the question starts
-        message = f"@{winner} ❓👁️🔢❓\n"
-        send_message(target_room_id, message)
-        while time.time() - start_time < magic_time:
-            try:
-                if since_token:
-                    params["since"] = since_token
+    collected_responses = []  # Store all responses
     
-                response = requests.get(sync_url, headers=headers, params=params)
-    
-                if response.status_code != 200:
-                    continue
-    
-                sync_data = response.json()
-                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
-    
-                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    processed_events = set()  # Track processed event IDs to avoid duplicates
 
-                for event in room_events:
-                    if magic_number_correct = True:
-                        return
-                    event_id = event["event_id"]
-                    event_type = event.get("type")  # Get the type of the event
+    initialize_sync()
+    magic_number_correct = False
+    start_time = time.time()  # Track when the question starts
+    message = f"@{winner} ❓👁️🔢❓\n"
+    send_message(target_room_id, message)
+    while time.time() - start_time < magic_time:
+        try:
+            if since_token:
+                params["since"] = since_token
+
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:
+                if magic_number_correct = True:
+                    return
+                event_id = event["event_id"]
+                event_type = event.get("type")  # Get the type of the event
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
     
-                    # Only process and redact if the event type is "m.room.message"
-                    if event_type == "m.room.message":
-                        
-                        # Skip processing if this event_id was already processed
-                        if event_id in processed_events:
-                            continue
-        
-                        # Add event_id to the set of processed events
-                        processed_events.add(event_id)
-                        sender = event["sender"]
-                        sender_display_name = get_display_name(sender)
-                        message_content = event.get("content", {}).get("body", "")
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "")
 
-                        if sender == bot_user_id or sender_display_name != winner:
-                            continue
+                    if sender == bot_user_id or sender_display_name != winner:
+                        continue
 
-                        if str(magic_number).lower() in str(message_content).lower():
-                            magic_number_correct = True
-                            react_to_message(target_room_id, event_id, "okra6")
+                    if str(magic_number).lower() in str(message_content).lower():
+                        magic_number_correct = True
+                        react_to_message(target_room_id, event_id, "okra6")
 
             except requests.exceptions.RequestException as e:
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")
 
-
-    except subprocess.CalledProcessError as e:
-        print(f"Error occurred while running main.py: {e}")
-        print("Error output:", e.stderr)
-
+        except subprocess.CalledProcessError as e:
+            print(f"Error occurred while running main.py: {e}")
+            print("Error output:", e.stderr)
 
 
 

@@ -2448,33 +2448,40 @@ superscript_map = {
 def to_superscript(num):
     return ''.join(superscript_map[digit] for digit in str(num))
 
-def generate_and_render_polynomial_image_high(max_power=4):
-    # Randomly generate coefficients for each power up to the specified max_power
-    coefficients = [random.randint(1, 9) for _ in range(max_power + 1)]
+def generate_and_render_polynomial_image_high():
+    max_power = 3  # Maximum exponent
+    terms_to_display = 3  # Limit to 3 terms
+
+    # Randomly generate coefficients for each power up to max_power
+    coefficients = {power: random.randint(1, 20) for power in range(max_power, -1, -1)}
+    
     terms = []
     derivative_terms = []
 
-    # Construct polynomial and derivative terms
-    for power, coef in enumerate(reversed(coefficients)):
-        if coef == 1 and power > 0:
-            coef_str = ""
-        else:
-            coef_str = str(coef)
+    # Construct polynomial and derivative terms, ordered by power descending
+    for power in range(max_power, -1, -1):
+        coef = coefficients[power]
         
-        # Skip the term if coefficient is zero
+        # Skip if coefficient is zero
         if coef == 0:
             continue
 
-        # Generate polynomial terms with superscript exponents
+        # Convert coefficient 1 to empty string for simplicity, unless it’s a constant term
+        coef_str = str(coef) if coef != 1 or power == 0 else ""
+
+        # Construct polynomial terms with superscript exponents
         if power == 0:
-            terms.append(f"{coef}")
+            terms.append(f"{coef}")  # Constant term
         elif power == 1:
-            terms.append(f"{coef_str}x")
+            terms.append(f"{coef_str}x")  # No exponent shown for power of 1
             derivative_terms.append(f"{coef}")
         else:
-            superscript = to_superscript(power)
-            terms.append(f"{coef_str}x{superscript}")
-            derivative_terms.append(f"{coef * power}x{to_superscript(power - 1)}")
+            terms.append(f"{coef_str}x{to_superscript(power)}")  # Display higher powers with superscript
+            derivative_terms.append(f"{coef * power}x{to_superscript(power - 1) if power > 2 else ''}")
+
+        # Stop after reaching the desired number of terms
+        if len(terms) == terms_to_display:
+            break
 
     # Join the terms for both polynomial and derivative strings
     polynomial = " + ".join(terms)
@@ -2518,7 +2525,6 @@ def generate_and_render_polynomial_image_high(max_power=4):
         return content_uri, img_width, img_height, derivative
     else:
         print("Failed to upload the image to Matrix.")
-
 
 
 

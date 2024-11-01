@@ -2447,39 +2447,31 @@ def to_superscript(num):
     return ''.join(superscript_map[digit] for digit in str(num))
 
 def generate_and_render_polynomial_image_high():
-    max_power = 3  # Maximum exponent
-    terms_to_display = 2  # Limit to 3 terms
-
-    # Randomly generate coefficients for each power up to max_power with values between 1 and 9
-    coefficients = {power: random.randint(1, 9) for power in range(max_power, -1, -1)}
+    # Choose two unique powers randomly from 1 to 4
+    powers = sorted(random.sample(range(1, 5), 2), reverse=True)
     
     terms = []
     derivative_terms = []
 
-    # Construct polynomial and derivative terms, ordered by power descending
-    for power in range(max_power, -1, -1):
-        coef = coefficients[power]
-        
-        # Convert coefficient 1 to empty string for simplicity, unless it’s a constant term
-        coef_str = str(coef) if coef != 1 or power == 0 else ""
+    # Construct polynomial and derivative terms for the selected powers
+    for power in powers:
+        coef = random.randint(1, 9)  # Coefficients between 1 and 9
+        coef_str = str(coef) if coef != 1 else ""  # Omit "1" as a coefficient unless constant
 
-        # Construct polynomial terms with superscript exponents
-        if power == 0:
-            terms.append(f"{coef}")  # Constant term
-        elif power == 1:
+        # Construct polynomial term with superscript exponents
+        if power == 1:
             terms.append(f"{coef_str}x")  # No exponent shown for power of 1
             derivative_terms.append(f"{coef}")
         else:
             terms.append(f"{coef_str}x{to_superscript(power)}")  # Display higher powers with superscript
             derivative_terms.append(f"{coef * power}x{to_superscript(power - 1) if power > 2 else ''}")
 
-        # Stop after reaching the desired number of terms
-        if len(terms) == terms_to_display:
-            break
-
     # Join the terms for both polynomial and derivative strings
     polynomial = " + ".join(terms)
     derivative = " + ".join(derivative_terms) if derivative_terms else "0"
+
+    print(f"Polynomial: {polynomial}")
+    print(f"Derivative: {derivative}")
 
     # Define the font path relative to the current script
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
@@ -2518,8 +2510,7 @@ def generate_and_render_polynomial_image_high():
         print("Failed to upload the image to Matrix.")
 
 
-
-def generate_and_render_polynomial_image(): #POLY
+def generate_and_render_polynomial_image_high(): #POLY
     # Randomly select coefficients for a, b, and c
     a = random.randint(1, 9)
     b = random.randint(1, 9)

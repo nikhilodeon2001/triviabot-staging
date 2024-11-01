@@ -170,7 +170,7 @@ def ask_magic_number(winner):
     initialize_sync()
     magic_number_correct = False
     start_time = time.time()  # Track when the question starts
-    message = f"@{winner} ❓👁️🔢❓\n"
+    message = f"\n@{winner} ❓👁️🔢❓\n"
     send_message(target_room_id, message)
     while time.time() - start_time < magic_time:
         try:

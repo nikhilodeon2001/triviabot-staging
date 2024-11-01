@@ -211,13 +211,9 @@ def ask_magic_number(winner):
                         magic_number_correct = True
                         react_to_message(target_room_id, event_id, "okra6")
 
-            except requests.exceptions.RequestException as e:
-                sentry_sdk.capture_exception(e)
-                print(f"Error collecting responses: {e}")
-
-        except subprocess.CalledProcessError as e:
-            print(f"Error occurred while running main.py: {e}")
-            print("Error output:", e.stderr)
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting responses: {e}")
 
 
 

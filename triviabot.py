@@ -85,8 +85,8 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 id_limits = {"general": 20000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
 first_place_bonus = 0
-magic_time = 10
-magic_users = []
+magic_time = 5
+magic_number = 0000
 
 
 num_mysterybox_clues_default = 10
@@ -118,8 +118,8 @@ categories_to_exclude = []
 
 
 
-def generate_magic_image(input_text):
-    global since_token, params, headers, max_retries, delay_between_retries, magic_users
+def send_magic_image(input_text):
+    global since_token, params, headers, max_retries, delay_between_retries
 
     command = [
         "python", "main.py", 
@@ -142,8 +142,7 @@ def generate_magic_image(input_text):
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
         
-        #message = "⬇️ 🔍❓🔢⌨️ 🚀➡️🥒💖💬\n"
-        message = "Solve the mystery below and Okra will be nice (to you)\n⬇️ 🔍❓🔢⌨️ 🚀➡️🥒💖💬\n"
+        message = "Find the magic number and Okra will be nice (to you)\n"
         send_message(target_room_id, message)
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -152,6 +151,14 @@ def generate_magic_image(input_text):
             print("Error: Failed to send image.")
             print(response)
 
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred while running main.py: {e}")
+        print("Error output:", e.stderr)
+
+
+def ask_magic_number(winner):
+    global since_token, params, headers, max_retries, delay_between_retries, magic_number_correct
+
         sync_url = f"{matrix_base_url}/sync"
     
         collected_responses = []  # Store all responses
@@ -159,8 +166,10 @@ def generate_magic_image(input_text):
         processed_events = set()  # Track processed event IDs to avoid duplicates
 
         initialize_sync()
+        magic_number_correct = False
         start_time = time.time()  # Track when the question starts
-        magic_message = "\n"
+        message = f"@{winner} ❓👁️🔢❓\n"
+        send_message(target_room_id, message)
         while time.time() - start_time < magic_time:
             try:
                 if since_token:
@@ -176,8 +185,9 @@ def generate_magic_image(input_text):
     
                 room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
-                
                 for event in room_events:
+                    if magic_number_correct = True:
+                        return
                     event_id = event["event_id"]
                     event_type = event.get("type")  # Get the type of the event
     
@@ -194,29 +204,24 @@ def generate_magic_image(input_text):
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
 
-                        if sender == bot_user_id:
+                        if sender == bot_user_id or sender_display_name != winner:
                             continue
 
-                        if str(input_text).lower() in str(message_content).lower():
-                            redact_message(event_id, target_room_id)
-                            if sender_display_name in magic_users:
-                                continue
-                            magic_users.append(sender_display_name)
-                            print(f"{sender_display_name} sent {input_text}")  
-                            print(magic_users)
-                            magic_message += f"@{sender_display_name} ✨\n"
+                        if str(magic_number).lower() in str(message_content).lower():
+                            magic_number_correct = True
+                            react_to_message(target_room_id, event_id, "okra6")
 
             except requests.exceptions.RequestException as e:
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")
 
-        if magic_users:
-            send_message(target_room_id, magic_message)
-            time.sleep(1)
 
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running main.py: {e}")
         print("Error output:", e.stderr)
+
+
+
 
 def generate_jeopardy_image(question_text):
     # Define the background color and text properties
@@ -839,7 +844,8 @@ def generate_round_summary(round_data, winner):
     """
     Generate a summary of the trivia round using OpenAI's API.
     """
-
+    ask_magic_number(winner)
+    
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
         prompt = (
@@ -849,7 +855,7 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
-    elif winner in magic_users:
+    elif magic_number_correct = True:
          prompt = (
             f"The winner of the trivia round is {winner}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Compliment specific responses they gave during the round and talk about how much beter they are than eveyone else, including OkraStrut."
@@ -916,7 +922,7 @@ def generate_round_summary(round_data, winner):
                 temperature=0.8,
             )
 
-        elif winner in magic_users:
+        elif magic_number_correct = True:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -2210,9 +2216,6 @@ def show_standings():
                 standing_message += f"\n{rank}. {user}: {formatted_points}"
 
             standing_message += lightning_display
-
-            if  user in magic_users:
-                standing_message += " ✨"
         
         send_message(target_room_id, standing_message)
 
@@ -2802,7 +2805,7 @@ def start_trivia_round():
 # Function to start the trivia round
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
-    global headers, params, filter_json, since_token, round_count, selected_questions
+    global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
@@ -2829,26 +2832,17 @@ def start_trivia_round():
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
             fastest_answers_count.clear()
-            magic_users.clear()
             
             # Reset round data for the next round
             round_data["questions"] = []
 
-            # Select a random GIF URL
-            
-                
-            # Send the selected GIF
-            #
-
-
-            
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
             round_start_messages()
 
             if random.random() < 1.0:  # random.random() generates a float between 0 and 1
                 magic_number = random_number = random.randint(1000, 9999)
                 print(f"Magic number is {magic_number}")
-                generate_magic_image(magic_number)
+                send_magic_image(magic_number)
             else:
                 selected_gif_url = random.choice(okra_gif_urls)
                 print(selected_gif_url)

@@ -142,14 +142,16 @@ def send_magic_image(input_text):
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
         
-        message = "Find the magic number and Okra will be nice (to you)\n"
-        send_message(target_room_id, message)
+        #message = "Find the magic number and Okra will be nice (to you)\n"
+        #send_message(target_room_id, message)
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
         if response.status_code != 200:                      
             print("Error: Failed to send image.")
             print(response)
+        else:
+            time.sleep(3)
 
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running main.py: {e}")

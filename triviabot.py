@@ -211,7 +211,7 @@ def ask_magic_number(winner):
 
                     if str(magic_number).lower() in str(message_content).lower():
                         magic_number_correct = True
-                        react_to_message(target_room_id, event_id, "okra6")
+                        react_to_message(event_id, target_room_id, "okra6")
 
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)

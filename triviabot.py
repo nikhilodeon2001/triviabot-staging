@@ -2520,7 +2520,7 @@ def generate_and_render_polynomial_image_high():
         print("Failed to upload the image to Matrix.")
 
 
-def generate_and_render_polynomial_image_high(): #POLY
+def generate_and_render_polynomial_image(): #POLY
     # Randomly select coefficients for a, b, and c
     a = random.randint(1, 9)
     b = random.randint(1, 9)

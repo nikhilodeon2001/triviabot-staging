@@ -2452,8 +2452,8 @@ def generate_and_render_polynomial_image_high():
     max_power = 3  # Maximum exponent
     terms_to_display = 3  # Limit to 3 terms
 
-    # Randomly generate coefficients for each power up to max_power
-    coefficients = {power: random.randint(1, 20) for power in range(max_power, -1, -1)}
+    # Randomly generate coefficients for each power up to max_power with values between 1 and 9
+    coefficients = {power: random.randint(1, 9) for power in range(max_power, -1, -1)}
     
     terms = []
     derivative_terms = []
@@ -2462,10 +2462,6 @@ def generate_and_render_polynomial_image_high():
     for power in range(max_power, -1, -1):
         coef = coefficients[power]
         
-        # Skip if coefficient is zero
-        if coef == 0:
-            continue
-
         # Convert coefficient 1 to empty string for simplicity, unless it’s a constant term
         coef_str = str(coef) if coef != 1 or power == 0 else ""
 
@@ -2525,7 +2521,6 @@ def generate_and_render_polynomial_image_high():
         return content_uri, img_width, img_height, derivative
     else:
         print("Failed to upload the image to Matrix.")
-
 
 
 

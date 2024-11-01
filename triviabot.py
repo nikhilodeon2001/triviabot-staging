@@ -2458,7 +2458,6 @@ def to_superscript(num):
 def generate_and_render_polynomial_image_high():
     # Randomly select two unique powers from {1, 2, 3}
     powers = sorted(random.sample([1, 2, 3], 2), reverse=True)
-    print(powers)
     
     terms = []
     derivative_terms = []

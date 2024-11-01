@@ -2446,9 +2446,18 @@ superscript_map = {
 def to_superscript(num):
     return ''.join(superscript_map[digit] for digit in str(num))
 
+# Mapping to convert integers to superscript characters
+superscript_map = {
+    "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+    "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹"
+}
+
+def to_superscript(num):
+    return ''.join(superscript_map[digit] for digit in str(num))
+
 def generate_and_render_polynomial_image_high():
-    # Choose two unique powers randomly from 1 to 4
-    powers = sorted(random.sample(range(1, 4), 2), reverse=True)
+    # Randomly select two unique powers from {1, 2, 3}
+    powers = sorted(random.sample([1, 2, 3], 2), reverse=True)
     
     terms = []
     derivative_terms = []

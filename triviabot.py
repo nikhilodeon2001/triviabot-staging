@@ -212,6 +212,7 @@ def generate_magic_image(input_text):
 
         if magic_users:
             send_message(target_room_id, magic_message)
+            time.sleep(1)
 
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running main.py: {e}")

@@ -89,11 +89,11 @@ magic_time = 10
 magic_users = []
 
 
-num_mysterybox_clues_default = 0
+num_mysterybox_clues_default = 10
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 2
+num_jeopardy_clues_default = 0
 num_jeopardy_clues = num_jeopardy_clues_default
 ghost_mode_default = False
 ghost_mode = ghost_mode_default
@@ -1499,7 +1499,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         send_image_flag = True
         
     elif trivia_url == "polynomial":
-        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image() #POLY
+        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image_high() #POLY
         message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
@@ -2437,6 +2437,91 @@ def round_start_messages():
             elif top_count == 4:
                 send_message(target_room_id, f"🌡️  {username} is heating up! Only 2 leaderboards left.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
     return None
+
+
+# Mapping to convert integers to superscript characters
+superscript_map = {
+    "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+    "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹"
+}
+
+def to_superscript(num):
+    return ''.join(superscript_map[digit] for digit in str(num))
+
+def generate_and_render_polynomial_image_high(max_power=4):
+    # Randomly generate coefficients for each power up to the specified max_power
+    coefficients = [random.randint(1, 9) for _ in range(max_power + 1)]
+    terms = []
+    derivative_terms = []
+
+    # Construct polynomial and derivative terms
+    for power, coef in enumerate(reversed(coefficients)):
+        if coef == 1 and power > 0:
+            coef_str = ""
+        else:
+            coef_str = str(coef)
+        
+        # Skip the term if coefficient is zero
+        if coef == 0:
+            continue
+
+        # Generate polynomial terms with superscript exponents
+        if power == 0:
+            terms.append(f"{coef}")
+        elif power == 1:
+            terms.append(f"{coef_str}x")
+            derivative_terms.append(f"{coef}")
+        else:
+            superscript = to_superscript(power)
+            terms.append(f"{coef_str}x{superscript}")
+            derivative_terms.append(f"{coef * power}x{to_superscript(power - 1)}")
+
+    # Join the terms for both polynomial and derivative strings
+    polynomial = " + ".join(terms)
+    derivative = " + ".join(derivative_terms) if derivative_terms else "0"
+
+    print(f"Polynomial: {polynomial}")
+    print(f"Derivative: {derivative}")
+
+    # Define the font path relative to the current script
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+
+    # Create a blank image
+    img_width, img_height = 600, 150
+    img = Image.new('RGB', (img_width, img_height), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Load the font
+    font_size = 48
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return
+
+    # Draw the polynomial text in the center
+    text_bbox = draw.textbbox((0, 0), polynomial, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2
+    draw.text((text_x, text_y), polynomial, fill=(255, 255, 0), font=font)
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+
+    # Upload the image to Matrix
+    content_uri = upload_image_to_matrix(image_buffer.read())
+    if content_uri:
+        return content_uri, img_width, img_height, derivative
+    else:
+        print("Failed to upload the image to Matrix.")
+
+
+
+
 
 def generate_and_render_polynomial_image(): #POLY
     # Randomly select coefficients for a, b, and c

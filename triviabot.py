@@ -186,7 +186,7 @@ def ask_magic_number(winner):
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
             for event in room_events:
-                if magic_number_correct = True:
+                if magic_number_correct == True:
                     return
                 event_id = event["event_id"]
                 event_type = event.get("type")  # Get the type of the event
@@ -853,7 +853,7 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
-    elif magic_number_correct = True:
+    elif magic_number_correct == True:
          prompt = (
             f"The winner of the trivia round is {winner}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Compliment specific responses they gave during the round and talk about how much beter they are than eveyone else, including OkraStrut."
@@ -920,7 +920,7 @@ def generate_round_summary(round_data, winner):
                 temperature=0.8,
             )
 
-        elif magic_number_correct = True:
+        elif magic_number_correct == True:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[

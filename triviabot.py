@@ -142,7 +142,8 @@ def generate_magic_image(input_text):
         image_mxc = upload_image_to_matrix(image_data)
         image_size = 100
         
-        message = "⬇️ 🔍❓🔢⌨️ 🚀➡️🥒💖💬\n"
+        #message = "⬇️ 🔍❓🔢⌨️ 🚀➡️🥒💖💬\n"
+        message = "Solve the mystery below and Okra will be nice (to you)\n⬇️ 🔍❓🔢⌨️ 🚀➡️🥒💖💬\n"
         send_message(target_room_id, message)
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -550,8 +551,6 @@ def redact_message(event_id, room_id):
         if response.status_code != 200:
             print(f"Failed to redact message {event_id}. Status code: {response.status_code}")
             print(response.text)
-        else:
-            print("message redacted")
     
     except requests.exceptions.RequestException as e:
         print(f"Error redacting message {event_id}: {e}")

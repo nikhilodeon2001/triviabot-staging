@@ -2450,7 +2450,7 @@ def to_superscript(num):
 
 def generate_and_render_polynomial_image_high():
     max_power = 3  # Maximum exponent
-    terms_to_display = 3  # Limit to 3 terms
+    terms_to_display = 2  # Limit to 3 terms
 
     # Randomly generate coefficients for each power up to max_power with values between 1 and 9
     coefficients = {power: random.randint(1, 9) for power in range(max_power, -1, -1)}

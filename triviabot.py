@@ -2413,8 +2413,6 @@ def print_selected_questions(selected_questions):
 
 
 def round_start_messages():
-
-    print("entering round start")
     db = connect_to_mongodb()
     top_users = list(db.top_users.find())
     sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
@@ -2482,9 +2480,6 @@ def generate_and_render_polynomial_image_high():
     # Join the terms for both polynomial and derivative strings
     polynomial = " + ".join(terms)
     derivative = " + ".join(derivative_terms) if derivative_terms else "0"
-
-    print(f"Polynomial: {polynomial}")
-    print(f"Derivative: {derivative}")
 
     # Define the font path relative to the current script
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")

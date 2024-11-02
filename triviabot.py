@@ -1545,8 +1545,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     else:
          message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
 
-    if len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0]):
-        message_body += "\n⚠️ Answer is a number. You get one shot...\n"
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median"]::
+        message_body += "\n⚠️ Numerical answer. One guess enforced. ⚠️\n"
     
     response = send_message(target_room_id, message_body)
 

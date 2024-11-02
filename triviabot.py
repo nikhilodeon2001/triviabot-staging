@@ -1684,7 +1684,10 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     threshold = 0.90
     user_answer = str(user_answer).lower()
     correct_answer = str(correct_answer).lower()  
-
+    
+    user_answer = normalize_superscripts(user_answer)
+    correct_answer = normalize_superscripts(correct_answer)
+    
     if url == "derivative":
         return derivative_checker(user_answer, correct_answer)
         
@@ -2310,8 +2313,15 @@ superscript_map = {
     "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹"
 }
 
+# Reverse mapping to convert superscript characters back to regular numbers
+reverse_superscript_map = {v: k for k, v in superscript_map.items()}
+
 def to_superscript(num):
     return ''.join(superscript_map[digit] for digit in str(num))
+
+def normalize_superscripts(text):
+    return ''.join(reverse_superscript_map.get(char, char) for char in text)
+
 
 def generate_and_render_derivative_image_high():
     # Randomly select two unique powers from {1, 2, 3}

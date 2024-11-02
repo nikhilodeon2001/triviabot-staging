@@ -83,7 +83,7 @@ time_between_questions_default = time_between_questions
 questions_module = os.getenv("questions_module", "trivia_questions")
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 20000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
 first_place_bonus = 0
 magic_time = 7
 magic_number = 0000
@@ -1546,7 +1546,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
          message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
 
     if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median"]:
-        message_body += "\n🚨 Numerical answer. One guess enforced. 🚨\n"
+        message_body += "\n🚨 One Guess Only 🚨\n"
     
     response = send_message(target_room_id, message_body)
 
@@ -1718,6 +1718,8 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
         return True
 
     # New Step: First 5 characters match
+    print(f"user answer is {user_answer}")
+    print(f"correct answer is {correct_answer}")
     if user_answer[:5] == correct_answer[:5]:
         return True
     
@@ -2808,6 +2810,8 @@ try:
     # Call this function at the start of the script to initialize the sync
     initialize_sync()
 
+    fuzzy_match("mahjong", "Mah jongg", "Toys & Games", "opendb")
+    
     # Start the trivia round
     start_trivia_round()
 

@@ -450,7 +450,7 @@ def prompt_user_for_response(round_winner, winner_points):
         
                     if "ghost" in message_content.lower():
                         ghost_mode = 1
-                        send_message(target_room_id, f"👻🎃 @{round_winner} says Happy Halloween. Answers will disappear.\n")
+                        send_message(target_room_id, f"👻🎃 @{round_winner} says Boo! Answers will disappear.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")

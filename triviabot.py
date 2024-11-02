@@ -1674,7 +1674,7 @@ def derivative_checker(response, answer, threshold):
     print(f"Response is {response}")
     print(f"Answer is {answer}")
 
-    if response == answer or jaccard_similarity(user_answer, correct_answer) >= threshold:
+    if response == answer or jaccard_similarity(response, answer) >= threshold:
         return True
     else:
         return False

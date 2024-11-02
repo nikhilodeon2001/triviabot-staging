@@ -1663,20 +1663,37 @@ def is_number(s):
     except ValueError:
         return False
 
+
+def derivative_checker(response, answer):
+    response = response.replace(" ", "")      
+    answer = answer.replace(" ", "")
+
+    response = response.translate(str.maketrans('', '', string.punctuation))
+    answer = answer.translate(str.maketrans('', '', string.punctuation))
+
+    print(f"Response is {response}")
+    print(f"Answer is {answer}")
+
+    if response == answer:
+        return True
+    else:
+        return False
+
+
 def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     threshold = 0.90
-    user_answer = str(user_answer)  # Ensure user_answer is also a string
-    correct_answer = str(correct_answer)  # Convert to string
-    
-    if not user_answer or not correct_answer:           #POLY
-         return user_answer == correct_answer  # Only accept exact match if either are empty        #POLY
-    
-    no_spaces_user = user_answer.replace(" ", "")       #POLY
-    no_spaces_correct = correct_answer.replace(" ", "") #POLY
+    user_answer = str(user_answer).lower()
+    correct_answer = str(correct_answer).lower.()  
 
-    if no_spaces_user == no_spaces_correct:     #POLY
+    if url == "derivatives":
+        return derivative_checker(user_answer, correct_answer)
+        
+    no_spaces_user = user_answer.replace(" ", "")      
+    no_spaces_correct = correct_answer.replace(" ", "") 
+
+    if no_spaces_user == no_spaces_correct:     
         return True
-    
+
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
@@ -1725,8 +1742,8 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
         return True
 
     # Step 3: Jaccard similarity (Character level)
-    #if jaccard_similarity(user_answer, correct_answer) >= threshold:
-    #    return True
+    if jaccard_similarity(user_answer, correct_answer) >= threshold and url != "scramble":
+        return True
 
     # Step 4: Token-based matching
     if token_based_matching(user_answer, correct_answer) >= threshold:

@@ -1674,7 +1674,7 @@ def derivative_checker(response, answer):
     response = response.translate(str.maketrans('', '', string.punctuation))
     answer = answer.translate(str.maketrans('', '', string.punctuation))
 
-    if response == answer or jaccard_similarity(response, answer) == 1:
+    if (response == answer or jaccard_similarity(response, answer) == 1) and len(response) == len(answer):
         return True
     else:
         return False

@@ -89,11 +89,11 @@ magic_time = 7
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 10
+num_mysterybox_clues_default = 0
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 0
+num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
 ghost_mode_default = False
 ghost_mode = ghost_mode_default
@@ -856,7 +856,7 @@ def generate_round_summary(round_data, winner):
     elif magic_number_correct == True:
          prompt = (
             f"The winner of the trivia round is {winner}. "
-            "Love bomb the winning player about their username and be very specific, positive, and loving. Compliment specific responses they gave during the round and talk about how much beter they are than eveyone else, including OkraStrut."
+            "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else, including OkraStrut."
             "Create no more than 5 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
@@ -2439,14 +2439,6 @@ def round_start_messages():
     return None
 
 
-# Mapping to convert integers to superscript characters
-superscript_map = {
-    "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
-    "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹"
-}
-
-def to_superscript(num):
-    return ''.join(superscript_map[digit] for digit in str(num))
 
 # Mapping to convert integers to superscript characters
 superscript_map = {
@@ -2843,6 +2835,7 @@ def start_trivia_round():
 
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
             round_start_messages()
+            time.sleep(3)
                 
             # Randomly select n questions
             print() 

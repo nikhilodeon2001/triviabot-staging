@@ -1718,13 +1718,7 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
         return True
 
     # New Step: First 5 characters match
-    print(f"user answer is {user_answer}")
-    print(f"correct answer is {correct_answer}")
-    print(user_answer[:5])
-    print(correct_answer[:5])
-    print(user_answer[:5] == correct_answer[:5])
-    if user_answer[:5] == correct_answer[:5]:
-        print("here")
+    if user_answer[:5] == correct_answer[:5] or no_spaces_user[:5] == no_spaces_correct[:5]:
         return True
     
     # Remove filler words and split correct answer

@@ -875,6 +875,8 @@ def generate_round_summary(round_data, winner):
     for question_data in round_data["questions"]:
         question_number = question_data["question_number"]
         question_text = question_data["question_text"]
+        question_category = question_data["question_category"]
+        question_url = question_data["question_url"]
         correct_answers = question_data["correct_answers"]
 
         # Convert all items in correct_answers to strings before joining
@@ -889,7 +891,7 @@ def generate_round_summary(round_data, winner):
             for response in question_data["user_responses"]:
                 username = response["username"]
                 user_response = response["response"]
-                is_correct = "Correct" if any(fuzzy_match(user_response, answer) for answer in correct_answers) else "Incorrect"
+                is_correct = "Correct" if any(fuzzy_match(user_response, answer, question_category, question_url) for answer in correct_answers) else "Incorrect"
                 prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
         else:
             prompt += "No responses recorded for this question.\n"
@@ -1503,8 +1505,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         image_size = 100
         send_image_flag = True
         
-    elif trivia_url == "polynomial":
-        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial_image_high() #POLY
+    elif trivia_url == "derivative":
+        image_mxc, image_width, image_height, new_solution = generate_and_render_derivative_image_high() #POLY
         message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
@@ -1562,6 +1564,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     round_data["questions"].append({
         "question_number": question_number,
         "question_category": trivia_category,
+        "question_url": trivia_url,
         "question_text": trivia_question,
         "correct_answers": correct_answers,  
         "user_responses": [] 
@@ -1660,7 +1663,8 @@ def is_number(s):
     except ValueError:
         return False
 
-def fuzzy_match(user_answer, correct_answer, threshold=0.90): #POLY
+def fuzzy_match(user_answer, correct_answer, category, url): #POLY
+    threshold = 0.90
     user_answer = str(user_answer)  # Ensure user_answer is also a string
     correct_answer = str(correct_answer)  # Convert to string
     
@@ -1796,7 +1800,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
     return collected_responses
 
 
-def check_correct_responses_delete(question_ask_time, trivia_answer_list, question_number, collected_responses):
+def check_correct_responses_delete(question_ask_time, trivia_answer_list, question_number, collected_responses, trivia_category, trivia_url):
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
     
@@ -1840,7 +1844,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
             })
                                 
         # Check if the user's response is in the list of correct answers
-        if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):            
+        if any(fuzzy_match(message_content, answer, trivia_category, trivia_url) for answer in trivia_answer_list):            
             timestamp = response["response_time"]  # Use the response time from the collected data
             if timestamp and question_ask_time:
                 # Convert timestamp to seconds
@@ -1925,163 +1929,6 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
 
     flush_submission_queue() 
     return None
-
-
-def check_correct_responses(question_ask_time, trivia_answer_list, question_number):
-    """Check and respond to users who answered the trivia question correctly."""
-    global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
-    sync_url = f"{matrix_base_url}/sync"
-    
-    # Define the first item in the list as trivia_answer
-    trivia_answer = trivia_answer_list[0]  # The first item is the main answer
-    correct_responses = []  # To store users who answered correctly
-    has_responses = False  # Track if there are any responses
-   
-    for attempt in range(max_retries):
-        try:
-            fastest_correct_user = None
-            fastest_response_time = None
-            
-            if since_token:
-                params["since"] = since_token
-
-            response = requests.get(sync_url, headers=headers, params=params)
-            
-            if response.status_code == 200:
-                sync_data = response.json()
-                since_token = sync_data.get("next_batch")  # Update the since token
-                
-                # Process messages from the room
-                responses.clear()
-                for room_id, room_data in sync_data.get("rooms", {}).get("join", {}).items():
-                    if room_id == target_room_id:  # Only process messages from the target room
-                        for event in room_data.get("timeline", {}).get("events", []):
-                            sender = event["sender"]
-                            display_name = get_display_name(event.get("content", {}).get("displayname", sender))  # Get the display name from content
-                            
-                            # Check if the user has already answered correctly, ignore if they have
-                            if any(resp[0] == display_name for resp in correct_responses):
-                                continue  # Ignore this response since the user has already answered correctly
-
-                            # Log user submission (MongoDB operation)
-                            log_user_submission(display_name)
-
-                            emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🛑"]
-                            message_content = event.get("content", {}).get("body", "")
-                            normalized_message_content = normalize_text(message_content)
-                        
-                            # Continue loop only if sender is bot_user_id and message contains one of the specified emojis
-                            if sender == bot_user_id and any(emoji in message_content for emoji in emojis):
-                                continue
-                                
-                            # Indicate that there was at least one response
-                            has_responses = True
-                            
-                            # Find the current question data to add responses
-                            current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
-                            if current_question_data:
-                                current_question_data["user_responses"].append({
-                                    "username": display_name,
-                                    "response": message_content
-                                })
-                                
-                            # Check if the user's response is in the list of correct answers
-                            if any(fuzzy_match(message_content, answer) for answer in trivia_answer_list):
-                                
-                                timestamp = event.get("origin_server_ts", None) / 1000  # Extract the timestamp
-                                if timestamp and question_ask_time:
-                                    # Convert timestamp to seconds
-                                    response_time = timestamp - question_ask_time
-                                else:   
-                                    response_time = float('inf')
-                                    
-                                points = calculate_points(response_time)
-                                correct_responses.append((display_name, points, response_time, message_content))
-                    
-                                # Check if this is the fastest correct response so far
-                                if fastest_correct_user is None or response_time < fastest_response_time:
-                                    fastest_correct_user = display_name
-                                    fastest_response_time = response_time
-        
-             
-                # Now that we know the fastest responder, iterate over correct_responses to:
-                # - Assign the extra 500 points to the fastest user
-                # - Update the scoreboard for all users
-                for i, (display_name, points, response_time, message_content) in enumerate(correct_responses):
-                    if display_name == fastest_correct_user:
-                        correct_responses[i] = (display_name, points + first_place_bonus, response_time, message_content)
-                      
-                        if display_name in fastest_answers_count:
-                            fastest_answers_count[display_name] += 1
-                        else:
-                            fastest_answers_count[display_name] = 1
-                            
-                        if display_name in scoreboard:
-                            scoreboard[display_name] += points + first_place_bonus
-                        else:
-                            scoreboard[display_name] = points + first_place_bonus
-                    else:
-                        if display_name in scoreboard:
-                            scoreboard[display_name] += points
-                        else:
-                            scoreboard[display_name] = points                    
-            
-                update_answer_streaks(fastest_correct_user)  # Update the correct answer streak for this user
-               
-                # Add the current state of the scoreboard to round_data
-                current_question_data = next((q for q in round_data["questions"] if q["question_number"] == question_number), None)
-                if current_question_data:
-                    current_question_data["scoreboard_after_question"] = dict(scoreboard)
-
-                # Construct a single message for all the responses
-                message = f"\n✅ Answer ✅\n{trivia_answer}\n"
-            
-                # Notify the chat
-                if correct_responses:    
-                    correct_responses_length = len(correct_responses)
-                    
-                    # Loop through the responses and append to the message
-                    for display_name, points, response_time, message_content in correct_responses:
-                        time_diff = response_time - fastest_response_time
-                    
-                        # Display the formatted message based on yolo_mode
-                        if time_diff == 0:
-                            message += f"\n⚡ {display_name}"
-                            if not yolo_mode:
-                                message += f": {points}"
-                            if points == 420:
-                                message += "🌿"
-                            if current_longest_answer_streak["streak"] > 1:
-                                message += f"  🔥{current_longest_answer_streak['streak']}"
-                        else:
-                            message += f"\n👥 {display_name}"
-                            if not yolo_mode:
-                                message += f": {points}"
-                            if points == 420:
-                                message += "🌿"
-            
-                # Send the entire message at once
-                if message:
-                    send_message(target_room_id, message)
-
-                flush_submission_queue()
-                
-                return None
-            else:
-                print(f"Failed to fetch messages. Status code: {response.status_code}")
-                return None
-         
-        except requests.exceptions.RequestException as e:
-            sentry_sdk.capture_exception(e)
-            print(f"Attempt {attempt + 1} failed: {e}")
-            
-            if attempt < max_retries - 1:
-                time.sleep(delay_between_retries)
-            else:
-                print(f"Max retries reached. Failed to fetch messages.")
-                return None  
-                    
-    return None  
 
 
 def update_answer_streaks(user):
@@ -2449,7 +2296,7 @@ superscript_map = {
 def to_superscript(num):
     return ''.join(superscript_map[digit] for digit in str(num))
 
-def generate_and_render_polynomial_image_high():
+def generate_and_render_derivative_image_high():
     # Randomly select two unique powers from {1, 2, 3}
     powers = sorted(random.sample([1, 2, 3], 2), reverse=True)
     
@@ -2513,7 +2360,7 @@ def generate_and_render_polynomial_image_high():
         print("Failed to upload the image to Matrix.")
 
 
-def generate_and_render_polynomial_image(): #POLY
+def generate_and_render_derivative_image(): #POLY
     # Randomly select coefficients for a, b, and c
     a = random.randint(1, 9)
     b = random.randint(1, 9)
@@ -2863,7 +2710,7 @@ def start_trivia_round():
                 
                 solution_list = trivia_answer_list if new_solution is None else [new_solution]
                 
-                check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses)
+                check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses, trivia_category, trivia_url)
                 
                 if not yolo_mode or question_number == questions_per_round:
                     show_standings()

@@ -1685,7 +1685,7 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     user_answer = str(user_answer).lower()
     correct_answer = str(correct_answer).lower()  
 
-    if url == "derivatives":
+    if url == "derivative":
         return derivative_checker(user_answer, correct_answer)
         
     no_spaces_user = user_answer.replace(" ", "")      

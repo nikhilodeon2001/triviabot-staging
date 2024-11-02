@@ -1545,6 +1545,9 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     else:
          message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
 
+    if len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0]):
+        message_body += "\n⚠️ Answer is a number. You get one shot...\n"
+    
     response = send_message(target_room_id, message_body)
 
     if response is None:
@@ -1833,6 +1836,12 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_response_time = None
     fastest_correct_event_id = None
 
+    # Check if trivia_answer_list is a single-element list with a numeric answer
+    single_numeric_answer = len(trivia_answer_list) == 1 and is_number(trivia_answer)
+
+    # Dictionary to track first numerical response from each user if answer is a number
+    user_first_numeric_response = {}
+
     # Process collected responses
     for response in collected_responses:
         sender = response["user_id"]
@@ -1842,11 +1851,23 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):
             continue  # Ignore this response since the user has already answered correctly
-    
+
+        message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
+
+        # If it's a single numeric answer question, and this user's response is numeric, only record the first one
+        if single_numeric_answer:
+            if display_name in user_first_numeric_response:
+                continue  # Skip if we've already recorded a numeric response for this user
+            
+            # Check if the message content is numeric
+            if is_number(message_content):
+                user_first_numeric_response[display_name] = message_content
+            else:
+                continue  # Skip non-numeric responses for single numeric questions
+        
         # Log user submission (MongoDB operation)
         log_user_submission(display_name)
                             
-        message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         normalized_message_content = normalize_text(message_content)
         
         if "okra" in message_content.lower() and emoji_mode == True:

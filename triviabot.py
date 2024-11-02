@@ -1664,7 +1664,7 @@ def is_number(s):
         return False
 
 
-def derivative_checker(response, answer, threshold):
+def derivative_checker(response, answer):
     response = response.replace(" ", "")      
     answer = answer.replace(" ", "")
 
@@ -1674,7 +1674,7 @@ def derivative_checker(response, answer, threshold):
     print(f"Response is {response}")
     print(f"Answer is {answer}")
 
-    if response == answer or jaccard_similarity(response, answer) >= threshold:
+    if response == answer or jaccard_similarity(response, answer) == 1:
         return True
     else:
         return False
@@ -1689,7 +1689,7 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     correct_answer = normalize_superscripts(correct_answer)
     
     if url == "derivative":
-        return derivative_checker(user_answer, correct_answer, threshold)
+        return derivative_checker(user_answer, correct_answer)
         
     no_spaces_user = user_answer.replace(" ", "")      
     no_spaces_correct = correct_answer.replace(" ", "") 

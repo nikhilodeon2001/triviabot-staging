@@ -2806,10 +2806,7 @@ try:
     load_global_variables()
 
     # Call this function at the start of the script to initialize the sync
-    initialize_sync()
-
-    print(fuzzy_match("mahjong", "Mah jongg", "Toys & Games", "opendb"))
-    
+    initialize_sync()    
     
     # Start the trivia round
     start_trivia_round()

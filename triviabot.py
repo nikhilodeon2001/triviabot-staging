@@ -1683,7 +1683,7 @@ def derivative_checker(response, answer):
 def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     threshold = 0.90
     user_answer = str(user_answer).lower()
-    correct_answer = str(correct_answer).lower.()  
+    correct_answer = str(correct_answer).lower()  
 
     if url == "derivatives":
         return derivative_checker(user_answer, correct_answer)

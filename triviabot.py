@@ -89,11 +89,11 @@ magic_time = 7
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 10
+num_mysterybox_clues_default = 2
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 0
+num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
 ghost_mode_default = False
 ghost_mode = ghost_mode_default
@@ -1619,11 +1619,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         send_image_flag = True
 
     elif trivia_url == "multiple choice": 
-        print(trivia_answer_list[0])
-        print(trivia_answer_list[0]=="True")
-        print(trivia_answer_list[0]=="False")
         if trivia_answer_list[0] in {"True", "False"}:
-            message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 True/False 🚨 {trivia_question}\n\n"
+            message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 True or False 🚨 {trivia_question}\n\n"
         else:
             message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 MC 🚨 {trivia_question}\n\n"
             for answer in trivia_answer_list[1:]:

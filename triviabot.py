@@ -1713,11 +1713,11 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     
     # Ensure correct_answer_words is not empty
     if correct_answer_words and len(correct_answer_words[0]) > 3:
-        if user_answer == correct_answer_words[0] or no_filler_user == correct_answer_words[0]
+        if user_answer == correct_answer_words[0] or no_filler_user == correct_answer_words[0]:
             return True
 
     if no_filler_answer_words and len(no_filler_answer_words[0]) > 3:
-        if user_answer == no_filler_answer_words[0] or no_filler_user == no_filler_answer_words[0]
+        if user_answer == no_filler_answer_words[0] or no_filler_user == no_filler_answer_words[0]:
             return True
 
     #Check if user's answer is a substring of the correct answer after normalization

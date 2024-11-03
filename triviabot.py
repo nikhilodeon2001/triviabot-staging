@@ -1682,7 +1682,7 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
-    if len(user_answer) < 5:
+    if len(user_answer) < 4:
         return user_answer == correct_answer  # Only accept an exact match for short answers
     
     if user_answer == correct_answer:

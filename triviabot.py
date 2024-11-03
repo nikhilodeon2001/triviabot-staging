@@ -1620,6 +1620,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     elif trivia_url == "multiple choice": 
         print(trivia_answer_list[0])
+        print(trivia_answer_list[0]==True)
+        print(trivia_answer_list[0]==False)
         if trivia_answer_list[0] in {True, False}:
             message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 True/False 🚨 {trivia_question}\n\n"
         else:

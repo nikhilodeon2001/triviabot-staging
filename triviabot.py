@@ -1621,9 +1621,10 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     elif trivia_url == "multiple choice": 
         if trivia_answer_list[0] in {True, False}:
             message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 True/False 🚨 {trivia_question}\n\n"
-        message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 Multiple Choice 🚨 {trivia_question}\n\n"
-        for answer in trivia_answer_list[1:]:
-            message_body += f"{answer}\n"
+        else:
+            message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 MC 🚨 {trivia_question}\n\n"
+            for answer in trivia_answer_list[1:]:
+                message_body += f"{answer}\n"
             
         #image_mxc, image_width, image_height = generate_mc_image(trivia_answer_list)
         #image_size = 100

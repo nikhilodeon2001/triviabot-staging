@@ -1770,8 +1770,8 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     correct_answer = normalize_text(str(correct_answer))
 
     if url == "multiple choice":
-        print user_answer[0]
-        print correct_answer[0]
+        print(user_answer[0])
+        print(correct_answer[0])
         return user_answer[0] == correct_answer[0];
     
     if is_number(correct_answer):

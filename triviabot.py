@@ -1627,11 +1627,14 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     elif trivia_url == "multiple choice":
         image_mxc, image_width, image_height = generate_mc_image(trivia_answer_list)
-        message_body = f"\n{number_block}✏️ {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         
         if trivia_answer_list[0] in {True, False}:
             message_body += "\n🚨 1 Guess 🚨\n\n"
         message_body += "\n🚨 Letter Only - 1 Guess 🚨\n\n"
+
+        image_size = 100
+        send_image_flag = True
 
     else:
          message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"

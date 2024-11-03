@@ -305,7 +305,7 @@ def generate_mc_image(answers):
         return None
 
     # Calculate the maximum width of any answer for consistent sizing
-    max_answer_width = max(answer_font.getsize(answer)[0] for answer in answers[1:])
+    max_answer_width = max(draw.textbbox((0, 0), answer, font=answer_font)[2] for answer in answers[1:])
     
     # Draw the first element (main answer) as a title at the top
     main_answer_text = answers[0]
@@ -357,7 +357,6 @@ def generate_mc_image(answers):
     else:
         print("Failed to upload the image to Matrix.")
         return None
-
 
 def draw_text_wrapper(text, font, max_width):
     lines = []

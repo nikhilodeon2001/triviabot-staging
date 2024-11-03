@@ -1619,7 +1619,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         send_image_flag = True
 
     elif trivia_url == "multiple choice": 
-        if trivia_answer_list[0]) in {True, False}:
+        if trivia_answer_list[0] in {True, False}:
             message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 True/False 🚨 {trivia_question}\n\n"
         message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 Multiple Choice 🚨 {trivia_question}\n\n"
         for answer in trivia_answer_list[1:]:

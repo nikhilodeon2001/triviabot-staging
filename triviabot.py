@@ -270,6 +270,90 @@ def generate_jeopardy_image(question_text):
         print("Failed to upload the image to Matrix.")
         return None
 
+
+def generate_mc_image(answers):
+    # Define the background color and text properties
+    background_color = (6, 12, 233)  # Blue color similar to Jeopardy screen
+    text_color = (255, 255, 255)    # White text
+    
+    # Define color map for answers
+    color_map = {
+        "A": (0, 0, 255),    # Blue for A
+        "B": (255, 255, 0),  # Yellow for B
+        "C": (0, 255, 0),    # Green for C
+        "D": (255, 0, 0),    # Red for D
+        "True": (0, 255, 0), # Green for True
+        "False": (255, 0, 0) # Red for False
+    }
+    
+    # Define image size and font properties
+    img_width, img_height = 800, 600
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    question_font_size = 60
+    answer_font_size = 40
+
+    # Create a blank image with blue background
+    img = Image.new('RGB', (img_width, img_height), color=background_color)
+    draw = ImageDraw.Draw(img)
+    
+    # Load the font for question and answers
+    try:
+        question_font = ImageFont.truetype(font_path, question_font_size)
+        answer_font = ImageFont.truetype(font_path, answer_font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return None
+    
+    # Draw the first element (main answer) as a title at the top
+    main_answer_text = answers[0]
+    wrapped_main_answer = "\n".join(draw_text_wrapper(main_answer_text, question_font, img_width - 40))
+    main_answer_bbox = draw.textbbox((0, 0), wrapped_main_answer, font=question_font)
+    main_answer_x = (img_width - (main_answer_bbox[2] - main_answer_bbox[0])) // 2
+    main_answer_y = 20  # Position main answer text near the top
+    draw.multiline_text((main_answer_x, main_answer_y), wrapped_main_answer, fill=text_color, font=question_font, align="center")
+
+    # Calculate the position for the additional answers
+    answer_y_start = main_answer_y + (main_answer_bbox[3] - main_answer_bbox[1]) + 40  # Start below main answer text
+    answer_spacing = 10  # Space between answer lines
+
+    # Draw each subsequent answer with conditional coloring
+    for i, answer in enumerate(answers[1:], start=1):  # Skip the first element in answers
+        wrapped_answer = "\n".join(draw_text_wrapper(answer, answer_font, img_width - 40))
+        
+        # Determine color based on the answer type
+        first_word = answer.split()[0].rstrip(".")  # Get the first word (A, B, C, D or True/False)
+        color = color_map.get(first_word, text_color)  # Default to white if no specific color
+
+        if first_word in {"True", "False"}:
+            # Draw True/False with specific color for the answer
+            draw.text((40, answer_y_start + i * (answer_font_size + answer_spacing)), wrapped_answer, font=answer_font, fill=color)
+        elif first_word in {"A", "B", "C", "D"}:
+            # Split letter and rest of the text, color letter separately
+            letter = first_word + "."  # Add back the period for display
+            remaining_text = " ".join(answer.split()[1:])
+            draw.text((40, answer_y_start + i * (answer_font_size + answer_spacing)), letter, font=answer_font, fill=color)
+            draw.text((80, answer_y_start + i * (answer_font_size + answer_spacing)), remaining_text, font=answer_font, fill=text_color)
+        else:
+            # Default answer drawing with white text
+            draw.text((40, answer_y_start + i * (answer_font_size + answer_spacing)), wrapped_answer, font=answer_font, fill=text_color)
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+    
+    # Upload the image and send to the chat
+    image_mxc = upload_image_to_matrix(image_buffer.read())
+    
+    if image_mxc:
+        # Return image_mxc, image_width, and image_height
+        return image_mxc, img_width, img_height
+    else:
+        print("Failed to upload the image to Matrix.")
+        return None
+
+
+
 def draw_text_wrapper(text, font, max_width):
     lines = []
     words = text.split()
@@ -1529,7 +1613,6 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         image_size = 100
         send_image_flag = True
 
-
     elif trivia_url == "jeopardy":
         image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
         message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
@@ -1542,11 +1625,19 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         image_size = 100
         send_image_flag = True
 
+    elif trivia_url == "multiple choice":
+        image_mxc, image_width, image_height = generate_mc_image(trivia_answer_list)
+        message_body = f"\n{number_block}✏️ {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        
+        if trivia_answer_list[0] in {True, False}:
+            message_body += "\n🚨 1 Guess 🚨\n\n"
+        message_body += "\n🚨 Letter Only - 1 Guess 🚨\n\n"
+
     else:
          message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
 
     if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median"]:
-        message_body += "\n🚨 One Guess Only 🚨\n\n"
+        message_body += "\n🚨 1 Guess 🚨\n\n"
     
     response = send_message(target_room_id, message_body)
 

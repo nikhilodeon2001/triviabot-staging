@@ -292,7 +292,7 @@ def generate_mc_image(answers):
     question_font_size = 60
     answer_font_size = 40
 
-    # Create a blank image with blue background
+    # Create a blank image with a black background
     img = Image.new('RGB', (img_width, img_height), color=background_color)
     draw = ImageDraw.Draw(img)
     
@@ -305,7 +305,7 @@ def generate_mc_image(answers):
         return None
 
     # Calculate the maximum width of any answer for consistent sizing
-    max_answer_width = max(draw.textsize(answer, font=answer_font)[0] for answer in answers[1:])
+    max_answer_width = max(answer_font.getsize(answer)[0] for answer in answers[1:])
     
     # Draw the first element (main answer) as a title at the top
     main_answer_text = answers[0]

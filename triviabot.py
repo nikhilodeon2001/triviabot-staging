@@ -1625,6 +1625,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
             message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 MC 🚨 {trivia_question}\n\n"
             for answer in trivia_answer_list[1:]:
                 message_body += f"{answer}\n"
+        trivia_answer_list[:] = trivia_answer_list[:1]
             
         #image_mxc, image_width, image_height = generate_mc_image(trivia_answer_list)
         #image_size = 100
@@ -1767,6 +1768,9 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     user_answer = normalize_text(str(user_answer))
     correct_answer = normalize_text(str(correct_answer))
 
+    if category == "multiple choice":
+        return user_answer[0] == correct_answer[0];
+    
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
@@ -1910,10 +1914,10 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer
-    single_numeric_answer = len(trivia_answer_list) == 1 and is_number(trivia_answer)
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_category == "multiple choice"
 
     # Dictionary to track first numerical response from each user if answer is a number
-    user_first_numeric_response = {}
+    user_first_response = {}
 
     # Process collected responses
     for response in collected_responses:
@@ -1928,13 +1932,13 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
 
         # If it's a single numeric answer question, and this user's response is numeric, only record the first one
-        if single_numeric_answer:
-            if display_name in user_first_numeric_response:
+        if single_answer:
+            if display_name in user_first_response:
                 continue  # Skip if we've already recorded a numeric response for this user
             
             # Check if the message content is numeric
-            if is_number(message_content):
-                user_first_numeric_response[display_name] = message_content
+            if is_number(message_content) or message_content.lower() in {"a", "b", "c", "d", "true", "false"}:
+                user_first_response[display_name] = message_content
             else:
                 continue  # Skip non-numeric responses for single numeric questions
         

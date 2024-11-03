@@ -1633,18 +1633,12 @@ def remove_filler_words(input_str):
     filtered_words = [word for word in words if word not in filler_words]
     return ' '.join(filtered_words)
 
-def normalize_text(input_str):
-    """Normalize text by removing diacritics, punctuation, whitespace, and filler words, and converting to lowercase."""
-    # Strip leading/trailing whitespace
+def normalize_text(input):
+    text = text.lower()    
+    text = normalize_superscripts(text)
     text = input_str.strip()
-    # Remove diacritics
     text = remove_diacritics(text)
-    # Remove punctuation
     text = text.translate(str.maketrans('', '', string.punctuation))
-    # Convert to lowercase
-    text = text.lower()
-    # Remove filler words using the subfunction
-    text = remove_filler_words(text)
     return text
 
 def levenshtein_similarity(str1, str2):
@@ -1681,52 +1675,50 @@ def derivative_checker(response, answer):
 
 
 def fuzzy_match(user_answer, correct_answer, category, url): #POLY
-    threshold = 0.90
-    user_answer = str(user_answer).lower()
-    correct_answer = str(correct_answer).lower()  
-    
-    user_answer = normalize_superscripts(user_answer)
-    correct_answer = normalize_superscripts(correct_answer)
-    
-    if url == "derivative":
-        return derivative_checker(user_answer, correct_answer)
-        
-    no_spaces_user = user_answer.replace(" ", "")      
-    no_spaces_correct = correct_answer.replace(" ", "") 
-
-    if no_spaces_user == no_spaces_correct:     
-        return True
+    threshold = 0.90    
+    user_answer = normalize_text(str(user_answer))
+    correct_answer = normalize_text(str(correct_answer))
 
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
-    if len(user_answer) < 4 or len(correct_answer) < 4:
-        return user_answer.lower() == correct_answer.lower()  # Only accept an exact match for short answers
-
-    # Normalize both user and correct answers
-    user_answer = normalize_text(user_answer)
-    correct_answer = normalize_text(correct_answer)
+    if len(user_answer) < 5:
+        return user_answer == correct_answer  # Only accept an exact match for short answers
     
-    # Check if either post-normalized answer is empty
-    if not user_answer or not correct_answer:
-         return user_answer == correct_answer  # Only accept exact match if either are now empty
-    
-    no_spaces_user = user_answer.replace(" ", "")       #POLY
-    no_spaces_correct = correct_answer.replace(" ", "") #POLY
-
-    if no_spaces_user == no_spaces_correct:     #POLY
+    if user_answer == correct_answer:
         return True
+    
+    if url == "derivative":
+        return derivative_checker(user_answer, correct_answer)
 
+    no_spaces_user = user_answer.replace(" ", "")      
+    no_spaces_correct = correct_answer.replace(" ", "") 
+
+    no_filler_user = remove_filler_words(user_answer)
+    no_filler_correct = remove_filler_words(correct_answer)
+
+    no_filler_spaces_user = no_filler_user.replace(" ", "")
+    no_filler_spaces_correct = no_filler_correct.replace(" ", "")
+
+    if no_spaces_user == no_spaces_correct or no_filler_user == no_filler_correct or no_filler_spaces_user == no_filler_spaces_correct:     
+        return True
+         
     # New Step: First 5 characters match
-    if user_answer[:5] == correct_answer[:5] or no_spaces_user[:5] == no_spaces_correct[:5]:
+    if user_answer[:5] == correct_answer[:5] or no_spaces_user[:5] == no_spaces_correct[:5] or no_filler_user[:5] or no_filler_correct[:5] or no_filler_spaces_user[:5] = no_filler_spaces_correct[:5]:
         return True
     
     # Remove filler words and split correct answer
     correct_answer_words = correct_answer.split()
+    no_filler_answer_words = no_filler_correct.split()
     
     # Ensure correct_answer_words is not empty
-    if correct_answer_words and user_answer == correct_answer_words[0] and len(correct_answer_words[0]) > 3:
-        return True
+    if correct_answer_words and len(correct_answer_words[0]) > 3:
+        if user_answer == correct_answer_words[0] or no_filler_user == correct_answer_words[0]
+            return True
+
+    if no_filler_answer_words and len(no_filler_answer_words[0]) > 3:
+        if user_answer == no_filler_answer_words[0] or no_filler_user == no_filler_answer_words[0]
+            return True
 
     #Check if user's answer is a substring of the correct answer after normalization
     if user_answer in correct_answer:
@@ -1734,10 +1726,6 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     
     # Step 1: Exact match or Partial match
     if correct_answer in user_answer:
-        return True
-
-    # Step 1: Exact match or Partial match
-    if user_answer in correct_answer and len(user_answer) >= min(5, len(correct_answer)):
         return True
     
     # Step 2: Levenshtein similarity

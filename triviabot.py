@@ -289,59 +289,48 @@ def generate_mc_image(answers):
     # Define image size and font properties
     img_width, img_height = 800, 600
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
-    question_font_size = 60
-    answer_font_size = 40
+    font_size = 60  # Use this font size for both title and answers
 
     # Create a blank image with a black background
     img = Image.new('RGB', (img_width, img_height), color=background_color)
     draw = ImageDraw.Draw(img)
     
-    # Load the font for question and answers
+    # Load the font
     try:
-        question_font = ImageFont.truetype(font_path, question_font_size)
-        answer_font = ImageFont.truetype(font_path, answer_font_size)
+        font = ImageFont.truetype(font_path, font_size)
     except IOError:
         print(f"Error: Font file not found at {font_path}")
         return None
 
-    # Calculate the maximum width of any answer for consistent sizing
-    max_answer_width = max(draw.textbbox((0, 0), answer, font=answer_font)[2] for answer in answers[1:])
-    
-    # Draw the first element (main answer) as a title at the top
-    main_answer_text = answers[0]
-    wrapped_main_answer = "\n".join(draw_text_wrapper(main_answer_text, question_font, img_width - 40))
-    main_answer_bbox = draw.textbbox((0, 0), wrapped_main_answer, font=question_font)
-    main_answer_x = (img_width - (main_answer_bbox[2] - main_answer_bbox[0])) // 2
-    main_answer_y = 20  # Position main answer text near the top
-    draw.multiline_text((main_answer_x, main_answer_y), wrapped_main_answer, fill=text_color, font=question_font, align="center")
+    # Calculate the vertical starting position for the answers
+    answer_y_start = 20  # Start near the top
+    answer_spacing = 20  # Space between answer lines
 
-    # Calculate the position for the additional answers
-    answer_y_start = main_answer_y + (main_answer_bbox[3] - main_answer_bbox[1]) + 40  # Start below main answer text
-    answer_spacing = 10  # Space between answer lines
-
-    # Draw each subsequent answer with conditional coloring and aligned to maximum width
+    # Draw each answer in answers[1:] with specified colors, using title font size
     for i, answer in enumerate(answers[1:], start=1):  # Skip the first element in answers
-        wrapped_answer = "\n".join(draw_text_wrapper(answer, answer_font, img_width - 40))
+        # Wrap and center-align the answer
+        wrapped_answer = "\n".join(draw_text_wrapper(answer, font, img_width - 40))
         
         # Determine color based on the answer type
         first_word = answer.split()[0].rstrip(".")  # Get the first word (A, B, C, D or True/False)
         color = color_map.get(first_word, text_color)  # Default to white if no specific color
 
-        # Calculate horizontal alignment for centered text within max_answer_width
-        answer_x = (img_width - max_answer_width) // 2
+        # Calculate horizontal alignment for centered text
+        answer_bbox = draw.textbbox((0, 0), wrapped_answer, font=font)
+        answer_x = (img_width - (answer_bbox[2] - answer_bbox[0])) // 2
 
         if first_word in {"True", "False"}:
             # Draw True/False with specific color for the answer
-            draw.text((answer_x, answer_y_start + i * (answer_font_size + answer_spacing)), wrapped_answer, font=answer_font, fill=color)
+            draw.multiline_text((answer_x, answer_y_start + i * (font_size + answer_spacing)), wrapped_answer, font=font, fill=color)
         elif first_word in {"A", "B", "C", "D"}:
             # Split letter and rest of the text, color letter separately
             letter = first_word + "."  # Add back the period for display
             remaining_text = " ".join(answer.split()[1:])
-            draw.text((answer_x, answer_y_start + i * (answer_font_size + answer_spacing)), letter, font=answer_font, fill=color)
-            draw.text((answer_x + 30, answer_y_start + i * (answer_font_size + answer_spacing)), remaining_text, font=answer_font, fill=text_color)
+            draw.text((answer_x, answer_y_start + i * (font_size + answer_spacing)), letter, font=font, fill=color)
+            draw.text((answer_x + 30, answer_y_start + i * (font_size + answer_spacing)), remaining_text, font=font, fill=text_color)
         else:
             # Default answer drawing with white text
-            draw.text((answer_x, answer_y_start + i * (answer_font_size + answer_spacing)), wrapped_answer, font=answer_font, fill=text_color)
+            draw.multiline_text((answer_x, answer_y_start + i * (font_size + answer_spacing)), wrapped_answer, font=font, fill=text_color)
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()

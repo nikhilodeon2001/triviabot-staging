@@ -1634,9 +1634,9 @@ def remove_filler_words(input_str):
     return ' '.join(filtered_words)
 
 def normalize_text(input):
-    text = input.lower()    
+    text = input.strip()
+    text = text.lower()    
     text = normalize_superscripts(text)
-    text = input_str.strip()
     text = remove_diacritics(text)
     text = text.translate(str.maketrans('', '', string.punctuation))
     return text

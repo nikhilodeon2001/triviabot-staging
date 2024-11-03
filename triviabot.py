@@ -1704,7 +1704,7 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
         return True
          
     # New Step: First 5 characters match
-    if user_answer[:5] == correct_answer[:5] or no_spaces_user[:5] == no_spaces_correct[:5] or no_filler_user[:5] or no_filler_correct[:5] or no_filler_spaces_user[:5] = no_filler_spaces_correct[:5]:
+    if user_answer[:5] == correct_answer[:5] or no_spaces_user[:5] == no_spaces_correct[:5] or no_filler_user[:5] == no_filler_correct[:5] or no_filler_spaces_user[:5] = no_filler_spaces_correct[:5]:
         return True
     
     # Remove filler words and split correct answer

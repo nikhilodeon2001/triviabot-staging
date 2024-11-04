@@ -1627,7 +1627,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     elif trivia_url == "multiple choice": 
         if trivia_answer_list[0] in {"True", "False"}:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 TRUE FALSE 🚨 {trivia_question}\n\n"
-        if trivia_answer_list[0] in {"Yes", "No"}:
+        elif trivia_answer_list[0] in {"Yes", "No"}:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 YES NO 🚨 {trivia_question}\n\n"
         else:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 A B C D 🚨 {trivia_question}\n\n"

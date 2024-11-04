@@ -1576,54 +1576,61 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     new_solution = None
     new_question = None
     send_image_flag = False
+
+    message_body = ""
+
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median"]:
+        message_body += "\n🚨 1 Guess 🚨\n"
     
     if is_valid_url(trivia_url): 
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
-        message_body = f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
         
     elif trivia_url == "derivative":
         image_mxc, image_width, image_height, new_solution = generate_and_render_derivative_image_high() #POLY
-        message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
         
     elif trivia_url == "scramble":
         image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
-        message_body = f"\n{number_block}🧩 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        message_body += f"\n{number_block}🧩 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
 
     elif trivia_url == "median":
         image_mxc, image_width, image_height, new_solution = generate_median_question()
-        message_body = f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        message_body += f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
 
     elif trivia_url == "mean":
         image_mxc, image_width, image_height, new_solution = generate_mean_question()
-        message_body = f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        message_body += f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
 
     elif trivia_url == "jeopardy":
         image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
-        message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
+        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
         image_size = 100
         send_image_flag = True
 
     elif trivia_category == "Crossword":
         image_mxc, image_width, image_height = generate_crossword_image(trivia_answer_list[0])
-        message_body = f"\n{number_block}✏️ {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        message_body += f"\n{number_block}✏️ {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
 
     elif trivia_url == "multiple choice": 
         if trivia_answer_list[0] in {"True", "False"}:
-            message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 True or False 🚨 {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 TRUE FALSE 🚨 {trivia_question}\n\n"
+        if trivia_answer_list[0] in {"Yes", "No"}:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 YES NO 🚨 {trivia_question}\n\n"
         else:
-            message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 MC 🚨 {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 A B C D 🚨 {trivia_question}\n\n"
             for answer in trivia_answer_list[1:]:
                 message_body += f"{answer}\n"
         trivia_answer_list[:] = trivia_answer_list[:1]
@@ -1633,10 +1640,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         #send_image_flag = True
 
     else:
-         message_body = f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median"]:
-        message_body += "\n🚨 1 Guess 🚨\n\n"
+         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
     
     response = send_message(target_room_id, message_body)
 

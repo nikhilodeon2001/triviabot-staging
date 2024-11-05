@@ -130,20 +130,20 @@ def select_wof_questions():
 
         # Fetch wheel of fortune questions using the random subset method
         wof_collection = db["wof_questions"]
-        #pipeline_wof = [
-        #    {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-        #    {"$group": {  # Group by category and pick a representative question
-        #        "_id": "$category",
-        #        "question": {"$first": "$$ROOT"}  # Select the first document in each category group
-        #    }},
-        #    {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
-        #    {"$sample": {"size": num_wof_clues_final}}  # Sample the unique categories
-        #]
-
         pipeline_wof = [
             {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-            {"$sample": {"size": 1}}  # Sample one random question
+            {"$group": {  # Group by category and pick a representative question
+                "_id": "$category",
+                "question": {"$first": "$$ROOT"}  # Select the first document in each category group
+            }},
+            {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
+            {"$sample": {"size": num_wof_clues_final}}  # Sample the unique categories
         ]
+
+        #pipeline_wof = [
+        #    {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
+        #   {"$sample": {"size": 1}}  # Sample one random question
+        #]
 
         
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
@@ -151,7 +151,7 @@ def select_wof_questions():
         message = ""
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         for doc in wof_questions:
-            category = doc[1]  # Access the second element as the category
+            category = doc["category"]  # Use the key name to access category
             message += f"Category: {category}/n"
         send_message(target_room_id, message)  
                     

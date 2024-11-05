@@ -132,12 +132,12 @@ def select_wof_questions():
         wof_collection = db["wof_questions"]
         pipeline_wof = [
             {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-            {"$group": {  # Group by category and pick a representative question
-                "_id": "$category",
-                "question": {"$first": "$$ROOT"}  # Select the first document in each category group
+            {"$group": {  # Group by question text to ensure uniqueness
+                "_id": "$text",   # Group by the question text to remove duplicates
+                "question": {"$first": "$$ROOT"}  # Select the first document with each unique text
             }},
             {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
-            {"$sample": {"size": num_wof_clues_final}}  # Sample the unique categories
+            {"$sample": {"size": num_wof_clues_final}}  # Randomly sample unique questions by text
         ]
 
         #pipeline_wof = [
@@ -152,7 +152,7 @@ def select_wof_questions():
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         for doc in wof_questions:
             category = doc["category"]  # Use the key name to access category
-            message += f"Category: {category}/n"
+            message += f"Category: {category}\n"
         send_message(target_room_id, message)  
                     
         # Store separate sets of IDs in MongoDB only if they are non-empty

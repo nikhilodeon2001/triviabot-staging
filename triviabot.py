@@ -84,7 +84,7 @@ time_between_questions_default = time_between_questions
 questions_module = os.getenv("questions_module", "trivia_questions")
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000, "wof": 1500}
 first_place_bonus = 0
 magic_time = 7
 magic_number = 0000
@@ -96,6 +96,10 @@ num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
 num_jeopardy_clues_default = 3
 num_jeopardy_clues = num_jeopardy_clues_default
+num_wof_clues_default = 0
+num_wof_clues = num_wof_clues_default
+num_wof_clues_final_default = 3
+num_wof_clues_final = num_wof_clues_final_default
 ghost_mode_default = False
 ghost_mode = ghost_mode_default
 god_mode_default = False
@@ -116,6 +120,110 @@ question_categories = [
 ]
 
 categories_to_exclude = []  
+
+def select_wof_questions():
+    try:
+        db = connect_to_mongodb()
+        recent_wof_ids = get_recent_question_ids_from_mongo("wof")
+        selected_questions = []
+
+
+        # Fetch wheel of fortune questions using the random subset method
+        wof_collection = db["wof_questions"]
+        pipeline_wof = [
+            {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
+            {"$group": {  # Group by category and pick a representative question
+                "_id": "$category",
+                "question": {"$first": "$$ROOT"}  # Select the first document in each category group
+            }},
+            {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
+            {"$sample": {"size": num_wof_clues_final}}  # Sample the unique categories
+        ]
+        
+        wof_questions = list(wof_collection.aggregate(pipeline_wof))
+
+        message = ""
+        # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
+        for doc in wof_questions:
+            category = doc[1]  # Access the second element as the category
+            message += f"Category: {category}/n"
+        send_message(target_room_id, message)  
+                    
+        # Store separate sets of IDs in MongoDB only if they are non-empty
+        #wof_question_ids = [doc["_id"] for doc in wof_questions]
+        #if wof_question_ids:
+        #    store_question_ids_in_mongo(wof_question_ids, "wof")
+        
+
+        return wof_questions
+
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error selecting wof questions: {e}")
+        return []  # Return an empty list in case of failure
+
+
+
+
+def generate_wheel_of_fortune_board(word):
+    # Define colors for the board
+    background_color = (0, 0, 0)        # Black background
+    tile_border_color = (0, 128, 0)     # Green border around each tile
+    tile_fill_color = (255, 255, 255)   # White tile for unfilled letters
+    text_color = (0, 0, 0)              # Black text for revealed letters
+
+    # Define image size and font properties
+    img_width, img_height = 800, 200
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    font_size = 60
+
+    # Create a blank image with black background
+    img = Image.new('RGB', (img_width, img_height), color=background_color)
+    draw = ImageDraw.Draw(img)
+
+    # Load the font
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return None
+    
+    # Calculate tile dimensions and spacing
+    tile_width, tile_height = 60, 80
+    spacing = 10
+    
+    # Calculate the starting x position to center the board
+    total_width = len(word) * (tile_width + spacing) - spacing
+    start_x = (img_width - total_width) // 2
+    y_position = (img_height - tile_height) // 2
+
+    # Draw tiles for each letter in the word
+    for i, char in enumerate(word):
+        x_position = start_x + i * (tile_width + spacing)
+        
+        # Draw a green rectangle with a white fill for each character
+        draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
+                       outline=tile_border_color, fill=tile_fill_color)
+        
+        # If the character is a space, skip the tile drawing
+        if char != " ":
+            # For now, we leave it blank (to fill letters later)
+            pass
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+
+    # Upload the image and send to the chat (assuming upload_image_to_matrix function)
+    image_mxc = upload_image_to_matrix(image_buffer.read())
+
+    if image_mxc:
+        # Return image_mxc, image_width, and image_height
+        return image_mxc, img_width, img_height
+    else:
+        print("Failed to upload the image to Matrix.")
+        return None
 
 
 
@@ -412,13 +520,14 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, god_mode, yolo_mode
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
     num_crossword_clues = num_crossword_clues_default
     num_jeopardy_clues = num_jeopardy_clues_default
     num_mysterybox_clues = num_mysterybox_clues_default
+    num_wof_clues = num_wof_clues_default
     god_mode = god_mode_default
     yolo_mode = yolo_mode_default
     
@@ -447,7 +556,7 @@ def process_round_options(round_winner, winner_points):
 
 
 def prompt_user_for_response(round_winner, winner_points):
-    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, yolo_mode, god_mode
+    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode
     
     # Call initialize_sync to set since_token
     initialize_sync()
@@ -2231,12 +2340,22 @@ def select_trivia_questions(questions_per_round):
         recent_crossword_ids = get_recent_question_ids_from_mongo("crossword")
         recent_jeopardy_ids = get_recent_question_ids_from_mongo("jeopardy")
         recent_mysterybox_ids = get_recent_question_ids_from_mongo("mysterybox")
+        recent_wof_ids = get_recent_question_ids_from_mongo("wof")
 
         selected_questions = []
 
 
-
-         # Fetch mysterybox questions using the random subset method
+         # Fetch wheel of fortune questions using the random subset method
+        wof_collection = db["wof_questions"]
+        pipeline_wof = [
+            {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},
+            {"$sample": {"size": num_wof_clues}}  # Apply sampling on the filtered subset
+        ]
+        wof_questions = list(wof_collection.aggregate(pipeline_wof))
+        selected_questions.extend(wof_questions)
+ 
+        
+        # Fetch mysterybox questions using the random subset method
         mysterybox_collection = db["mysterybox_questions"]
         pipeline_mysterybox = [
             {"$match": {"_id": {"$nin": list(recent_mysterybox_ids)}}},
@@ -2265,7 +2384,7 @@ def select_trivia_questions(questions_per_round):
         selected_questions.extend(jeopardy_questions)
 
         # Calculate the remaining questions needed for general trivia
-        remaining_needed = max(questions_per_round - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions), 0)
+        remaining_needed = max(questions_per_round - len(wof_questions) - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions), 0)
 
         if remaining_needed > 0:
 
@@ -2296,6 +2415,10 @@ def select_trivia_questions(questions_per_round):
             selected_questions.extend(trivia_questions)
 
             # Store separate sets of IDs in MongoDB only if they are non-empty
+            wof_question_ids = [doc["_id"] for doc in wof_questions]
+            if wof_question_ids:
+                store_question_ids_in_mongo(wof_question_ids, "wof")
+            
             mysterybox_question_ids = [doc["_id"] for doc in mysterybox_questions]
             if mysterybox_question_ids:
                 store_question_ids_in_mongo(mysterybox_question_ids, "mysterybox")
@@ -2892,7 +3015,8 @@ try:
     initialize_sync()    
     
     # Start the trivia round
-    start_trivia_round()
+    select_wof_questions()
+    #start_trivia_round()
 
 except Exception as e:
     sentry_sdk.capture_exception(e)

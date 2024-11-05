@@ -130,24 +130,24 @@ def select_wof_questions():
 
         # Fetch wheel of fortune questions using the random subset method
         wof_collection = db["wof_questions"]
-        #pipeline_wof = [
-         #   {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-         #   {"$group": {  # Group by question text to ensure uniqueness
-         #       "_id": "$text",   # Group by the question text to remove duplicates
-         #       "question": {"$first": "$$ROOT"}  # Select the first document with each unique text
-         #   }},
-         #   {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
-         #   {"$sample": {"size": num_wof_clues_final}}  # Randomly sample unique questions by text
-        #]
-
         pipeline_wof = [
             {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-            {"$sample": {"size": 3}}  # Sample one random question
+            {"$group": {  # Group by question text to ensure uniqueness
+                "_id": "$text",  # Group by the question text field
+                "question": {"$first": "$$ROOT"}  # Select the first document with each unique text
+            }},
+            {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
+            {"$sample": {"size": 3}}  # Sample 3 unique questions
         ]
+
+        #pipeline_wof = [
+        #    {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
+        #    {"$sample": {"size": 3}}  # Sample one random question
+        #]
 
         
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
-        print(wof_questions)
+        #print(wof_questions)
 
         message = ""
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple

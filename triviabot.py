@@ -160,9 +160,10 @@ def select_wof_questions(winner="No-Employer1482"):
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
 
         image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0])
-        message_body += f"\nYour puzzle is: \n"
+        message = f"\nYour puzzle is: \n"
         image_size = 100
 
+        send_message(target_room_id, message)
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
         if response is None:                      

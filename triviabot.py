@@ -143,7 +143,7 @@ def select_wof_questions(winner="No-Employer1482"):
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
-        message = f"\n{winner}: Choose a Category (#):\n\n"
+        message = f"\n@{winner}: Choose a Category (#):\n\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 1
         for doc in wof_questions:
@@ -159,7 +159,7 @@ def select_wof_questions(winner="No-Employer1482"):
         if wof_question_id:
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
 
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answer"])
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0])
         message_body += f"\nYour puzzle is: \n"
         image_size = 100
 

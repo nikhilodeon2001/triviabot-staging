@@ -143,15 +143,16 @@ def select_wof_questions():
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
-        message = "Choose a Category (#):"
+        message = "Choose a Category (#):\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 1
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
+            counter = counter + 1
         send_message(target_room_id, message)  
 
-        wof_question = wof_questions[ask_wof_number() - 1]
+        wof_question = wof_questions[int(ask_wof_number()) - 1]
                     
        # Store the ID of this single question in MongoDB if it's not empty
         wof_question_id = wof_question["_id"]  # Get the ID of the selected question

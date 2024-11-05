@@ -90,11 +90,11 @@ magic_time = 7
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 0
+num_mysterybox_clues_default = 2
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 0
+num_jeopardy_clues_default = 3
 num_jeopardy_clues = num_jeopardy_clues_default
 ghost_mode_default = False
 ghost_mode = ghost_mode_default
@@ -430,7 +430,7 @@ def process_round_options(round_winner, winner_points):
     message = (
         f"\n🍔🍟 @{round_winner}, what's your order?\n\n"
         "⏱️⏳ <3 - 15>:  Time (s) between questions\n"
-        "🟦✋ Jeopardy:  5 Jeopardy questions\n"
+        "🟦✋ Jeopardy:  6 Jeopardy questions\n"
         "🟦❌ Trebek:  0 Jeopardy questions\n"
         "🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
@@ -511,7 +511,7 @@ def prompt_user_for_response(round_winner, winner_points):
                         send_message(target_room_id, f"🚫⛔ @{round_winner} has excluded {matched_category}.\n")
         
                     if "jeopardy" in message_content.lower():
-                        num_jeopardy_clues = 5
+                        num_jeopardy_clues = 6
                         send_message(target_room_id, f"🟦✋ @{round_winner} has added 5 Jeopardy questions.\n")
         
                     if "trebek" in message_content.lower():

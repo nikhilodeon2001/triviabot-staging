@@ -140,30 +140,34 @@ def select_wof_questions():
             {"$sample": {"size": 3}}  # Sample 3 unique questions
         ]
 
-        #pipeline_wof = [
-        #    {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-        #    {"$sample": {"size": 3}}  # Sample one random question
-        #]
-
-        
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
-        message = ""
+        message = "Choose a Category (#):"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
+        counter = 1
         for doc in wof_questions:
-            print(doc)
             category = doc["question"]  # Use the key name to access category
-            message += f"Category: {category}\n"
+            message += f"{counter}. {category}\n"
         send_message(target_room_id, message)  
-                    
-        # Store separate sets of IDs in MongoDB only if they are non-empty
-        #wof_question_ids = [doc["_id"] for doc in wof_questions]
-        #if wof_question_ids:
-        #    store_question_ids_in_mongo(wof_question_ids, "wof")
-        
 
-        return wof_questions
+        wof_question = wof_questions[ask_wof_number() - 1]
+                    
+       # Store the ID of this single question in MongoDB if it's not empty
+        wof_question_id = wof_question["_id"]  # Get the ID of the selected question
+        if wof_question_id:
+            store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
+
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answer"])
+        message_body += f"\nYour puzzle is: \n"
+        image_size = 100
+
+        response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
+
+        if response is None:                      
+            print("Error: Failed to send image.")
+            
+        return None
 
     except Exception as e:
         # Capture the exception in Sentry and print detailed error information
@@ -176,9 +180,68 @@ def select_wof_questions():
         return []  # Return an empty list in case of failure
 
 
+def ask_wof_number(winner="No-Employer1482"):
+    global since_token, params, headers, max_retries, delay_between_retries
+
+    sync_url = f"{matrix_base_url}/sync"
+
+    collected_responses = []  # Store all responses
+    
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+    message = f"\n@{winner} ❓3 Consonants, 1 Vowel❓\n"
+    send_message(target_room_id, message)
+    selected_question = 1
+    while time.time() - start_time < magic_time:
+        try:
+            if since_token:
+                params["since"] = since_token
+
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")  # Get the type of the event
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "")
+
+                    if sender == bot_user_id or sender_display_name != winner:
+                        continue
+
+                    if str(message_content) in {"1", "2", "3"}:
+                        selected_question = str(message_content)
+                        react_to_message(event_id, target_room_id, "okra21")
+                        return selected_question
+                    else:
+                        react_to_message(event_id, target_room_id, "okra5")
+
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting responses: {e}")
 
 
-def generate_wheel_of_fortune_board(word):
+def generate_wof_image(word):
     # Define colors for the board
     background_color = (0, 0, 0)        # Black background
     tile_border_color = (0, 128, 0)     # Green border around each tile

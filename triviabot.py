@@ -143,7 +143,7 @@ def select_wof_questions():
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
-        message = "Choose a Category (#):\n"
+        message = "\nChoose a Category (#):\n\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 1
         for doc in wof_questions:
@@ -192,7 +192,7 @@ def ask_wof_number(winner="No-Employer1482"):
 
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n@{winner} ❓3 Consonants, 1 Vowel❓\n"
+    #message = f"\n@{winner} ❓3 Consonants, 1 Vowel❓\n"
     send_message(target_room_id, message)
     selected_question = 1
     while time.time() - start_time < magic_time:
@@ -241,7 +241,7 @@ def ask_wof_number(winner="No-Employer1482"):
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")                    
     
-    return selected_number
+    return selected_question
 
         
 

@@ -130,15 +130,21 @@ def select_wof_questions():
 
         # Fetch wheel of fortune questions using the random subset method
         wof_collection = db["wof_questions"]
+        #pipeline_wof = [
+        #    {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
+        #    {"$group": {  # Group by category and pick a representative question
+        #        "_id": "$category",
+        #        "question": {"$first": "$$ROOT"}  # Select the first document in each category group
+        #    }},
+        #    {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
+        #    {"$sample": {"size": num_wof_clues_final}}  # Sample the unique categories
+        #]
+
         pipeline_wof = [
             {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-            {"$group": {  # Group by category and pick a representative question
-                "_id": "$category",
-                "question": {"$first": "$$ROOT"}  # Select the first document in each category group
-            }},
-            {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
-            {"$sample": {"size": num_wof_clues_final}}  # Sample the unique categories
+            {"$sample": {"size": 1}}  # Sample one random question
         ]
+
         
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
 

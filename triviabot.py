@@ -237,9 +237,9 @@ def ask_wof_number(winner="No-Employer1482"):
                     else:
                         react_to_message(event_id, target_room_id, "okra5")
     
-    except requests.exceptions.RequestException as e:
-            sentry_sdk.capture_exception(e)
-            print(f"Error collecting responses: {e}")                    
+        except requests.exceptions.RequestException as e:
+                sentry_sdk.capture_exception(e)
+                print(f"Error collecting responses: {e}")                    
     
     return selected_number
 

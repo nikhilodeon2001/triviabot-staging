@@ -249,7 +249,7 @@ def ask_wof_number(winner="No-Employer1482"):
         
 
 
-def generate_wof_image(word):
+def generate_wof_image(word, revealed_letters = ['r', 's', 't', 'l', 'n', 'e']):
     # Define colors for the board
     background_color = (0, 0, 0)        # Black background
     tile_border_color = (0, 128, 0)     # Green border around each tile
@@ -289,10 +289,14 @@ def generate_wof_image(word):
         draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
                        outline=tile_border_color, fill=tile_fill_color)
         
-        # If the character is a space, skip the tile drawing
-        if char != " ":
-            # For now, we leave it blank (to fill letters later)
-            pass
+        # Check if the character should be revealed
+        if char.upper() in revealed_letters or char.lower() in revealed_letters:
+            # Draw the character if it's in the revealed letters
+            draw.text((x_position + tile_width // 4, y_position + tile_height // 4),
+                      char, fill=text_color, font=font)
+        elif char == " ":
+            # Leave spaces empty without tiles
+            continue
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()
@@ -308,7 +312,6 @@ def generate_wof_image(word):
     else:
         print("Failed to upload the image to Matrix.")
         return None
-
 
 
 def send_magic_image(input_text):

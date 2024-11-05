@@ -133,10 +133,10 @@ def select_wof_questions():
         pipeline_wof = [
             {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
             {"$group": {  # Group by question text to ensure uniqueness
-                "_id": "$text",  # Group by the question text field
-                "question": {"$first": "$$ROOT"}  # Select the first document with each unique text
+                "_id": "$question",  # Group by the question text field
+                "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
             }},
-            {"$replaceRoot": {"newRoot": "$question"}},  # Flatten the grouped results
+            {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
             {"$sample": {"size": 3}}  # Sample 3 unique questions
         ]
 

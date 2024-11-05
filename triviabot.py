@@ -142,7 +142,7 @@ def select_wof_questions():
 
         pipeline_wof = [
             {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-           {"$sample": {"size": 3}}  # Sample one random question
+            {"$sample": {"size": 3}}  # Sample one random question
         ]
 
         

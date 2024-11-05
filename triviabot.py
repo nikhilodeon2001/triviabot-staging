@@ -152,7 +152,7 @@ def select_wof_questions():
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
-            message += f"Category: {question}\n"
+            message += f"Category: {category}\n"
         send_message(target_room_id, message)  
                     
         # Store separate sets of IDs in MongoDB only if they are non-empty

@@ -147,10 +147,12 @@ def select_wof_questions():
 
         
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
+        print(wof_questions)
 
         message = ""
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         for doc in wof_questions:
+            print(doc)
             category = doc["question"]  # Use the key name to access category
             message += f"Category: {category}\n"
         send_message(target_room_id, message)  

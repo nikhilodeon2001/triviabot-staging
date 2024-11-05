@@ -164,8 +164,13 @@ def select_wof_questions():
         return wof_questions
 
     except Exception as e:
+        # Capture the exception in Sentry and print detailed error information
         sentry_sdk.capture_exception(e)
-        print(f"Error selecting wof questions: {e}")
+        
+        # Print a detailed error message with traceback
+        error_details = traceback.format_exc()
+        print(f"Error selecting wof questions: {e}\nDetailed traceback:\n{error_details}")
+        
         return []  # Return an empty list in case of failure
 
 

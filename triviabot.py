@@ -121,7 +121,7 @@ question_categories = [
 
 categories_to_exclude = []  
 
-def select_wof_questions(winner="No-Employer1482"):
+def select_wof_questions(winner):
     try:
         db = connect_to_mongodb()
         recent_wof_ids = get_recent_question_ids_from_mongo("wof")
@@ -153,7 +153,7 @@ def select_wof_questions(winner="No-Employer1482"):
             counter = counter + 1
         send_message(target_room_id, message)  
 
-        wof_question = wof_questions[int(ask_wof_number()) - 1]
+        wof_question = wof_questions[int(ask_wof_number(winner)) - 1]
         print(wof_question["answers"][0])
                     
        # Store the ID of this single question in MongoDB if it's not empty
@@ -168,7 +168,7 @@ def select_wof_questions(winner="No-Employer1482"):
         if response is None:                      
             print("Error: Failed to send image.")
 
-        wof_letters = ask_wof_letters(wof_question["answers"][0])
+        wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
         
         image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -189,7 +189,7 @@ def select_wof_questions(winner="No-Employer1482"):
         return []  # Return an empty list in case of failure
 
 
-def ask_wof_letters(winner="No-Employer1482", answer):
+def ask_wof_letters(winner, answer):
     print(answer)
     global since_token, params, headers, max_retries, delay_between_retries
 
@@ -291,9 +291,7 @@ def ask_wof_letters(winner="No-Employer1482", answer):
 
 
 
-
-
-def ask_wof_number(winner="No-Employer1482"):
+def ask_wof_number(winner):
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
@@ -3255,7 +3253,7 @@ try:
     initialize_sync()    
     
     # Start the trivia round
-    select_wof_questions()
+    select_wof_questions("No-Employer1482")
     #start_trivia_round()
 
 except Exception as e:

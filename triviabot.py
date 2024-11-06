@@ -249,11 +249,12 @@ def ask_wof_number(winner="No-Employer1482"):
         
 
 
-def generate_wof_image(word, revealed_letters = ['r', 's', 't', 'l', 'n', 'e']):
+def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
     # Define colors for the board
     background_color = (0, 0, 0)        # Black background
     tile_border_color = (0, 128, 0)     # Green border around each tile
     tile_fill_color = (255, 255, 255)   # White tile for unfilled letters
+    space_tile_color = (0, 128, 0)      # Green tile for spaces between words
     text_color = (0, 0, 0)              # Black text for revealed letters
 
     # Define image size and font properties
@@ -285,18 +286,19 @@ def generate_wof_image(word, revealed_letters = ['r', 's', 't', 'l', 'n', 'e']):
     for i, char in enumerate(word):
         x_position = start_x + i * (tile_width + spacing)
         
-        # Draw a green rectangle with a white fill for each character
-        draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
-                       outline=tile_border_color, fill=tile_fill_color)
-        
-        # Check if the character should be revealed
-        if char.upper() in revealed_letters or char.lower() in revealed_letters:
-            # Draw the character if it's in the revealed letters
-            draw.text((x_position + tile_width // 4, y_position + tile_height // 4),
-                      char, fill=text_color, font=font)
-        elif char == " ":
-            # Leave spaces empty without tiles
-            continue
+        if char == " ":
+            # Draw a green tile for spaces between words
+            draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
+                           outline=tile_border_color, fill=space_tile_color)
+        else:
+            # Draw a green-bordered white tile for letters
+            draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
+                           outline=tile_border_color, fill=tile_fill_color)
+            
+            # Reveal letter if it is in revealed_letters
+            if char.upper() in revealed_letters or char.lower() in revealed_letters:
+                draw.text((x_position + tile_width // 4, y_position + tile_height // 4),
+                          char, fill=text_color, font=font)
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()
@@ -312,7 +314,6 @@ def generate_wof_image(word, revealed_letters = ['r', 's', 't', 'l', 'n', 'e']):
     else:
         print("Failed to upload the image to Matrix.")
         return None
-
 
 def send_magic_image(input_text):
     global since_token, params, headers, max_retries, delay_between_retries

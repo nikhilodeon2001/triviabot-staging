@@ -123,6 +123,7 @@ categories_to_exclude = []
 
 def select_wof_questions(winner):
     try:
+        time.sleep(2)
         db = connect_to_mongodb()
         recent_wof_ids = get_recent_question_ids_from_mongo("wof")
         selected_questions = []

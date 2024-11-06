@@ -290,13 +290,16 @@ def ask_wof_letters(winner, answer):
     initialize_sync()
     start_time = time.time()  # Track when the question starts
     message = f"\n@{winner}\n\n❓ Pick 4 Letters ❓\n"
-    message += f"🥒 I'll throw in O,K,R,A 🥒\n"
+    message += f"🥒 I'll throw in O K R A 🥒\n"
     send_message(target_room_id, message)
     
     wf_letters = []
     
-    while time.time() - start_time < magic_time and len(wf_letters) < 4:
+    while time.time() - start_time < magic_time:
         try:
+            if len(wf_letters) == 4:
+                break
+                
             if since_token:
                 params["since"] = since_token
 
@@ -312,6 +315,9 @@ def ask_wof_letters(winner, answer):
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
             for event in room_events:
+                if len(wf_letters) == 4:
+                    break
+                
                 event_id = event["event_id"]
                 event_type = event.get("type")
 
@@ -334,7 +340,7 @@ def ask_wof_letters(winner, answer):
                     if message_content.upper() == answer:
                         react_to_message(event_id, target_room_id, "okra21")
                         wf_winner = True
-                        success_message = f"🎉 Correct {winner}! 🎉 {answer} 🎉"
+                        success_message = f"🎉 Correct @{winner}! 🎉 {answer} 🎉"
                         send_message(target_room_id, success_message)
                         return True
                     

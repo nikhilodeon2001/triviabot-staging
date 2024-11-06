@@ -189,8 +189,7 @@ def select_wof_questions(winner):
         return []  # Return an empty list in case of failure
 
 
-def ask_wof_letters(winner, answer):
-    print(answer)
+   print(answer)
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
@@ -275,20 +274,26 @@ def ask_wof_letters(winner, answer):
         available_consonants = [c for c in "BCDFGHJKMPQVWXZ" if c not in answer_letters]
         available_vowels = [v for v in "AIUO" if v not in answer_letters]
 
-        # Randomly select 3 consonants and 1 vowel from the pool
-        chosen_consonants = random.sample(available_consonants, 3)
-        chosen_vowel = random.choice(available_vowels)
+        # Ensure there are enough letters; use default if insufficient
+        if len(available_consonants) < 3:
+            chosen_consonants = ['X', 'Z', 'J']  # Default consonants
+        else:
+            chosen_consonants = random.sample(available_consonants, 3)
+        
+        if not available_vowels:
+            chosen_vowel = 'U'  # Default vowel
+        else:
+            chosen_vowel = random.choice(available_vowels)
 
         # Combine with fixed letters and return
         message = f"Too slow. I'll pick for you.\nConsonants: {', '.join(chosen_consonants)}\nVowel: {chosen_vowel}"
-        message += "\n\nI feel good about these!"
+        message += "\n\n😊 These are terrible."
         send_message(target_room_id, message)
         return list(set(chosen_consonants + [chosen_vowel] + list(fixed_letters)))
     else:
         message = f"Consonants: {consonants}\nVowels: {vowels}"
         send_message(target_room_id, message)
         return list(set(consonants + vowels + list(fixed_letters)))
-
 
 
 def ask_wof_number(winner):

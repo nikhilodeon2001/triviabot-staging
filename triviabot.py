@@ -279,7 +279,7 @@ def ask_wof_letters(winner="No-Employer1482", answer=""):
         chosen_vowel = random.choice(available_vowels)
 
         # Combine with fixed letters and return
-        message = f"Too slow. I'll pick for you.\nConsonants: {', '.join(chosen_consonants)}, Vowel: {chosen_vowel}"
+        message = f"Too slow. I'll pick for you.\nConsonants: {', '.join(chosen_consonants)}\nVowel: {chosen_vowel}"
         message += "\n\nI feel good about these!"
         send_message(target_room_id, message)
         return list(set(chosen_consonants + [chosen_vowel] + list(fixed_letters)))

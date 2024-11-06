@@ -169,6 +169,7 @@ def select_wof_questions(winner):
             print("Error: Failed to send image.")
 
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
+        time.sleep(3)
         
         image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -176,9 +177,9 @@ def select_wof_questions(winner):
         if response is None:                      
             print("Error: Failed to send image.")
 
-        process_wof_guesses(winner, wof_question["answers"][0])
+        wof_result = process_wof_guesses(winner, wof_question["answers"][0])
         
-        return None
+        return wof_result
 
     except Exception as e:
         # Capture the exception in Sentry and print detailed error information
@@ -188,7 +189,7 @@ def select_wof_questions(winner):
         error_details = traceback.format_exc()
         print(f"Error selecting wof questions: {e}\nDetailed traceback:\n{error_details}")
         
-        return []  # Return an empty list in case of failure
+        return False  # Return an empty list in case of failure
 
     
 
@@ -259,9 +260,6 @@ def process_wof_guesses(winner, answer):
     timeout_message = f"⏰ Time's up! The correct answer was: {answer}."
     send_message(target_room_id, timeout_message)
     return False
-
-
-
 
 
 
@@ -1349,7 +1347,8 @@ def generate_round_summary(round_data, winner):
     """
     Generate a summary of the trivia round using OpenAI's API.
     """
-    ask_magic_number(winner)
+    #ask_magic_number(winner)
+    wof_boolean = select_wof_questions(winner)
     
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
@@ -1360,7 +1359,8 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
-    elif magic_number_correct == True:
+    #elif magic_number_correct == True:
+    elif wof_boolean == True:   
          prompt = (
             f"The winner of the trivia round is {winner}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else, including OkraStrut."
@@ -3335,8 +3335,7 @@ try:
     initialize_sync()    
     
     # Start the trivia round
-    select_wof_questions("No-Employer1482")
-    #start_trivia_round()
+    start_trivia_round()
 
 except Exception as e:
     sentry_sdk.capture_exception(e)

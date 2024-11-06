@@ -1,6 +1,3 @@
-
-
-
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -27,11 +24,8 @@ from urllib.parse import urlparse
 import io            
 from PIL import Image, ImageDraw, ImageFont 
 import openai
-
 import main
 import subprocess
-
-
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"

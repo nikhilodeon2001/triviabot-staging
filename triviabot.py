@@ -293,7 +293,7 @@ def ask_wof_letters(winner, answer):
     message += f"🥒 I'll throw in O,K,R,A 🥒\n"
     send_message(target_room_id, message)
     
-    wf_letters = [
+    wf_letters = []
     
     while time.time() - start_time < magic_time:
         try:

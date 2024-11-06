@@ -854,7 +854,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -864,6 +864,8 @@ def process_round_options(round_winner, winner_points):
     num_wof_clues = num_wof_clues_default
     god_mode = god_mode_default
     yolo_mode = yolo_mode_default
+    magic_number_correct = False
+    wf_winner = False
     
     if round_winner is None:
         return
@@ -1767,6 +1769,7 @@ def load_global_variables():
     #print(f"questions module: {questions_module}")
     #print(f"max retries is: {max_retries}")
     #print(f"delay_between_retries is: {delay_between_retries}")
+   
     
 def save_data_to_mongo(collection_name, document_id, data):
     """

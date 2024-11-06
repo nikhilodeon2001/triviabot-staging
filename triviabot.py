@@ -174,9 +174,7 @@ def select_wof_questions(winner):
         if response is None:                      
             print("Error: Failed to send image.")
 
-        print(f"wf_winner = {wf_winner}")
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
-        print(f"wf_winner = {wf_winner}")
         
         if wf_winner == False:
             time.sleep(3)
@@ -262,6 +260,8 @@ def process_wof_guesses(winner, answer):
 
                     # If no valid answer was guessed, react with a neutral reaction
                     react_to_message(event_id, target_room_id, "okra5")
+                    
+            time.sleep(0.1)
     
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)

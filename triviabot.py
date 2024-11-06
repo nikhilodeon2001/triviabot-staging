@@ -354,9 +354,6 @@ def ask_wof_letters(winner, answer):
                             react_to_message(event_id, target_room_id, "okra21")
                             final_letters = list(set(consonants + vowels + list(fixed_letters)))
                             continue
-
-                    # If no valid letter was parsed, send a feedback reaction
-                    react_to_message(event_id, target_room_id, "okra5")
     
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)

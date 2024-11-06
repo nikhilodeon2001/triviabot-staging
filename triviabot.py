@@ -255,7 +255,7 @@ def process_wof_guesses(winner, answer):
                     # Check if the message content matches the answer
                     if message_content == answer:
                         react_to_message(event_id, target_room_id, "okra21")
-                        success_message = f"🎉 Correct {winner}! 🎉 {answer} 🎉"
+                        success_message = f"🎉 Correct @{winner}! 🎉 {answer} 🎉"
                         send_message(target_room_id, success_message)
                         wf_winner = True
                         return None
@@ -290,7 +290,7 @@ def ask_wof_letters(winner, answer):
     initialize_sync()
     start_time = time.time()  # Track when the question starts
     message = f"\n@{winner}\n\n❓ Pick 4 Letters ❓\n"
-    message += f"🥒 I'll throw in O K R A 🥒\n"
+    message += f"🥒 I'll throw in O K R A for free 🥒\n"
     send_message(target_room_id, message)
     
     wf_letters = []
@@ -369,9 +369,9 @@ def ask_wof_letters(winner, answer):
         else:
             wf_letters = random.sample(available_consonants, 4)
         
-        message = f"Too slow. I'll pick for you.\nLet's use: {wf_letters}\n\n"
+        message = f"Too slow. I'll pick for you.\nLet's use: {' '.join(wf_letters)}\n\n"
     else:
-        message = f"You picked:\n{wf_letters}\n\n"
+        message = f"You picked: {' '.join(wf_letters)}\n\n"
 
     final_letters = fixed_letters + wf_letters
     send_message(target_room_id, message)
@@ -460,7 +460,7 @@ def generate_wof_image(word, clue, revealed_letters):
     img_width, img_height = 800, 450  # Increase height to make room for the clue and revealed letters
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif-Bold.ttf")  # Use a bold font if available
     font_size = 50
-    clue_font_size = 30
+    clue_font_size = 40
     revealed_font_size = 20  # Smaller font for the revealed letters
 
     # Create a blank image with black background

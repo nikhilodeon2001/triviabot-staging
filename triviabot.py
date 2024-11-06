@@ -189,7 +189,8 @@ def select_wof_questions(winner="No-Employer1482"):
         return []  # Return an empty list in case of failure
 
 
-def ask_wof_letters(winner="No-Employer1482", answer=""):
+def ask_wof_letters(winner="No-Employer1482", answer):
+    print(answer)
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"

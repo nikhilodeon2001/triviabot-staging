@@ -416,9 +416,14 @@ def generate_wof_image(word, clue, revealed_letters):
                            outline=tile_border_color, fill=tile_fill_color)
             
             # Reveal letter if it is in revealed_letters
-            if char.upper() in revealed_letters:
-                text_x = x_position + tile_width // 4
-                text_y = y_position + tile_height // 4
+            if char in revealed_letters:
+                # Center the letter within the tile
+                letter_bbox = draw.textbbox((0, 0), char, font=font)
+                letter_width = letter_bbox[2] - letter_bbox[0]
+                letter_height = letter_bbox[3] - letter_bbox[1]
+                
+                text_x = x_position + (tile_width - letter_width) // 2
+                text_y = y_position + (tile_height - letter_height) // 2
                 draw.text((text_x, text_y), char, fill=text_color, font=font)
 
     # Draw the clue text below the word tiles
@@ -447,7 +452,6 @@ def generate_wof_image(word, clue, revealed_letters):
     else:
         print("Failed to upload the image to Matrix.")
         return None
-
 
         
 

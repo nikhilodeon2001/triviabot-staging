@@ -175,7 +175,7 @@ def select_wof_questions(winner):
 
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
 
-        if wf_winner = False:
+        if wf_winner == False:
             time.sleep(3)
         
             image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)

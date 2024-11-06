@@ -258,7 +258,7 @@ def process_wof_guesses(winner, answer):
             print(f"Error collecting responses: {e}")
 
     # If time runs out without a correct guess
-    timeout_message = f"⏰ Time's up! The correct answer was: {answer}."
+    timeout_message = f"⏰ Time's up! {answer}."
     send_message(target_room_id, timeout_message)
     return False
 

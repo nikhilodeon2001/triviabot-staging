@@ -289,7 +289,8 @@ def ask_wof_letters(winner, answer):
     # Initialize the sync and message to prompt user for letters
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n@{winner}\n❓Pick 3 Consonants & 1 Vowel❓\n"
+    message = f"\n@{winner}\n\n❓Pick 3 Consonants & 1 Vowel❓\n"
+    message += f"🥒 I'll throw in O,K,R,A 🥒\n"
     send_message(target_room_id, message)
     
     consonants = []

@@ -363,12 +363,14 @@ def ask_wof_letters(winner, answer):
             print(f"Error collecting responses: {e}")
 
     if len(wf_letters) < num_wf_letters:
-        available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in answer_letters]
-
-        if len(available_latters) < num_wf_letters:
-            wf_letters = ['J', 'Q', 'X', 'Z']  
-        else:
-            wf_letters = random.sample(available_consonants, num_wf_letters)
+        #available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in answer_letters]
+        available_letters = ['Å', 'Λ', 'Д', 'Ⱥ', 'Ά', 'Δ', 'Ä', 'β', 'Þ', 'Ь', 'Ɓ', 'В', 'Ç', 'Ƈ', 'Ͼ', 'С', 'Ð', 'Đ', 'Ḏ', 'Ξ', 'Є', 'Ɇ', 'Э', 'Ề', 'Σ', 'Ғ', 'Ƒ', 'Ϝ', 'Ǥ', 'ɢ', 'Ĝ', 'Ħ', 'Ή', 'Н', 'ዘ', 'Ḩ', 'І', 'ɪ', 'Ί', 'Ỉ', 'Ӏ', 'Ɉ', 'Ј', 'ʝ', 'К', 'Ƙ', 'Ӄ', 'Ҡ', 'Ҝ', 'Ŀ', 'Ƚ', 'Ł', 'ᒪ', 'Ӎ', 'ʍ', 'Μ', 'М', 'Ñ', 'Ń', 'И', 'Ň', 'Ø', 'Ө', 'Θ', 'Ω', 'Ö', 'Ֆ', 'Þ', 'Ρ', '₱', 'Ҏ', 'Ƥ', 'Ǫ', 'Ɋ', 'Ք', 'Я', 'Ȓ', 'Ř', 'Ɍ', 'Ʀ', 'Ş', 'Ș', 'Ƨ', 'Ѕ', 'Ⴝ', 'Ƭ', 'Ţ', 'Ʈ', 'Ț', 'Ͳ', 'Τ', 'Ù', 'Û', 'Ʊ', 'Ʉ', 'Џ', 'Ṽ', 'Ṿ', 'Ѵ', 'Ѷ', 'Ѡ', 'Ϣ', 'Щ', 'Χ', 'Ж', 'Ẍ', 'Ӿ', '¥', 'У', 'Ү', 'Ψ', 'Ɏ', 'Ƶ', 'Ȥ', 'Ż', 'Ẕ', 'Զ']
+        wf_letters = random.sample(available_letters, num_wf_letters)
+        
+        #if len(available_letters) < num_wf_letters:
+        #    wf_letters = ['Ħ', 'Д,', 'Ж', 'Զ']  
+        #else:
+        #    wf_letters = random.sample(available_consonants, num_wf_letters)
         
         message = f"Too slow. I'll pick for you.\nLet's use: {' '.join(wf_letters)}\n\n"
     else:

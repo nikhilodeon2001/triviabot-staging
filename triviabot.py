@@ -188,8 +188,9 @@ def select_wof_questions(winner):
         
         return []  # Return an empty list in case of failure
 
-
-   print(answer)
+    
+    def ask_wof_letters(winner, answer):
+    print(answer)
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
@@ -294,7 +295,6 @@ def select_wof_questions(winner):
         message = f"Consonants: {consonants}\nVowels: {vowels}"
         send_message(target_room_id, message)
         return list(set(consonants + vowels + list(fixed_letters)))
-
 
 def ask_wof_number(winner):
     global since_token, params, headers, max_retries, delay_between_retries

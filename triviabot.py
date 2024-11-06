@@ -358,6 +358,7 @@ def ask_wof_number(winner="No-Employer1482"):
 
 
 def generate_wof_image(word, clue, revealed_letters):
+    print(revealed_letters)
     word = word.upper()
     
     # Define colors for the board

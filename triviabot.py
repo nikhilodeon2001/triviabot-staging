@@ -159,14 +159,19 @@ def select_wof_questions(winner="No-Employer1482"):
         if wof_question_id:
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
 
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0])
-        message = f"\nYour puzzle is: {wof_question["question"]}\n"
-        message += wof_question["answers"][0]
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], ['r', 's', 't', 'l', 'n', 'e'])
+        message = f"\n{wof_question["question"]}\n"
+        message += "Letters Revealed: R S T L N E"
+        print(wof_question["answers"][0])
 
         image_size = 100
 
         send_message(target_room_id, message)
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
+        
+        wof_letters = ask_wof_letters()
+
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_letters)
 
         if response is None:                      
             print("Error: Failed to send image.")
@@ -182,6 +187,100 @@ def select_wof_questions(winner="No-Employer1482"):
         print(f"Error selecting wof questions: {e}\nDetailed traceback:\n{error_details}")
         
         return []  # Return an empty list in case of failure
+
+
+
+def ask_wof_letters(winner="No-Employer1482"):
+    global since_token, params, headers, max_retries, delay_between_retries
+
+    sync_url = f"{matrix_base_url}/sync"
+
+    collected_responses = []  # Store all responses
+    
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+
+    # Letters that are automatically provided and should not count towards user selections
+    fixed_letters = {'R', 'S', 'T', 'L', 'N', 'E'}
+    
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+    message = f"\n@{winner} ❓Pick 3 Consonants & 1 Vowel❓\n"
+    send_message(target_room_id, message)
+    
+    consonants = []
+    vowels = []
+    while time.time() - start_time < magic_time:
+        try:
+            if since_token:
+                params["since"] = since_token
+
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")  # Get the type of the event
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "").upper()
+
+                    if sender == bot_user_id or sender_display_name != winner:
+                        continue
+
+                    # Parse letters from the message content
+                    for char in message_content:
+                        if char in fixed_letters:
+                            continue  # Skip if the letter is one of R, S, T, L, N, E
+
+                        if len(consonants) < 3 and char.isalpha() and char not in "AEIOU" and char not in consonants:
+                            consonants.append(char)
+                        elif len(vowels) < 1 and char in "AEIOU" and char not in vowels:
+                            vowels.append(char)
+
+                        # Check if we have collected enough letters
+                        if len(consonants) == 3 and len(vowels) == 1:
+                            react_to_message(event_id, target_room_id, "okra21")
+                            return list(set(consonants + vowels + list(fixed_letters)))
+
+                    # If no valid letter was parsed, send a feedback reaction
+                    react_to_message(event_id, target_room_id, "okra5")
+    
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting responses: {e}")                    
+    
+    # If time runs out or not enough letters are collected, use default letters
+    if len(consonants) < 3 or len(vowels) < 1:
+        message = "Too slow. I'll pick for you."
+        message = f"\nConsonants: X, Z, J, Q"
+        return list(set(['X', 'Z', 'J', 'Q'] + list(fixed_letters)))
+    else:
+        message = f"\nConsonants: {consonants}"
+        message += f"\nVowels: {vowels}"
+        return list(set(consonants + vowels + list(fixed_letters)))
+
+
+
+
+
+
 
 
 def ask_wof_number(winner="No-Employer1482"):
@@ -249,7 +348,7 @@ def ask_wof_number(winner="No-Employer1482"):
         
 
 
-def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
+def generate_wof_image(word):
     word = word.upper()
     # Define colors for the board
     background_color = (0, 0, 0)        # Black background

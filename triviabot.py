@@ -372,7 +372,7 @@ def ask_wof_letters(winner, answer):
         #else:
         #    wf_letters = random.sample(available_consonants, num_wf_letters)
         
-        message = f"Too slow. I'll pick for you.\nLet's use: {' '.join(wf_letters)}\n\n"
+        message = f"Too slow. Let me help you out.\nLet's use: {' '.join(wf_letters)}\n\n"
     else:
         message = f"You picked: {' '.join(wf_letters)}\n\n"
 

@@ -159,7 +159,7 @@ def select_wof_questions(winner="No-Employer1482"):
         if wof_question_id:
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
 
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], ['r', 's', 't', 'l', 'n', 'e'])
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], ['R', 'S', 'T', 'L', 'N', 'E'])
         message = f"\n{wof_question["question"]}\n"
         message += "Letters Revealed: R S T L N E"
         print(wof_question["answers"][0])

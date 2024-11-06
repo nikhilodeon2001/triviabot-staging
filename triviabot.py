@@ -290,8 +290,8 @@ def ask_wof_letters(winner, answer):
     # Initialize the sync and message to prompt user for letters
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n@{winner}\n\n❓ Pick {num_wf_letters} Letters ❓\n"
-    message += f"🥒 I'll throw in O K R A for free 🥒\n"
+    message = f"\n@{winner}:❓Pick {num_wf_letters} Letters❓\n"
+    message += f"\n🥒 I'll give you O K R A 🥒\n"
     send_message(target_room_id, message)
     
     wf_letters = []
@@ -530,7 +530,7 @@ def generate_wof_image(word, clue, revealed_letters):
     draw.text((clue_x - clue_width // 2, clue_y), clue_text, fill=clue_color, font=clue_font)
 
     # Draw the revealed letters below the clue text
-    revealed_text = f"Revealed Letters: {' '.join(revealed_letters).upper()}"
+    revealed_text = f"{' '.join(revealed_letters).upper()}"
     revealed_bbox = draw.textbbox((0, 0), revealed_text, font=revealed_font)
     revealed_width = revealed_bbox[2] - revealed_bbox[0]
     revealed_x = (img_width - revealed_width) // 2

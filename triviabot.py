@@ -295,7 +295,7 @@ def ask_wof_letters(winner, answer):
     
     wf_letters = []
     
-    while time.time() - start_time < magic_time:
+    while time.time() - start_time < magic_time and len(wf_letters) < 4:
         try:
             if since_token:
                 params["since"] = since_token

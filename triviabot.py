@@ -1359,7 +1359,7 @@ def scramble_text(input_text):
 
 def generate_round_summary(round_data, winner):
     #ask_magic_number(winner) 
-
+    
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
         prompt = (
@@ -2557,15 +2557,21 @@ def update_round_streaks(user):
 
     # Generate the round summary if the user is not None
     if user is not None:
-        summary = generate_round_summary(round_data, user)
-        # Determine the message to send
+        
         if current_longest_round_streak["streak"] > 1:
-            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n{summary}\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n"
+            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n"
         else:
-            message = f"\n🏆 Winner: @{user}!\n\n{summary}\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n"
+            message = f"\n🏆 Winner: @{user}!\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n"
 
-        # Send the message
         send_message(target_room_id, message)
+        time.sleep(2)
+        
+        select_wf_quesitons()
+        
+        gpt_summary = generate_round_summary(round_data, user)
+
+        gpt_message = f"\n{gpt_summary}\n"
+        send_message(target_room_id, gpt_message)
 
     # Perform all MongoDB operations at the end
     for operation in mongo_operations:

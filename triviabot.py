@@ -113,6 +113,7 @@ emoji_mode = emoji_mode_default
 
 magic_number_correct = False
 wf_winner = False
+num_wf_letters = 2
 
 
 question_categories = [
@@ -289,7 +290,7 @@ def ask_wof_letters(winner, answer):
     # Initialize the sync and message to prompt user for letters
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n@{winner}\n\n❓ Pick 4 Letters ❓\n"
+    message = f"\n@{winner}\n\n❓ Pick {num_wf_letters} Letters ❓\n"
     message += f"🥒 I'll throw in O K R A for free 🥒\n"
     send_message(target_room_id, message)
     
@@ -297,7 +298,7 @@ def ask_wof_letters(winner, answer):
     
     while time.time() - start_time < magic_time:
         try:
-            if len(wf_letters) == 4:
+            if len(wf_letters) == num_wf_letters:
                 break
                 
             if since_token:
@@ -315,7 +316,7 @@ def ask_wof_letters(winner, answer):
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
             for event in room_events:
-                if len(wf_letters) == 4:
+                if len(wf_letters) == num_wf_letters:
                     break
                 
                 event_id = event["event_id"]
@@ -349,11 +350,11 @@ def ask_wof_letters(winner, answer):
                         if char in fixed_letters:
                             continue  # Skip if the letter is one in fixed_letters
 
-                        if len(wf_letters) < 4 and char.isalpha() and char not in wf_letters:
+                        if len(wf_letters) < num_wf_letters and char.isalpha() and char not in wf_letters:
                             wf_letters.append(char)
 
                         # Check if we have collected enough letters
-                        if len(wf_letters) == 4:
+                        if len(wf_letters) == num_wf_letters:
                             react_to_message(event_id, target_room_id, "okra21")
                             break
     
@@ -361,13 +362,13 @@ def ask_wof_letters(winner, answer):
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
 
-    if len(wf_letters) < 4:
+    if len(wf_letters) < num_wf_letters:
         available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in answer_letters]
 
-        if len(available_latters) < 4:
+        if len(available_latters) < num_wf_letters:
             wf_letters = ['J', 'Q', 'X', 'Z']  
         else:
-            wf_letters = random.sample(available_consonants, 4)
+            wf_letters = random.sample(available_consonants, num_wf_letters)
         
         message = f"Too slow. I'll pick for you.\nLet's use: {' '.join(wf_letters)}\n\n"
     else:
@@ -389,8 +390,7 @@ def ask_wof_number(winner):
 
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    #message = f"\n@{winner} ❓3 Consonants, 1 Vowel❓\n"
-    #send_message(target_room_id, message)
+    
     selected_question = 1
     while time.time() - start_time < magic_time:
         try:

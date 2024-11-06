@@ -170,8 +170,14 @@ def select_wof_questions(winner="No-Employer1482"):
 
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
         send_message(target_room_id, message)
+
         
+        print("here")
         wof_letters = ask_wof_letters()
+        print("now here")
+        
+        print(wof_letters)
+        print(wof_question)
 
         image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
 

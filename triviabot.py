@@ -3240,7 +3240,7 @@ def start_trivia_round():
             round_data["questions"] = []
 
 
-            if random.random() < 1.0:  # random.random() generates a float between 0 and 1
+            if random.random() < 0:  # random.random() generates a float between 0 and 1
                 magic_number = random_number = random.randint(1000, 9999)
                 print(f"Magic number is {magic_number}")
                 send_magic_image(magic_number)

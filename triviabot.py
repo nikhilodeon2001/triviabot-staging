@@ -159,7 +159,7 @@ def select_wof_questions(winner="No-Employer1482"):
         if wof_question_id:
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
 
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], ['r', 's', 't', 'l', 'n', 'e'])
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], ['r', 's', 't', 'l', 'n', 'e'])
         message = f"\n{wof_question["question"]}\n"
         message += "Letters Revealed: R S T L N E"
         print(wof_question["answers"][0])
@@ -171,7 +171,7 @@ def select_wof_questions(winner="No-Employer1482"):
         
         wof_letters = ask_wof_letters()
 
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_letters)
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
 
         if response is None:                      
             print("Error: Failed to send image.")
@@ -357,19 +357,22 @@ def ask_wof_number(winner="No-Employer1482"):
         
 
 
-def generate_wof_image(word, revealed_letters):
+def generate_wof_image(word, clue, revealed_letters):
     word = word.upper()
+    
     # Define colors for the board
     background_color = (0, 0, 0)        # Black background
     tile_border_color = (0, 128, 0)     # Green border around each tile
     tile_fill_color = (255, 255, 255)   # White tile for unfilled letters
     space_tile_color = (0, 128, 0)      # Green tile for spaces between words
     text_color = (0, 0, 0)              # Black text for revealed letters
+    clue_color = (255, 255, 255)        # White color for the clue text
 
     # Define image size and font properties
-    img_width, img_height = 800, 200
-    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    img_width, img_height = 800, 400  # Increase height to make room for the clue
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif-Bold.ttf")  # Use a bold font if available
     font_size = 50
+    clue_font_size = 30
 
     # Create a blank image with black background
     img = Image.new('RGB', (img_width, img_height), color=background_color)
@@ -378,11 +381,12 @@ def generate_wof_image(word, revealed_letters):
     # Load the font
     try:
         font = ImageFont.truetype(font_path, font_size)
+        clue_font = ImageFont.truetype(font_path, clue_font_size)
     except IOError:
         print(f"Error: Font file not found at {font_path}")
         return None
     
-    # Calculate tile dimensions, spacing, and padding for borders
+    # Tile dimensions, spacing, and padding for borders
     tile_width, tile_height = 50, 70
     spacing = 15
     padding = 5  # Padding around each tile for the green border effect
@@ -390,7 +394,7 @@ def generate_wof_image(word, revealed_letters):
     # Calculate the starting x position to center the board
     total_width = len(word) * (tile_width + spacing) - spacing
     start_x = (img_width - total_width) // 2
-    y_position = (img_height - tile_height) // 2
+    y_position = (img_height - tile_height) // 2 - 60  # Position the tiles higher to make room for the clue
 
     # Draw tiles for each letter in the word
     for i, char in enumerate(word):
@@ -411,10 +415,19 @@ def generate_wof_image(word, revealed_letters):
                            outline=tile_border_color, fill=tile_fill_color)
             
             # Reveal letter if it is in revealed_letters
-            if char.upper() in revealed_letters or char.lower() in revealed_letters:
+            if char.upper() in revealed_letters:
                 text_x = x_position + tile_width // 4
                 text_y = y_position + tile_height // 4
                 draw.text((text_x, text_y), char, fill=text_color, font=font)
+
+    # Draw the clue text below the word tiles
+    clue_text = clue.upper()
+    clue_x = img_width // 2
+    clue_y = y_position + tile_height + 50  # Position below the tiles with some padding
+    
+    # Center the clue text
+    clue_width, clue_height = draw.textsize(clue_text, font=clue_font)
+    draw.text((clue_x - clue_width // 2, clue_y), clue_text, fill=clue_color, font=clue_font)
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()
@@ -430,6 +443,8 @@ def generate_wof_image(word, revealed_letters):
     else:
         print("Failed to upload the image to Matrix.")
         return None
+
+
         
 
 def send_magic_image(input_text):

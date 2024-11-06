@@ -1,5 +1,6 @@
 
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -110,6 +111,9 @@ yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
 
+magic_number_correct = False
+wf_winner = False
+
 
 question_categories = [
     "Mystery Box or Boat", "Famous People", "Anatomy", "Characters", "Music", "Art & Literature", 
@@ -170,17 +174,19 @@ def select_wof_questions(winner):
             print("Error: Failed to send image.")
 
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
-        time.sleep(3)
-        
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
-        response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
-        if response is None:                      
-            print("Error: Failed to send image.")
-
-        wof_result = process_wof_guesses(winner, wof_question["answers"][0])
+        if wf_winner = False:
+            time.sleep(3)
         
-        return wof_result
+            image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
+            response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
+    
+            if response is None:                      
+                print("Error: Failed to send image.")
+
+            process_wof_guesses(winner, wof_question["answers"][0])
+        
+        return None
 
     except Exception as e:
         # Capture the exception in Sentry and print detailed error information
@@ -190,12 +196,12 @@ def select_wof_questions(winner):
         error_details = traceback.format_exc()
         print(f"Error selecting wof questions: {e}\nDetailed traceback:\n{error_details}")
         
-        return False  # Return an empty list in case of failure
+        return None  # Return an empty list in case of failure
 
     
 
 def process_wof_guesses(winner, answer):
-    global since_token, params, headers, max_retries, delay_between_retries
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
 
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
@@ -245,10 +251,11 @@ def process_wof_guesses(winner, answer):
 
                     # Check if the message content matches the answer
                     if message_content == answer:
-                        # Correct guess - send success message and return
-                        success_message = f"🎉 Correct! {winner} guessed the answer: {answer} 🎉"
+                        react_to_message(event_id, target_room_id, "okra21")
+                        success_message = f"🎉 Correct {winner}! 🎉 {answer} 🎉"
                         send_message(target_room_id, success_message)
-                        return True
+                        wf_winner = True
+                        return None
 
                     # If no valid answer was guessed, react with a neutral reaction
                     react_to_message(event_id, target_room_id, "okra5")
@@ -260,13 +267,13 @@ def process_wof_guesses(winner, answer):
     # If time runs out without a correct guess
     timeout_message = f"⏰ Time's up! {answer}."
     send_message(target_room_id, timeout_message)
-    return False
+    return None
 
 
 
 def ask_wof_letters(winner, answer):
     print(answer)
-    global since_token, params, headers, max_retries, delay_between_retries
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
 
     sync_url = f"{matrix_base_url}/sync"
     
@@ -279,7 +286,7 @@ def ask_wof_letters(winner, answer):
     # Initialize the sync and message to prompt user for letters
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n@{winner} ❓Pick 3 Consonants & 1 Vowel❓\n"
+    message = f"\n@{winner}\n❓Pick 3 Consonants & 1 Vowel❓\n"
     send_message(target_room_id, message)
     
     consonants = []
@@ -321,6 +328,13 @@ def ask_wof_letters(winner, answer):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
+                  if message_content == answer:
+                    react_to_message(event_id, target_room_id, "okra21")
+                    wf_winner = True
+                    success_message = f"🎉 Correct {winner}! 🎉 {answer} 🎉"
+                    send_message(target_room_id, success_message)
+                    return True
+                    
                     # Parse letters from the message content
                     for char in message_content:
                         if char in fixed_letters:
@@ -363,7 +377,7 @@ def ask_wof_letters(winner, answer):
 
         # Combine with fixed letters and return
         message = f"Too slow. I'll pick for you.\n\nConsonants: {', '.join(chosen_consonants)}\nVowel: {chosen_vowel}"
-        message += "\n\n😊 These nice and are terrible."
+        message += "\n\n😊 These are nice and are terrible."
         send_message(target_room_id, message)
         return list(set(chosen_consonants + [chosen_vowel] + list(fixed_letters)))
     else:
@@ -587,7 +601,7 @@ def send_magic_image(input_text):
 
 
 def ask_magic_number(winner):
-    global since_token, params, headers, max_retries, delay_between_retries, magic_number_correct
+    global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
 
@@ -596,7 +610,6 @@ def ask_magic_number(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     initialize_sync()
-    magic_number_correct = False
     start_time = time.time()  # Track when the question starts
     message = f"\n@{winner} ❓👁️🔢❓\n"
     send_message(target_room_id, message)
@@ -1343,10 +1356,10 @@ def scramble_text(input_text):
 
 
 def generate_round_summary(round_data, winner):
-    global magic_number_correct
+    global wf_winner    
+    #ask_magic_number(winner) 
     
-    #ask_magic_number(winner)
-    magic_number_correct = select_wof_questions(winner)
+    wf_winner = select_wof_questions(winner)
 
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
@@ -1357,7 +1370,7 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
-    elif magic_number_correct == True:
+    elif magic_number_correct == True or wf_winner == True:
          prompt = (
             f"The winner of the trivia round is {winner}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else, including OkraStrut."

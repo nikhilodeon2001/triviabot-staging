@@ -250,6 +250,8 @@ def ask_wof_number(winner="No-Employer1482"):
 
 
 def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
+    word = word.upper()
+    
     # Define colors for the board
     background_color = (0, 0, 0)        # Black background
     tile_border_color = (0, 128, 0)     # Green border around each tile
@@ -284,11 +286,15 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
     start_x = (img_width - total_width) // 2
     start_y = (img_height - total_height) // 2
 
-    # Draw the top border row
+    # Draw the top border row with padding
+    y_position = start_y
     for i in range(len(word) + 2):
         x_position = start_x + i * (tile_width + spacing)
-        draw.rectangle([x_position, start_y, x_position + tile_width, start_y + tile_height],
+        draw.rectangle([x_position - padding, y_position - padding, 
+                        x_position + tile_width + padding, y_position + tile_height + padding],
                        fill=tile_border_color)
+        draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
+                       fill=space_tile_color)
 
     # Draw the main row with letters
     y_position = start_y + tile_height + spacing  # Start below the top border row
@@ -310,17 +316,20 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
                            outline=tile_border_color, fill=tile_fill_color)
             
             # Reveal letter if it is in revealed_letters
-            if char.upper() in revealed_letters or char.lower() in revealed_letters:
+            if char.upper() in revealed_letters:
                 text_x = x_position + tile_width // 4
                 text_y = y_position + tile_height // 4
                 draw.text((text_x, text_y), char, fill=text_color, font=font)
 
-    # Draw the bottom border row
+    # Draw the bottom border row with padding
     y_position = start_y + 2 * (tile_height + spacing)  # Position for bottom border row
     for i in range(len(word) + 2):
         x_position = start_x + i * (tile_width + spacing)
-        draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
+        draw.rectangle([x_position - padding, y_position - padding, 
+                        x_position + tile_width + padding, y_position + tile_height + padding],
                        fill=tile_border_color)
+        draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
+                       fill=space_tile_color)
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()

@@ -293,8 +293,7 @@ def ask_wof_letters(winner, answer):
     message += f"🥒 I'll throw in O,K,R,A 🥒\n"
     send_message(target_room_id, message)
     
-    consonants = []
-    vowels = []
+    wf_letters = [
     
     while time.time() - start_time < magic_time:
         try:
@@ -350,7 +349,8 @@ def ask_wof_letters(winner, answer):
                         # Check if we have collected enough letters
                         if len(wf_letters) == 4:
                             react_to_message(event_id, target_room_id, "okra21")
-                            final_letters = list(set(consonants + vowels + list(fixed_letters)))
+                            #final_letters = list(set(consonants + vowels + list(fixed_letters)))
+                            final_letters = fixed_letters + wf_letters
                             continue
     
         except requests.exceptions.RequestException as e:
@@ -372,7 +372,7 @@ def ask_wof_letters(winner, answer):
         # Combine with fixed letters and return
         message = f"Too slow. I'll pick for you.\n\nConsonants: {', '.join(chosen_consonants)}\nVowel: {chosen_vowel}\n\n"
         send_message(target_room_id, message)
-        return list(set(chosen_letters] + list(fixed_letters)))
+        return fixed_letters + chosen_letters
     else:
         message = f"Consonants: {consonants}\nVowels: {vowels}"
         send_message(target_room_id, message)

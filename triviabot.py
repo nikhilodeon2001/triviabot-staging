@@ -867,8 +867,6 @@ def process_round_options(round_winner, winner_points):
     if winner_points >= god_mode_points:
         message += "🎖🍆 Dicktator: Control the question order\n"
 
-    message += "\nYou have 10 seconds."
-
     send_message(target_room_id, message)
     prompt_user_for_response(round_winner, winner_points)
 

@@ -123,6 +123,8 @@ question_categories = [
     "History", "Movies", "Religion & Mythology", "Sports & Leisure", "World Culture", "General Knowledge"
 ]
 
+fixed_letters = ['O', 'K', 'R', 'A']
+
 categories_to_exclude = []  
 
 def select_wof_questions(winner):
@@ -131,7 +133,6 @@ def select_wof_questions(winner):
         db = connect_to_mongodb()
         recent_wof_ids = get_recent_question_ids_from_mongo("wof")
         selected_questions = []
-        revealed_letters = ['R', 'S', 'T', 'L', 'N', 'E']
 
 
         # Fetch wheel of fortune questions using the random subset method
@@ -167,7 +168,7 @@ def select_wof_questions(winner):
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
             
         image_size = 100
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], revealed_letters)
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
         if response is None:                      
@@ -272,15 +273,15 @@ def process_wof_guesses(winner, answer):
 
 
 def ask_wof_letters(winner, answer):
-    print(answer)
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+
+    answer = answer.upper()
 
     sync_url = f"{matrix_base_url}/sync"
     
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Letters that are automatically provided and should not count towards user selections
-    fixed_letters = {'R', 'S', 'T', 'L', 'N', 'E'}
     answer_letters = set(answer.upper())
     
     # Initialize the sync and message to prompt user for letters
@@ -328,7 +329,7 @@ def ask_wof_letters(winner, answer):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if message_content == answer:
+                    if message_content.upper() == answer:
                         react_to_message(event_id, target_room_id, "okra21")
                         wf_winner = True
                         success_message = f"🎉 Correct {winner}! 🎉 {answer} 🎉"
@@ -376,8 +377,7 @@ def ask_wof_letters(winner, answer):
             chosen_vowel = random.choice(available_vowels)
 
         # Combine with fixed letters and return
-        message = f"Too slow. I'll pick for you.\n\nConsonants: {', '.join(chosen_consonants)}\nVowel: {chosen_vowel}"
-        message += "\n\n😊 These are nice and are terrible."
+        message = f"Too slow. I'll pick for you.\n\nConsonants: {', '.join(chosen_consonants)}\nVowel: {chosen_vowel}\n\n"
         send_message(target_room_id, message)
         return list(set(chosen_consonants + [chosen_vowel] + list(fixed_letters)))
     else:

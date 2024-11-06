@@ -86,7 +86,7 @@ max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 50000, "jeopardy": 100000, "wof": 1500}
 first_place_bonus = 0
-magic_time = 7
+magic_time = 10
 magic_number = 0000
 
 
@@ -175,7 +175,9 @@ def select_wof_questions(winner):
 
         if response is None:                      
             print("Error: Failed to send image.")
-            
+
+        process_wof_guesses(winner, wof_question["answers"][0])
+        
         return None
 
     except Exception as e:
@@ -189,6 +191,80 @@ def select_wof_questions(winner):
         return []  # Return an empty list in case of failure
 
     
+
+def process_wof_guesses(winner, answer):
+    global since_token, params, headers, max_retries, delay_between_retries
+
+    sync_url = f"{matrix_base_url}/sync"
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+    answer = answer.upper()  # Normalize the answer to uppercase for comparison
+    
+    # Initialize the sync and send message to prompt user for a guess
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+    message = f"\n@{winner} ❓ GUESS NOW ❓\n"
+    send_message(target_room_id, message)
+    
+    while time.time() - start_time < magic_time:
+        try:
+            if since_token:
+                params["since"] = since_token
+
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "").upper().strip()
+
+                    if sender == bot_user_id or sender_display_name != winner:
+                        continue
+
+                    # Check if the message content matches the answer
+                    if message_content == answer:
+                        # Correct guess - send success message and return
+                        success_message = f"🎉 Correct! {winner} guessed the answer: {answer} 🎉"
+                        send_message(target_room_id, success_message)
+                        return True
+
+                    # If no valid answer was guessed, react with a neutral reaction
+                    react_to_message(event_id, target_room_id, "okra5")
+    
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting responses: {e}")
+
+    # If time runs out without a correct guess
+    timeout_message = f"⏰ Time's up! The correct answer was: {answer}."
+    send_message(target_room_id, timeout_message)
+    return False
+
+
+
+
+
+
 def ask_wof_letters(winner, answer):
     print(answer)
     global since_token, params, headers, max_retries, delay_between_retries

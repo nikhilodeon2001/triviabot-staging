@@ -258,9 +258,9 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
     text_color = (0, 0, 0)              # Black text for revealed letters
 
     # Define image size and font properties
-    img_width, img_height = 800, 200
+    img_width, img_height = 900, 300
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
-    font_size = 50
+    font_size = 40
 
     # Create a blank image with black background
     img = Image.new('RGB', (img_width, img_height), color=background_color)
@@ -273,29 +273,37 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
         print(f"Error: Font file not found at {font_path}")
         return None
     
-    # Calculate tile dimensions, spacing, and padding for borders
-    tile_width, tile_height = 50, 70
-    spacing = 15
+    # Tile dimensions, spacing, and padding for borders
+    tile_width, tile_height = 40, 60
+    spacing = 10
     padding = 5  # Padding around each tile for the green border effect
 
-    # Calculate the starting x position to center the board
-    total_width = len(word) * (tile_width + spacing) - spacing
+    # Calculate total board width and height to center it
+    total_width = (len(word) + 2) * (tile_width + spacing) - spacing  # 2 extra tiles for left & right border
+    total_height = (tile_height + spacing) * 3  # 3 rows for top, middle, and bottom border rows
     start_x = (img_width - total_width) // 2
-    y_position = (img_height - tile_height) // 2
+    start_y = (img_height - total_height) // 2
 
-    # Draw tiles for each letter in the word
-    for i, char in enumerate(word):
+    # Draw the top border row
+    for i in range(len(word) + 2):
+        x_position = start_x + i * (tile_width + spacing)
+        draw.rectangle([x_position, start_y, x_position + tile_width, start_y + tile_height],
+                       fill=tile_border_color)
+
+    # Draw the main row with letters
+    y_position = start_y + tile_height + spacing  # Start below the top border row
+    for i, char in enumerate(" " + word + " "):  # Add padding space for left and right borders
         x_position = start_x + i * (tile_width + spacing)
         
-        # Draw a green background rectangle as padding around each tile
+        # Draw a green background rectangle around each tile
         draw.rectangle([x_position - padding, y_position - padding, 
                         x_position + tile_width + padding, y_position + tile_height + padding],
                        fill=tile_border_color)
 
         if char == " ":
-            # Draw a green tile for spaces between words
+            # Draw green tile for spaces between words or as border
             draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
-                           outline=tile_border_color, fill=space_tile_color)
+                           fill=space_tile_color)
         else:
             # Draw a white tile with green border for letters
             draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
@@ -306,6 +314,13 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
                 text_x = x_position + tile_width // 4
                 text_y = y_position + tile_height // 4
                 draw.text((text_x, text_y), char, fill=text_color, font=font)
+
+    # Draw the bottom border row
+    y_position = start_y + 2 * (tile_height + spacing)  # Position for bottom border row
+    for i in range(len(word) + 2):
+        x_position = start_x + i * (tile_width + spacing)
+        draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
+                       fill=tile_border_color)
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()

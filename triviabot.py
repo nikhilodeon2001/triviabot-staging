@@ -174,8 +174,10 @@ def select_wof_questions(winner):
         if response is None:                      
             print("Error: Failed to send image.")
 
+        print(f"wf_winner = {wf_winner}")
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
-
+        print(f"wf_winner = {wf_winner}")
+        
         if wf_winner == False:
             time.sleep(3)
         

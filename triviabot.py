@@ -353,7 +353,7 @@ def ask_wof_letters(winner, answer):
                         if len(consonants) == 3 and len(vowels) == 1:
                             react_to_message(event_id, target_room_id, "okra21")
                             final_letters = list(set(consonants + vowels + list(fixed_letters)))
-                            return final_letters
+                            continue
 
                     # If no valid letter was parsed, send a feedback reaction
                     react_to_message(event_id, target_room_id, "okra5")

@@ -126,6 +126,7 @@ def select_wof_questions(winner="No-Employer1482"):
         db = connect_to_mongodb()
         recent_wof_ids = get_recent_question_ids_from_mongo("wof")
         selected_questions = []
+        revealed_letters = ['R', 'S', 'T', 'L', 'N', 'E']
 
 
         # Fetch wheel of fortune questions using the random subset method
@@ -153,33 +154,24 @@ def select_wof_questions(winner="No-Employer1482"):
         send_message(target_room_id, message)  
 
         wof_question = wof_questions[int(ask_wof_number()) - 1]
+        print(wof_question["answers"][0])
                     
        # Store the ID of this single question in MongoDB if it's not empty
         wof_question_id = wof_question["_id"]  # Get the ID of the selected question
         if wof_question_id:
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
-
-        revealed_letters = ['R', 'S', 'T', 'L', 'N', 'E']
-
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], revealed_letters)
-        message = f"Letters: {revealed_letters}"
-        print(wof_question["answers"][0])
-
+            
         image_size = 100
-
-
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], revealed_letters)
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
-        send_message(target_room_id, message)
 
-        
-        print("here")
+        if response is None:                      
+            print("Error: Failed to send image.")
+
         wof_letters = ask_wof_letters()
-        print("now here")
         
-        print(wof_letters)
-        print(wof_question)
-
         image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
+        response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
         if response is None:                      
             print("Error: Failed to send image.")
@@ -195,7 +187,6 @@ def select_wof_questions(winner="No-Employer1482"):
         print(f"Error selecting wof questions: {e}\nDetailed traceback:\n{error_details}")
         
         return []  # Return an empty list in case of failure
-
 
 
 def ask_wof_letters(winner="No-Employer1482"):

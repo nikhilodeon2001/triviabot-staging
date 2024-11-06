@@ -349,7 +349,7 @@ def ask_wof_letters(winner, answer):
                         # Check if we have collected enough letters
                         if len(wf_letters) == 4:
                             react_to_message(event_id, target_room_id, "okra21")
-                            continue
+                            break
     
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
@@ -362,13 +362,12 @@ def ask_wof_letters(winner, answer):
             wf_letters = ['J', 'Q', 'X', 'Z']  
         else:
             wf_letters = random.sample(available_consonants, 4)
-            
-        final_letters = fixed_letters + wf_letters
         
         message = f"Too slow. I'll pick for you.\nLet's use: {wf_letters}\n\n"
     else:
         message = f"You picked:\n{wf_letters}\n\n"
 
+    final_letters = fixed_letters + wf_letters
     send_message(target_room_id, message)
     return final_letters
             

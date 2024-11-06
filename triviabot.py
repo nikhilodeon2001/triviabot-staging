@@ -159,15 +159,17 @@ def select_wof_questions(winner="No-Employer1482"):
         if wof_question_id:
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
 
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], ['R', 'S', 'T', 'L', 'N', 'E'])
-        message = f"\n{wof_question["question"]}\n"
-        message += "Letters Revealed: R S T L N E"
+        revealed_letters = ['R', 'S', 'T', 'L', 'N', 'E']
+
+        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], revealed_letters)
+        message = f"Letters: {revealed_letters}"
         print(wof_question["answers"][0])
 
         image_size = 100
 
-        send_message(target_room_id, message)
+
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
+        send_message(target_room_id, message)
         
         wof_letters = ask_wof_letters()
 
@@ -207,7 +209,6 @@ def ask_wof_letters(winner="No-Employer1482"):
     
     consonants = []
     vowels = []
-    print("Starting to collect letters...")  # Debug start
     
     while time.time() - start_time < magic_time:
         try:
@@ -215,7 +216,6 @@ def ask_wof_letters(winner="No-Employer1482"):
                 params["since"] = since_token
 
             response = requests.get(sync_url, headers=headers, params=params)
-            print("Received response from sync.")  # Debug response
 
             if response.status_code != 200:
                 print(f"Unexpected status code: {response.status_code}")
@@ -225,7 +225,6 @@ def ask_wof_letters(winner="No-Employer1482"):
             since_token = sync_data.get("next_batch")  # Update since_token for the next batch
 
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
-            print(f"Processing {len(room_events)} events...")  # Debug event count
 
             for event in room_events:
                 event_id = event["event_id"]
@@ -244,29 +243,23 @@ def ask_wof_letters(winner="No-Employer1482"):
                     sender_display_name = get_display_name(sender)
                     message_content = event.get("content", {}).get("body", "").upper()
 
-                    print(f"Processing message: {message_content} from {sender_display_name}")  # Debug message content
-
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
                     # Parse letters from the message content
                     for char in message_content:
                         if char in fixed_letters:
-                            print(f"Skipping fixed letter: {char}")  # Debug skipped letters
                             continue  # Skip if the letter is one of R, S, T, L, N, E
 
                         if len(consonants) < 3 and char.isalpha() and char not in "AEIOU" and char not in consonants:
                             consonants.append(char)
-                            print(f"Added consonant: {char}")  # Debug added consonant
                         elif len(vowels) < 1 and char in "AEIOU" and char not in vowels:
                             vowels.append(char)
-                            print(f"Added vowel: {char}")  # Debug added vowel
 
                         # Check if we have collected enough letters
                         if len(consonants) == 3 and len(vowels) == 1:
                             react_to_message(event_id, target_room_id, "okra21")
                             final_letters = list(set(consonants + vowels + list(fixed_letters)))
-                            print(f"Final letters: {final_letters}")  # Debug final letters
                             return final_letters
 
                     # If no valid letter was parsed, send a feedback reaction
@@ -280,12 +273,10 @@ def ask_wof_letters(winner="No-Employer1482"):
     if len(consonants) < 3 or len(vowels) < 1:
         message = "Too slow. I'll pick for you.\nConsonants: X, Z, J, Q"
         send_message(target_room_id, message)
-        print(message)  # Debug default message
         return list(set(['X', 'Z', 'J', 'Q'] + list(fixed_letters)))
     else:
         message = f"Consonants: {consonants}\nVowels: {vowels}"
         send_message(target_room_id, message)
-        print(f"Collected letters: {message}")  # Debug collected letters
         return list(set(consonants + vowels + list(fixed_letters)))
 
 
@@ -368,12 +359,14 @@ def generate_wof_image(word, clue, revealed_letters):
     space_tile_color = (0, 128, 0)      # Green tile for spaces between words
     text_color = (0, 0, 0)              # Black text for revealed letters
     clue_color = (255, 255, 255)        # White color for the clue text
+    revealed_letters_color = (200, 200, 200)  # Light gray color for the revealed letters
 
     # Define image size and font properties
-    img_width, img_height = 800, 400  # Increase height to make room for the clue
+    img_width, img_height = 800, 450  # Increase height to make room for the clue and revealed letters
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif-Bold.ttf")  # Use a bold font if available
     font_size = 50
     clue_font_size = 30
+    revealed_font_size = 20  # Smaller font for the revealed letters
 
     # Create a blank image with black background
     img = Image.new('RGB', (img_width, img_height), color=background_color)
@@ -383,6 +376,7 @@ def generate_wof_image(word, clue, revealed_letters):
     try:
         font = ImageFont.truetype(font_path, font_size)
         clue_font = ImageFont.truetype(font_path, clue_font_size)
+        revealed_font = ImageFont.truetype(font_path, revealed_font_size)  # Less bold font for revealed letters
     except IOError:
         print(f"Error: Font file not found at {font_path}")
         return None
@@ -437,6 +431,15 @@ def generate_wof_image(word, clue, revealed_letters):
     clue_height = clue_bbox[3] - clue_bbox[1]
 
     draw.text((clue_x - clue_width // 2, clue_y), clue_text, fill=clue_color, font=clue_font)
+
+    # Draw the revealed letters below the clue text
+    revealed_text = f"Revealed Letters: {' '.join(revealed_letters).upper()}"
+    revealed_bbox = draw.textbbox((0, 0), revealed_text, font=revealed_font)
+    revealed_width = revealed_bbox[2] - revealed_bbox[0]
+    revealed_x = (img_width - revealed_width) // 2
+    revealed_y = clue_y + clue_height + 20  # Position below the clue with padding
+
+    draw.text((revealed_x, revealed_y), revealed_text, fill=revealed_letters_color, font=revealed_font)
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()

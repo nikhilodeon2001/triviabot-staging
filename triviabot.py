@@ -194,8 +194,6 @@ def ask_wof_letters(winner="No-Employer1482"):
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
-
-    collected_responses = []  # Store all responses
     
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
@@ -209,24 +207,29 @@ def ask_wof_letters(winner="No-Employer1482"):
     
     consonants = []
     vowels = []
+    print("Starting to collect letters...")  # Debug start
+    
     while time.time() - start_time < magic_time:
         try:
             if since_token:
                 params["since"] = since_token
 
             response = requests.get(sync_url, headers=headers, params=params)
+            print("Received response from sync.")  # Debug response
 
             if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
                 continue
 
             sync_data = response.json()
             since_token = sync_data.get("next_batch")  # Update since_token for the next batch
 
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+            print(f"Processing {len(room_events)} events...")  # Debug event count
 
             for event in room_events:
                 event_id = event["event_id"]
-                event_type = event.get("type")  # Get the type of the event
+                event_type = event.get("type")
 
                 # Only process and redact if the event type is "m.room.message"
                 if event_type == "m.room.message":
@@ -241,43 +244,49 @@ def ask_wof_letters(winner="No-Employer1482"):
                     sender_display_name = get_display_name(sender)
                     message_content = event.get("content", {}).get("body", "").upper()
 
+                    print(f"Processing message: {message_content} from {sender_display_name}")  # Debug message content
+
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
                     # Parse letters from the message content
                     for char in message_content:
                         if char in fixed_letters:
+                            print(f"Skipping fixed letter: {char}")  # Debug skipped letters
                             continue  # Skip if the letter is one of R, S, T, L, N, E
 
                         if len(consonants) < 3 and char.isalpha() and char not in "AEIOU" and char not in consonants:
                             consonants.append(char)
+                            print(f"Added consonant: {char}")  # Debug added consonant
                         elif len(vowels) < 1 and char in "AEIOU" and char not in vowels:
                             vowels.append(char)
+                            print(f"Added vowel: {char}")  # Debug added vowel
 
                         # Check if we have collected enough letters
                         if len(consonants) == 3 and len(vowels) == 1:
                             react_to_message(event_id, target_room_id, "okra21")
-                            return list(set(consonants + vowels + list(fixed_letters)))
+                            final_letters = list(set(consonants + vowels + list(fixed_letters)))
+                            print(f"Final letters: {final_letters}")  # Debug final letters
+                            return final_letters
 
                     # If no valid letter was parsed, send a feedback reaction
                     react_to_message(event_id, target_room_id, "okra5")
     
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
-            print(f"Error collecting responses: {e}")                    
-    
+            print(f"Error collecting responses: {e}")
+
     # If time runs out or not enough letters are collected, use default letters
     if len(consonants) < 3 or len(vowels) < 1:
-        message = "Too slow. I'll pick for you."
-        message = f"\nConsonants: X, Z, J, Q"
+        message = "Too slow. I'll pick for you.\nConsonants: X, Z, J, Q"
+        send_message(target_room_id, message)
+        print(message)  # Debug default message
         return list(set(['X', 'Z', 'J', 'Q'] + list(fixed_letters)))
     else:
-        message = f"\nConsonants: {consonants}"
-        message += f"\nVowels: {vowels}"
+        message = f"Consonants: {consonants}\nVowels: {vowels}"
+        send_message(target_room_id, message)
+        print(f"Collected letters: {message}")  # Debug collected letters
         return list(set(consonants + vowels + list(fixed_letters)))
-
-
-
 
 
 

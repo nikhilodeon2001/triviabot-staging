@@ -2566,7 +2566,7 @@ def update_round_streaks(user):
         send_message(target_room_id, message)
         time.sleep(2)
         
-        select_wf_quesitons()
+        select_wof_quesitons()
         
         gpt_summary = generate_round_summary(round_data, user)
 

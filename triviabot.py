@@ -425,8 +425,11 @@ def generate_wof_image(word, clue, revealed_letters):
     clue_x = img_width // 2
     clue_y = y_position + tile_height + 50  # Position below the tiles with some padding
     
-    # Center the clue text
-    clue_width, clue_height = draw.textsize(clue_text, font=clue_font)
+    # Get the bounding box of the clue text to calculate its width and height
+    clue_bbox = draw.textbbox((0, 0), clue_text, font=clue_font)
+    clue_width = clue_bbox[2] - clue_bbox[0]
+    clue_height = clue_bbox[3] - clue_bbox[1]
+
     draw.text((clue_x - clue_width // 2, clue_y), clue_text, fill=clue_color, font=clue_font)
 
     # Save the image to a bytes buffer

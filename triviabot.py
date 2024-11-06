@@ -260,7 +260,7 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
     # Define image size and font properties
     img_width, img_height = 800, 200
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
-    font_size = 60
+    font_size = 50
 
     # Create a blank image with black background
     img = Image.new('RGB', (img_width, img_height), color=background_color)
@@ -273,10 +273,11 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
         print(f"Error: Font file not found at {font_path}")
         return None
     
-    # Calculate tile dimensions and spacing
-    tile_width, tile_height = 60, 80
-    spacing = 10
-    
+    # Calculate tile dimensions, spacing, and padding for borders
+    tile_width, tile_height = 50, 70
+    spacing = 15
+    padding = 5  # Padding around each tile for the green border effect
+
     # Calculate the starting x position to center the board
     total_width = len(word) * (tile_width + spacing) - spacing
     start_x = (img_width - total_width) // 2
@@ -286,19 +287,25 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
     for i, char in enumerate(word):
         x_position = start_x + i * (tile_width + spacing)
         
+        # Draw a green background rectangle as padding around each tile
+        draw.rectangle([x_position - padding, y_position - padding, 
+                        x_position + tile_width + padding, y_position + tile_height + padding],
+                       fill=tile_border_color)
+
         if char == " ":
             # Draw a green tile for spaces between words
             draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
                            outline=tile_border_color, fill=space_tile_color)
         else:
-            # Draw a green-bordered white tile for letters
+            # Draw a white tile with green border for letters
             draw.rectangle([x_position, y_position, x_position + tile_width, y_position + tile_height],
                            outline=tile_border_color, fill=tile_fill_color)
             
             # Reveal letter if it is in revealed_letters
             if char.upper() in revealed_letters or char.lower() in revealed_letters:
-                draw.text((x_position + tile_width // 4, y_position + tile_height // 4),
-                          char, fill=text_color, font=font)
+                text_x = x_position + tile_width // 4
+                text_y = y_position + tile_height // 4
+                draw.text((text_x, text_y), char, fill=text_color, font=font)
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()
@@ -314,6 +321,7 @@ def generate_wof_image(word, revealed_letters=['r', 's', 't', 'l', 'n', 'e']):
     else:
         print("Failed to upload the image to Matrix.")
         return None
+        
 
 def send_magic_image(input_text):
     global since_token, params, headers, max_retries, delay_between_retries

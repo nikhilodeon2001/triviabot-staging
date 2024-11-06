@@ -168,7 +168,7 @@ def select_wof_questions(winner="No-Employer1482"):
         if response is None:                      
             print("Error: Failed to send image.")
 
-        wof_letters = ask_wof_letters()
+        wof_letters = ask_wof_letters(wof_question["answers"][0])
         
         image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -189,7 +189,7 @@ def select_wof_questions(winner="No-Employer1482"):
         return []  # Return an empty list in case of failure
 
 
-def ask_wof_letters(winner="No-Employer1482"):
+def ask_wof_letters(winner="No-Employer1482", answer=""):
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
@@ -198,7 +198,9 @@ def ask_wof_letters(winner="No-Employer1482"):
 
     # Letters that are automatically provided and should not count towards user selections
     fixed_letters = {'R', 'S', 'T', 'L', 'N', 'E'}
+    answer_letters = set(answer.upper())
     
+    # Initialize the sync and message to prompt user for letters
     initialize_sync()
     start_time = time.time()  # Track when the question starts
     message = f"\n@{winner} ❓Pick 3 Consonants & 1 Vowel❓\n"
@@ -266,11 +268,21 @@ def ask_wof_letters(winner="No-Employer1482"):
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
 
-    # If time runs out or not enough letters are collected, use default letters
+    # If time runs out or not enough letters are collected, select random letters
     if len(consonants) < 3 or len(vowels) < 1:
-        message = "Too slow. I'll pick for you.\nConsonants: X, Z, J, Q"
+        # Pool of available letters excluding fixed letters and answer letters
+        available_consonants = [c for c in "BCDFGHJKMPQVWXZ" if c not in answer_letters]
+        available_vowels = [v for v in "AIUO" if v not in answer_letters]
+
+        # Randomly select 3 consonants and 1 vowel from the pool
+        chosen_consonants = random.sample(available_consonants, 3)
+        chosen_vowel = random.choice(available_vowels)
+
+        # Combine with fixed letters and return
+        message = f"Too slow. I'll pick for you.\nConsonants: {', '.join(chosen_consonants)}, Vowel: {chosen_vowel}"
+        message += "\n\nI feel good about these!"
         send_message(target_room_id, message)
-        return list(set(['X', 'Z', 'J', 'Q'] + list(fixed_letters)))
+        return list(set(chosen_consonants + [chosen_vowel] + list(fixed_letters)))
     else:
         message = f"Consonants: {consonants}\nVowels: {vowels}"
         send_message(target_room_id, message)

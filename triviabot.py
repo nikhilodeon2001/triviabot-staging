@@ -358,7 +358,7 @@ def ask_wof_letters(winner, answer):
             print(f"Error collecting responses: {e}")
 
     # If time runs out or not enough letters are collected, select random letters
-    if len(wf_letters) < 4
+    if len(wf_letters) < 4:
         # Pool of available letters excluding fixed letters and answer letters
         available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in answer_letters]
 

@@ -1358,10 +1358,7 @@ def scramble_text(input_text):
 
 
 def generate_round_summary(round_data, winner):
-    global wf_winner    
     #ask_magic_number(winner) 
-    
-    wf_winner = select_wof_questions(winner)
 
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":

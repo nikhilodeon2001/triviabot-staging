@@ -349,34 +349,28 @@ def ask_wof_letters(winner, answer):
                         # Check if we have collected enough letters
                         if len(wf_letters) == 4:
                             react_to_message(event_id, target_room_id, "okra21")
-                            #final_letters = list(set(consonants + vowels + list(fixed_letters)))
-                            final_letters = fixed_letters + wf_letters
                             continue
     
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
 
-    # If time runs out or not enough letters are collected, select random letters
     if len(wf_letters) < 4:
-        # Pool of available letters excluding fixed letters and answer letters
         available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in answer_letters]
 
-        # Ensure there are enough letters; use default if insufficient
-        if len(available_consonants) < 4:
-            chosen_letters = ['J', 'Q', 'X', 'Z']  # Default consonants
+        if len(available_latters) < 4:
+            wf_letters = ['J', 'Q', 'X', 'Z']  
         else:
-            chosen_letters = random.sample(available_consonants, 4)
+            wf_letters = random.sample(available_consonants, 4)
+            
+        final_letters = fixed_letters + wf_letters
         
-
-        # Combine with fixed letters and return
-        message = f"Too slow. I'll pick for you.\n\nConsonants: {', '.join(chosen_consonants)}\nVowel: {chosen_vowel}\n\n"
-        send_message(target_room_id, message)
-        return fixed_letters + chosen_letters
+        message = f"Too slow. I'll pick for you.\nLet's use: {wf_letters}\n\n"
     else:
-        message = f"Consonants: {consonants}\nVowels: {vowels}"
-        send_message(target_room_id, message)
-        return final_letters
+        message = f"You picked:\n{wf_letters}\n\n"
+
+    send_message(target_room_id, message)
+    return final_letters
             
 
 def ask_wof_number(winner):

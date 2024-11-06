@@ -1344,12 +1344,11 @@ def scramble_text(input_text):
 
 
 def generate_round_summary(round_data, winner):
-    """
-    Generate a summary of the trivia round using OpenAI's API.
-    """
-    #ask_magic_number(winner)
-    wof_boolean = select_wof_questions(winner)
+    global magic_number_correct
     
+    #ask_magic_number(winner)
+    magic_number_correct = select_wof_questions(winner)
+
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
         prompt = (
@@ -1359,8 +1358,7 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
-    #elif magic_number_correct == True:
-    elif wof_boolean == True:   
+    elif magic_number_correct == True:
          prompt = (
             f"The winner of the trivia round is {winner}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else, including OkraStrut."

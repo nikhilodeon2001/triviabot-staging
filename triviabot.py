@@ -455,6 +455,7 @@ def ask_wof_number(winner):
 
 
 def generate_wof_image(word, clue, revealed_letters):
+    print(revealed_letters)
     word = word.upper()
     
     # Define colors for the board

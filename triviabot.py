@@ -289,7 +289,7 @@ def ask_wof_letters(winner, answer):
     # Initialize the sync and message to prompt user for letters
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n@{winner}\n\n❓Pick 3 Consonants & 1 Vowel❓\n"
+    message = f"\n@{winner}\n\n❓ Pick 4 Letters ❓\n"
     message += f"🥒 I'll throw in O,K,R,A 🥒\n"
     send_message(target_room_id, message)
     
@@ -342,15 +342,13 @@ def ask_wof_letters(winner, answer):
                     # Parse letters from the message content
                     for char in message_content:
                         if char in fixed_letters:
-                            continue  # Skip if the letter is one of R, S, T, L, N, E
+                            continue  # Skip if the letter is one in fixed_letters
 
-                        if len(consonants) < 3 and char.isalpha() and char not in "AEIOU" and char not in consonants:
-                            consonants.append(char)
-                        elif len(vowels) < 1 and char in "AEIOU" and char not in vowels:
-                            vowels.append(char)
+                        if len(wf_letters) < 4 and char.isalpha() and char not in wf_letters:
+                            wf_letters.append(char)
 
                         # Check if we have collected enough letters
-                        if len(consonants) == 3 and len(vowels) == 1:
+                        if len(wf_letters) == 4:
                             react_to_message(event_id, target_room_id, "okra21")
                             final_letters = list(set(consonants + vowels + list(fixed_letters)))
                             continue
@@ -360,30 +358,25 @@ def ask_wof_letters(winner, answer):
             print(f"Error collecting responses: {e}")
 
     # If time runs out or not enough letters are collected, select random letters
-    if len(consonants) < 3 or len(vowels) < 1:
+    if len(wf_letters) < 4
         # Pool of available letters excluding fixed letters and answer letters
-        available_consonants = [c for c in "BCDFGHJKMPQVWXZ" if c not in answer_letters]
-        available_vowels = [v for v in "AIUO" if v not in answer_letters]
+        available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in answer_letters]
 
         # Ensure there are enough letters; use default if insufficient
-        if len(available_consonants) < 3:
-            chosen_consonants = ['X', 'Z', 'J']  # Default consonants
+        if len(available_consonants) < 4:
+            chosen_letters = ['J', 'Q', 'X', 'Z']  # Default consonants
         else:
-            chosen_consonants = random.sample(available_consonants, 3)
+            chosen_letters = random.sample(available_consonants, 4)
         
-        if not available_vowels:
-            chosen_vowel = 'U'  # Default vowel
-        else:
-            chosen_vowel = random.choice(available_vowels)
 
         # Combine with fixed letters and return
         message = f"Too slow. I'll pick for you.\n\nConsonants: {', '.join(chosen_consonants)}\nVowel: {chosen_vowel}\n\n"
         send_message(target_room_id, message)
-        return list(set(chosen_consonants + [chosen_vowel] + list(fixed_letters)))
+        return list(set(chosen_letters] + list(fixed_letters)))
     else:
         message = f"Consonants: {consonants}\nVowels: {vowels}"
         send_message(target_room_id, message)
-        return list(set(consonants + vowels + list(fixed_letters)))
+        return final_letters
             
 
 def ask_wof_number(winner):

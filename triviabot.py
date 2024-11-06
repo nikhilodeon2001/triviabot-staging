@@ -113,7 +113,7 @@ emoji_mode = emoji_mode_default
 
 magic_number_correct = False
 wf_winner = False
-num_wf_letters = 2
+num_wf_letters = 3
 
 
 question_categories = [

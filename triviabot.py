@@ -2054,7 +2054,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     message_body = ""
 
     if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "multiple choice"]:
-        message_body += "\n🚨 ONE GUESS ONLY 🚨"
+        message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE

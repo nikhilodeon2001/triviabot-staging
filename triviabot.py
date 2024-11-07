@@ -127,33 +127,35 @@ categories_to_exclude = []
 
 def get_math_question():
     question_functions = [create_mean_question, create_median_question, create_derivative_question]
-    
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
-# Function to create a mean question in tuple format
+# Function to create a mean question in dictionary format
 def create_mean_question():
-    category = "Mathematics"
-    question_text = "What is the MEAN of the following set?"
-    url = "mean"
-    answers = [""]
-    return (category, question_text, url, answers)
+    return {
+        "category": "Mathematics",
+        "question": "What is the MEAN of the following set?",
+        "url": "mean",
+        "answers": [""]
+    }
 
-# Function to create a median question in tuple format
+# Function to create a median question in dictionary format
 def create_median_question():
-    category = "Mathematics"
-    question_text = "What is the MEDIAN of the following set?"
-    url = "median"
-    answers = [""]
-    return (category, question_text, url, answers)
+    return {
+        "category": "Mathematics",
+        "question": "What is the MEDIAN of the following set?",
+        "url": "median",
+        "answers": [""]
+    }
 
-# Function to create a derivative question in tuple format
+# Function to create a derivative question in dictionary format
 def create_derivative_question():
-    category = "Mathematics"
-    question_text = "What is the DERIVATIVE with respect to x?"
-    url = "derivative"
-    answers = [""]
-    return (category, question_text, url, answers)
+    return {
+        "category": "Mathematics",
+        "question": "What is the DERIVATIVE with respect to x?",
+        "url": "derivative",
+        "answers": [""]
+    }
 
 
 

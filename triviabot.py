@@ -2716,9 +2716,10 @@ def select_trivia_questions(questions_per_round):
         selected_questions = []
 
         math_questions = [get_math_question() for _ in range(num_math_questions)]
+        stats_questions = [get_stats_question() for _ in range(num_stats_questions)]
+        
         selected_questions.extend(math_questions)
-        print(math_questions)
-        print(selected_questions)
+        selected_questions.extend(stats_questions)
 
         # Fetch wheel of fortune questions using the random subset method
         wof_collection = db["wof_questions"]

@@ -131,42 +131,29 @@ def get_math_question():
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
+# Function to create a mean question in tuple format
 def create_mean_question():
-    # Create a mean question object
-    doc = {
-        "category": "Mathematics",
-        "question": "What is the MEAN of the following set?",
-        "url": "mean",
-        "answers": [""]
-    }
-    # Return the formatted question object
-    question = (doc["category"], doc["question"], doc["url"], doc["answers"])
-    return question
+    category = "Mathematics"
+    question_text = "What is the MEAN of the following set?"
+    url = "mean"
+    answers = [""]
+    return (category, question_text, url, answers)
 
+# Function to create a median question in tuple format
 def create_median_question():
-    # Create a median question object
-    doc = {
-        "category": "Mathematics",
-        "question": "What is the MEDIAN of the following set?",
-        "url": "median",
-        "answers": [""]
-    }
-    # Return the formatted question object
-    question = (doc["category"], doc["question"], doc["url"], doc["answers"])
-    return question
+    category = "Mathematics"
+    question_text = "What is the MEDIAN of the following set?"
+    url = "median"
+    answers = [""]
+    return (category, question_text, url, answers)
 
+# Function to create a derivative question in tuple format
 def create_derivative_question():
-    # Create a derivative question object
-    doc = {
-        "category": "Mathematics",
-        "question": "What is the DERIVATIVE with respect to x?",
-        "url": "derivative",
-        "answers": [""]
-    }
-    # Return the formatted question object
-    question = (doc["category"], doc["question"], doc["url"], doc["answers"])
-    return question
-
+    category = "Mathematics"
+    question_text = "What is the DERIVATIVE with respect to x?"
+    url = "derivative"
+    answers = [""]
+    return (category, question_text, url, answers)
 
 
 

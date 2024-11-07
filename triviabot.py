@@ -2999,7 +2999,7 @@ def generate_and_render_derivative_image():
         print("Failed to upload the image to Matrix.")
 
 
-def generate_and_render_expanded_polynomial():
+def generate_and_render_polynomial():
     # Randomly select two unique integers from -9 to 9, excluding 0
     factors = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
     sum_factors = sum(factors)

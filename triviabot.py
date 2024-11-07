@@ -908,7 +908,7 @@ def process_round_options(round_winner, winner_points):
 
 
 def prompt_user_for_response(round_winner, winner_points):
-    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode
+    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions
     
     # Call initialize_sync to set since_token
     initialize_sync()

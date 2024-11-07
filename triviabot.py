@@ -85,7 +85,7 @@ magic_time = 10
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 2
+num_mysterybox_clues_default = 10
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
@@ -2053,8 +2053,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     message_body = ""
 
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median"]:
-        message_body += "\n🚨 1 Guess 🚨\n"
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "multiple choice"]:
+        message_body += "\n🚨 ONE GUESS ONLY 🚨"
     
     if is_valid_url(trivia_url): 
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
@@ -2100,9 +2100,9 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     elif trivia_url == "multiple choice": 
         if trivia_answer_list[0] in {"True", "False"}:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 TRUE / FALSE 🚨 {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[TRUE or FALSE] {trivia_question}\n\n"
         else:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 A B C D 🚨 {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[Enter Letter] {trivia_question}\n\n"
             for answer in trivia_answer_list[1:]:
                 message_body += f"{answer}\n"
         trivia_answer_list[:] = trivia_answer_list[:1]

@@ -273,9 +273,7 @@ def ask_wof_letters(winner, answer):
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
 
     answer = answer.upper()
-
     sync_url = f"{matrix_base_url}/sync"
-    
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Letters that are automatically provided and should not count towards user selections
@@ -306,7 +304,6 @@ def ask_wof_letters(winner, answer):
 
             sync_data = response.json()
             since_token = sync_data.get("next_batch")  # Update since_token for the next batch
-
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
             for event in room_events:
@@ -379,9 +376,7 @@ def ask_wof_number(winner):
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
-
     collected_responses = []  # Store all responses
-    
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     initialize_sync()
@@ -400,7 +395,6 @@ def ask_wof_number(winner):
 
             sync_data = response.json()
             since_token = sync_data.get("next_batch")  # Update since_token for the next batch
-
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
             for event in room_events:
@@ -440,7 +434,6 @@ def ask_wof_number(winner):
 
 
 def generate_wof_image(word, clue, revealed_letters):
-    print(revealed_letters)
     word = word.upper()
     
     # Define colors for the board
@@ -1672,7 +1665,8 @@ def login_to_chat():
 
                 bearer_token = chat_login_response_json.get('access_token')
                 bot_user_id = chat_login_response_json.get('user_id')
-                print(bearer_token)
+                #print(bearer_token)
+                print("bearer token retrieved")
                 return bearer_token, bot_user_id
 
             else:
@@ -3251,7 +3245,6 @@ def start_trivia_round():
                 send_magic_image(magic_number)
             else:
                 selected_gif_url = random.choice(okra_gif_urls)
-                print(selected_gif_url)
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
                 time.sleep(7)

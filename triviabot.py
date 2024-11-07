@@ -104,6 +104,8 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
+num_math_questions_default = 2
+num_math_questions = num_math_questions_default
 
 magic_number_correct = False
 wf_winner = False
@@ -121,6 +123,52 @@ question_categories = [
 fixed_letters = ['O', 'K', 'R', 'A']
 
 categories_to_exclude = []  
+
+
+def get_math_question():
+    question_functions = [create_mean_question, create_median_question, create_derivative_question]
+    
+    selected_question_function = random.choice(question_functions)
+    return selected_question_function()
+
+def create_mean_question():
+    # Create a mean question object
+    doc = {
+        "category": "Mathematics",
+        "question": "What is the MEAN of the following set?",
+        "url": "mean",
+        "answers": [""]
+    }
+    # Return the formatted question object
+    question = (doc["category"], doc["question"], doc["url"], doc["answers"])
+    return question
+
+def create_median_question():
+    # Create a median question object
+    doc = {
+        "category": "Mathematics",
+        "question": "What is the MEDIAN of the following set?",
+        "url": "median",
+        "answers": [""]
+    }
+    # Return the formatted question object
+    question = (doc["category"], doc["question"], doc["url"], doc["answers"])
+    return question
+
+def create_derivative_question():
+    # Create a derivative question object
+    doc = {
+        "category": "Mathematics",
+        "question": "What is the DERIVATIVE with respect to x?",
+        "url": "derivative",
+        "answers": [""]
+    }
+    # Return the formatted question object
+    question = (doc["category"], doc["question"], doc["url"], doc["answers"])
+    return question
+
+
+
 
 def select_wof_questions(winner):
     try:
@@ -834,7 +882,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -846,6 +894,7 @@ def process_round_options(round_winner, winner_points):
     yolo_mode = yolo_mode_default
     magic_number_correct = False
     wf_winner = False
+    num_math_questions = num_math_questions_default
     
     if round_winner is None:
         return
@@ -928,6 +977,8 @@ def prompt_user_for_response(round_winner, winner_points):
                     matched_category = cross_reference_category(message_content)
         
                     if matched_category:
+                        if matched_category == "Mathematics":
+                            num_math_questions = 0
                         categories_to_exclude[:1] = [matched_category]  # Add matched_category to exclude list
         
                         # Send message after handling special cases
@@ -2663,8 +2714,10 @@ def select_trivia_questions(questions_per_round):
 
         selected_questions = []
 
+        math_questions = [get_math_question() for _ in range(num_math_questions)]
+        selected_questions.extend(math_questions)
 
-         # Fetch wheel of fortune questions using the random subset method
+        # Fetch wheel of fortune questions using the random subset method
         wof_collection = db["wof_questions"]
         pipeline_wof = [
             {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},
@@ -2673,7 +2726,6 @@ def select_trivia_questions(questions_per_round):
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         selected_questions.extend(wof_questions)
  
-        
         # Fetch mysterybox questions using the random subset method
         mysterybox_collection = db["mysterybox_questions"]
         pipeline_mysterybox = [

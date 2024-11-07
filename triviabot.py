@@ -86,11 +86,11 @@ magic_time = 10
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 2
+num_mysterybox_clues_default = 0
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 3
+num_jeopardy_clues_default = 0
 num_jeopardy_clues = num_jeopardy_clues_default
 num_wof_clues_default = 0
 num_wof_clues = num_wof_clues_default
@@ -105,9 +105,9 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
-num_math_questions_default = 4
+num_math_questions_default = 10
 num_math_questions = num_math_questions_default
-num_stats_questions_default = 1
+num_stats_questions_default = 0
 num_stats_questions = num_stats_questions_default
 
 magic_number_correct = False
@@ -2999,14 +2999,22 @@ def generate_and_render_derivative_image():
         print("Failed to upload the image to Matrix.")
 
 
-def generate_and_render_polynomial():
+def generate_and_render_expanded_polynomial():
     # Randomly select two unique integers from -9 to 9, excluding 0
     factors = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
     sum_factors = sum(factors)
     product_factors = factors[0] * factors[1]
 
-    # Construct the polynomial string for the form: x^2 + (sum)x + (product)
-    polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {abs(sum_factors)}x {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
+    # Construct the sum term for the polynomial
+    if sum_factors == 1:
+        sum_term = "x"
+    elif sum_factors == -1:
+        sum_term = "- x"
+    else:
+        sum_term = f"{sum_factors}x"
+
+    # Construct the polynomial string for the form: x² + (sum)x + (product)
+    polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {sum_term} {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
 
     print(f"Polynomial: {polynomial}")
     print(f"Sum of factors: {sum_factors}")

@@ -105,7 +105,7 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
-num_math_questions_default = 0
+num_math_questions_default = 4
 num_math_questions = num_math_questions_default
 num_stats_questions_default = 1
 num_stats_questions = num_stats_questions_default
@@ -129,7 +129,7 @@ categories_to_exclude = []
 
 
 def get_math_question():
-    question_functions = [create_derivative_question]
+    question_functions = [create_derivative_question, create_polynomial_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
@@ -165,8 +165,14 @@ def create_derivative_question():
         "answers": [""]
     }
 
-
-
+def create_polynomial_question():
+    return {
+        "category": "Mathematics",
+        "question": "What is the SUM of the two factors of the below?",
+        "url": "polynomial",
+        "answers": [""]
+    }
+        
 def select_wof_questions(winner):
     try:
         time.sleep(2)
@@ -2054,17 +2060,23 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     message_body = ""
 
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "polynomial"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
-        image_mxc, image_width, image_height = download_image_from_url(trivia_url) #FILE TYPE
+        image_mxc, image_width, image_height = download_image_from_url(trivia_url) 
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
         
+    elif trivia_url == "polynomial":
+        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial()
+        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        image_size = 100
+        send_image_flag = True
+
     elif trivia_url == "derivative":
-        image_mxc, image_width, image_height, new_solution = generate_and_render_derivative_image_high() #POLY
+        image_mxc, image_width, image_height, new_solution = generate_and_render_derivative_image()
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
@@ -2923,7 +2935,7 @@ def normalize_superscripts(text):
     return ''.join(reverse_superscript_map.get(char, char) for char in text)
 
 
-def generate_and_render_derivative_image_high():
+def generate_and_render_derivative_image():
     # Randomly select two unique powers from {1, 2, 3}
     powers = sorted(random.sample([1, 2, 3], 2), reverse=True)
     
@@ -2987,36 +2999,23 @@ def generate_and_render_derivative_image_high():
         print("Failed to upload the image to Matrix.")
 
 
-def generate_and_render_derivative_image(): #POLY
-    # Randomly select coefficients for a, b, and c
-    a = random.randint(1, 9)
-    b = random.randint(1, 9)
-    c = random.randint(1, 9)
+def generate_and_render_polynomial():
+    # Randomly select two unique integers from -9 to 9, excluding 0
+    factors = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
+    sum_factors = sum(factors)
+    product_factors = factors[0] * factors[1]
 
-    display_a = a
-    display_b = b
-    display_c = c
+    # Construct the polynomial string for the form: x^2 + (sum)x + (product)
+    polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {abs(sum_factors)}x {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
 
-    if a == 1:
-        display_a = ""
-    if b == 1:
-        display_b = ""
-
-    # Create the polynomial string in the form ax^2 + bx + c
-    polynomial = f"{display_a}x² + {display_b}x + {display_c}"
-
-    # Calculate the derivative: derivative of ax^2 + bx + c is 2ax + b
-    derivative = f"{2 * a}x + {b}"
-
-    # Print the polynomial and its derivative
     print(f"Polynomial: {polynomial}")
-    print(f"Derivative: {derivative}")
+    print(f"Sum of factors: {sum_factors}")
 
     # Define the font path relative to the current script
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
 
     # Create a blank image
-    img_width, img_height = 400, 150
+    img_width, img_height = 600, 150
     img = Image.new('RGB', (img_width, img_height), color=(0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -3028,13 +3027,13 @@ def generate_and_render_derivative_image(): #POLY
         print(f"Error: Font file not found at {font_path}")
         return
 
-    # Draw the polynomial text in the center
+    # Draw the polynomial text in the center in light purple
     text_bbox = draw.textbbox((0, 0), polynomial, font=font)
     text_width = text_bbox[2] - text_bbox[0]
     text_height = text_bbox[3] - text_bbox[1]
     text_x = (img_width - text_width) // 2
     text_y = (img_height - text_height) // 2
-    draw.text((text_x, text_y), polynomial, fill=(255, 255, 0), font=font)
+    draw.text((text_x, text_y), polynomial, fill=(200, 162, 200), font=font)  # Light purple color
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()
@@ -3044,9 +3043,12 @@ def generate_and_render_derivative_image(): #POLY
     # Upload the image to Matrix
     content_uri = upload_image_to_matrix(image_buffer.read())
     if content_uri:
-        return content_uri, img_width, img_height, derivative
+        return content_uri, img_width, img_height, sum_factors
     else:
         print("Failed to upload the image to Matrix.")
+
+
+
 
 
 def round_preview(selected_questions):

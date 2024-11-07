@@ -104,8 +104,10 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
-num_math_questions_default = 2
+num_math_questions_default = 1
 num_math_questions = num_math_questions_default
+num_stats_questions_default = 1
+num_stats_questions = num_stats_questions_default
 
 magic_number_correct = False
 wf_winner = False
@@ -117,7 +119,7 @@ question_categories = [
     "Chemistry", "Geography", "Mathematics", "Physics", "Science & Nature", "Language", "English Grammar", 
     "Astronomy", "Logos", "The World", "Economics & Government", "Toys & Games", "Food & Drinks", "Geology", 
     "Tech & Video Games", "Flags", "Miscellaneous", "Biology", "Superheroes", "Television", "Pop Culture", 
-    "History", "Movies", "Religion & Mythology", "Sports & Leisure", "World Culture", "General Knowledge"
+    "History", "Movies", "Religion & Mythology", "Sports & Leisure", "World Culture", "General Knowledge", "Statistics"
 ]
 
 fixed_letters = ['O', 'K', 'R', 'A']
@@ -126,14 +128,19 @@ categories_to_exclude = []
 
 
 def get_math_question():
-    question_functions = [create_mean_question, create_median_question, create_derivative_question]
+    question_functions = [create_derivative_question]
+    selected_question_function = random.choice(question_functions)
+    return selected_question_function()
+
+def get_stats_question():
+    question_functions = [create_mean_question, create_median_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
 # Function to create a mean question in dictionary format
 def create_mean_question():
     return {
-        "category": "Mathematics",
+        "category": "Statistics",
         "question": "What is the MEAN of the following set?",
         "url": "mean",
         "answers": [""]
@@ -142,7 +149,7 @@ def create_mean_question():
 # Function to create a median question in dictionary format
 def create_median_question():
     return {
-        "category": "Mathematics",
+        "category": "Statistics",
         "question": "What is the MEDIAN of the following set?",
         "url": "median",
         "answers": [""]
@@ -871,7 +878,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -884,6 +891,7 @@ def process_round_options(round_winner, winner_points):
     magic_number_correct = False
     wf_winner = False
     num_math_questions = num_math_questions_default
+    num_stats_questions = num_stats_questions_default
     
     if round_winner is None:
         return
@@ -908,7 +916,7 @@ def process_round_options(round_winner, winner_points):
 
 
 def prompt_user_for_response(round_winner, winner_points):
-    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions
+    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions, num_stats_questions
     
     # Call initialize_sync to set since_token
     initialize_sync()
@@ -968,6 +976,10 @@ def prompt_user_for_response(round_winner, winner_points):
                     if matched_category:
                         if matched_category == "Mathematics":
                             num_math_questions = 0
+                            num_stats_questions = num_stats_questions_default
+                        if matched_category == "Statistics":
+                            num_stats_questions = 0
+                            num_math_questions = num_math_questions_default
                         categories_to_exclude[:1] = [matched_category]  # Add matched_category to exclude list
         
                         # Send message after handling special cases
@@ -3062,6 +3074,7 @@ def get_category_title(trivia_category, trivia_url):
         "Chemistry": "🧪⚗️",
         "Geography": "🧭🗺️",
         "Mathematics": "➕➗",
+        "Statistics": "📊🔢",
         "Physics": "⚛️🍎",
         "Science & Nature": "🔬🌺",
         "Language": "🗣️🔤",

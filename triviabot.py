@@ -1,3 +1,4 @@
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -104,7 +105,7 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
-num_math_questions_default = 1
+num_math_questions_default = 0
 num_math_questions = num_math_questions_default
 num_stats_questions_default = 1
 num_stats_questions = num_stats_questions_default
@@ -2053,7 +2054,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     message_body = ""
 
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "multiple choice"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
@@ -2100,9 +2101,9 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     elif trivia_url == "multiple choice": 
         if trivia_answer_list[0] in {"True", "False"}:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[TRUE or FALSE] {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨TRUE or FALSE🚨 {trivia_question}\n\n"
         else:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[Enter Letter] {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨Enter Letter🚨 {trivia_question}\n\n"
             for answer in trivia_answer_list[1:]:
                 message_body += f"{answer}\n"
         trivia_answer_list[:] = trivia_answer_list[:1]
@@ -2759,7 +2760,7 @@ def select_trivia_questions(questions_per_round):
         selected_questions.extend(jeopardy_questions)
 
         # Calculate the remaining questions needed for general trivia
-        remaining_needed = max(questions_per_round - len(wof_questions) - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions), 0)
+        remaining_needed = max(questions_per_round - len(wof_questions) - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions) - len(math_questions) - len(stats_questions), 0)
 
         if remaining_needed > 0:
 

@@ -170,7 +170,7 @@ def create_derivative_question():
 def create_sum_factors_question():
     return {
         "category": "Mathematics",
-        "question": "What is the SUM of the two factors of the below?",
+        "question": "What is the SUM of the below polynomial's factors?",
         "url": "polynomial sum",
         "answers": [""]
     }
@@ -178,7 +178,7 @@ def create_sum_factors_question():
 def create_product_factors_question():
     return {
         "category": "Mathematics",
-        "question": "What is the PRODUCT of the two factors of the below?",
+        "question": "What is the PRODUCT of the below polynomial's factors?",
         "url": "polynomial product",
         "answers": [""]
     }
@@ -186,7 +186,7 @@ def create_product_factors_question():
 def create_factors_question():
     return {
         "category": "Mathematics",
-        "question": "What are the 2 FACTORS of the below?",
+        "question": "What are the 2 FACTORS of the polynomial below?",
         "url": "polynomial factors",
         "answers": [""]
     }
@@ -2096,6 +2096,9 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True
+
+    elif trivia_url == "characters":
+        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nIdentify the Movie, Book, or TV Show from the characters:\n\n{trivia_question}\n"
 
     elif trivia_url == "polynomial product":
         image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial("product")

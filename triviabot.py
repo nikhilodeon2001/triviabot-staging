@@ -131,8 +131,13 @@ categories_to_exclude = []
 def get_math_question():
     question_functions = [create_derivative_question, create_polynomial_question]
     selected_question_function = random.choice(question_functions)
-    return selected_question_function()
-
+    
+    if selected_question_function == create_polynomial_question:
+        polynomial_type = random.choice(["sum", "product", "factors"])
+        return selected_question_function(polynomial_type)
+    else:
+        return selected_question_function()
+        
 def get_stats_question():
     question_functions = [create_mean_question, create_median_question]
     selected_question_function = random.choice(question_functions)
@@ -141,7 +146,7 @@ def get_stats_question():
 # Function to create a mean question in dictionary format
 def create_mean_question():
     return {
-        "category": "Statistics",
+        "category": "Mathematics",
         "question": "What is the MEAN of the following set?",
         "url": "mean",
         "answers": [""]
@@ -150,7 +155,7 @@ def create_mean_question():
 # Function to create a median question in dictionary format
 def create_median_question():
     return {
-        "category": "Statistics",
+        "category": "Mathematics",
         "question": "What is the MEDIAN of the following set?",
         "url": "median",
         "answers": [""]
@@ -165,10 +170,26 @@ def create_derivative_question():
         "answers": [""]
     }
 
-def create_polynomial_question():
+def create_sum_factors_question():
     return {
         "category": "Mathematics",
         "question": "What is the SUM of the two factors of the below?",
+        "url": "polynomial",
+        "answers": [""]
+    }
+
+def create_product_factors_question():
+    return {
+        "category": "Mathematics",
+        "question": "What is the PRODUCT of the two factors of the below?",
+        "url": "polynomial",
+        "answers": [""]
+    }
+
+def create_factors_question():
+    return {
+        "category": "Mathematics",
+        "question": "What are the 2 FACTORS of the below?",
         "url": "polynomial",
         "answers": [""]
     }
@@ -2999,25 +3020,29 @@ def generate_and_render_derivative_image():
         print("Failed to upload the image to Matrix.")
 
 
-def generate_and_render_polynomial():
+def generate_and_render_polynomial(type):
     # Randomly select two unique integers from -9 to 9, excluding 0
     factors = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
     sum_factors = sum(factors)
     product_factors = factors[0] * factors[1]
 
     # Construct the sum term for the polynomial
-    if sum_factors == 1:
-        sum_term = "x"
-    elif sum_factors == -1:
-        sum_term = "- x"
-    else:
-        sum_term = f"{sum_factors}x"
+    if abs(sum_factors) == 1:
+        sum_term = ""
 
     # Construct the polynomial string for the form: x² + (sum)x + (product)
-    polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {sum_term} {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
+    polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {sum_term}x {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
 
     print(f"Polynomial: {polynomial}")
-    print(f"Sum of factors: {sum_factors}")
+
+    if type == "sum":
+         print(f"Sum of factors: {sum_factors}")
+    elif type == "product":
+         print(f"Product of factors: {product_factors}")
+    elif type == "factors":
+         print(f"Factors: {factors}")
+    else:
+        print("Wrong type passed in to polynomial function")
 
     # Define the font path relative to the current script
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
@@ -3051,7 +3076,16 @@ def generate_and_render_polynomial():
     # Upload the image to Matrix
     content_uri = upload_image_to_matrix(image_buffer.read())
     if content_uri:
-        return content_uri, img_width, img_height, sum_factors
+        if type == "sum":
+            return content_uri, img_width, img_height, sum_factors
+        elif type == "product":
+            return content_uri, img_width, img_height, product_factors
+        elif type == "factors":
+            factors_str = [f"{factors[0]} {factors[1]}"]
+            return content_uri, img_width, img_height, factors_str
+        else:
+             return content_uri, img_width, img_height, sum_factors
+            
     else:
         print("Failed to upload the image to Matrix.")
 

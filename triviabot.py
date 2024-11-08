@@ -87,7 +87,7 @@ magic_time = 10
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 2
+num_mysterybox_clues_default = 10
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default

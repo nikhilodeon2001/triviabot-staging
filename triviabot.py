@@ -2283,6 +2283,21 @@ def derivative_checker(response, answer):
 
 def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     threshold = 0.90    
+
+    if url == "polynomial factors":
+        user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
+        correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]
+        
+        # Ensure user answer has exactly two numbers
+        if len(user_numbers) != 2:
+            return False
+        
+        # Check if the two sets of numbers match (order does not matter)
+        return set(user_numbers) == set(correct_numbers)
+    
+    # Additional matching logic for other categories and URLs if necessary
+    return False
+        
     
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
@@ -3094,7 +3109,7 @@ def generate_and_render_polynomial(type):
         elif type == "product":
             return content_uri, img_width, img_height, str(int(product_factors))
         elif type == "factors":
-            factors_str = [f"{factors[0]} {factors[1]}", f"{factors[1]} {factors[0]}"]
+            factors_str = f"{factors[0]} {factors[1]}"
             return content_uri, img_width, img_height, factors_str
         else:
              return content_uri, img_width, img_height, str(int(sum_factors))

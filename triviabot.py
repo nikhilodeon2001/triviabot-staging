@@ -129,14 +129,10 @@ categories_to_exclude = []
 
 
 def get_math_question():
-    question_functions = [create_derivative_question, create_polynomial_question]
+    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_factors_question, create_product_factors_question, create_factors_question]
     selected_question_function = random.choice(question_functions)
-    
-    if selected_question_function == create_polynomial_question:
-        polynomial_type = random.choice(["sum", "product", "factors"])
-        return selected_question_function(polynomial_type)
-    else:
-        return selected_question_function()
+    return selected_question_function()
+
         
 def get_stats_question():
     question_functions = [create_mean_question, create_median_question]
@@ -174,7 +170,7 @@ def create_sum_factors_question():
     return {
         "category": "Mathematics",
         "question": "What is the SUM of the two factors of the below?",
-        "url": "polynomial",
+        "url": "polynomial sum",
         "answers": [""]
     }
 
@@ -182,7 +178,7 @@ def create_product_factors_question():
     return {
         "category": "Mathematics",
         "question": "What is the PRODUCT of the two factors of the below?",
-        "url": "polynomial",
+        "url": "polynomial product",
         "answers": [""]
     }
 
@@ -190,7 +186,7 @@ def create_factors_question():
     return {
         "category": "Mathematics",
         "question": "What are the 2 FACTORS of the below?",
-        "url": "polynomial",
+        "url": "polynomial factors",
         "answers": [""]
     }
         
@@ -2090,8 +2086,20 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         image_size = 100
         send_image_flag = True
         
-    elif trivia_url == "polynomial":
-        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial()
+    elif trivia_url == "polynomial sum":
+        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial("sum")
+        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        image_size = 100
+        send_image_flag = True
+
+    elif trivia_url == "polynomial product":
+        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial("product")
+        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+        image_size = 100
+        send_image_flag = True
+
+    elif trivia_url == "polynomial factors":
+        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial("factors")
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         image_size = 100
         send_image_flag = True

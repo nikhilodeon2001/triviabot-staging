@@ -3394,14 +3394,14 @@ def start_trivia_round():
                 solution_list = trivia_answer_list if new_solution is None else [new_solution]
 
                 # Check if new_solution is a string or an iterable of strings
-                if new_solution is None:
-                    solution_list = trivia_answer_list
-                elif isinstance(new_solution, str):
-                    solution_list = [new_solution]  # Wrap single string in a list
-                elif isinstance(new_solution, (list, tuple)) and all(isinstance(item, str) for item in new_solution):
-                    solution_list = list(new_solution)  # Directly use the iterable if it's a list/tuple of strings
-                else:
-                    raise ValueError("new_solution must be a string, a list/tuple of strings, or None")
+                #if new_solution is None:
+                #    solution_list = trivia_answer_list
+                #elif isinstance(new_solution, str):
+                #    solution_list = [new_solution]  # Wrap single string in a list
+                #elif isinstance(new_solution, (list, tuple)) and all(isinstance(item, str) for item in new_solution):
+                #    solution_list = list(new_solution)  # Directly use the iterable if it's a list/tuple of strings
+                #else:
+                #    raise ValueError("new_solution must be a string, a list/tuple of strings, or None")
 
                 
                 check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses, trivia_category, trivia_url)

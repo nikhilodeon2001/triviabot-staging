@@ -87,11 +87,11 @@ magic_time = 10
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 0
+num_mysterybox_clues_default = 2
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 0
+num_jeopardy_clues_default = 3
 num_jeopardy_clues = num_jeopardy_clues_default
 num_wof_clues_default = 0
 num_wof_clues = num_wof_clues_default
@@ -106,7 +106,7 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
-num_math_questions_default = 10
+num_math_questions_default = 2
 num_math_questions = num_math_questions_default
 num_stats_questions_default = 0
 num_stats_questions = num_stats_questions_default

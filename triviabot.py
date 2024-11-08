@@ -241,7 +241,7 @@ def select_wof_questions(winner):
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
         
         if wf_winner == False:
-            time.sleep(3)
+            time.sleep(1.5)
         
             image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
             response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)

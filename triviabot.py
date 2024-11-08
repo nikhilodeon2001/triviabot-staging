@@ -2283,6 +2283,10 @@ def derivative_checker(response, answer):
 
 def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     threshold = 0.90    
+    
+    if is_number(correct_answer):
+        return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
+    
     user_answer = normalize_text(str(user_answer))
     correct_answer = normalize_text(str(correct_answer))
 

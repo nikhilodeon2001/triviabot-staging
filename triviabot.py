@@ -325,7 +325,7 @@ def process_wof_guesses(winner, answer):
                     # If no valid answer was guessed, react with a neutral reaction
                     react_to_message(event_id, target_room_id, "okra5")
                     
-            time.sleep(0.1)
+            time.sleep(0.3)
     
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
@@ -417,7 +417,9 @@ def ask_wof_letters(winner, answer):
                         if len(wf_letters) == num_wf_letters:
                             react_to_message(event_id, target_room_id, "okra21")
                             break
-    
+            
+            time.sleep(0.3)
+            
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
@@ -2098,7 +2100,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         send_image_flag = True
 
     elif trivia_url == "characters":
-        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nIdentify the Movie, Book, or TV Show from the characters:\n\n{trivia_question}\n"
+        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\nName the movie, book, or show:\n\n{trivia_question}\n"
 
     elif trivia_url == "polynomial product":
         image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial("product")
@@ -2434,7 +2436,9 @@ def collect_responses(question_ask_time, question_number, time_limit):
                         "response_time": response_time,
                         "event_id": event_id
                     })
-
+                    
+            time.sleep(0.3)
+            
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")

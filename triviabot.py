@@ -2432,7 +2432,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice", "median", "mean", "polynomial sum", "polynomial product", "polynomial factors"]:
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice", "median", "mean", "polynomial sum", "polynomial product", "polynomial factors"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}

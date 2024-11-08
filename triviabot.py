@@ -3086,15 +3086,14 @@ def generate_and_render_polynomial(type):
     content_uri = upload_image_to_matrix(image_buffer.read())
     if content_uri:
         if type == "sum":
-            return content_uri, img_width, img_height, sum_factors
+            return content_uri, img_width, img_height, str(int(sum_factors))
         elif type == "product":
-            return content_uri, img_width, img_height, product_factors
+            return content_uri, img_width, img_height, str(int(product_factors))
         elif type == "factors":
-            factors_str = [f"{factors[0]} {factors[1]}"]
+            factors_str = [f"{factors[0]} {factors[1]}", f"{factors[1]} {factors[0]}"]
             return content_uri, img_width, img_height, factors_str
         else:
-             return content_uri, img_width, img_height, sum_factors
-            
+             return content_uri, img_width, img_height, str(int(sum_factors))
     else:
         print("Failed to upload the image to Matrix.")
 
@@ -3389,6 +3388,17 @@ def start_trivia_round():
                 send_message(target_room_id, f"\n🛑 TIME 🛑\n")
                 
                 solution_list = trivia_answer_list if new_solution is None else [new_solution]
+
+                # Check if new_solution is a string or an iterable of strings
+                if new_solution is None:
+                    solution_list = trivia_answer_list
+                elif isinstance(new_solution, str):
+                    solution_list = [new_solution]  # Wrap single string in a list
+                elif isinstance(new_solution, (list, tuple)) and all(isinstance(item, str) for item in new_solution):
+                    solution_list = list(new_solution)  # Directly use the iterable if it's a list/tuple of strings
+                else:
+                    raise ValueError("new_solution must be a string, a list/tuple of strings, or None")
+
                 
                 check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses, trivia_category, trivia_url)
                 

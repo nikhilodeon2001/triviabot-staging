@@ -274,7 +274,7 @@ def process_wof_guesses(winner, answer):
     # Initialize the sync and send message to prompt user for a guess
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n@{winner} ❓ GUESS NOW ❓\n"
+    message = f"\n@{winner} ❓Your Answer❓\n"
     send_message(target_room_id, message)
     
     while time.time() - start_time < magic_time:
@@ -2076,8 +2076,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     send_image_flag = False
 
     message_body = ""
-
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "polynomial"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "polynomial sum", "polynomial product", "polynomial factors"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
@@ -2433,7 +2432,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url == "multiple choice"
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice", "median", "mean", "polynomial sum", "polynomial product", "polynomial factors"]:
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}

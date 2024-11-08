@@ -3036,6 +3036,8 @@ def generate_and_render_polynomial(type):
     # Construct the sum term for the polynomial
     if abs(sum_factors) == 1:
         sum_term = ""
+    else:
+        sum_term = abs(sum_factors)
 
     # Construct the polynomial string for the form: x² + (sum)x + (product)
     polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {sum_term}x {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"

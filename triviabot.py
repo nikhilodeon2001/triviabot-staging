@@ -1340,7 +1340,7 @@ def generate_mean_question():
     # Upload the image to Matrix (assuming the upload function exists)
     content_uri = upload_image_to_matrix(image_buffer.read())
 
-    print(f"Mean: {mean}")
+    print(f"Mean: {mean_value}")
 
     # Return the integer mean for verification
     return content_uri, img_width, img_height, str(int(mean_value))

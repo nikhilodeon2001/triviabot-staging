@@ -87,7 +87,7 @@ magic_time = 10
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 10
+num_mysterybox_clues_default = 2
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 0
 num_crossword_clues = num_crossword_clues_default
@@ -106,7 +106,7 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
-num_math_questions_default = 2
+num_math_questions_default = 1
 num_math_questions = num_math_questions_default
 num_stats_questions_default = 0
 num_stats_questions = num_stats_questions_default
@@ -1438,7 +1438,7 @@ def generate_round_summary(round_data, winner):
     elif magic_number_correct == True or wf_winner == True:
          prompt = (
             f"The winner of the trivia round is {winner}. "
-            "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else, including OkraStrut."
+            "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
             "Create no more than 5 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
@@ -2436,8 +2436,9 @@ def collect_responses(question_ask_time, question_number, time_limit):
                         "response_time": response_time,
                         "event_id": event_id
                     })
-                    
-            time.sleep(0.3)
+            
+            if ghost_mode == False:
+                time.sleep(0.3)        
             
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
@@ -3388,16 +3389,14 @@ def start_trivia_round():
                 selected_gif_url = random.choice(okra_gif_urls)
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-                time.sleep(7)
+                #time.sleep(7)
 
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
             round_start_messages()
             time.sleep(3)
                 
             # Randomly select n questions
-            print() 
             print_selected_questions(selected_questions)
-            print()
             
             question_number = 1
             while question_number <= questions_per_round:
@@ -3406,31 +3405,15 @@ def start_trivia_round():
                     selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner) - 1]
                     
                 else:
-                    # Normal mode - sequential questions
                     selected_question = selected_questions[0]
 
                 trivia_category, trivia_question, trivia_url, trivia_answer_list = selected_question
-                
-                # Ask the trivia question and get start times
-                question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
-                
+                question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)         
                 collected_responses = collect_responses(question_time, question_number, question_time)
                 
-                send_message(target_room_id, f"\n🛑 TIME 🛑\n")
+                #send_message(target_room_id, f"\n🛑 TIME 🛑\n")
                 
-                solution_list = trivia_answer_list if new_solution is None else [new_solution]
-
-                # Check if new_solution is a string or an iterable of strings
-                #if new_solution is None:
-                #    solution_list = trivia_answer_list
-                #elif isinstance(new_solution, str):
-                #    solution_list = [new_solution]  # Wrap single string in a list
-                #elif isinstance(new_solution, (list, tuple)) and all(isinstance(item, str) for item in new_solution):
-                #    solution_list = list(new_solution)  # Directly use the iterable if it's a list/tuple of strings
-                #else:
-                #    raise ValueError("new_solution must be a string, a list/tuple of strings, or None")
-
-                
+                solution_list = trivia_answer_list if new_solution is None else [new_solution]            
                 check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses, trivia_category, trivia_url)
                 
                 if not yolo_mode or question_number == questions_per_round:

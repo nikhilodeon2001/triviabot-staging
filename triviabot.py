@@ -3114,7 +3114,7 @@ def generate_and_render_polynomial(type):
         elif type == "product":
             return content_uri, img_width, img_height, str(int(product_factors))
         elif type == "factors":
-            factors_str = f"{factors[0]} {factors[1]}"
+            factors_str = f"{factors[0]} and {factors[1]}"
             return content_uri, img_width, img_height, factors_str
         else:
              return content_uri, img_width, img_height, str(int(sum_factors))

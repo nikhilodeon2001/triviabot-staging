@@ -1274,6 +1274,9 @@ def generate_median_question():
         # Check if the median is a whole number, and if so, convert to integer
         if median.is_integer():
             median = int(median)
+
+    print(f"Median: {median}")
+    
     return content_uri, img_width, img_height, str(median)
 
 
@@ -1336,6 +1339,8 @@ def generate_mean_question():
 
     # Upload the image to Matrix (assuming the upload function exists)
     content_uri = upload_image_to_matrix(image_buffer.read())
+
+    print(f"Mean: {mean}")
 
     # Return the integer mean for verification
     return content_uri, img_width, img_height, str(int(mean_value))
@@ -3056,9 +3061,11 @@ def generate_and_render_polynomial(type):
     else:
         sum_term = abs(sum_factors)
 
-    # Construct the polynomial string for the form: x² + (sum)x + (product)
-    polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {sum_term}x {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
-
+    if sum_term == 0:
+        polynomial = f"x² {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
+    else:
+        polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {sum_term}x {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
+    
     print(f"Polynomial: {polynomial}")
 
     if type == "sum":

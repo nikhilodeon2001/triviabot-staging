@@ -115,6 +115,8 @@ magic_number_correct = False
 wf_winner = False
 num_wf_letters = 3
 
+image_questions = True
+
 
 question_categories = [
     "Mystery Box or Boat", "Famous People", "Anatomy", "Characters", "Music", "Art & Literature", 
@@ -2139,6 +2141,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         send_image_flag = True
 
     elif trivia_url == "jeopardy":
+        if image_question 
         image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
         image_size = 100
@@ -2837,26 +2840,57 @@ def select_trivia_questions(questions_per_round):
             trivia_collection = db["trivia_questions"]
             # Define the maximum number of questions per category
             max_questions_per_category = 2
-            
-            pipeline_trivia = [
-                {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
-                {
-                    "$group": {
-                        "_id": "$category",
-                        "questions": {"$push": "$$ROOT"}  # Push full document to each category group
-                    }
-                },
-                {
-                    "$project": {
-                        "category": "$_id",
-                        "questions": {"$slice": ["$questions", max_questions_per_category]}  # Limit number of questions per category
-                    }
-                },
-                {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
-                {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
-                {"$sample": {"size": remaining_needed}}  # Sample from the resulting limited set
-            ]
-            
+
+            if image_questions == False
+                # Define a list of substrings to exclude in URLs
+                excluded_url_substring = "http"
+                pipeline_trivia = [
+                    {
+                        "$match": {
+                            "_id": {"$nin": list(recent_general_ids)},
+                            "category": {"$nin": categories_to_exclude},
+                            "$or": [
+                                {"url": {"$not": {"$regex": substring}}} 
+                            ]
+                        }
+                    },
+                    {
+                        "$group": {
+                            "_id": "$category",
+                            "questions": {"$push": "$$ROOT"}  # Push full document to each category group
+                        }
+                    },
+                    {
+                        "$project": {
+                            "category": "$_id",
+                            "questions": {"$slice": ["$questions", max_questions_per_category]}  # Limit number of questions per category
+                        }
+                    },
+                    {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
+                    {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
+                    {"$sample": {"size": remaining_needed}}  # Sample from the resulting limited set
+                ]
+                
+            else:
+                pipeline_trivia = [
+                    {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
+                    {
+                        "$group": {
+                            "_id": "$category",
+                            "questions": {"$push": "$$ROOT"}  # Push full document to each category group
+                        }
+                    },
+                    {
+                        "$project": {
+                            "category": "$_id",
+                            "questions": {"$slice": ["$questions", max_questions_per_category]}  # Limit number of questions per category
+                        }
+                    },
+                    {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
+                    {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
+                    {"$sample": {"size": remaining_needed}}  # Sample from the resulting limited set
+                ]
+
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
 

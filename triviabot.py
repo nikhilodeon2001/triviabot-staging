@@ -2120,7 +2120,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     elif trivia_url == "polynomial product":
         image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("product")
-         if image_questions == True:
+        if image_questions == True:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
             send_image_flag = True
         else:

@@ -242,7 +242,8 @@ def select_wof_questions(winner):
             if response is None:                      
                 print("Error: Failed to send image.")
         else:
-            message = f"{display_string}\n{wof_question["question"]}\n{fixed_letters}\n"
+            fixed_letters_str = "Revealed Letters: " + ' '.join(fixed_letters)
+            message = f"{display_string}\n{wof_question['question']}\n{fixed_letters_str}\n"
             send_message(target_room_id, message)
 
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
@@ -256,7 +257,8 @@ def select_wof_questions(winner):
                 if response is None:                      
                     print("Error: Failed to send image.")
             else:
-                message = f"{display_string}\n{wof_question["question"]}\n{wof_letters}\n"
+                wof_letters_str = "Revealed Letters: " + ' '.join(wof_letters)
+                message = f"{display_string}\n{wof_question['question']}\n{fixed_letters_str}\n"
                 send_message(target_room_id, message)
 
             process_wof_guesses(winner, wof_question["answers"][0])
@@ -607,8 +609,8 @@ def generate_wof_image(word, clue, revealed_letters):
 
     draw.text((revealed_x, revealed_y), revealed_text, fill=revealed_letters_color, font=revealed_font)
 
-     # Generate the string representation with revealed and unrevealed letters
-    display_string = ''.join([char if char in revealed_letters else '_' for char in word])
+    # Generate the string representation with revealed and unrevealed letters
+    display_string = ''.join([char if char in revealed_letters else ('_' if char != ' ' else ' ') for char in word])
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()

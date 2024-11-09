@@ -243,7 +243,7 @@ def select_wof_questions(winner):
                 print("Error: Failed to send image.")
         else:
             message = f"{display_string}\n{wof_question["question"]}\n{fixed_letters}\n"
-            send_message(target_room_id message)
+            send_message(target_room_id, message)
 
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
         
@@ -257,7 +257,7 @@ def select_wof_questions(winner):
                     print("Error: Failed to send image.")
             else:
                 message = f"{display_string}\n{wof_question["question"]}\n{wof_letters}\n"
-                send_message(target_room_id message)
+                send_message(target_room_id, message)
 
             process_wof_guesses(winner, wof_question["answers"][0])
         

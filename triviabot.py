@@ -2873,7 +2873,7 @@ def select_trivia_questions(questions_per_round):
                             "_id": {"$nin": list(recent_general_ids)},
                             "category": {"$nin": categories_to_exclude},
                             "$or": [
-                                {"url": {"$not": {"$regex": substring}}} 
+                                {"url": {"$not": {"$regex": excluded_url_substring}}} 
                             ]
                         }
                     },

@@ -2864,7 +2864,7 @@ def select_trivia_questions(questions_per_round):
             # Define the maximum number of questions per category
             max_questions_per_category = 2
 
-            if image_questions == False
+            if image_questions == False:
                 # Define a list of substrings to exclude in URLs
                 excluded_url_substring = "http"
                 pipeline_trivia = [

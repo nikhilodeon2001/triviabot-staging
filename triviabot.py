@@ -2128,7 +2128,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
 
     elif trivia_url == "polynomial factors":
         image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("factors")
-         if image_questions == True:
+        if image_questions == True:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
             send_image_flag = True
         else:
@@ -2143,8 +2143,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{polynomial}\n"
         
     elif trivia_url == "scramble":
+        image_mxc, image_width, image_height, scramble = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
         if image_questions:
-            image_mxc, image_width, image_height, scramble = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
             message_body += f"\n{number_block}🧩 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
             send_image_flag = True
         else:
@@ -2174,7 +2174,6 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         else:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
             
-
     elif trivia_category == "Crossword":
         image_mxc, image_width, image_height = generate_crossword_image(trivia_answer_list[0])
         message_body += f"\n{number_block}✏️ {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"

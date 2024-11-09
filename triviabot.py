@@ -2167,7 +2167,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{num_set}\n"
 
     elif trivia_url == "jeopardy":
-        if image_questions: 
+        if image_questions == True: 
             image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
             send_image_flag = True

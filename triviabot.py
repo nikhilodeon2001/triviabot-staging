@@ -233,24 +233,29 @@ def select_wof_questions(winner):
         wof_question_id = wof_question["_id"]  # Get the ID of the selected question
         if wof_question_id:
             store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
-            
-        image_size = 100
-        image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
-        response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
-        if response is None:                      
-            print("Error: Failed to send image.")
+        image_size = 100
+        image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
+       
+        if image_questions == True:    
+            response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
+            if response is None:                      
+                print("Error: Failed to send image.")
+        else:
+            message = f"{display_string}\n{wof_question["question"]}\n{fixed_letters}\n"            
 
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
         
         if wf_winner == False:
             time.sleep(1.5)
-        
-            image_mxc, image_width, image_height = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
-            response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
-    
-            if response is None:                      
-                print("Error: Failed to send image.")
+            image_mxc, image_width, image_height display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
+            
+            if image_questions == True:
+                response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
+                if response is None:                      
+                    print("Error: Failed to send image.")
+            else:
+                message = f"{display_string}\n{wof_question["question"]}\n{wof_letters}\n"
 
             process_wof_guesses(winner, wof_question["answers"][0])
         
@@ -509,6 +514,7 @@ def ask_wof_number(winner):
 
 def generate_wof_image(word, clue, revealed_letters):
     word = word.upper()
+    image_mxc = True
     
     # Define colors for the board
     background_color = (0, 0, 0)        # Black background
@@ -537,7 +543,7 @@ def generate_wof_image(word, clue, revealed_letters):
         revealed_font = ImageFont.truetype(font_path, revealed_font_size)  # Less bold font for revealed letters
     except IOError:
         print(f"Error: Font file not found at {font_path}")
-        return None
+        return None, None, None, None
     
     # Tile dimensions, spacing, and padding for borders
     tile_width, tile_height = 50, 70
@@ -599,20 +605,24 @@ def generate_wof_image(word, clue, revealed_letters):
 
     draw.text((revealed_x, revealed_y), revealed_text, fill=revealed_letters_color, font=revealed_font)
 
+     # Generate the string representation with revealed and unrevealed letters
+    display_string = ''.join([char if char in revealed_letters else '_' for char in word])
+
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()
     img.save(image_buffer, format='PNG')
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image and send to the chat (assuming upload_image_to_matrix function)
-    image_mxc = upload_image_to_matrix(image_buffer.read())
+    if image_questions == True:
+        image_mxc = upload_image_to_matrix(image_buffer.read())
 
     if image_mxc:
         # Return image_mxc, image_width, and image_height
-        return image_mxc, img_width, img_height
+        return image_mxc, img_width, img_height, display_string
     else:
         print("Failed to upload the image to Matrix.")
-        return None
+        return None, None, None, None
 
         
 

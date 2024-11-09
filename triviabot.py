@@ -115,7 +115,8 @@ magic_number_correct = False
 wf_winner = False
 num_wf_letters = 3
 
-image_questions = True
+image_questions_default = True
+image_questions = image_questions_default
 
 
 question_categories = [
@@ -907,7 +908,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -921,6 +922,7 @@ def process_round_options(round_winner, winner_points):
     wf_winner = False
     num_math_questions = num_math_questions_default
     num_stats_questions = num_stats_questions_default
+    image_questions = image_questions_default
     
     if round_winner is None:
         return
@@ -935,6 +937,7 @@ def process_round_options(round_winner, winner_points):
         "🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
         "👻🎃 Ghost: Boo! Vanishing answers\n"
+        "❌📷 Boring: No image questions\n. None.\n"
     )
 
     if winner_points >= god_mode_points:
@@ -945,7 +948,7 @@ def process_round_options(round_winner, winner_points):
 
 
 def prompt_user_for_response(round_winner, winner_points):
-    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions, num_stats_questions
+    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions, num_stats_questions, image_questions
     
     # Call initialize_sync to set since_token
     initialize_sync()
@@ -1033,6 +1036,10 @@ def prompt_user_for_response(round_winner, winner_points):
                     if "ghost" in message_content.lower():
                         ghost_mode = 1
                         send_message(target_room_id, f"👻🎃 @{round_winner} says Boo! Answers will disappear.\n")
+
+                    if "boring" in message_content.lower():
+                        image_questions = False
+                        send_message(target_room_id, f"❌📷 @{round_winner} thinks a word is worth 1000 images.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
@@ -1218,6 +1225,7 @@ def generate_median_question():
     of the numbers will be sent to the user with the question.
     """
     # Generate a random n between 3 and 7
+    content_uri = True
     n = random.randint(3, 7)
     
     # Generate a random set of n numbers between 1 and 20
@@ -1245,7 +1253,7 @@ def generate_median_question():
         font = ImageFont.truetype(font_path, font_size)
     except IOError:
         print(f"Error: Font file not found at {font_path}")
-        return None
+        return None, None, None, None, None
 
     # Convert numbers to a string and draw them on the image
     numbers_text = ', '.join(map(str, random_numbers))
@@ -1262,7 +1270,8 @@ def generate_median_question():
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix (assuming the upload function exists)
-    content_uri = upload_image_to_matrix(image_buffer.read())
+    if image_questions == True:
+        content_uri = upload_image_to_matrix(image_buffer.read())
 
     # Calculate the median and return it for verification
     sorted_numbers = sorted(random_numbers)
@@ -1281,7 +1290,7 @@ def generate_median_question():
 
     print(f"Median: {median}")
     
-    return content_uri, img_width, img_height, str(median)
+    return content_uri, img_width, img_height, str(median), random_numbers
 
 
 
@@ -1293,6 +1302,7 @@ def generate_mean_question():
     of the numbers will be sent to the user with the question.
     """
     # Generate a random n between 3 and 5
+    content_uri = True
     n = random.randint(3, 5)
     
     # Keep generating random numbers until their mean is an integer
@@ -1326,7 +1336,7 @@ def generate_mean_question():
         font = ImageFont.truetype(font_path, font_size)
     except IOError:
         print(f"Error: Font file not found at {font_path}")
-        return None
+        return None, None, None, None, None
 
     # Convert numbers to a string and draw them on the image
     text_bbox = draw.textbbox((0, 0), numbers_text, font=font)
@@ -1342,12 +1352,13 @@ def generate_mean_question():
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix (assuming the upload function exists)
-    content_uri = upload_image_to_matrix(image_buffer.read())
+    if image_questions == True:
+        content_uri = upload_image_to_matrix(image_buffer.read())
 
     print(f"Mean: {int(mean_value)}")
 
     # Return the integer mean for verification
-    return content_uri, img_width, img_height, str(int(mean_value))
+    return content_uri, img_width, img_height, str(int(mean_value)), numbers_text
 
 
 
@@ -1360,6 +1371,7 @@ def generate_scrambled_image(scrambled_text):
     # Define the font path and size
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
     font_size = 48
+    content_uri = True
     
     # Create a blank image
     img_width, img_height = 400, 150
@@ -1371,7 +1383,7 @@ def generate_scrambled_image(scrambled_text):
         font = ImageFont.truetype(font_path, font_size)
     except IOError:
         print(f"Error: Font file not found at {font_path}")
-        return
+        return None, None, None, None
 
     # Draw the scrambled text in the center of the image
     text_bbox = draw.textbbox((0, 0), scrambled_text, font=font)
@@ -1387,9 +1399,10 @@ def generate_scrambled_image(scrambled_text):
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix
-    content_uri = upload_image_to_matrix(image_buffer.read())
+    if image_questions == True:
+        content_uri = upload_image_to_matrix(image_buffer.read())
     if content_uri:
-        return content_uri, img_width, img_height
+        return content_uri, img_width, img_height, scrambled_text
     else:
         print("Failed to upload the image to Matrix.")
 
@@ -2096,44 +2109,65 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         
     elif trivia_url == "polynomial sum":
         image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("sum")
-        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        send_image_flag = True
+        if image_questions == True:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{polynomial}\n"
 
     elif trivia_url == "characters":
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\nName the movie, book, or show:\n\n{trivia_question}\n"
 
     elif trivia_url == "polynomial product":
         image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("product")
-        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        send_image_flag = True
+         if image_questions == True:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{polynomial}\n"
 
     elif trivia_url == "polynomial factors":
         image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("factors")
-        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        send_image_flag = True
-
+         if image_questions == True:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{polynomial}\n"
+            
     elif trivia_url == "derivative":
-        image_mxc, image_width, image_height, new_solution = generate_and_render_derivative_image()
-        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        send_image_flag = True
+        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_derivative_image()
+        if image_questions == True:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{polynomial}\n"
         
     elif trivia_url == "scramble":
-        image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
-        message_body += f"\n{number_block}🧩 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        send_image_flag = True
+        if image_questions:
+            image_mxc, image_width, image_height, scramble = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
+            message_body += f"\n{number_block}🧩 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block}🧩 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{scramble}\n"
 
     elif trivia_url == "median":
-        image_mxc, image_width, image_height, new_solution = generate_median_question()
-        message_body += f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        send_image_flag = True
+        image_mxc, image_width, image_height, new_solution, num_set = generate_median_question()
+        if image_questions == True:
+            message_body += f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{num_set}\n"
 
     elif trivia_url == "mean":
-        image_mxc, image_width, image_height, new_solution = generate_mean_question()
-        message_body += f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        send_image_flag = True
+        image_mxc, image_width, image_height, new_solution, num_set = generate_mean_question()
+        if image_questions == True:
+            message_body += f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{num_set}\n"
 
     elif trivia_url == "jeopardy":
-        if image_question: 
+        if image_questions: 
             image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
             send_image_flag = True

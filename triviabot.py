@@ -610,7 +610,7 @@ def generate_wof_image(word, clue, revealed_letters):
     draw.text((revealed_x, revealed_y), revealed_text, fill=revealed_letters_color, font=revealed_font)
 
     # Generate the string representation with revealed and unrevealed letters
-    display_string = ''.join([char if char in revealed_letters else ('_' if char != ' ' else ' ') for char in word])
+    display_string = ' '.join([char if char in revealed_letters else ('_' if char != ' ' else ' ') for char in word])
 
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()

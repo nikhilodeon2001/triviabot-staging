@@ -951,7 +951,7 @@ def process_round_options(round_winner, winner_points):
         "🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
         "👻🎃 Ghost: Boo! Vanishing answers\n"
-        "❌📷 Blank: No image questions. None.\n"
+        "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )
 
     if winner_points >= god_mode_points:

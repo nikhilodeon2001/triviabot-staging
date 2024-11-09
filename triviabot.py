@@ -951,7 +951,7 @@ def process_round_options(round_winner, winner_points):
         "🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
         "👻🎃 Ghost: Boo! Vanishing answers\n"
-        "❌📷 Boring: No image questions\n. None.\n"
+        "❌📷 Blank: No image questions. None.\n"
     )
 
     if winner_points >= god_mode_points:
@@ -1051,7 +1051,7 @@ def prompt_user_for_response(round_winner, winner_points):
                         ghost_mode = 1
                         send_message(target_room_id, f"👻🎃 @{round_winner} says Boo! Answers will disappear.\n")
 
-                    if "boring" in message_content.lower():
+                    if "blank" in message_content.lower():
                         image_questions = False
                         send_message(target_room_id, f"❌📷 @{round_winner} thinks a word is worth 1000 images.\n")
 

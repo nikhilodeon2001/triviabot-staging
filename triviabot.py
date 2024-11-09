@@ -2092,65 +2092,58 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     if is_valid_url(trivia_url): 
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) 
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
         
     elif trivia_url == "polynomial sum":
-        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial("sum")
+        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("sum")
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
 
     elif trivia_url == "characters":
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\nName the movie, book, or show:\n\n{trivia_question}\n"
 
     elif trivia_url == "polynomial product":
-        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial("product")
+        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("product")
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
 
     elif trivia_url == "polynomial factors":
-        image_mxc, image_width, image_height, new_solution = generate_and_render_polynomial("factors")
+        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("factors")
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
 
     elif trivia_url == "derivative":
         image_mxc, image_width, image_height, new_solution = generate_and_render_derivative_image()
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
         
     elif trivia_url == "scramble":
         image_mxc, image_width, image_height = generate_scrambled_image(scramble_text(trivia_answer_list[0]))
         message_body += f"\n{number_block}🧩 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
 
     elif trivia_url == "median":
         image_mxc, image_width, image_height, new_solution = generate_median_question()
         message_body += f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
 
     elif trivia_url == "mean":
         image_mxc, image_width, image_height, new_solution = generate_mean_question()
         message_body += f"\n{number_block}📊 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
 
     elif trivia_url == "jeopardy":
-        if image_question 
-        image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
-        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
-        image_size = 100
-        send_image_flag = True
+        if image_question: 
+            image_mxc, image_width, image_height = generate_jeopardy_image(trivia_question)
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nAnd the answer is: \n"
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+            
 
     elif trivia_category == "Crossword":
         image_mxc, image_width, image_height = generate_crossword_image(trivia_answer_list[0])
         message_body += f"\n{number_block}✏️ {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        image_size = 100
         send_image_flag = True
 
     elif trivia_url == "multiple choice": 
@@ -2161,10 +2154,6 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
             for answer in trivia_answer_list[1:]:
                 message_body += f"{answer}\n"
         trivia_answer_list[:] = trivia_answer_list[:1]
-            
-        #image_mxc, image_width, image_height = generate_mc_image(trivia_answer_list)
-        #image_size = 100
-        #send_image_flag = True
 
     else:
          message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
@@ -2176,6 +2165,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         return None, None, None
             
     if send_image_flag:  
+        image_size = 100
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
         if response is None:                      
@@ -3030,6 +3020,7 @@ def normalize_superscripts(text):
 def generate_and_render_derivative_image():
     # Randomly select two unique powers from {1, 2, 3}
     powers = sorted(random.sample([1, 2, 3], 2), reverse=True)
+    content_uri = True
     
     terms = []
     derivative_terms = []
@@ -3068,7 +3059,7 @@ def generate_and_render_derivative_image():
         font = ImageFont.truetype(font_path, font_size)
     except IOError:
         print(f"Error: Font file not found at {font_path}")
-        return
+        return None, None, None, None, None
 
     # Draw the polynomial text in the center
     text_bbox = draw.textbbox((0, 0), polynomial, font=font)
@@ -3084,15 +3075,17 @@ def generate_and_render_derivative_image():
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix
-    content_uri = upload_image_to_matrix(image_buffer.read())
+    if image_questions == True:
+        content_uri = upload_image_to_matrix(image_buffer.read())
     if content_uri:
-        return content_uri, img_width, img_height, derivative
+        return content_uri, img_width, img_height, derivative, polynomial
     else:
         print("Failed to upload the image to Matrix.")
 
 
 def generate_and_render_polynomial(type):
     # Randomly select two unique integers from -9 to 9, excluding 0
+    content_uri = True
     factors = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
     sum_factors = sum(factors)
     product_factors = factors[0] * factors[1]
@@ -3133,7 +3126,7 @@ def generate_and_render_polynomial(type):
         font = ImageFont.truetype(font_path, font_size)
     except IOError:
         print(f"Error: Font file not found at {font_path}")
-        return
+        return None, None, None, None, None
 
     # Draw the polynomial text in the center in light purple
     text_bbox = draw.textbbox((0, 0), polynomial, font=font)
@@ -3149,17 +3142,19 @@ def generate_and_render_polynomial(type):
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix
-    content_uri = upload_image_to_matrix(image_buffer.read())
+    if image_questions == True:
+        content_uri = upload_image_to_matrix(image_buffer.read())
+        
     if content_uri:
         if type == "sum":
-            return content_uri, img_width, img_height, str(int(sum_factors))
+            return content_uri, img_width, img_height, str(int(sum_factors)), polynomial
         elif type == "product":
-            return content_uri, img_width, img_height, str(int(product_factors))
+            return content_uri, img_width, img_height, str(int(product_factors)), polynomial
         elif type == "factors":
             factors_str = f"{factors[0]} and {factors[1]}"
-            return content_uri, img_width, img_height, factors_str
+            return content_uri, img_width, img_height, factors_str, polynomial
         else:
-             return content_uri, img_width, img_height, str(int(sum_factors))
+            return content_uri, img_width, img_height, str(int(sum_factors)), polynomial
     else:
         print("Failed to upload the image to Matrix.")
 

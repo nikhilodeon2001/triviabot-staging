@@ -115,7 +115,7 @@ magic_number_correct = False
 wf_winner = False
 num_wf_letters = 3
 
-image_questions_default = True
+image_questions_default = False
 image_questions = image_questions_default
 
 

@@ -2128,7 +2128,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{polynomial}\n"
 
     elif trivia_url == "characters":
-        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\nName the movie, book, or show:\n\n{trivia_question}\n"
+        message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nName the movie, book, or show:\n\n{trivia_question}\n"
 
     elif trivia_url == "polynomial product":
         image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("product")

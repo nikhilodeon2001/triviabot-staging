@@ -3447,7 +3447,7 @@ def start_trivia_round():
                 magic_number = random_number = random.randint(1000, 9999)
                 print(f"Magic number is {magic_number}")
                 send_magic_image(magic_number)
-            else:
+            elif image_questions == True:
                 selected_gif_url = random.choice(okra_gif_urls)
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)

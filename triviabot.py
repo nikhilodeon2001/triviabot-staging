@@ -1467,7 +1467,7 @@ def generate_round_summary(round_data, winner, wf_answer):
     elif magic_number_correct == True or wf_winner == True:
          prompt = (
             f"The winner of the trivia round is {winner}. "
-            f"Love bomb the winning player about their username and tell them why it's such a great username. Also specifically mention how they solved the final puzzle where the answer was {wf_answer} Mention  how much beter they are than eveyone else including yourself, the great OkraStrut."
+            f"Love bomb the winning player about their username and tell them why it's such a great username. Be specifc when explaining why it's great. Also specifically mention how they solved the final puzzle where the answer was {wf_answer} Mention  how much beter they are than eveyone else including yourself, the great OkraStrut."
             "Create no more than 5 sentences in total. Be sweet, happy, positive, and use emojis in your response.\n"
             #"Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             #"Questions asked:\n"
@@ -1476,7 +1476,7 @@ def generate_round_summary(round_data, winner, wf_answer):
     else:
         prompt = (
             f"The winner of the trivia round is {winner}. "
-            f"Roast the winning player about their username and be very specific and negative in your roast about why their username is terribel. Also specifically insult how they couldn't solve the final puzzle where the answer was {wf_answer} . "
+            f"Roast the winning player about their username and be very specific and negative in your roast about why their username is terrible. Also specifically insult how they couldn't solve the final puzzle where the answer was {wf_answer} . "
             "Create no more than 5 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner using angry and rough language. "
             #"Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             #"Questions asked:\n"
@@ -2336,6 +2336,9 @@ def derivative_checker(response, answer):
 def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     threshold = 0.90    
 
+    if user_answer == correct_answer:
+        return True  
+    
     if url == "polynomial factors":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
         correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]

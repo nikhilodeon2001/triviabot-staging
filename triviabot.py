@@ -250,7 +250,7 @@ def select_wof_questions(winner):
         
         if wf_winner == False:
             time.sleep(1.5)
-            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
+            image_mxc, image_width, image_height, display_string, = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
             
             if image_questions == True:
                 response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -263,7 +263,7 @@ def select_wof_questions(winner):
 
             process_wof_guesses(winner, wof_question["answers"][0])
         
-        return None
+        return wof_question["answers"][0]
 
     except Exception as e:
         # Capture the exception in Sentry and print detailed error information
@@ -1452,36 +1452,37 @@ def scramble_text(input_text):
 
 
 
-def generate_round_summary(round_data, winner):
+def generate_round_summary(round_data, winner, wf_answer):
     #ask_magic_number(winner) 
     
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
         prompt = (
             f"You are OkraStrut. You played trivia against everyone and dominated by a huge margin. "
-            "Roast everyone except OkraStrut about how terrible they are and how easily you beat them. Rudely call out specific players except OkraStrut in your roast and call our specific wrong answers they gave. "
-            "Create no more than 5 sentences in total. Be sarcastic, angry, offensive, and use emojis in your comments. End by complimenting yourself, OkraStrut, on how great you are. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            "Roast everyone except OkraStrut about how terrible they are and how easily you beat them. Compliement your own username endlessly. "
+            "Create no more than 5 sentences in total. Be sarcastic, angry, offensive, and use emojis in your comments. End by complimenting yourself, OkraStrut, on how great you are.\n"
+            #"Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            #"Questions asked:\n"
         )
     elif magic_number_correct == True or wf_winner == True:
          prompt = (
             f"The winner of the trivia round is {winner}. "
-            "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
-            "Create no more than 5 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            f"Love bomb the winning player about their username and tell them why it's such a great username. Also specifically mention how they solved the final puzzle where the answer was {wf_answer} Mention  how much beter they are than eveyone else including yourself, the great OkraStrut."
+            "Create no more than 5 sentences in total. Be sweet, happy, positive, and use emojis in your response.\n"
+            #"Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            #"Questions asked:\n"
         )
     
     else:
         prompt = (
             f"The winner of the trivia round is {winner}. "
-            "Roast the winning player about their username and be very specific and negative in your roast. Insult specific responses they gave during the round. "
+            f"Roast the winning player about their username and be very specific and negative in your roast about why their username is terribel. Also specifically insult how they couldn't solve the final puzzle where the answer was {wf_answer} . "
             "Create no more than 5 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner using angry and rough language. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            #"Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            #"Questions asked:\n"
         )
 
+    '''
     # Add questions, their correct answers, users' responses, and scoreboard status after each question
     for question_data in round_data["questions"]:
         question_number = question_data["question_number"]
@@ -1516,7 +1517,7 @@ def generate_round_summary(round_data, winner):
             prompt += "No responses recorded.\n"
         
         prompt += "\n"
-
+'''
 
     # Use OpenAI's API to generate the summary
     try:
@@ -1533,11 +1534,11 @@ def generate_round_summary(round_data, winner):
                 temperature=0.8,
             )
 
-        elif magic_number_correct == True:
+        elif magic_number_correct == True or wf_winner == True:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are a loving old man who is completely in love with the winning trivia player."},
+                    {"role": "system", "content": f"You are a loving old man who is completely in love with the winning trivia player {winner}."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=200,
@@ -1550,7 +1551,7 @@ def generate_round_summary(round_data, winner):
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are a bitter, dirty, and raunchy old curmudgeon who is completely fed up with all the trivia players."},
+                    {"role": "system", "content": f"You are a bitter, dirty, and raunchy old curmudgeon who is completely fed up with all the trivia players, specifically {winner}."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=200,
@@ -2713,9 +2714,9 @@ def update_round_streaks(user):
         send_message(target_room_id, message)
         time.sleep(2)
         
-        select_wof_questions(user)
+        wof_answer = select_wof_questions(user)
         
-        gpt_summary = generate_round_summary(round_data, user)
+        gpt_summary = generate_round_summary(round_data, user, wof_answer)
 
         gpt_message = f"\n{gpt_summary}\n"
         send_message(target_room_id, gpt_message)

@@ -89,7 +89,7 @@ magic_number = 0000
 
 num_mysterybox_clues_default = 2
 num_mysterybox_clues = num_mysterybox_clues_default
-num_crossword_clues_default = 0
+num_crossword_clues_default = 2
 num_crossword_clues = num_crossword_clues_default
 num_jeopardy_clues_default = 3
 num_jeopardy_clues = num_jeopardy_clues_default

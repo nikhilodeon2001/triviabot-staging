@@ -106,7 +106,7 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
-num_math_questions_default = 1
+num_math_questions_default = 0
 num_math_questions = num_math_questions_default
 num_stats_questions_default = 0
 num_stats_questions = num_stats_questions_default
@@ -953,10 +953,10 @@ def process_round_options(round_winner, winner_points):
         "⏱️⏳ <3 - 15>:  Time (s) between questions\n"
         "🟦✋ Jeopardy:  6 Jeopardy questions\n"
         "🟦❌ Trebek:  0 Jeopardy questions\n"
-        "🚫👆 <Category>:  Exclude one category\n"
+        #"🚫👆 <Category>:  Exclude one category\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
         "👻🎃 Ghost: Boo! Vanishing answers\n"
-        "❌📷 Blank: No images. None. Nada. Zilch.\n"
+        "❌📷 Blank: No images. None. Nada. Zilch.\n\n"
     )
 
     if winner_points >= god_mode_points:
@@ -1022,19 +1022,19 @@ def prompt_user_for_response(round_winner, winner_points):
                         except ValueError:
                             pass
         
-                    matched_category = cross_reference_category(message_content)
+                    #matched_category = cross_reference_category(message_content)
         
-                    if matched_category:
-                        if matched_category == "Mathematics":
-                            num_math_questions = 0
-                            num_stats_questions = num_stats_questions_default
-                        if matched_category == "Statistics":
-                            num_stats_questions = 0
-                            num_math_questions = num_math_questions_default
-                        categories_to_exclude[:1] = [matched_category]  # Add matched_category to exclude list
+                    #if matched_category:
+                    #    if matched_category == "Mathematics":
+                    #        num_math_questions = 0
+                    #        num_stats_questions = num_stats_questions_default
+                    #    if matched_category == "Statistics":
+                    #        num_stats_questions = 0
+                    #        num_math_questions = num_math_questions_default
+                    #    categories_to_exclude[:1] = [matched_category]  # Add matched_category to exclude list
         
                         # Send message after handling special cases
-                        send_message(target_room_id, f"🚫⛔ @{round_winner} has excluded {matched_category}.\n")
+                    #    send_message(target_room_id, f"🚫⛔ @{round_winner} has excluded {matched_category}.\n")
         
                     if "jeopardy" in message_content.lower():
                         num_jeopardy_clues = 6
@@ -2532,7 +2532,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 continue  # Skip if we've already recorded a numeric response for this user
         
 
-            if is_number(message_content) or re.search(r'\d', message_content) or message_content.lower() in {"a", "b", "c", "d", "t", "f", "true", "false"}:
+            if is_number(message_content) or message_content.lower() in {"a", "b", "c", "d", "t", "f", "true", "false"}:
             #if is_number(message_content) or message_content.lower() in {"a", "b", "c", "d", "t", "f", "true", "false"}:    
                 user_first_response[display_name] = message_content
             else:
@@ -3159,11 +3159,11 @@ def generate_and_render_polynomial(type):
     print(f"Polynomial: {polynomial}")
 
     if type == "sum":
-         print(f"Sum of factors: {sum_factors}")
+         print(f"Sum of zeroes: {sum_factors}")
     elif type == "product":
-         print(f"Product of factors: {product_factors}")
+         print(f"Product of zeroes: {product_factors}")
     elif type == "factors":
-         print(f"Factors: {factors}")
+         print(f"Zeroes: {factors}")
     else:
         print("Wrong type passed in to polynomial function")
 

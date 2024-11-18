@@ -3499,8 +3499,8 @@ def start_trivia_round():
 
             # Fetch new coffee donations
             print("fetching donations")
-            new_coffee = fetch_new_donations()
-            print(new_coffee)
+            fetch_new_donations()
+            #print(new_coffee)
 
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()

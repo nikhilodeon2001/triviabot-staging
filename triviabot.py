@@ -180,7 +180,6 @@ def fetch_new_donations():
                         "name": donor_name,
                         "amount": donor_amount,
                         "message": donor_message,
-                        "timestamp": datetime.now()
                     }
                     try:
                         donors_collection.insert_one(new_donor)  # Insert into MongoDB

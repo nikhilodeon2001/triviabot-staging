@@ -165,7 +165,7 @@ def fetch_new_donations():
             print(f"Error fetching donations: {response.status_code}")
             return []
 
-     except Exception as e:
+    except Exception as e:
         sentry_sdk.capture_exception(e)
         print(f"Error inserting trivia questions into MongoDB: {e}")
 

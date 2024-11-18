@@ -139,37 +139,69 @@ def fetch_new_donations():
 
     try:
         db = connect_to_mongodb()  # Connect to the MongoDB database
-        donors_collection = db["donors"]  # Use the 'trivia_questions' collection
+        donors_collection = db["donors"]  # Use the 'donors' collection
+
+        print("Fetching donations from Buy Me a Coffee API...")
         
-    
         response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            data = response.json()
-            print("API Response Content:", response.content)
-            new_donors = []
-            
-            for donor in data:
-                # Check if donor already exists in MongoDB
-                if not donors_collection.find_one({"donor_id": donor["supporter_id"]}):
-                    new_donor = {
-                        "donor_id": donor["supporter_id"],
-                        "name": donor["supporter_name"],
-                        "amount": donor["supporter_amount"],
-                        "message": donor.get("supporter_message", ""),
-                        "timestamp": datetime.now()
-                    }
-                    donors_collection.insert_one(new_donor)
-                    new_donors.append(new_donor)
-                    
-            return new_donors
-        else:
-            print(f"Error fetching donations: {response.status_code}")
+        response.raise_for_status()  # Raise an error for HTTP issues
+        
+        # Parse and validate JSON response
+        try:
+            api_response = response.json()
+        except ValueError as ve:
+            print(f"Error parsing JSON: {ve}")
             return []
 
-    except Exception as e:
-        sentry_sdk.capture_exception(e)
-        print(f"Error inserting trivia questions into MongoDB: {e}")
+        # Extract donations list from the 'data' key
+        donations = api_response.get("data", [])
+        if not isinstance(donations, list):  # Validate expected data type
+            print(f"Unexpected donations format: {type(donations)}. Donations: {donations}")
+            return []
 
+        new_donors = []
+
+        for donor in donations:
+            if isinstance(donor, dict):  # Ensure donor is a dictionary
+                # Extract and process donor details
+                donor_id = donor.get("support_id")
+                donor_name = donor.get("supporter_name")
+                donor_amount = float(donor.get("support_coffees", 0)) * float(donor.get("support_coffee_price", 0))
+                donor_message = donor.get("support_note", "")
+
+                if not donor_id or not donor_name:  # Skip invalid entries
+                    print(f"Skipping invalid donor entry: {donor}")
+                    continue
+
+                # Check if donor already exists in MongoDB
+                if not donors_collection.find_one({"donor_id": donor_id}):
+                    new_donor = {
+                        "donor_id": donor_id,
+                        "name": donor_name,
+                        "amount": donor_amount,
+                        "message": donor_message,
+                        "timestamp": datetime.now()
+                    }
+                    try:
+                        donors_collection.insert_one(new_donor)  # Insert into MongoDB
+                        new_donors.append(new_donor)
+                    except Exception as e:
+                        print(f"Error inserting donor into MongoDB: {e}")
+            else:
+                print(f"Skipping invalid donor format: {donor}")
+
+        print(f"New donors added: {new_donors}")
+        return new_donors
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching donations: {e}")
+        sentry_sdk.capture_exception(e)
+        return []
+
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        sentry_sdk.capture_exception(e)
+        return []
 
 
 

@@ -72,6 +72,7 @@ username = os.getenv("username")
 password = os.getenv("password")
 mongo_db_string = os.getenv("mongo_db_string")
 openai.api_key = os.getenv("open_api_key")  # Store your API key securely
+buymeacoffee_api_key = ok.getnenv("buy_me_a_coffee_api_key")
 target_room_id = os.getenv("target_room_id")
 question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
@@ -130,6 +131,45 @@ question_categories = [
 fixed_letters = ['O', 'K', 'R', 'A']
 
 categories_to_exclude = []  
+
+
+def fetch_new_donations():
+    url = "https://developers.buymeacoffee.com/api/v1/supporters"
+    headers = {"Authorization": f"Bearer {buymeacoffee_api_key}"}
+
+    try:
+        db = connect_to_mongodb()  # Connect to the MongoDB database
+        donors_collection = db["donors"]  # Use the 'trivia_questions' collection
+        
+    
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            new_donors = []
+            
+            for donor in data:
+                # Check if donor already exists in MongoDB
+                if not donors_collection.find_one({"donor_id": donor["supporter_id"]}):
+                    new_donor = {
+                        "donor_id": donor["supporter_id"],
+                        "name": donor["supporter_name"],
+                        "amount": donor["supporter_amount"],
+                        "message": donor.get("supporter_message", ""),
+                        "timestamp": datetime.now()
+                    }
+                    donors_collection.insert_one(new_donor)
+                    new_donors.append(new_donor)
+                    
+            return new_donors
+        else:
+            print(f"Error fetching donations: {response.status_code}")
+            return []
+
+     except Exception as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error inserting trivia questions into MongoDB: {e}")
+
+
 
 
 def get_math_question():
@@ -3456,6 +3496,11 @@ def start_trivia_round():
             
             # Load existing streak data from the file
             load_streak_data()
+
+            # Fetch new coffee donations
+            print("fetching donations")
+            new_coffee = fetch_new_donations()
+            print(new_coffee)
 
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()

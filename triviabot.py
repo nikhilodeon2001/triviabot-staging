@@ -167,16 +167,11 @@ def fetch_new_donations():
                 donor_id = donor.get("support_id")
                 donor_name = donor.get("supporter_name")
                 donor_amount = float(donor.get("support_coffees", 0)) * float(donor.get("support_coffee_price", 0))
-                donor_message = donor.get("support_note", "")
-
-                if not donor_id or not donor_name:  # Skip invalid entries
-                    print(f"Skipping invalid donor entry: {donor}")
-                    continue
+                donor_date = donor.get("support_created_on", datetime.now().isoformat())
 
                 # Check if donor already exists in MongoDB
                 if not donors_collection.find_one({"donor_id": donor_id}):
                     new_donor = {
-                        "donor_id": donor_id,
                         "name": donor_name,
                         "amount": donor_amount,
                         "message": donor_message,

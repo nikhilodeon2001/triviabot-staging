@@ -133,7 +133,25 @@ fixed_letters = ['O', 'K', 'R', 'A']
 categories_to_exclude = []  
 
 
-def fetch_new_donations():
+
+def get_coffees(username):
+    db = connect_to_mongodb()
+    donors_collection = db["donors"]  # Ensure this matches the name of your collection
+
+    pipeline = [
+        {"$match": {"name": username}},  # Filter by username
+        {"$group": {  # Group by username and calculate total coffees
+            "_id": "$name",
+            "total_coffees": {"$sum": "$support_coffees"}
+        }}
+    ]
+
+    result = list(donors_collection.aggregate(pipeline))
+    return int(result[0]["total_coffees"]) if result else 0
+
+
+
+def fetch_donations():
     base_url = "https://developers.buymeacoffee.com/api/v1/supporters"
     headers = {"Authorization": f"Bearer {buymeacoffee_api_key}"}
 
@@ -3533,7 +3551,7 @@ def start_trivia_round():
 
             # Fetch new coffee donations
             print("fetching donations")
-            fetch_new_donations()
+            fetch_donations()
             #print(new_coffee)
 
             # Reset the scoreboard and fastest answers at the start of each round

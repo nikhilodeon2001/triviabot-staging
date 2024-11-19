@@ -1551,6 +1551,8 @@ def scramble_text(input_text):
 
 def generate_round_summary(round_data, winner):
     #ask_magic_number(winner) 
+
+    winner_coffees = get_coffees(winner)
     
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
@@ -1561,6 +1563,16 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
+
+    elif winner_coffees > 0:
+         prompt = (
+            f"The winner of the trivia round is {winner}. "
+            f"Thank {winner} for donating {winner_coffees} to the cause. You are very grateful. Compliment the winning player about their username and be very specific about why you like it. "
+            "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
+            "Create no more than 5 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+
     elif magic_number_correct == True or wf_winner == True:
          prompt = (
             f"The winner of the trivia round is {winner}. "

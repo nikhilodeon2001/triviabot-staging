@@ -134,7 +134,7 @@ categories_to_exclude = []
 
 
 def fetch_new_donations():
-    url = "https://developers.buymeacoffee.com/api/v1/supporters"
+    base_url = "https://developers.buymeacoffee.com/api/v1/supporters"
     headers = {"Authorization": f"Bearer {buymeacoffee_api_key}"}
 
     try:
@@ -142,47 +142,55 @@ def fetch_new_donations():
         donors_collection = db["donors"]  # Use the 'donors' collection
 
         print("Fetching donations from Buy Me a Coffee API...")
-        
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raise an error for HTTP issues
-        
-        # Parse and validate JSON response
-        try:
-            api_response = response.json()
-        except ValueError as ve:
-            print(f"Error parsing JSON: {ve}")
-            return []
-
-        # Extract donations list from the 'data' key
-        donations = api_response.get("data", [])
-        if not isinstance(donations, list):  # Validate expected data type
-            print(f"Unexpected donations format: {type(donations)}. Donations: {donations}")
-            return []
 
         new_donors = []
+        next_page_url = base_url  # Start with the base URL
 
-        for donor in donations:
-            if isinstance(donor, dict):  # Ensure donor is a dictionary
-                # Extract and process donor details
-                donor_id = donor.get("support_id")
-                donor_name = donor.get("supporter_name")
-                donor_amount = float(donor.get("support_coffees", 0)) * float(donor.get("support_coffee_price", 0))
-                donor_date = donor.get("support_created_on", datetime.now().isoformat())
+        while next_page_url:
+            response = requests.get(next_page_url, headers=headers)
+            response.raise_for_status()  # Raise an error for HTTP issues
+            
+            # Parse and validate JSON response
+            try:
+                api_response = response.json()
+            except ValueError as ve:
+                print(f"Error parsing JSON: {ve}")
+                break
 
-                # Check if donor already exists in MongoDB
-                if not donors_collection.find_one({"donor_id": donor_id}):
-                    new_donor = {
-                        "name": donor_name,
-                        "amount": donor_amount,
-                        "message": donor_message,
-                    }
-                    try:
-                        donors_collection.insert_one(new_donor)  # Insert into MongoDB
-                        new_donors.append(new_donor)
-                    except Exception as e:
-                        print(f"Error inserting donor into MongoDB: {e}")
-            else:
-                print(f"Skipping invalid donor format: {donor}")
+            # Extract donations list from the 'data' key
+            donations = api_response.get("data", [])
+            if not isinstance(donations, list):  # Validate expected data type
+                print(f"Unexpected donations format: {type(donations)}. Donations: {donations}")
+                break
+
+            for donor in donations:
+                if isinstance(donor, dict):  # Ensure donor is a dictionary
+                    # Extract and process donor details
+                    donor_id = donor.get("support_id")
+                    donor_name = donor.get("supporter_name")
+                    donor_coffees = donor.get("support_coffees", 0)
+                    donor_coffee_price = donor.get("support_coffee_price", 0)
+                    donor_date = donor.get("support_created_on", datetime.now().isoformat())
+
+                    # Check if donor already exists in MongoDB
+                    if not donors_collection.find_one({"donor_id": donor_id}):
+                        new_donor = {
+                            "donor_id": donor_id,
+                            "name": donor_name,
+                            "coffees": donor_coffees,
+                            "coffee_price": donor_coffee_price,
+                            "date": donor_date
+                        }
+                        try:
+                            donors_collection.insert_one(new_donor)  # Insert into MongoDB
+                            new_donors.append(new_donor)
+                        except Exception as e:
+                            print(f"Error inserting donor into MongoDB: {e}")
+                else:
+                    print(f"Skipping invalid donor format: {donor}")
+
+            # Get the next page URL from the response
+            next_page_url = api_response.get("next_page_url")
 
         print(f"New donors added: {new_donors}")
         return new_donors
@@ -196,7 +204,6 @@ def fetch_new_donations():
         print(f"Unexpected error: {e}")
         sentry_sdk.capture_exception(e)
         return []
-
 
 
 def get_math_question():

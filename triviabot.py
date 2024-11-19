@@ -142,7 +142,7 @@ def get_coffees(username):
         {"$match": {"name": username}},  # Filter by username
         {"$group": {  # Group by username and calculate total coffees
             "_id": "$name",
-            "total_coffees": {"$sum": "$support_coffees"}
+            "total_coffees": {"$sum": "$coffees"}
         }}
     ]
 

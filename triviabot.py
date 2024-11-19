@@ -168,9 +168,9 @@ def fetch_new_donations():
                     # Extract and process donor details
                     donor_id = donor.get("support_id")
                     donor_name = donor.get("supporter_name")
-                    donor_coffees = donor.get("support_coffees", 0)
-                    donor_coffee_price = donor.get("support_coffee_price", 0)
-                    donor_date = donor.get("support_created_on", datetime.now().isoformat())
+                    donor_coffees = donor.get("support_coffees")
+                    donor_coffee_price = donor.get("support_coffee_price")
+                    donor_date = donor.get("support_created_on")
 
                     # Check if donor already exists in MongoDB
                     if not donors_collection.find_one({"donor_id": donor_id}):

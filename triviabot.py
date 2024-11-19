@@ -3555,9 +3555,6 @@ def start_trivia_round():
 
             # Load global varaiables at the start of round
             load_global_variables()
-
-            winner_coffees = get_coffees("nsharma2")
-            print(f"Total Coffees: {winner_coffees}")
             
             # Load existing streak data from the file
             load_streak_data()

@@ -159,8 +159,6 @@ def fetch_donations():
         db = connect_to_mongodb()  # Connect to the MongoDB database
         donors_collection = db["donors"]  # Use the 'donors' collection
 
-        print("Fetching donations from Buy Me a Coffee API...")
-
         new_donors = []
         next_page_url = base_url  # Start with the base URL
 
@@ -3557,14 +3555,15 @@ def start_trivia_round():
 
             # Load global varaiables at the start of round
             load_global_variables()
+
+            winner_coffees = get_coffees("nsharma2")
+            print(f"Total Coffees: {winner_coffees}")
             
             # Load existing streak data from the file
             load_streak_data()
 
             # Fetch new coffee donations
-            print("fetching donations")
             fetch_donations()
-            #print(new_coffee)
 
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()

@@ -1565,9 +1565,9 @@ def generate_round_summary(round_data, winner):
     elif winner_coffees > 0:
          prompt = (
             f"The winner of the trivia round is {winner}. "
-            f"Thank {winner} for donating {winner_coffees} to the cause. You are very grateful. Compliment the winning player about their username and be very specific about why you like it. "
+            f"Thank {winner} for donating to the cause. Specifically mention they donated {winner_coffees}. You are very grateful. Compliment the winning player about their username and be very specific about why you like it. "
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
-            "Create no more than 5 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Create no more than 7 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
 

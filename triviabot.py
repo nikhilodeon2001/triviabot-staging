@@ -134,6 +134,79 @@ categories_to_exclude = []
 
 
 
+def generate_round_summary_image(round_data, winner):
+    winner_coffees = get_coffees(winner)
+    winner_at = f"@{winner}"
+    magic_number_correct = True  # Replace with actual condition
+    wf_winner = False  # Replace with actual condition
+
+    # Construct the base prompt
+    if winner == "OkraStrut":
+        prompt = (
+            f"An arrogant trivia master named {winner_at} dominates a trivia contest. "
+            "The setting is a comical stage with {winner_at} holding a massive golden trophy while all other players look utterly defeated, "
+            "with exaggerated frowns and sweat drops. The atmosphere is sarcastic, bold, and colorful, with emojis and mocking banners. "
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+    elif winner_coffees > 0:
+        prompt = (
+            f"A warm and cheerful celebration of {winner_at}, who donated {winner_coffees} coffees. "
+            f"The scene shows {winner_at} surrounded by coffee cups, smiling players applauding them, and a cheerful background. "
+            "Add glowing lights, hearts, and a festive atmosphere. "
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+    elif magic_number_correct or wf_winner:
+        prompt = (
+            f"A colorful and happy scene celebrating {winner_at}, the trivia champion. "
+            f"{winner_at} is shown as a radiant figure holding a trivia trophy, surrounded by sparkles, question marks, and books. "
+            "The background is vibrant, with other players cheering in the distance. "
+            
+        )
+    else:
+        prompts = [
+            f"A sarcastic and comical scene showing {winner_at}, the trivia winner, holding a 'World's Luckiest' trophy. "
+            "Other players are facepalming and looking frustrated in the background. The scene is exaggerated and filled with humorous details. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n",
+            f"{winner_at} wins a trivia round, but the atmosphere is full of disbelief. "
+            "Create a sarcastic and mocking image with players looking stunned, and {winner_at} smirking arrogantly while holding a trophy. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n",
+            f"A humorous depiction of {winner_at} winning a trivia game. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n"
+        ]
+        prompt = random.choice(prompts)
+
+    # Add details from the round data to enhance the prompt
+    for question_data in round_data["questions"]:
+        question_number = question_data["question_number"]
+        question_text = question_data["question_text"]
+        correct_answers = question_data["correct_answers"]
+        correct_answers_str = ', '.join(map(str, correct_answers))
+        prompt += f"\nTrivia Question {question_number}: {question_text} (Correct Answers: {correct_answers_str})"
+
+    # Generate the image using DALL-E
+    try:
+        response = openai.Image.create(
+            prompt=prompt,
+            n=1,
+            size="1024x1024"  # Adjust size as needed
+        )
+        # Return the image URL from the API response
+        image_url = response["data"][0]["url"]
+
+        image_mxc, image_width, image_height = download_image_from_url(image_url)
+        send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+        return None
+        
+    except openai.OpenAIError as e:
+        print(f"Error generating image: {e}")
+        return "Image generation failed!"
+
+
+
+
+
+
+
+
 def get_coffees(username):
     db = connect_to_mongodb()
     donors_collection = db["donors"]  # Ensure this matches the name of your collection
@@ -2184,7 +2257,7 @@ def distinguish_host(room_id, message_id):     # DISTINGUISH
             time.sleep(delay_between_retries)
 
 
-def send_image(room_id, image_mxc, image_width, image_height, image_size): #IMAGE CODE
+def send_image(room_id, image_mxc, image_width, image_height, image_size): 
     global headers, max_retries, delay_between_retries
 
     """Send a message to the room with retry logic."""
@@ -2865,6 +2938,8 @@ def update_round_streaks(user):
 
         gpt_message = f"\n{gpt_summary}\n"
         send_message(target_room_id, gpt_message)
+
+        generate_round_summary_image(round_data, user)
 
     # Perform all MongoDB operations at the end
     for operation in mongo_operations:

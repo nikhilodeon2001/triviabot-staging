@@ -134,7 +134,7 @@ fixed_letters = ['O', 'K', 'R', 'A']
 categories_to_exclude = []  
 
 
-def nice_okra(winner):
+def nice_okra_option(winner):
     global since_token, params, headers, max_retries, delay_between_retries, nice_okra
     nice_okra = False
 
@@ -1683,13 +1683,14 @@ def scramble_text(input_text):
 
 
 
-def generate_round_summary(round_data, winner):
+def generate_round_summary(round_data, winner):\
+    global nice_okra
     #ask_magic_number(winner) 
 
     winner_coffees = get_coffees(winner)
 
-    if winner_coffees > 0:
-        nice_okra(winner)
+    if winner_coffees > 0 and wf_winner == False:
+        nice_okra_option(winner)
     
     winner_at = f"@{winner}"
      
@@ -1703,7 +1704,7 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
 
-    elif winner_coffees > 0 and nice_okra == True:
+    elif nice_okra == True:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "

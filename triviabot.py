@@ -2933,7 +2933,7 @@ def update_round_streaks(user):
         else:
             time.sleep(4)
             image_message = f"\n@{user} Get a win streak. Earn an image.\n"
-            send_message(taget_room_id, image_message)
+            send_message(target_room_id, image_message)
             time.sleep(1)
 
     # Perform all MongoDB operations at the end

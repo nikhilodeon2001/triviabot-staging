@@ -147,28 +147,28 @@ def generate_round_summary_image(round_data, winner):
         
     elif winner_coffees > 0:
         prompt = (
-            f"The scene shows a personification of the username {winner} surrounded by coffee cups and oney, smiling players applauding them, and a cheerful background. "
+            f"The scene shows a personification of {winner} surrounded by coffee cups and money, smiling players applauding them, and a cheerful background. "
             "Add glowing lights, hearts, and a festive atmosphere."
         )
         message = f"✊🔥 {winner_at}, thank you for your donation to the cause."
     
     elif magic_number_correct or wf_winner:
         prompt = (
-            f"A personification of the username {winner} is shown as a radiant figure holding a trivia trophy, surrounded by sparkles, question marks, and books. "
+            f"A personification of {winner} is shown as a radiant figure holding a trivia trophy, surrounded by sparkles, question marks, and books. "
             "The background is vibrant, with other beaten and bruised players sulking in the distance."
         )
         message = f"🤩🌟 {winner_at}, Okra is impressed with your performance."
     
     else:
         prompts = [
-            f"A sarcastic and comical scene showing a personsification of the username {winner}, the trivia winner, holding a 'World's Luckiest' trophy. "
+            f"A sarcastic and comical scene showing a personsification of {winner} holding a 'World's Luckiest' trophy. "
             "Other players are facepalming and looking frustrated in the background. The scene is exaggerated and filled with humorous details.",
-            f"Create a sarcastic and mocking image with players looking stunned, and a personification of the username {winner} smirking arrogantly while holding a trophy.",
-            f"A humorous depiction of the personfication of the username {winner} winning a trivia game. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed. ",
-            f"A Renaissance painting of the personfication of the username {winner} winning a trivia game. The painting is elegant and refined.",
-            f"A depiction of the personfication of the username {winner} as a deity. The ambiance is holy, elegant, and ethereal.",
-            f"A depiction of the personfication of the username {winner} smiling as a deformed and hideous being holding the world's smallest trophy.",
-            f"A depiction of a giant monstrous and angry personificaton of an Okra looking down at a personfication of the username {winner}, who is ugly and deformed and is holding a small trophy."
+            f"Create a sarcastic and mocking image with players looking stunned, and a personification of {winner} smirking arrogantly while holding a trophy.",
+            f"A humorous personfication of {winner} winning a trivia game. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed. ",
+            f"A Renaissance painting of the personfication of {winner}. The painting is elegant and refined.",
+            f"A personfication of {winner} as a deity. The ambiance is holy, elegant, and ethereal.",
+            f"A personfication of {winner} smiling as a deformed and hideous being holding the world's smallest trophy.",
+            f"A giant, monstrous, and angry personificaton of an Okra looking down at a personfication of {winner}, who is ugly and deformed and is holding a small trophy."
         ]
 
         message = f"💩🤮 {winner_at}...you are the worst."

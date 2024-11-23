@@ -173,7 +173,7 @@ def generate_round_summary_image(round_data, winner):
         message = f"💩🤮 {winner_at}...your streak deserves this picture.\n"
         
         prompt = random.choice(prompts)
-
+    
     # Generate the image using DALL-E
     try:
         response = openai.Image.create(
@@ -186,6 +186,7 @@ def generate_round_summary_image(round_data, winner):
 
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+        print(prompt)
         send_message(target_room_id, message)
         return None
         

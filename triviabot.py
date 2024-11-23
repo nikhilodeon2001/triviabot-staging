@@ -115,6 +115,7 @@ num_stats_questions = num_stats_questions_default
 magic_number_correct = False
 wf_winner = False
 num_wf_letters = 3
+nice_okra = False
 
 image_questions_default = True
 image_questions = image_questions_default
@@ -131,6 +132,88 @@ question_categories = [
 fixed_letters = ['O', 'K', 'R', 'A']
 
 categories_to_exclude = []  
+
+
+def nice_okra(winner):
+    global since_token, params, headers, max_retries, delay_between_retries, nice_okra
+    nice_okra = False
+
+    sync_url = f"{matrix_base_url}/sync"
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+    
+    # Initialize the sync and message to prompt user for letters
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+    message = f"\n☕🤝 @{winner}, thanks for the coffee. Say 'okra' and I'll be nice.\n"
+    send_message(target_room_id, message)
+    
+    while time.time() - start_time < magic_time:
+        try:                
+            if since_token:
+                params["since"] = since_token
+
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:                
+                event_id = event["event_id"]
+                event_type = event.get("type")
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "").upper()
+
+                    if sender == bot_user_id or sender_display_name != winner:
+                        continue
+
+                    if "okra" in message_content.lower():
+                        react_to_message(event_id, target_room_id, "okra21")
+                        nice_okra = True
+                        return None
+            
+            time.sleep(0.3)
+            return None
+            
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting responses: {e}")
+
+    if len(wf_letters) < num_wf_letters:
+        available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in answer_letters]
+        #available_letters = ['Å', 'Λ', 'Д', 'Ⱥ', 'Ά', 'Δ', 'Ä', 'β', 'Þ', 'Ь', 'Ɓ', 'В', 'Ç', 'Ƈ', 'Ͼ', 'С', 'Ð', 'Đ', 'Ḏ', 'Ξ', 'Є', 'Ɇ', 'Э', 'Ề', 'Σ', 'Ғ', 'Ƒ', 'Ϝ', 'Ǥ', 'ɢ', 'Ĝ', 'Ħ', 'Ή', 'Н', 'ዘ', 'Ḩ', 'І', 'ɪ', 'Ί', 'Ỉ', 'Ӏ', 'Ɉ', 'Ј', 'ʝ', 'К', 'Ƙ', 'Ӄ', 'Ҡ', 'Ҝ', 'Ŀ', 'Ƚ', 'Ł', 'ᒪ', 'Ӎ', 'ʍ', 'Μ', 'М', 'Ñ', 'Ń', 'И', 'Ň', 'Ø', 'Ө', 'Θ', 'Ω', 'Ö', 'Ֆ', 'Þ', 'Ρ', '₱', 'Ҏ', 'Ƥ', 'Ǫ', 'Ɋ', 'Ք', 'Я', 'Ȓ', 'Ř', 'Ɍ', 'Ʀ', 'Ş', 'Ș', 'Ƨ', 'Ѕ', 'Ⴝ', 'Ƭ', 'Ţ', 'Ʈ', 'Ț', 'Ͳ', 'Τ', 'Ù', 'Û', 'Ʊ', 'Ʉ', 'Џ', 'Ṽ', 'Ṿ', 'Ѵ', 'Ѷ', 'Ѡ', 'Ϣ', 'Щ', 'Χ', 'Ж', 'Ẍ', 'Ӿ', '¥', 'У', 'Ү', 'Ψ', 'Ɏ', 'Ƶ', 'Ȥ', 'Ż', 'Ẕ', 'Զ']
+        #wf_letters = random.sample(available_letters, num_wf_letters)
+        
+        if len(available_letters) < num_wf_letters:
+            wf_letters = ['Q', 'X,', 'Z']  
+        else:
+            wf_letters = random.sample(available_letters, num_wf_letters)
+        
+        message = f"Too slow. Let me help you out.\nLet's use: {' '.join(wf_letters)}\n\n"
+    else:
+        message = f"You picked: {' '.join(wf_letters)}\n\n"
+
+    final_letters = fixed_letters + wf_letters
+    send_message(target_room_id, message)
+    return final_letters
+
+
+
 
 
 
@@ -1604,8 +1687,12 @@ def generate_round_summary(round_data, winner):
     #ask_magic_number(winner) 
 
     winner_coffees = get_coffees(winner)
-    winner_at = f"@{winner}"
+
+    if winner_coffees > 0:
+        nice_okra(winner)
     
+    winner_at = f"@{winner}"
+     
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
         prompt = (
@@ -1616,7 +1703,7 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
 
-    elif winner_coffees > 0:
+    elif winner_coffees > 0 and nice_okra == True:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "

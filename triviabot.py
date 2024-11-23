@@ -2931,7 +2931,7 @@ def update_round_streaks(user):
             generate_round_summary_image(round_data, user)
         else:
             time.sleep(4)
-            image_message = f"\n@{user} Get a win streak. Earn an image.\n"
+            image_message = f"\n@{user} Get a win streak. Earn a custom image.\n"
             send_message(target_room_id, image_message)
             time.sleep(1)
 

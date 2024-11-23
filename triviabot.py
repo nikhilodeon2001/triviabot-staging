@@ -145,32 +145,21 @@ def generate_round_summary_image(round_data, winner):
         )
         message = "🥒OKRA!! 🥒OKRA!! 🥒OKRA!!\n"
         
-    elif winner_coffees > 0:
+    elif winner_coffees > 100:
         prompt = (
             f"The scene shows a personification of {winner} surrounded by okra and money. "
             "Add glowing lights, hearts, and a festive atmosphere."
         )
         message = f"✊🔥 {winner_at}, thank you for your donation to the cause. And nice streak!\n"
     
-    elif magic_number_correct or wf_winner:
-        prompt = (
-            f"A personification of {winner} is shown as a radiant figure holding a piece of okra, surrounded by sparkles, question marks, and books. "
-            "The background is vibrant, with other beaten and bruised players sulking in the distance."
-        )
-        message = f"🤩🌟 {winner_at}, Okra is impressed with your streak.\n"
-    
     else:
         prompts = [
-            f"A sarcastic and comical scene showing a personsification of {winner} holding a soggy piece of okra.",
-            f"A sarcastic and mocking image with players looking stunned, and a personification of {winner} smirking arrogantly while holding an okra trophy.",
-            f"A humorous personfication of {winner} surrounded by okra. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed.",
             f"A Renaissance painting of the personfication of {winner} holding a piece of okra. The painting is elegant and refined.",
             f"A personfication of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal.",
-            f"A personfication of {winner} smiling as a deformed and hideous being holding some okra.",
-            f"A giant, monstrous, and angry personificaton of a piece of okra looking down at a personfication of {winner}, who is ugly, deformed and looks like an idiot."
+            f"A personfication of {winner} getting yelled at by an angry, giant okra."
         ]
 
-        message = f"💩🤮 {winner_at}...your streak deserves this picture.\n"
+        message = f"💩🤮 {winner_at}...your streak deserves this terrible image.\n"
         
         prompt = random.choice(prompts)
     
@@ -1630,7 +1619,7 @@ def generate_round_summary(round_data, winner):
     elif winner_coffees > 0:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
-            f"Start by mentioning that {winner_at} donated {winner_coffees} coffees. Specifically mention the number, {winner_coffees}. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
+            f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
             "Create no more than 5 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
@@ -2928,11 +2917,20 @@ def update_round_streaks(user):
         gpt_message = f"\n{gpt_summary}\n"
         send_message(target_room_id, gpt_message)
         
-        if current_longest_round_streak['streak'] > 2:
+        if current_longest_round_streak['streak'] % 5 == 0:
             generate_round_summary_image(round_data, user)
         else:
+            number_to_emoji = {
+                1: "1️⃣",
+                2: "2️⃣",
+                3: "3️⃣",
+                4: "4️⃣"
+            }
+            
             time.sleep(4)
-            image_message = f"\n@{user} Get a win streak over 2. Earn a custom image.\n"
+            remaining_games = 5 - (current_longest_round_streak['streak'] % 5)
+            dynamic_emoji = number_to_emoji[remaining_games]
+            image_message = f"\n{dynamic_emoji}📸 @{user} Win {remaining_games} more in a row. Earn an image.\n"
             send_message(target_room_id, image_message)
             time.sleep(1)
 

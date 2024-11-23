@@ -143,21 +143,21 @@ def generate_round_summary_image(round_data, winner):
             "The setting is a fiery Hell, where a giant and angry piece of okra holds a massive golden trophy while looking down on and smiting all other players, "
             "The atmosphere is angry, scary, and full of malice."
         )
-        message = "🥒OKRA!! 🥒OKRA!! 🥒OKRA!!"
+        message = "🥒OKRA!! 🥒OKRA!! 🥒OKRA!!\n"
         
     elif winner_coffees > 0:
         prompt = (
             f"The scene shows a personification of {winner} surrounded by coffee cups and money, smiling players applauding them, and a cheerful background. "
             "Add glowing lights, hearts, and a festive atmosphere."
         )
-        message = f"✊🔥 {winner_at}, thank you for your donation to the cause."
+        message = f"✊🔥 {winner_at}, thank you for your donation to the cause. And nice streak!\n"
     
     elif magic_number_correct or wf_winner:
         prompt = (
             f"A personification of {winner} is shown as a radiant figure holding a trivia trophy, surrounded by sparkles, question marks, and books. "
             "The background is vibrant, with other beaten and bruised players sulking in the distance."
         )
-        message = f"🤩🌟 {winner_at}, Okra is impressed with your performance."
+        message = f"🤩🌟 {winner_at}, Okra is impressed with your streak.\n"
     
     else:
         prompts = [
@@ -171,7 +171,7 @@ def generate_round_summary_image(round_data, winner):
             f"A giant, monstrous, and angry personificaton of an Okra looking down at a personfication of {winner}, who is ugly and deformed and is holding a small trophy."
         ]
 
-        message = f"💩🤮 {winner_at}...you are the worst."
+        message = f"💩🤮 {winner_at}...your streak deserves this picture.\n"
         
         prompt = random.choice(prompts)
 
@@ -2927,9 +2927,14 @@ def update_round_streaks(user):
 
         gpt_message = f"\n{gpt_summary}\n"
         send_message(target_room_id, gpt_message)
-
-        #if current_longest_round_streak['streak'] % 5 == 0:
-        generate_round_summary_image(round_data, user)
+        
+        if current_longest_round_streak['streak'] > 1:
+            generate_round_summary_image(round_data, user)
+        else:
+            time.sleep(4)
+            image_message = f"\n@{user} Get a win streak. Earn an image.\n"
+            send_message(taget_room_id, image_message)
+            time.sleep(1)
 
     # Perform all MongoDB operations at the end
     for operation in mongo_operations:

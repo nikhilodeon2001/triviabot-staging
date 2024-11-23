@@ -137,10 +137,7 @@ categories_to_exclude = []
 def generate_round_summary_image(round_data, winner):
     winner_coffees = get_coffees(winner)
     winner_at = f"@{winner}"
-    magic_number_correct = True  # Replace with actual condition
-    wf_winner = False  # Replace with actual condition
 
-    # Construct the base prompt
     if winner == "OkraStrut":
         prompt = (
             "The setting is a fiery Hell, where a giant and angry piece of okra holds a massive golden trophy while looking down on and smiting all other players, "
@@ -170,7 +167,8 @@ def generate_round_summary_image(round_data, winner):
             f"A humorous depiction of the personfication of the username {winner} winning a trivia game. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed. ",
             f"A Renaissance painting of the personfication of the username {winner} winning a trivia game. The painting is elegant and refined.",
             f"A depiction of the personfication of the username {winner} as a deity. The ambiance is holy, elegant, and ethereal.",
-            f"A depiction of the personfication of the username {winner} smiling as a deformed and hideous being holding the world's smallest trophy."
+            f"A depiction of the personfication of the username {winner} smiling as a deformed and hideous being holding the world's smallest trophy.",
+            f"A depiction of a giant monstrous and angry personificaton of an Okra looking down at a personfication of the username {winner}, who is ugly and deformed and is holding a small trophy."
         ]
 
         message = f"💩🤮 {winner_at}...you are the worst."

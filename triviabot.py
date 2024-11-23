@@ -140,35 +140,34 @@ def generate_round_summary_image(round_data, winner):
 
     if winner == "OkraStrut":
         prompt = (
-            "The setting is a fiery Hell, where a giant and angry piece of okra holds a massive golden trophy while looking down on and smiting all other players, "
+            "The setting is a fiery Hell, where a giant and angry piece of okra holds a massive golden trophy while looking down on and smiting all other players. "
             "The atmosphere is angry, scary, and full of malice."
         )
         message = "🥒OKRA!! 🥒OKRA!! 🥒OKRA!!\n"
         
     elif winner_coffees > 0:
         prompt = (
-            f"The scene shows a personification of {winner} surrounded by coffee cups and money, smiling players applauding them, and a cheerful background. "
+            f"The scene shows a personification of {winner} surrounded by okra and money. "
             "Add glowing lights, hearts, and a festive atmosphere."
         )
         message = f"✊🔥 {winner_at}, thank you for your donation to the cause. And nice streak!\n"
     
     elif magic_number_correct or wf_winner:
         prompt = (
-            f"A personification of {winner} is shown as a radiant figure holding a trivia trophy, surrounded by sparkles, question marks, and books. "
+            f"A personification of {winner} is shown as a radiant figure holding a piece of okra, surrounded by sparkles, question marks, and books. "
             "The background is vibrant, with other beaten and bruised players sulking in the distance."
         )
         message = f"🤩🌟 {winner_at}, Okra is impressed with your streak.\n"
     
     else:
         prompts = [
-            f"A sarcastic and comical scene showing a personsification of {winner} holding a 'World's Luckiest' trophy. "
-            "Other players are facepalming and looking frustrated in the background. The scene is exaggerated and filled with humorous details.",
-            f"Create a sarcastic and mocking image with players looking stunned, and a personification of {winner} smirking arrogantly while holding a trophy.",
-            f"A humorous personfication of {winner} winning a trivia game. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed. ",
-            f"A Renaissance painting of the personfication of {winner}. The painting is elegant and refined.",
-            f"A personfication of {winner} as a deity. The ambiance is holy, elegant, and ethereal.",
-            f"A personfication of {winner} smiling as a deformed and hideous being holding the world's smallest trophy.",
-            f"A giant, monstrous, and angry personificaton of an Okra looking down at a personfication of {winner}, who is ugly and deformed and is holding a small trophy."
+            f"A sarcastic and comical scene showing a personsification of {winner} holding a soggy piece of okra.",
+            f"A sarcastic and mocking image with players looking stunned, and a personification of {winner} smirking arrogantly while holding an okra trophy.",
+            f"A humorous personfication of {winner} surrounded by okra. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed.",
+            f"A Renaissance painting of the personfication of {winner} holding a piece of okra. The painting is elegant and refined.",
+            f"A personfication of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal.",
+            f"A personfication of {winner} smiling as a deformed and hideous being holding some okra.",
+            f"A giant, monstrous, and angry personificaton of a piece of okra looking down at a personfication of {winner}, who is ugly, deformed and looks like an idiot."
         ]
 
         message = f"💩🤮 {winner_at}...your streak deserves this picture.\n"

@@ -143,44 +143,39 @@ def generate_round_summary_image(round_data, winner):
     # Construct the base prompt
     if winner == "OkraStrut":
         prompt = (
-            f"An arrogant trivia master named {winner_at} dominates a trivia contest. "
-            "The setting is a comical stage with {winner_at} holding a massive golden trophy while all other players look utterly defeated, "
-            "with exaggerated frowns and sweat drops. The atmosphere is sarcastic, bold, and colorful, with emojis and mocking banners. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            "The setting is a fiery Hell, where a giant and angry piece of okra holds a massive golden trophy while looking down on and smiting all other players, "
+            "The atmosphere is angry, scary, and full of malice."
         )
+        message = "🥒OKRA!! 🥒OKRA!! 🥒OKRA!!"
+        
     elif winner_coffees > 0:
         prompt = (
-            f"A warm and cheerful celebration of {winner_at}, who donated {winner_coffees} coffees. "
-            f"The scene shows {winner_at} surrounded by coffee cups, smiling players applauding them, and a cheerful background. "
-            "Add glowing lights, hearts, and a festive atmosphere. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            f"The scene shows a personification of the username {winner} surrounded by coffee cups and oney, smiling players applauding them, and a cheerful background. "
+            "Add glowing lights, hearts, and a festive atmosphere."
         )
+        message = f"✊🔥 {winner_at}, thank you for your donation to the cause."
+    
     elif magic_number_correct or wf_winner:
         prompt = (
-            f"A colorful and happy scene celebrating {winner_at}, the trivia champion. "
-            f"{winner_at} is shown as a radiant figure holding a trivia trophy, surrounded by sparkles, question marks, and books. "
-            "The background is vibrant, with other players cheering in the distance. "
-            
+            f"A personification of the username {winner} is shown as a radiant figure holding a trivia trophy, surrounded by sparkles, question marks, and books. "
+            "The background is vibrant, with other beaten and bruised players sulking in the distance."
         )
+        message = f"🤩🌟 {winner_at}, Okra is impressed with your performance."
+    
     else:
         prompts = [
-            f"A sarcastic and comical scene showing {winner_at}, the trivia winner, holding a 'World's Luckiest' trophy. "
-            "Other players are facepalming and looking frustrated in the background. The scene is exaggerated and filled with humorous details. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n",
-            f"{winner_at} wins a trivia round, but the atmosphere is full of disbelief. "
-            "Create a sarcastic and mocking image with players looking stunned, and {winner_at} smirking arrogantly while holding a trophy. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n",
-            f"A humorous depiction of {winner_at} winning a trivia game. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n"
+            f"A sarcastic and comical scene showing a personsification of the username {winner}, the trivia winner, holding a 'World's Luckiest' trophy. "
+            "Other players are facepalming and looking frustrated in the background. The scene is exaggerated and filled with humorous details.",
+            f"Create a sarcastic and mocking image with players looking stunned, and a personification of the username {winner} smirking arrogantly while holding a trophy.",
+            f"A humorous depiction of the personfication of the username {winner} winning a trivia game. The scene is over-the-top with confetti, sarcastic banners, and other players looking annoyed or unimpressed. ",
+            f"A Renaissance painting of the personfication of the username {winner} winning a trivia game. The painting is elegant and refined.",
+            f"A depiction of the personfication of the username {winner} as a deity. The ambiance is holy, elegant, and ethereal.",
+            f"A depiction of the personfication of the username {winner} smiling as a deformed and hideous being holding the world's smallest trophy."
         ]
-        prompt = random.choice(prompts)
 
-    # Add details from the round data to enhance the prompt
-    for question_data in round_data["questions"]:
-        question_number = question_data["question_number"]
-        question_text = question_data["question_text"]
-        correct_answers = question_data["correct_answers"]
-        correct_answers_str = ', '.join(map(str, correct_answers))
-        prompt += f"\nTrivia Question {question_number}: {question_text} (Correct Answers: {correct_answers_str})"
+        message = f"💩🤮 {winner_at}...you are the worst."
+        
+        prompt = random.choice(prompts)
 
     # Generate the image using DALL-E
     try:
@@ -194,16 +189,12 @@ def generate_round_summary_image(round_data, winner):
 
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+        send_message(target_room_id, message)
         return None
         
     except openai.OpenAIError as e:
         print(f"Error generating image: {e}")
         return "Image generation failed!"
-
-
-
-
-
 
 
 
@@ -2939,6 +2930,7 @@ def update_round_streaks(user):
         gpt_message = f"\n{gpt_summary}\n"
         send_message(target_room_id, gpt_message)
 
+        #if current_longest_round_streak['streak'] % 5 == 0:
         generate_round_summary_image(round_data, user)
 
     # Perform all MongoDB operations at the end

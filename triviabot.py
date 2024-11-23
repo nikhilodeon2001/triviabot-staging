@@ -1683,7 +1683,7 @@ def scramble_text(input_text):
 
 
 
-def generate_round_summary(round_data, winner):\
+def generate_round_summary(round_data, winner):
     global nice_okra
     #ask_magic_number(winner) 
 

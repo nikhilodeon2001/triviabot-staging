@@ -2598,6 +2598,8 @@ def derivative_checker(response, answer):
 def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     threshold = 0.90    
 
+    user_answer = user_answer.replace("\uFFFC", "")  # Remove U+FFFC
+
     if user_answer == correct_answer:
         return True
 

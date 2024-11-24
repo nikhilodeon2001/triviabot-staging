@@ -542,7 +542,7 @@ def process_wof_guesses(winner, answer):
                     # Check if the message content matches the answer
                     if message_content == answer:
                         react_to_message(event_id, target_room_id, "okra21")
-                        success_message = f"✅🎉 Correct @{winner}! {answer}"
+                        success_message = f"\n✅🎉 Correct @{winner}! {answer}\n"
                         send_message(target_room_id, success_message)
                         wf_winner = True
                         return None
@@ -626,7 +626,7 @@ def ask_wof_letters(winner, answer):
                     if message_content.upper() == answer:
                         react_to_message(event_id, target_room_id, "okra21")
                         wf_winner = True
-                        success_message = f"🎉 Correct @{winner}! 🎉 {answer} 🎉"
+                        success_message = f"\n✅🎉 Correct @{winner}! {answer}\n"
                         send_message(target_room_id, success_message)
                         return True
                     

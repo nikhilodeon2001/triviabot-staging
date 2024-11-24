@@ -542,7 +542,7 @@ def process_wof_guesses(winner, answer):
                     # Check if the message content matches the answer
                     if message_content == answer:
                         react_to_message(event_id, target_room_id, "okra21")
-                        success_message = f"🎉 Correct @{winner}! 🎉 {answer} 🎉"
+                        success_message = f"✅🎉 Correct @{winner}! {answer}"
                         send_message(target_room_id, success_message)
                         wf_winner = True
                         return None
@@ -1688,15 +1688,6 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
 
-    elif nice_okra == True:
-         prompt = (
-            f"The winner of the trivia round is {winner_at}. "
-            f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
-            "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
-            "Create no more than 5 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
-        )
-
     elif magic_number_correct == True or wf_winner == True:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
@@ -1706,6 +1697,15 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
     
+    elif nice_okra == True:
+         prompt = (
+            f"The winner of the trivia round is {winner_at}. "
+            f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
+            "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
+            "Create no more than 5 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+  
     else:
         prompts = [
             f"The winner of the trivia round is {winner_at}. Roast the winning player about their username and be very specific and negative in your roast. Insult specific responses they gave during the round. Create no more than 5 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner using angry and rough language. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n",

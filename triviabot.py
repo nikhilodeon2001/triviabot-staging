@@ -226,7 +226,7 @@ def generate_round_summary_image(round_data, winner):
             f"A personfication of {winner} getting yelled at by an angry, giant okra."
         ]
 
-        message = f"💩🤮 {winner_at}...your streak deserves this terrible image.\n"
+        message = f"🔥💖 {winner_at} nice streak. This one's for you baby.\n"
         
         prompt = random.choice(prompts)
     
@@ -3004,7 +3004,7 @@ def update_round_streaks(user):
             time.sleep(4)
             remaining_games = 5 - (current_longest_round_streak['streak'] % 5)
             dynamic_emoji = number_to_emoji[remaining_games]
-            image_message = f"\n{dynamic_emoji}📸 @{user} Win {remaining_games} more in a row. Earn an image.\n"
+            image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
             send_message(target_room_id, image_message)
             time.sleep(1)
 

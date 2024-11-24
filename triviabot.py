@@ -220,7 +220,8 @@ def generate_round_summary_image(round_data, winner):
     
     else:
         prompts = [
-            f"A Renaissance painting of the personfication of {winner} holding a piece of okra. The painting is elegant and refined.",
+            f"A Renaissance painting of a personfication of {winner} holding a piece of okra. The painting is elegant and refined.",
+            f"A 1-panel comic of a personfication of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers.",
             f"A personfication of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal.",
             f"A personfication of {winner} getting yelled at by an angry, giant okra."
         ]

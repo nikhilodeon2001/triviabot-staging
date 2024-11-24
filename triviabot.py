@@ -226,7 +226,7 @@ def generate_round_summary_image(round_data, winner):
             f"A personfication of {winner} getting yelled at by an angry, giant okra."
         ]
 
-        message = f"🔥💖 {winner_at} nice streak. This one's for you baby.\n"
+        message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
         
         prompt = random.choice(prompts)
     

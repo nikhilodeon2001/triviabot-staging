@@ -88,11 +88,11 @@ magic_time = 10
 magic_number = 0000
 
 
-num_mysterybox_clues_default = 2
+num_mysterybox_clues_default = 1
 num_mysterybox_clues = num_mysterybox_clues_default
 num_crossword_clues_default = 2
 num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 3
+num_jeopardy_clues_default = 2
 num_jeopardy_clues = num_jeopardy_clues_default
 num_wof_clues_default = 0
 num_wof_clues = num_wof_clues_default
@@ -1135,7 +1135,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -1147,6 +1147,7 @@ def process_round_options(round_winner, winner_points):
     yolo_mode = yolo_mode_default
     magic_number_correct = False
     wf_winner = False
+    nice_okra = False
     num_math_questions = num_math_questions_default
     num_stats_questions = num_stats_questions_default
     image_questions = image_questions_default
@@ -2991,7 +2992,7 @@ def update_round_streaks(user):
         gpt_message = f"\n{gpt_summary}\n"
         send_message(target_room_id, gpt_message)
         
-        if current_longest_round_streak['streak'] % 5 == 0:
+        if current_longest_round_streak['streak'] % 3 == 0:
             generate_round_summary_image(round_data, user)
         else:
             number_to_emoji = {
@@ -3002,7 +3003,7 @@ def update_round_streaks(user):
             }
             
             time.sleep(4)
-            remaining_games = 5 - (current_longest_round_streak['streak'] % 5)
+            remaining_games = 3 - (current_longest_round_streak['streak'] % 3)
             dynamic_emoji = number_to_emoji[remaining_games]
             image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
             send_message(target_room_id, image_message)

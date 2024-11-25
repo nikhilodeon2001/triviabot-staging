@@ -79,7 +79,6 @@ questions_per_round = int(os.getenv("questions_per_round"))
 time_between_rounds = int(os.getenv("time_between_rounds"))
 time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
-questions_module = os.getenv("questions_module", "trivia_questions")
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
 id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 15000, "jeopardy": 100000, "wof": 1500}
@@ -2197,18 +2196,6 @@ def load_global_variables():
         "timeout": "3000",  # Timeout to quickly retrieve messages
         "filter": json.dumps(filter_json),  # Filter JSON as a parameter
     }
-
-    #print(f"target room id is: {target_room_id}")
-    #print(f"bot user id is: {bot_user_id}")
-    #print(f"bearer token is: {bearer_token}")
-    #print(f"question time is: {question_time}")
-    #print(f"questions per round is: {questions_per_round}")
-    #print(f"time between rounds is: {time_between_rounds}")
-    #print(f"time between questions is: {time_between_questions}")
-    #print(f"questions module: {questions_module}")
-    #print(f"max retries is: {max_retries}")
-    #print(f"delay_between_retries is: {delay_between_retries}")
-   
     
 def save_data_to_mongo(collection_name, document_id, data):
     """
@@ -3152,13 +3139,6 @@ def show_standings():
         send_message(target_room_id, standing_message)
 
 
-def load_trivia_questions():
-    #Dynamically load the trivia_questions module
-    trivia_module = importlib.import_module(questions_module)
-    importlib.reload(trivia_module)  # Reload in case the file has changed
-    return trivia_module.trivia_questions
-
-
 def store_question_ids_in_mongo(question_ids, question_type):
     db = connect_to_mongodb()
     collection_name = f"asked_{question_type}_questions"
@@ -3775,7 +3755,7 @@ def start_trivia_round():
     ]
     
 # Function to start the trivia round
-    global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, questions_module, filler_words
+    global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
     global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
 

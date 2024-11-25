@@ -3170,8 +3170,6 @@ def select_trivia_questions(questions_per_round):
         if remaining_needed > 0:
 
             trivia_collection = db["trivia_questions"]
-            # Define the maximum number of questions per category
-            max_questions_per_category = 2
 
             if image_questions == False:
                 # Define a list of substrings to exclude in URLs
@@ -3192,12 +3190,6 @@ def select_trivia_questions(questions_per_round):
                             "questions": {"$push": "$$ROOT"}  # Push full document to each category group
                         }
                     },
-                    {
-                        "$project": {
-                            "category": "$_id",
-                            "questions": {"$slice": ["$questions", max_questions_per_category]}  # Limit number of questions per category
-                        }
-                    },
                     {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
                     {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
                     {"$sample": {"size": remaining_needed}}  # Sample from the resulting limited set
@@ -3210,12 +3202,6 @@ def select_trivia_questions(questions_per_round):
                         "$group": {
                             "_id": "$category",
                             "questions": {"$push": "$$ROOT"}  # Push full document to each category group
-                        }
-                    },
-                    {
-                        "$project": {
-                            "category": "$_id",
-                            "questions": {"$slice": ["$questions", max_questions_per_category]}  # Limit number of questions per category
                         }
                     },
                     {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
@@ -3659,7 +3645,6 @@ def get_random_trivia_question():
         trivia_collection = db["trivia_questions"]
         
         recent_general_ids = get_recent_question_ids_from_mongo("general")
-        max_questions_per_category = 2
             
         pipeline = [
             {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
@@ -3667,12 +3652,6 @@ def get_random_trivia_question():
                 "$group": {
                     "_id": "$category",
                     "questions": {"$push": "$$ROOT"}  # Push full document to each category group
-                }
-            },
-            {
-                "$project": {
-                    "category": "$_id",
-                    "questions": {"$slice": ["$questions", max_questions_per_category]}  # Limit number of questions per category
                 }
             },
             {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents

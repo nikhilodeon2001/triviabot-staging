@@ -231,7 +231,7 @@ def nice_okra_option(winner):
             if since_token:
                 params["since"] = since_token
 
-            time.sleep(0.5)
+            time.sleep(1)
             response = requests.get(sync_url, headers=headers, params=params)
 
             if response.status_code != 200:
@@ -586,7 +586,7 @@ def process_wof_guesses(winner, answer):
             if since_token:
                 params["since"] = since_token
                 
-            time.sleep(0.5)
+            time.sleep(1)
             response = requests.get(sync_url, headers=headers, params=params)
 
             if response.status_code != 200:
@@ -667,7 +667,7 @@ def ask_wof_letters(winner, answer):
             if since_token:
                 params["since"] = since_token
 
-            time.sleep(0.5)
+            time.sleep(1)
             response = requests.get(sync_url, headers=headers, params=params)
 
             if response.status_code != 200:

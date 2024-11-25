@@ -1,5 +1,3 @@
-
-
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -29,6 +27,8 @@ import openai
 import main
 import subprocess
 import re
+import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
@@ -115,6 +115,37 @@ question_categories = [
 fixed_letters = ['O', 'K', 'R', 'A']
 
 categories_to_exclude = []  
+
+
+
+def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None):
+    try:
+        # Step 1: Download the image from the URL
+        response = requests.get(image_url, stream=True)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        file_data = response.content
+
+        # Step 2: Determine object name if not provided
+        if not object_name:
+            object_name = image_url.split("/")[-1]  # Use the file name from the URL
+
+        # Step 3: Include the folder in the object name
+        s3_key = f"{folder_name}/{object_name}"  # Add the folder name to the object path
+
+        
+        # Step 3: Connect to S3 and upload the file
+        s3_client = boto3.client("s3")
+        s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=file_data)
+
+        # Step 4: Generate and return the S3 URL
+        s3_url = f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
+        return f"Image uploaded successfully: {s3_url}"
+
+    except requests.exceptions.RequestException as req_err:
+        return f"Error downloading image: {req_err}"
+
+    except (BotoCoreError, ClientError) as boto_err:
+        return f"Error uploading to S3: {boto_err}"
 
 
 def load_parameters():
@@ -323,6 +354,7 @@ def generate_round_summary_image(round_data, winner):
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         print(prompt)
         send_message(target_room_id, message)
+        upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None)
         return None
         
     except openai.OpenAIError as e:

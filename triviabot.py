@@ -116,6 +116,7 @@ magic_number_correct = False
 wf_winner = False
 num_wf_letters = 3
 nice_okra = False
+image_wins = 3
 
 image_questions_default = True
 image_questions = image_questions_default
@@ -1684,7 +1685,7 @@ def generate_round_summary(round_data, winner):
         prompt = (
             f"You are {winner_at}. You played trivia against everyone and dominated by a huge margin. "
             "Roast everyone except OkraStrut about how terrible they are and how easily you beat them. Rudely call out specific players except OkraStrut in your roast and call our specific wrong answers they gave. "
-            "Create no more than 5 sentences in total. Be sarcastic, angry, offensive, and use emojis in your comments. End by complimenting yourself, OkraStrut, on how great you are. "
+            "Create no more than 3 sentences in total. Be sarcastic, angry, offensive, and use emojis in your comments. End by complimenting yourself, OkraStrut, on how great you are. "
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
@@ -1693,7 +1694,7 @@ def generate_round_summary(round_data, winner):
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
-            "Create no more than 5 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
+            "Create no more than 3 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
@@ -1703,33 +1704,33 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
-            "Create no more than 5 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Create no more than 3 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
   
     else:
         prompts = [
-            f"The winner of the trivia round is {winner_at}. Roast the winning player about their username and be very specific and negative in your roast. Insult specific responses they gave during the round. Create no more than 5 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner using angry and rough language. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n",
+            f"The winner of the trivia round is {winner_at}. Roast the winning player about their username and be very specific and negative in your roast. Insult specific responses they gave during the round. Create no more than 3 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner using angry and rough language. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n",
         
-            f"Congratulations to {winner_at}, our so-called 'winner' this round. Mock their username in a hilariously petty way and pick apart their responses with sharp sarcasm. Use no more than 5 sentences. Pretend you’re a sore loser begrudgingly announcing their victory, and make it painfully clear how unimpressed you are. Include emojis to spice it up. Here’s the summary of the trivia round with all the juicy details:\nQuestions asked:\n",
+            f"Congratulations to {winner_at}, our so-called 'winner' this round. Mock their username in a hilariously petty way and pick apart their responses with sharp sarcasm. Use no more than 3 sentences. Pretend you’re a sore loser begrudgingly announcing their victory, and make it painfully clear how unimpressed you are. Include emojis to spice it up. Here’s the summary of the trivia round with all the juicy details:\nQuestions asked:\n",
             
-            f"Against all odds, {winner_at} somehow won this round. Mock their username brutally and dig into how undeserved this win feels. Be witty and cutting, and call out their dumb luck and ridiculous guesses that somehow worked. Limit it to 5 sentences, and don’t hold back on the emojis to add insult to injury. Here’s the summary of their 'performance':\nQuestions asked:\n",
+            f"Against all odds, {winner_at} somehow won this round. Mock their username brutally and dig into how undeserved this win feels. Be witty and cutting, and call out their dumb luck and ridiculous guesses that somehow worked. Limit it to 3 sentences, and don’t hold back on the emojis to add insult to injury. Here’s the summary of their 'performance':\nQuestions asked:\n",
             
-            f"And the winner is {winner_at}... yawn. Roast their username and rip into how underwhelming their answers were, even if they were correct. Keep it savage, sarcastic, and peppered with emojis to show how little you think of their so-called victory. No more than 5 sentences. Detailed trivia summary for your ammo:\nQuestions asked:\n",
+            f"And the winner is {winner_at}... yawn. Roast their username and rip into how underwhelming their answers were, even if they were correct. Keep it savage, sarcastic, and peppered with emojis to show how little you think of their so-called victory. No more than 3 sentences. Detailed trivia summary for your ammo:\nQuestions asked:\n",
             
-            f"All hail {winner_at}, the king/queen of try-hards this round! Make fun of their username like a middle school bully and destroy their overly enthusiastic responses with ruthless sarcasm. Call out their desperation to win and how unimpressive their actual performance was. Use no more than 5 sentences, and go hard with emojis to hammer the point home. Summary of their desperate efforts:\nQuestions asked:\n",
+            f"All hail {winner_at}, the king/queen of try-hards this round! Make fun of their username like a middle school bully and destroy their overly enthusiastic responses with ruthless sarcasm. Call out their desperation to win and how unimpressive their actual performance was. Use no more than 3 sentences, and go hard with emojis to hammer the point home. Summary of their desperate efforts:\nQuestions asked:\n",
             
-            f"{winner_at} squeaked by with a win, but let’s not pretend it was impressive. Tear into their username and roast how they scraped by with questionable answers. Make it snarky, mean, and emoji-heavy while implying the win is barely worth celebrating. Limit to 5 sentences. Here’s the summary of this tragic triumph:\nQuestions asked:\n",
+            f"{winner_at} squeaked by with a win, but let’s not pretend it was impressive. Tear into their username and roast how they scraped by with questionable answers. Make it snarky, mean, and emoji-heavy while implying the win is barely worth celebrating. Limit to 3 sentences. Here’s the summary of this tragic triumph:\nQuestions asked:\n",
             
-            f"Let’s all congratulate {winner_at}, the luckiest loser who somehow won this round. Roast their username into oblivion and highlight their dumbest, most laughable responses. Be savagely sarcastic, offensive, and pepper it with emojis. Keep it short (5 sentences) but devastating. Here’s the summary of their cringe-worthy 'win':\nQuestions asked:\n",
+            f"Let’s all congratulate {winner_at}, the luckiest loser who somehow won this round. Roast their username into oblivion and highlight their dumbest, most laughable responses. Be savagely sarcastic, offensive, and pepper it with emojis. Keep it short (3 sentences) but devastating. Here’s the summary of their cringe-worthy 'win':\nQuestions asked:\n",
             
-            f"{winner_at} won? Really? Roast their username mercilessly and humiliate them for their most embarrassingly bad responses during the round. Destroy their ego with biting sarcasm, insults, and an onslaught of emojis. Keep it concise (5 sentences max). Trivia summary for your arsenal:\nQuestions asked:\n",
+            f"{winner_at} won? Really? Roast their username mercilessly and humiliate them for their most embarrassingly bad responses during the round. Destroy their ego with biting sarcasm, insults, and an onslaught of emojis. Keep it concise (3 sentences max). Trivia summary for your arsenal:\nQuestions asked:\n",
             
-            f"Apparently, {winner_at} won this round. This feels rigged. Mock their username with scathing sarcasm and destroy their responses like a sore loser who can’t believe they lost to this. Use an angry, ridiculous tone with plenty of 🤬 and 🫠 emojis, and cap it at 5 sentences. Here’s the evidence of this travesty:\nQuestions asked:\n",
+            f"Apparently, {winner_at} won this round. This feels rigged. Mock their username with scathing sarcasm and destroy their responses like a sore loser who can’t believe they lost to this. Use an angry, ridiculous tone with plenty of 🤬 and 🫠 emojis, and cap it at 3 sentences. Here’s the evidence of this travesty:\nQuestions asked:\n",
             
-            f"{winner_at} won, and everyone else should be embarrassed. Roast their username and mock their answers to prove they only won because everyone else was worse. Be hilariously mean, sarcastic, and over-the-top in your insults. Keep it to 5 sentences, and sprinkle liberally with emojis. Summary of this sad state of affairs:\nQuestions asked:\n",
+            f"{winner_at} won, and everyone else should be embarrassed. Roast their username and mock their answers to prove they only won because everyone else was worse. Be hilariously mean, sarcastic, and over-the-top in your insults. Keep it to 3 sentences, and sprinkle liberally with emojis. Summary of this sad state of affairs:\nQuestions asked:\n",
             
-            f"A big 'congratulations' to {winner_at} 🙄. Use their username as fodder for the most sarcastic roast ever, and tear into their most ridiculous responses during the game. Be mean, petty, and emoji-heavy, like you’re fake-smiling through gritted teeth. No more than 5 sentences. Here’s the trivia summary:\nQuestions asked:\n"
+            f"A big 'congratulations' to {winner_at} 🙄. Use their username as fodder for the most sarcastic roast ever, and tear into their most ridiculous responses during the game. Be mean, petty, and emoji-heavy, like you’re fake-smiling through gritted teeth. No more than 3 sentences. Here’s the trivia summary:\nQuestions asked:\n"
         ]   
 
         prompt = random.choice(prompts)
@@ -2600,8 +2601,6 @@ def derivative_checker(response, answer):
 def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     threshold = 0.90    
 
-    user_answer = user_answer.replace("\uFFFC", "")  # Remove U+FFFC
-
     if user_answer == correct_answer:
         return True
 
@@ -2782,32 +2781,29 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         event_id = response["event_id"]
         display_name = get_display_name(sender)  # Get the display name from content
         
+        message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
+        message_content = message_content.replace("\uFFFC", "")  # Remove U+FFFC
+
+        if "okra" in message_content.lower() and emoji_mode == True:
+            react_to_message(event_id, target_room_id, "okra1")
+
         # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):
             continue  # Ignore this response since the user has already answered correctly
-
-        message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
-
+        
         # If it's a single numeric answer question, and this user's response is numeric, only record the first one
         if single_answer:
             if display_name in user_first_response:
                 continue  # Skip if we've already recorded a numeric response for this user
         
-
             if is_number(message_content) or message_content.lower() in {"a", "b", "c", "d", "t", "f", "true", "false"}:
-            #if is_number(message_content) or message_content.lower() in {"a", "b", "c", "d", "t", "f", "true", "false"}:    
                 user_first_response[display_name] = message_content
             else:
                 continue  # Skip non-numeric responses for single numeric questions
         
         # Log user submission (MongoDB operation)
         log_user_submission(display_name)
-                            
-        normalized_message_content = normalize_text(message_content)
-        
-        if "okra" in message_content.lower() and emoji_mode == True:
-            react_to_message(event_id, target_room_id, "okra1")
-            
+                
         # Indicate that there was at least one response
         has_responses = True
                                 
@@ -2992,20 +2988,31 @@ def update_round_streaks(user):
         gpt_message = f"\n{gpt_summary}\n"
         send_message(target_room_id, gpt_message)
         
-        if current_longest_round_streak['streak'] % 3 == 0:
+        if current_longest_round_streak['streak'] % image_wins == 0:
             generate_round_summary_image(round_data, user)
         else:
             number_to_emoji = {
                 1: "1️⃣",
                 2: "2️⃣",
                 3: "3️⃣",
-                4: "4️⃣"
+                4: "4️⃣",
+                5: "5️⃣",
+                6: "6️⃣",
+                7: "7️⃣",
+                8: "8️⃣",
+                9: "9️⃣",
+                10: "🔟"
             }
             
             time.sleep(4)
-            remaining_games = 3 - (current_longest_round_streak['streak'] % 3)
+            remaining_games = image_wins - (current_longest_round_streak['streak'] % image_wins)
             dynamic_emoji = number_to_emoji[remaining_games]
-            image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
+            
+            if remaining_games == 1:
+                image_message = f"\n{dynamic_emoji}🎨 @{user} Win the next game and I'll draw you something.\n"
+            else:
+                image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
+                
             send_message(target_room_id, image_message)
             time.sleep(1)
 
@@ -3129,7 +3136,6 @@ def select_trivia_questions(questions_per_round):
         ]
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         selected_questions.extend(wof_questions)
-        print(f"wof questions: {wof_questions}")
  
         # Fetch mysterybox questions using the random subset method
         mysterybox_collection = db["mysterybox_questions"]
@@ -3139,8 +3145,6 @@ def select_trivia_questions(questions_per_round):
         ]
         mysterybox_questions = list(mysterybox_collection.aggregate(pipeline_mysterybox))
         selected_questions.extend(mysterybox_questions)
-        print(f"mysterybox questions: {mysterybox_questions}")
-
         
         # Fetch crossword questions using the random subset method
         crossword_collection = db["crossword_questions"]
@@ -3150,7 +3154,6 @@ def select_trivia_questions(questions_per_round):
         ]
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
         selected_questions.extend(crossword_questions)
-        print(f"crossword questions: {crossword_questions}")
 
         # Fetch jeopardy questions using the random subset method
         jeopardy_collection = db["jeopardy_questions"]
@@ -3160,15 +3163,11 @@ def select_trivia_questions(questions_per_round):
         ]
         jeopardy_questions = list(jeopardy_collection.aggregate(pipeline_jeopardy))
         selected_questions.extend(jeopardy_questions)
-        print(f"jeopardy questions: {jeopardy_questions}")
 
         # Calculate the remaining questions needed for general trivia
         remaining_needed = max(questions_per_round - len(wof_questions) - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions) - len(math_questions) - len(stats_questions), 0)
-        print(remaining_needed)
-        print(f"categories to exclude: {categories_to_exclude}")
         
         if remaining_needed > 0:
-
             trivia_collection = db["trivia_questions"]
 
             if image_questions == False:
@@ -3211,7 +3210,6 @@ def select_trivia_questions(questions_per_round):
 
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
-            print(f"trivia questions: {trivia_questions}")
 
             # Store separate sets of IDs in MongoDB only if they are non-empty
             wof_question_ids = [doc["_id"] for doc in wof_questions]

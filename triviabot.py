@@ -3797,6 +3797,7 @@ def start_trivia_round():
 
             # Load global varaiables at the start of round
             load_global_variables()
+            load_parameters()
             
             # Load existing streak data from the file
             load_streak_data()
@@ -3894,6 +3895,7 @@ try:
     
     # Load needed variables for sync
     load_global_variables()
+    load_parameters()
 
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    

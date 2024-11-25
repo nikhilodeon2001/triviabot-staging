@@ -3165,7 +3165,7 @@ def select_trivia_questions(questions_per_round):
         # Calculate the remaining questions needed for general trivia
         remaining_needed = max(questions_per_round - len(wof_questions) - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions) - len(math_questions) - len(stats_questions), 0)
         print(remaining_needed)
-        print(f"categories to exclude: {catgegories_to_exclude}")
+        print(f"categories to exclude: {categories_to_exclude}")
         
         if remaining_needed > 0:
 

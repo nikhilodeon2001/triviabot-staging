@@ -3129,6 +3129,7 @@ def select_trivia_questions(questions_per_round):
         ]
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         selected_questions.extend(wof_questions)
+        print(f"wof questions: {wof_questions}")
  
         # Fetch mysterybox questions using the random subset method
         mysterybox_collection = db["mysterybox_questions"]
@@ -3138,6 +3139,7 @@ def select_trivia_questions(questions_per_round):
         ]
         mysterybox_questions = list(mysterybox_collection.aggregate(pipeline_mysterybox))
         selected_questions.extend(mysterybox_questions)
+        print(f"mysterybox questions: {mysterybox_questions}")
 
         
         # Fetch crossword questions using the random subset method
@@ -3148,6 +3150,7 @@ def select_trivia_questions(questions_per_round):
         ]
         crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
         selected_questions.extend(crossword_questions)
+        print(f"crossword questions: {crossword_questions}")
 
         # Fetch jeopardy questions using the random subset method
         jeopardy_collection = db["jeopardy_questions"]
@@ -3157,10 +3160,13 @@ def select_trivia_questions(questions_per_round):
         ]
         jeopardy_questions = list(jeopardy_collection.aggregate(pipeline_jeopardy))
         selected_questions.extend(jeopardy_questions)
+        print(f"jeopardy questions: {jeopardy_questions}")
 
         # Calculate the remaining questions needed for general trivia
         remaining_needed = max(questions_per_round - len(wof_questions) - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions) - len(math_questions) - len(stats_questions), 0)
-
+        print(remaining_needed)
+        print(f"categories to exclude: {catgegories_to_exclude}")
+        
         if remaining_needed > 0:
 
             trivia_collection = db["trivia_questions"]
@@ -3219,6 +3225,7 @@ def select_trivia_questions(questions_per_round):
 
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
+            print(f"trivia questions: {trivia_questions}")
 
             # Store separate sets of IDs in MongoDB only if they are non-empty
             wof_question_ids = [doc["_id"] for doc in wof_questions]

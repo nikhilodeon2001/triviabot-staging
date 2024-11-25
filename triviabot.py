@@ -231,6 +231,7 @@ def nice_okra_option(winner):
             if since_token:
                 params["since"] = since_token
 
+            time.sleep(0.5)
             response = requests.get(sync_url, headers=headers, params=params)
 
             if response.status_code != 200:
@@ -265,8 +266,6 @@ def nice_okra_option(winner):
                         react_to_message(event_id, target_room_id, "okra21")
                         nice_okra = True
                         return None
-            
-            time.sleep(0.3)
             
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
@@ -586,7 +585,8 @@ def process_wof_guesses(winner, answer):
         try:
             if since_token:
                 params["since"] = since_token
-
+                
+            time.sleep(0.5)
             response = requests.get(sync_url, headers=headers, params=params)
 
             if response.status_code != 200:
@@ -628,8 +628,6 @@ def process_wof_guesses(winner, answer):
 
                     # If no valid answer was guessed, react with a neutral reaction
                     react_to_message(event_id, target_room_id, "okra5")
-                    
-            time.sleep(0.3)
     
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
@@ -669,6 +667,7 @@ def ask_wof_letters(winner, answer):
             if since_token:
                 params["since"] = since_token
 
+            time.sleep(0.5)
             response = requests.get(sync_url, headers=headers, params=params)
 
             if response.status_code != 200:
@@ -721,8 +720,6 @@ def ask_wof_letters(winner, answer):
                         if len(wf_letters) == num_wf_letters:
                             react_to_message(event_id, target_room_id, "okra21")
                             break
-            
-            time.sleep(0.3)
             
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)

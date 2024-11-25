@@ -87,17 +87,6 @@ first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
 
-
-num_mysterybox_clues_default = 3
-num_mysterybox_clues = num_mysterybox_clues_default
-num_crossword_clues_default = 0
-num_crossword_clues = num_crossword_clues_default
-num_jeopardy_clues_default = 3
-num_jeopardy_clues = num_jeopardy_clues_default
-num_wof_clues_default = 0
-num_wof_clues = num_wof_clues_default
-num_wof_clues_final_default = 3
-num_wof_clues_final = num_wof_clues_final_default
 ghost_mode_default = False
 ghost_mode = ghost_mode_default
 god_mode_default = False
@@ -107,16 +96,9 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
-num_math_questions_default = 0
-num_math_questions = num_math_questions_default
-num_stats_questions_default = 0
-num_stats_questions = num_stats_questions_default
-
 magic_number_correct = False
 wf_winner = False
-num_wf_letters = 3
 nice_okra = False
-image_wins = 3
 
 image_questions_default = True
 image_questions = image_questions_default
@@ -133,6 +115,103 @@ question_categories = [
 fixed_letters = ['O', 'K', 'R', 'A']
 
 categories_to_exclude = []  
+
+
+def load_parameters():
+    global image_wins
+    global num_mysterybox_clues_default
+    global num_crossword_clues_default
+    global num_jeopardy_clues_default
+    global num_wof_clues_default
+    global num_wof_clues_final_default
+    global num_mysterybox_clues
+    global num_crossword_clues
+    global num_jeopardy_clues
+    global num_wof_clues
+    global num_wof_clues_final
+    global num_wf_letters
+    global num_math_questions_default
+    global num_math_questions
+    global num_stats_questions_default
+    global num_stats_questions
+ 
+    
+    # Default values
+    default_values = {
+        "image_wins": 5,
+        "num_mysterybox_clues_default": 3,
+        "num_crossword_clues_default": 0,
+        "num_jeopardy_clues_default": 3,
+        "num_wof_clues_default": 0,
+        "num_wof_clues_final_default": 3,
+        "num_wf_letters": 3,
+        "num_math_questions_default": 0,
+        "num_stats_questions_default": 0
+    }
+
+    
+    for attempt in range(max_retries):
+        try:
+            db = connect_to_mongodb()
+
+            # Retrieve all parameter documents
+            documents = db.parameters.find()
+
+            # Initialize variables with defaults
+            parameters = {key: default_values[key] for key in default_values}
+
+            # Overwrite defaults with values from the database
+            for doc in documents:
+                if doc["_id"] in parameters:
+                    parameters[doc["_id"]] = int(doc.get("value", parameters[doc["_id"]]))
+
+            # Assign global variables
+            image_wins = parameters["image_wins"]
+            num_mysterybox_clues_default = parameters["num_mysterybox_clues_default"]
+            num_crossword_clues_default = parameters["num_crossword_clues_default"]
+            num_jeopardy_clues_default = parameters["num_jeopardy_clues_default"]
+            num_wof_clues_default = parameters["num_wof_clues_default"]
+            num_wof_clues_final_default = parameters["num_wof_clues_final_default"]
+            num_wf_letters = parameters["num_wf_letters"]
+            num_math_questions_default = parameters["num_math_questions_default"]
+            num_stats_questions_default = parameters["num_stats_questions_default"]
+
+            num_mysterybox_clues = num_mysterybox_clues_default
+            num_crossword_clues = num_crossword_clues_default
+            num_jeopardy_clues = num_jeopardy_clues_default
+            num_wof_clues = num_wof_clues_default
+            num_wof_clues_final = num_wof_clues_final_default
+            num_math_questions = num_math_questions_default
+            num_stats_questions = num_stats_questions_default
+            # Exit loop if successful
+            break
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Attempt {attempt + 1} failed: {e}")
+            if attempt < max_retries - 1:
+                print(f"Retrying in {delay_between_retries} seconds...")
+                time.sleep(delay_between_retries)
+            else:
+                print("Max retries reached. Data loading failed.")
+                # Set all variables to defaults if loading fails
+                image_wins = default_values["image_wins"]
+                num_mysterybox_clues_default = default_values["num_mysterybox_clues_default"]
+                num_crossword_clues_default = default_values["num_crossword_clues_default"]
+                num_jeopardy_clues_default = default_values["num_jeopardy_clues_default"]
+                num_wof_clues_default = default_values["num_wof_clues_default"]
+                num_wof_clues_final_default = default_values["num_wof_clues_final_default"]
+                num_wf_letters = default_values["num_wf_letters"]
+                num_math_questions_default = default_values["num_math_questions_default"]
+                num_stats_questions_default = default_values["num_stats_questions_default"]
+
+                num_mysterybox_clues = num_mysterybox_clues_default
+                num_crossword_clues = num_crossword_clues_default
+                num_jeopardy_clues = num_jeopardy_clues_default
+                num_wof_clues = num_wof_clues_default
+                num_wof_clues_final = num_wof_clues_final_default
+                num_math_questions = num_math_questions_default
+                num_stats_questions = num_stats_questions_default
 
 
 def nice_okra_option(winner):
@@ -3122,9 +3201,9 @@ def select_trivia_questions(questions_per_round):
 
         selected_questions = []
 
+        
         math_questions = [get_math_question() for _ in range(num_math_questions)]
         stats_questions = [get_stats_question() for _ in range(num_stats_questions)]
-        
         selected_questions.extend(math_questions)
         selected_questions.extend(stats_questions)
 

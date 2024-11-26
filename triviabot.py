@@ -143,10 +143,12 @@ def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='g
         return f"Image uploaded successfully: {s3_url}"
 
     except requests.exceptions.RequestException as req_err:
+        print(f"Error downloading image: {req_err}")
         return f"Error downloading image: {req_err}"
 
     except (BotoCoreError, ClientError) as boto_err:
         return f"Error uploading to S3: {boto_err}"
+        print(f"Error uploading to S3: {boto_err}")
 
 
 def load_parameters():

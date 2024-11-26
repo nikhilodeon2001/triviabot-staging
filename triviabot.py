@@ -118,7 +118,7 @@ fixed_letters = ['O', 'K', 'R', 'A']
 categories_to_exclude = []  
 
 
-def is_sovereign(user):
+def sovereign_check(user):
     db = connect_to_mongodb()
     sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
 
@@ -1798,7 +1798,7 @@ def generate_round_summary(round_data, winner):
     #ask_magic_number(winner) 
 
     winner_coffees = get_coffees(winner)
-    is_sovereign = is_sovereign(winner)
+    is_sovereign = sovereign_check(winner)
 
     if winner_coffees > 0 and wf_winner == False:
         nice_okra_option(winner)

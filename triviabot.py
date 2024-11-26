@@ -355,7 +355,7 @@ def generate_round_summary_image(round_data, winner):
         image = image.resize((256, 256))  # Resize to 256x256
         
         # Save resized image to a buffer
-        buffer = BytesIO()
+        buffer = io.BytesIO()
         image.save(buffer, format="PNG")
         buffer.seek(0)
         

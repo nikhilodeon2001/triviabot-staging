@@ -119,8 +119,10 @@ categories_to_exclude = []
 
 
 
-def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None, winner):
-    try:        
+def upload_image_to_s3(image_url, winner):
+    try:
+        bucket_name='triviabotwebsite'
+        folder_name='generated-images'
         # Step 1: Download the image from the URL
         response = requests.get(image_url, stream=True)
         response.raise_for_status()  # Raise an HTTPError for bad responses
@@ -359,7 +361,7 @@ def generate_round_summary_image(round_data, winner):
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         print(prompt)
         send_message(target_room_id, message)
-        upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None, winner)
+        upload_image_to_s3(image_url, winner)
         return None
         
     except openai.OpenAIError as e:

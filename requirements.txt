@@ -4,7 +4,7 @@ openai==0.28
 pymongo==4.8.0
 pytz==2024.1
 requests==2.32.3
-urllib3==2.2.2
+urllib3
 sentry-sdk==2.14.0
 matrix-nio==0.25.1
 certifi==2024.8.30

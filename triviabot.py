@@ -29,6 +29,7 @@ import subprocess
 import re
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
+import logging
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
@@ -120,6 +121,20 @@ categories_to_exclude = []
 
 def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None):
     try:
+        session = boto3.Session()
+        credentials = session.get_credentials()
+        print("AWS Credentials:", credentials.get_frozen_credentials())
+
+        s3_client = boto3.client("s3")
+        
+        try:
+            buckets = s3_client.list_buckets()
+            print("Buckets:", [bucket["Name"] for bucket in buckets["Buckets"]])
+        except Exception as e:
+            print("Error accessing S3:", e)
+
+        logging.basicConfig(level=logging.DEBUG)
+        boto3.set_stream_logger(name='botocore')
         
         # Step 1: Download the image from the URL
         response = requests.get(image_url, stream=True)
@@ -137,7 +152,7 @@ def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='g
         # Step 3: Connect to S3 and upload the file
         s3_client = boto3.client("s3")
         print("here")
-        s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=file_data)
+        s3_client.put_object(Bucket=bucket_name, Key=s3_key, Body=file_data)
         print("now here")
 
         # Step 4: Generate and return the S3 URL

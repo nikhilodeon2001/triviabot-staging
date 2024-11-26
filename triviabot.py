@@ -359,7 +359,7 @@ def generate_round_summary_image(round_data, winner):
         print(prompt)
         send_message(target_room_id, message)
         print("first here")
-        upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None)
+        upload_image_to_s3("https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif", bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None)
         return None
         
     except openai.OpenAIError as e:

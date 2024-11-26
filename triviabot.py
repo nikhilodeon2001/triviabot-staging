@@ -351,7 +351,7 @@ def generate_round_summary_image(round_data, winner):
 
         # Download and resize the image to 256x256
         image_data = requests.get(image_url).content
-        image = Image.open(BytesIO(image_data))
+        image = Image.open(io.BytesIO(image_data))
         image = image.resize((256, 256))  # Resize to 256x256
         
         # Save resized image to a buffer

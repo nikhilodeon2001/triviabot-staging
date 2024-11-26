@@ -140,7 +140,7 @@ def upload_image_to_s3(buffer, winner):
              
         # Step 3: Connect to S3 and upload the file
         s3_client = boto3.client("s3")
-        s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=buffer.getValue(), ContentType="image/png")
+        s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=buffer.getvalue(), ContentType="image/png")
 
         # Step 4: Generate and return the S3 URL
         print("Image uploaded successfully")

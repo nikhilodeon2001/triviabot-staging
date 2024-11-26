@@ -118,6 +118,15 @@ fixed_letters = ['O', 'K', 'R', 'A']
 categories_to_exclude = []  
 
 
+def is_sovereign(user):
+    db = connect_to_mongodb()
+    sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
+
+    if user in sovereigns:
+        return True
+    else:
+        return False
+
 
 def upload_image_to_s3(image_url, winner):
     try:
@@ -1789,6 +1798,7 @@ def generate_round_summary(round_data, winner):
     #ask_magic_number(winner) 
 
     winner_coffees = get_coffees(winner)
+    is_soverign = is_sovereign(winner)
 
     if winner_coffees > 0 and wf_winner == False:
         nice_okra_option(winner)
@@ -1805,7 +1815,16 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
 
-    elif magic_number_correct == True or wf_winner == True:
+    elif (magic_number_correct == True or wf_winner == True) and is_sovereign(user) == True:
+         prompt = (
+            f"The winner of the trivia round is {winner_at}. "
+            "Love bomb the winning player about their username and be very specific, positive, and loving. Give them a lot of admiration for being a previous Sovereign. Then mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
+            "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+
+    elif (magic_number_correct == True or wf_winner == True) and is_sovereign(user) == False:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
@@ -1813,8 +1832,17 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
+
+    elif nice_okra == True and is_sovereign(user) == True:
+         prompt = (
+            f"The winner of the trivia round is {winner_at}. "
+            f"Start by mentioning that {winner_at} donated to the trivia cause and give them a lot of kudos for being a previous Sovereign. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
+            "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
+            "Create no more than 4 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
     
-    elif nice_okra == True:
+    elif nice_okra == True and is_sovereign(user) == False:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "

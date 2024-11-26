@@ -121,6 +121,7 @@ categories_to_exclude = []
 def sovereign_check(user):
     db = connect_to_mongodb()
     sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
+    print(sovereigns)
 
     if user in sovereigns:
         return True

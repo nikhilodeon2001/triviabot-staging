@@ -1815,7 +1815,7 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
 
-    elif (magic_number_correct == True or wf_winner == True) and is_sovereign(user) == True:
+    elif (magic_number_correct == True or wf_winner == True) and is_sovereign(winner) == True:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Give them a lot of admiration for being a previous Sovereign. Then mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
@@ -1824,7 +1824,7 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
 
-    elif (magic_number_correct == True or wf_winner == True) and is_sovereign(user) == False:
+    elif (magic_number_correct == True or wf_winner == True) and is_sovereign(winner) == False:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
@@ -1833,7 +1833,7 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
 
-    elif nice_okra == True and is_sovereign(user) == True:
+    elif nice_okra == True and is_sovereign(winner) == True:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause and give them a lot of kudos for being a previous Sovereign. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
@@ -1842,7 +1842,7 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
     
-    elif nice_okra == True and is_sovereign(user) == False:
+    elif nice_okra == True and is_sovereign(winner) == False:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "

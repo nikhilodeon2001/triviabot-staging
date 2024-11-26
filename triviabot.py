@@ -360,13 +360,13 @@ def generate_round_summary_image(round_data, winner):
         response = openai.Image.create(
             prompt=prompt,
             n=1,
-            size="256x256"  # Adjust size as needed
+            size="512x512"  # Adjust size as needed
         )
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
 
         image_mxc, image_width, image_height = download_image_from_url(image_url)
-        send_image(target_room_id, image_mxc, 512, 512, image_size=100)
+        send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         print(prompt)
         send_message(target_room_id, message)
         upload_image_to_s3(image_url, winner)

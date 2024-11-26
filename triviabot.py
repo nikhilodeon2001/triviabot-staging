@@ -1799,6 +1799,7 @@ def generate_round_summary(round_data, winner):
 
     winner_coffees = get_coffees(winner)
     is_sovereign = sovereign_check(winner)
+    print(is_sovereign)
 
     if winner_coffees > 0 and wf_winner == False:
         nice_okra_option(winner)

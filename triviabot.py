@@ -127,35 +127,23 @@ def sovereign_check(user):
         return False
 
 
-def upload_image_to_s3(image_url, winner):
+def upload_image_to_s3(resized_image, winner):
     try:
         bucket_name='triviabotwebsite'
         folder_name='generated-images'
-        # Step 1: Download the image from the URL
-        response = requests.get(image_url, stream=True)
-        response.raise_for_status()  # Raise an HTTPError for bad responses
-        file_data = response.content
 
         # Step 2: Determine object name if not provided
         pst = pytz.timezone('America/Los_Angeles')
         now = datetime.datetime.now(pst)
         formatted_time = now.strftime('%B %d, %Y %H%M')  # Format: "November 25, 2024 1950"
-        object_name = f"{winner} ({formatted_time}).png"  # Add file extension if needed
+        object_name = f"{folder_name}/{winner} ({formatted_time}).png"
              
-        # Step 3: Include the folder in the object name
-        s3_key = f"{folder_name}/{object_name}"  # Add the folder name to the object path
-
         # Step 3: Connect to S3 and upload the file
         s3_client = boto3.client("s3")
-        s3_client.put_object(Bucket=bucket_name, Key=s3_key, Body=file_data)
+        s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=resized_image, ContentType="image/png")
 
         # Step 4: Generate and return the S3 URL
-        s3_url = f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
-        print(f"Image uploaded successfully: {s3_url}")
-        return s3_url
-
-    except requests.exceptions.RequestException as req_err:
-        print(f"Error downloading image: {req_err}")
+        print("Image uploaded successfully")
         return None
 
     except (BotoCoreError, ClientError) as boto_err:
@@ -320,10 +308,6 @@ def nice_okra_option(winner):
     return None
 
 
-
-
-
-
 def generate_round_summary_image(round_data, winner):
     winner_coffees = get_coffees(winner)
     winner_at = f"@{winner}"
@@ -365,11 +349,22 @@ def generate_round_summary_image(round_data, winner):
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
 
+        # Download and resize the image to 256x256
+        image_data = requests.get(image_url).content
+        image = Image.open(BytesIO(image_data))
+        image = image.resize((256, 256))  # Resize to 256x256
+        
+        # Save resized image to a buffer
+        buffer = BytesIO()
+        image.save(buffer, format="PNG")
+        buffer.seek(0)
+        
+        upload_image_to_s3(image, winner)
+        
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         print(prompt)
         send_message(target_room_id, message)
-        upload_image_to_s3(image_url, winner)
         return None
         
     except openai.OpenAIError as e:

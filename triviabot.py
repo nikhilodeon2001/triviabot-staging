@@ -139,6 +139,7 @@ def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='g
 
         # Step 4: Generate and return the S3 URL
         s3_url = f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
+        print(f"Image uploaded successfully: {s3_url}")
         return f"Image uploaded successfully: {s3_url}"
 
     except requests.exceptions.RequestException as req_err:

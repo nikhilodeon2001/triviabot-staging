@@ -127,7 +127,7 @@ def sovereign_check(user):
         return False
 
 
-def upload_image_to_s3(resized_image, winner):
+def upload_image_to_s3(buffer, winner):
     try:
         bucket_name='triviabotwebsite'
         folder_name='generated-images'
@@ -140,7 +140,7 @@ def upload_image_to_s3(resized_image, winner):
              
         # Step 3: Connect to S3 and upload the file
         s3_client = boto3.client("s3")
-        s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=resized_image, ContentType="image/png")
+        s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=buffer.getValue(), ContentType="image/png")
 
         # Step 4: Generate and return the S3 URL
         print("Image uploaded successfully")
@@ -359,7 +359,7 @@ def generate_round_summary_image(round_data, winner):
         image.save(buffer, format="PNG")
         buffer.seek(0)
         
-        upload_image_to_s3(image, winner)
+        upload_image_to_s3(buffer, winner)
         
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)

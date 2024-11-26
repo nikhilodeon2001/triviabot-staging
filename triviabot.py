@@ -129,11 +129,10 @@ def upload_image_to_s3(image_url, winner):
         file_data = response.content
 
         # Step 2: Determine object name if not provided
-        if not object_name:
-            pst = pytz.timezone('America/Los_Angeles')
-            now = datetime.now(pst)
-            formatted_time = now.strftime('%B %d, %Y %H%M')  # Format: "November 25, 2024 1950"
-            object_name = f"{winner} ({formatted_time}).png"  # Add file extension if needed
+        pst = pytz.timezone('America/Los_Angeles')
+        now = datetime.now(pst)
+        formatted_time = now.strftime('%B %d, %Y %H%M')  # Format: "November 25, 2024 1950"
+        object_name = f"{winner} ({formatted_time}).png"  # Add file extension if needed
              
         # Step 3: Include the folder in the object name
         s3_key = f"{folder_name}/{object_name}"  # Add the folder name to the object path

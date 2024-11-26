@@ -120,7 +120,7 @@ categories_to_exclude = []
 
 def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None):
     try:
-        print("here")
+        
         # Step 1: Download the image from the URL
         response = requests.get(image_url, stream=True)
         response.raise_for_status()  # Raise an HTTPError for bad responses
@@ -136,7 +136,9 @@ def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='g
         
         # Step 3: Connect to S3 and upload the file
         s3_client = boto3.client("s3")
+        print("here")
         s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=file_data)
+        print("now here")
 
         # Step 4: Generate and return the S3 URL
         s3_url = f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
@@ -358,8 +360,7 @@ def generate_round_summary_image(round_data, winner):
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         print(prompt)
         send_message(target_room_id, message)
-        print("first here")
-        upload_image_to_s3("https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif", bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None)
+        #upload_image_to_s3("https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif", bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None)
         return None
         
     except openai.OpenAIError as e:
@@ -3911,6 +3912,8 @@ try:
     # Load needed variables for sync
     load_global_variables()
     load_parameters()
+    print("loading")
+    upload_image_to_s3("https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif", bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None)
 
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    

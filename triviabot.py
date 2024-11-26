@@ -119,7 +119,7 @@ categories_to_exclude = []
 
 
 
-def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None):
+def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None, winner):
     try:        
         # Step 1: Download the image from the URL
         response = requests.get(image_url, stream=True)
@@ -127,9 +127,12 @@ def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='g
         file_data = response.content
 
         # Step 2: Determine object name if not provided
-        if not object_name:
-            object_name = image_url.split("/")[-1]  # Use the file name from the URL
-
+         if not object_name:
+            pst = pytz.timezone('America/Los_Angeles')
+            now = datetime.now(pst)
+            formatted_time = now.strftime('%B %d, %Y %H%M')  # Format: "November 25, 2024 1950"
+            object_name = f"{winner} ({formatted_time}).png"  # Add file extension if needed
+             
         # Step 3: Include the folder in the object name
         s3_key = f"{folder_name}/{object_name}"  # Add the folder name to the object path
 
@@ -140,7 +143,7 @@ def upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='g
         # Step 4: Generate and return the S3 URL
         s3_url = f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
         print(f"Image uploaded successfully: {s3_url}")
-        return None
+        return s3_url
 
     except requests.exceptions.RequestException as req_err:
         print(f"Error downloading image: {req_err}")
@@ -356,7 +359,7 @@ def generate_round_summary_image(round_data, winner):
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         print(prompt)
         send_message(target_room_id, message)
-        upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None)
+        upload_image_to_s3(image_url, bucket_name='triviabotwebsite', folder_name='generated-images', object_name=None, winner)
         return None
         
     except openai.OpenAIError as e:

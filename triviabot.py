@@ -1,3 +1,4 @@
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -338,6 +339,7 @@ def generate_round_summary_image(round_data, winner):
         message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
         
         prompt = random.choice(prompts)
+        print(prompt)
     
     # Generate the image using DALL-E
     try:
@@ -348,8 +350,12 @@ def generate_round_summary_image(round_data, winner):
         )
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
+ 
+        image_mxc, image_width, image_height = download_image_from_url(image_url)
+        send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+        send_message(target_room_id, message)
 
-        # Download and resize the image to 256x256
+         # Download and resize the image to 256x256
         image_data = requests.get(image_url).content
         image = Image.open(io.BytesIO(image_data))
         image = image.resize((256, 256))  # Resize to 256x256
@@ -360,11 +366,6 @@ def generate_round_summary_image(round_data, winner):
         buffer.seek(0)
         
         upload_image_to_s3(buffer, winner)
-        
-        image_mxc, image_width, image_height = download_image_from_url(image_url)
-        send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-        print(prompt)
-        send_message(target_room_id, message)
         return None
         
     except openai.OpenAIError as e:

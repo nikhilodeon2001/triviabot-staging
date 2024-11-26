@@ -343,6 +343,7 @@ def generate_round_summary_image(round_data, winner):
         ]
 
         message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
+        message += "https://redditlivetrivia.com/okra-museum\n"
         
         prompt = random.choice(prompts)
     
@@ -3114,6 +3115,8 @@ def update_round_streaks(user):
                 image_message = f"\n{dynamic_emoji}🎨 @{user} Win the next game and I'll draw you something.\n"
             else:
                 image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
+            
+            image_message += "https://redditlivetrivia.com/okra-museum\n"
                 
             send_message(target_room_id, image_message)
             time.sleep(1)

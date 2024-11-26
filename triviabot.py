@@ -121,6 +121,12 @@ categories_to_exclude = []
 def sovereign_check(user):
     db = connect_to_mongodb()
     sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
+
+    def round_start_messages():
+    db = connect_to_mongodb()
+    top_users = list(db.top_users.find())
+    sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
+
     print(sovereigns)
 
     if user in sovereigns:
@@ -1838,7 +1844,7 @@ def generate_round_summary(round_data, winner):
     elif nice_okra == True and is_sovereign == True:
          prompt = (
             f"The winner of the trivia round is {winner_at}. "
-            f"Start by mentioning that {winner_at} donated to the trivia cause and give them a lot of kudos for being a previous Sovereign. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
+            f"Start by mentioning that {winner_at} donated to the trivia cause and make sure to give them a lot of kudos for being a previous Sovereign. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
             "Create no more than 4 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"

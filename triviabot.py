@@ -360,7 +360,7 @@ def generate_round_summary_image(round_data, winner):
         response = openai.Image.create(
             prompt=prompt,
             n=1,
-            size="1024x1024"  # Adjust size as needed
+            size="256x256"  # Adjust size as needed
         )
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]

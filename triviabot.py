@@ -129,7 +129,7 @@ def upload_image_to_s3(image_url, winner):
         file_data = response.content
 
         # Step 2: Determine object name if not provided
-         if not object_name:
+        if not object_name:
             pst = pytz.timezone('America/Los_Angeles')
             now = datetime.now(pst)
             formatted_time = now.strftime('%B %d, %Y %H%M')  # Format: "November 25, 2024 1950"

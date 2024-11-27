@@ -1984,15 +1984,15 @@ def generate_round_summary(round_data, winner):
                 user_response = response["response"]
                 is_correct = "Correct" if any(fuzzy_match(user_response, answer, question_category, question_url) for answer in correct_answers) else "Incorrect"
                 #prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
-        else:
+        #else:
             #prompt += "No responses recorded for this question.\n"
         
         # Add scoreboard status after the question
-       #prompt += f"\nScoreboard after Question {question_number}:\n"
+        #prompt += f"\nScoreboard after Question {question_number}:\n"
         if "scoreboard_after_question" in question_data:
             for user, score in question_data["scoreboard_after_question"].items():
                 #prompt += f"{user}: {score}\n"
-        else:
+        #else:
             #prompt += "No responses recorded.\n"
         
         prompt += "\n"

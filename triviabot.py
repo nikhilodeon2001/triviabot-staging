@@ -132,56 +132,52 @@ reddit = praw.Reddit(
 
 
 def describe_image_with_vision(image_url):
-    """
-    Use OpenAI's GPT-4 model to describe an image using a valid schema.
+  """
+    Use OpenAI's GPT-4 Vision API to describe the content of an image.
     """
     try:
-        # Fetch the image from the URL
-        response = requests.get(image_url, stream=True)
-        response.raise_for_status()
-
-        # Save the image to a temporary file
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
-            temp_file.write(response.content)
-            temp_file_path = temp_file.name
-
-        # Send the image and request description
-        with open(temp_file_path, "rb") as image_file:
-            gpt_response = openai.ChatCompletion.create(
-                model="gpt-4-vision",
-                messages=[
-                    {"role": "system", "content": "You are an AI that describes images."},
-                    {"role": "user", "content": "Describe the image in detail."}
-                ],
-                functions=[
-                    {
-                        "name": "process_image",
-                        "description": "Processes an image to extract its description.",
-                        "parameters": {
-                            "type": "object",  # Ensuring this matches the expected schema type
-                            "properties": {
-                                "image_file": {"type": "string", "description": "Image file for analysis"}
-                            },
-                            "required": ["image_file"]
+        # Construct the payload for the API request
+        payload = {
+            "model": "gpt-4-vision-preview",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "You are a cool image analyst. Your goal is to describe what is in this image."
                         }
-                    }
-                ],
-                function_call={
-                    "name": "process_image",
-                    "arguments": {
-                        "image_file": image_file
-                    }
+                    ]
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "What is in the image?"
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": image_url
+                            }
+                        }
+                    ]
                 }
-            )
+            ],
+            "max_tokens": 500
+        }
 
-        # Extract the description from the response
-        description = gpt_response["choices"][0]["message"]["content"]
+        # Call the OpenAI API with the payload
+        response = openai.ChatCompletion.create(**payload)
+
+        # Extract and return the description from the response
+        description = response["choices"][0]["message"]["content"]
         return description
 
     except Exception as e:
         print(f"Error describing the image: {e}")
         return None
-
 
 
 

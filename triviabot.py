@@ -139,7 +139,7 @@ def describe_image_with_vision(image_url):
         response.raise_for_status()
 
         # Save the image to a file-like object (BytesIO)
-        image_data = io.BytesIO(response.content)
+        image_data = BytesIO(response.content)
         image_data.seek(0)  # Ensure the file pointer is at the start
 
         # Send the image to OpenAI's GPT-4 Vision API
@@ -147,9 +147,9 @@ def describe_image_with_vision(image_url):
             model="gpt-4-vision",
             messages=[
                 {"role": "system", "content": "You are an AI that describes images."},
-                {"role": "user", "content": "What is this image?"}
+                {"role": "user", "content": "Describe the image attached."}
             ],
-            files={"image": image_data}  # Attach the image file
+            files={"image_file": ("image.png", image_data, "image/png")}  # Specify name and MIME type
         )
 
         # Extract the response content
@@ -159,6 +159,7 @@ def describe_image_with_vision(image_url):
     except Exception as e:
         print(f"Error describing the image: {e}")
         return None
+
 
 
 def get_user_data(username):

@@ -147,7 +147,7 @@ def describe_image_with_vision(image_url):
         file_extension = image_url.split('.')[-1] if '.' in image_url else "png"
         image_payload = f"data:image/{file_extension};base64,{image_base64}"
 
-     gpt_response = openai.ChatCompletion.create(
+        gpt_response = openai.ChatCompletion.create(
             model="gpt-4-vision",
             messages=[
                 {"role": "system", "content": "You are an AI that describes images."},

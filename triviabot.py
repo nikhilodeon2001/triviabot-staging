@@ -31,6 +31,7 @@ import re
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 import logging
+import praw
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
@@ -119,70 +120,55 @@ fixed_letters = ['O', 'K', 'R', 'A']
 categories_to_exclude = []  
 
 
-def fetch_reddit_user_data(username):
-    base_url = "https://www.reddit.com/user"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Authorization": f"Bearer {token_v2}",  # Include token_v2
-    }
-    
+
+# Configure your Reddit client
+reddit = praw.Reddit(
+    client_id="kUvV9DPbLHKL9QyJdWhsZw",
+    client_secret="2LngaKlWKwo92aAq9UnL_Ota1-mtlw",
+    user_agent="TriviaBot/1.0"
+)
+
+def get_user_data(username):
     try:
-        # Fetch user profile (avatar and basic details)
-        profile_url = f"{base_url}/{username}/about.json"
-        profile_response = requests.get(profile_url, headers=headers)
-        profile_data = profile_response.json()
+        # Fetch user profile
+        user = reddit.redditor(username)
+        avatar_url = user.icon_img  # User avatar URL
 
-        if profile_response.status_code != 200:
-            print(f"Failed to fetch user profile: {profile_response.status_code}")
-            return None
+        print(f"Avatar for {username}: {avatar_url}")
+        print("\nFetching last 20 posts...")
 
-        avatar = profile_data.get("data", {}).get("icon_img", "No avatar found")
-        print(f"Avatar: {avatar}")
+        # Fetch last 20 posts
+        posts = []
+        for post in user.submissions.new(limit=20):
+            posts.append({
+                "title": post.title,
+                "url": post.url,
+                "subreddit": post.subreddit.display_name,
+                "created_utc": post.created_utc
+            })
+        
+        for i, post in enumerate(posts, 1):
+            print(f"{i}. {post['title']} ({post['url']}) - r/{post['subreddit']}")
 
-        # Fetch user posts
-        posts_url = f"{base_url}/{username}/submitted.json"
-        posts_response = requests.get(posts_url, headers=headers)
-        posts_data = posts_response.json()
+        print("\nFetching last 20 comments...")
 
-        if posts_response.status_code != 200:
-            print(f"Failed to fetch user posts: {posts_response.status_code}")
-            return None
+        # Fetch last 20 comments
+        comments = []
+        for comment in user.comments.new(limit=20):
+            comments.append({
+                "body": comment.body,
+                "subreddit": comment.subreddit.display_name,
+                "created_utc": comment.created_utc
+            })
+        
+        for i, comment in enumerate(comments, 1):
+            print(f"{i}. {comment['body']} - r/{comment['subreddit']}")
 
-        posts = [
-            {
-                "title": post.get("data", {}).get("title", "No title"),
-                "url": post.get("data", {}).get("url", "No URL"),
-                "subreddit": post.get("data", {}).get("subreddit", "Unknown subreddit"),
-            }
-            for post in posts_data.get("data", {}).get("children", [])
-        ]
-
-        # Fetch user comments
-        comments_url = f"{base_url}/{username}/comments.json"
-        comments_response = requests.get(comments_url, headers=headers)
-        comments_data = comments_response.json()
-
-        if comments_response.status_code != 200:
-            print(f"Failed to fetch user comments: {comments_response.status_code}")
-            return None
-
-        comments = [
-            {
-                "body": comment.get("data", {}).get("body", "No comment body"),
-                "subreddit": comment.get("data", {}).get("subreddit", "Unknown subreddit"),
-            }
-            for comment in comments_data.get("data", {}).get("children", [])
-        ]
-
-        return {"avatar": avatar, "posts": posts, "comments": comments}
+        return {"avatar_url": avatar_url, "posts": posts, "comments": comments}
 
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
-
-
-
-
 
 
 
@@ -4009,7 +3995,7 @@ try:
     initialize_sync()    
 
     print("fetching")
-    fetch_reddit_user_data("nsharma2")
+    get_user_data("nsharma2")
     print("done fetching")
     
     # Start the trivia round

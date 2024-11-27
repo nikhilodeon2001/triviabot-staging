@@ -1962,6 +1962,9 @@ def generate_round_summary(round_data, winner):
 
         prompt = random.choice(prompts)
 
+        prompt = f"The winner of the trivia round is {winner_at}. Roast the winning player about their reddit profile and history and be very specific and negative in your roast. Make fun about previous posts and comments they have made. Create no more than 4 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner with angry and rough language using the following Reddit profile data to personalize your response:\n\nReddit Profile Information:\n{reddit_info}\n\n"
+
+        
     # Add questions, their correct answers, users' responses, and scoreboard status after each question
     #for question_data in round_data["questions"]:
     #    question_number = question_data["question_number"]

@@ -366,6 +366,36 @@ def generate_round_summary_image(round_data, winner):
     winner_coffees = get_coffees(winner)
     winner_at = f"@{winner}"
 
+    try:
+        user_data = get_user_data(winner)
+        if not user_data:
+            print(f"Failed to fetch data for {winner}. Proceeding with trivia data only.")
+            user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
+    except Exception as e:
+        print(f"Error fetching Reddit data for {winner}: {e}")
+        user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
+
+    # Extract user data
+    reddit_avatar = user_data.get("avatar_url", "No avatar available.")
+    recent_posts = user_data.get("posts", [])
+    recent_comments = user_data.get("comments", [])
+
+    # Build personalized content using Reddit data
+    reddit_info = f"{winner_at}'s avatar: {reddit_avatar}\n\n"
+    if recent_posts:
+        reddit_info += "Recent Posts:\n"
+        for post in recent_posts:
+            reddit_info += f"- {post['title']} (r/{post['subreddit']}, {post['url']})\n"
+    else:
+        reddit_info += "No recent posts.\n"
+    
+    if recent_comments:
+        reddit_info += "\nRecent Comments:\n"
+        for comment in recent_comments:
+            reddit_info += f"- {comment['body']} (r/{comment['subreddit']})\n"
+    else:
+        reddit_info += "No recent comments.\n"
+
     if winner == "OkraStrut":
         prompt = (
             "The setting is a fiery Hell, where a giant and angry piece of okra holds a massive golden trophy while looking down on and smiting all other players. "
@@ -382,10 +412,10 @@ def generate_round_summary_image(round_data, winner):
     
     else:
         prompts = [
-            f"A Renaissance painting of a personfication of {winner} holding a piece of okra. The painting is elegant and refined.",
-            f"A 1-panel comic of a personfication of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers.",
-            f"A personfication of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal.",
-            f"A personfication of {winner} getting yelled at by an angry, giant okra."
+            f"Create a Renaissance painting of a personification of {winner} holding a piece of okra. Make the painting elegant and refined. Use the following information from {winner}'s Reddit profile to draw what you think {winner} looks like. Reddit Profile Information: {reddit_info}.",
+            f"A 1-panel comic of a personification of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers. Use the following information from {winner}'s Reddit profile to draw what you think {winner} looks like. Reddit Profile Information: {reddit_info}.",
+            f"A personification of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal. Use the following information from {winner}'s Reddit profile to draw what you think {winner} looks like. Reddit Profile Information: {reddit_info}.",
+            f"A personification of {winner} getting yelled at by an angry, giant okra. Use the following information from {winner}'s Reddit profile to draw what you think {winner} looks like. Reddit Profile Information: {reddit_info}."
         ]
 
         message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
@@ -1847,42 +1877,10 @@ def generate_round_summary(round_data, winner):
 
     winner_coffees = get_coffees(winner)
     is_sovereign = sovereign_check(winner)
-    
     if winner_coffees > 0 and wf_winner == False:
         nice_okra_option(winner)
     
     winner_at = f"@{winner}"
-
-    try:
-        user_data = get_user_data(winner)
-        if not user_data:
-            print(f"Failed to fetch data for {winner}. Proceeding with trivia data only.")
-            user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
-    except Exception as e:
-        print(f"Error fetching Reddit data for {winner}: {e}")
-        user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
-
-    # Extract user data
-    reddit_avatar = user_data.get("avatar_url", "No avatar available.")
-    recent_posts = user_data.get("posts", [])
-    recent_comments = user_data.get("comments", [])
-
-    # Build personalized content using Reddit data
-    reddit_info = f"{winner_at}'s avatar: {reddit_avatar}\n\n"
-    if recent_posts:
-        reddit_info += "Recent Posts:\n"
-        for post in recent_posts:
-            reddit_info += f"- {post['title']} (r/{post['subreddit']}, {post['url']})\n"
-    else:
-        reddit_info += "No recent posts.\n"
-    
-    if recent_comments:
-        reddit_info += "\nRecent Comments:\n"
-        for comment in recent_comments:
-            reddit_info += f"- {comment['body']} (r/{comment['subreddit']})\n"
-    else:
-        reddit_info += "No recent comments.\n"
-
      
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
@@ -1890,9 +1888,8 @@ def generate_round_summary(round_data, winner):
             f"You are {winner_at}. You played trivia against everyone and dominated by a huge margin. "
             "Roast everyone except OkraStrut about how terrible they are and how easily you beat them. Rudely call out specific players except OkraStrut in your roast and call our specific wrong answers they gave. "
             "Create no more than 4 sentences in total. Be sarcastic, angry, offensive, and use emojis in your comments. End by complimenting yourself, OkraStrut, on how great you are. "
-            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
-            f"Reddit Profile Information:\n{reddit_info}\n\n"
-            #"Trivia Data:\n"
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
         )
 
     elif (magic_number_correct == True or wf_winner == True) and is_sovereign == True:
@@ -1900,9 +1897,8 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Give them a lot of admiration for being a previous Sovereign. Then mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
             "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
-            f"Reddit Profile Information:\n{reddit_info}\n\n"
-            #"Trivia Data:\n"
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
         )
 
     elif (magic_number_correct == True or wf_winner == True) and is_sovereign == False:
@@ -1910,9 +1906,8 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
             "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
-            f"Reddit Profile Information:\n{reddit_info}\n\n"
-            #"Trivia Data:\n"
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
         )
 
     elif nice_okra == True and is_sovereign == True:
@@ -1920,9 +1915,8 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause and make sure to give them a lot of kudos for being a previous Sovereign. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
-            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
-            f"Reddit Profile Information:\n{reddit_info}\n\n"
-            #"Trivia Data:\n"
+            "Create no more than 4 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
         )
     
     elif nice_okra == True and is_sovereign == False:
@@ -1930,9 +1924,8 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
-            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
-            f"Reddit Profile Information:\n{reddit_info}\n\n"
-            #"Trivia Data:\n"
+            "Create no more than 4 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
         )
   
     else:
@@ -1962,41 +1955,38 @@ def generate_round_summary(round_data, winner):
 
         prompt = random.choice(prompts)
 
-        prompt = f"The winner of the trivia round is {winner_at}. Roast the winning player about their reddit profile and history and be very specific and negative in your roast. Make fun about previous posts and comments they have made. Create no more than 4 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner with angry and rough language using the following Reddit profile data to personalize your response:\n\nReddit Profile Information:\n{reddit_info}\n\n"
-
-        
     # Add questions, their correct answers, users' responses, and scoreboard status after each question
-    #for question_data in round_data["questions"]:
-    #    question_number = question_data["question_number"]
-    #    question_text = question_data["question_text"]
-    #    question_category = question_data["question_category"]
-    #    question_url = question_data["question_url"]
-    #    correct_answers = question_data["correct_answers"]
+    for question_data in round_data["questions"]:
+        question_number = question_data["question_number"]
+        question_text = question_data["question_text"]
+        question_category = question_data["question_category"]
+        question_url = question_data["question_url"]
+        correct_answers = question_data["correct_answers"]
 
         # Convert all items in correct_answers to strings before joining
-    #    correct_answers_str = ', '.join(map(str, correct_answers))
+        correct_answers_str = ', '.join(map(str, correct_answers))
         
-        #prompt += f"Question {question_number}: {question_text}\n"
-        #prompt += f"Correct Answers: {', '.join(correct_answers)}\n"
+        prompt += f"Question {question_number}: {question_text}\n"
+        prompt += f"Correct Answers: {', '.join(correct_answers)}\n"
         
         # Add users and their responses for each question
-        #prompt += "Users and their responses:\n"
-        #if question_data["user_responses"]:
-        #    for response in question_data["user_responses"]:
-        #        username = response["username"]
-        #        user_response = response["response"]
-        #        is_correct = "Correct" if any(fuzzy_match(user_response, answer, question_category, question_url) for answer in correct_answers) else "Incorrect"
-                #prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
-        #else:
-            #prompt += "No responses recorded for this question.\n"
+        prompt += "Users and their responses:\n"
+        if question_data["user_responses"]:
+            for response in question_data["user_responses"]:
+                username = response["username"]
+                user_response = response["response"]
+                is_correct = "Correct" if any(fuzzy_match(user_response, answer, question_category, question_url) for answer in correct_answers) else "Incorrect"
+                prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
+        else:
+            prompt += "No responses recorded for this question.\n"
         
         # Add scoreboard status after the question
-        #prompt += f"\nScoreboard after Question {question_number}:\n"
-        #if "scoreboard_after_question" in question_data:
-        #    for user, score in question_data["scoreboard_after_question"].items():
-                #prompt += f"{user}: {score}\n"
-        #else:
-            #prompt += "No responses recorded.\n"
+        prompt += f"\nScoreboard after Question {question_number}:\n"
+        if "scoreboard_after_question" in question_data:
+            for user, score in question_data["scoreboard_after_question"].items():
+                prompt += f"{user}: {score}\n"
+        else:
+            prompt += "No responses recorded.\n"
         
         prompt += "\n"
 

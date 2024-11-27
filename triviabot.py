@@ -376,25 +376,31 @@ def generate_round_summary_image(round_data, winner):
         user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
 
     # Extract user data
-    reddit_avatar = user_data.get("avatar_url", "No avatar available.")
+    reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
     recent_posts = user_data.get("posts", [])
     recent_comments = user_data.get("comments", [])
 
-    # Build personalized content using Reddit data
-    reddit_info = f"{winner_at}'s avatar: {reddit_avatar}\n\n"
-    if recent_posts:
-        reddit_info += "Recent Posts:\n"
-        for post in recent_posts:
-            reddit_info += f"- {post['title']} (r/{post['subreddit']}, {post['url']})\n"
-    else:
-        reddit_info += "No recent posts.\n"
-    
-    if recent_comments:
-        reddit_info += "\nRecent Comments:\n"
-        for comment in recent_comments:
-            reddit_info += f"- {comment['body']} (r/{comment['subreddit']})\n"
-    else:
-        reddit_info += "No recent comments.\n"
+    avatar_base64 = None
+    avatar_description = "No avatar provided."
+    if reddit_avatar_url:
+        try:
+            # Download the avatar image
+            response = requests.get(reddit_avatar_url)
+            response.raise_for_status()  # Check if request was successful
+            
+            # Load the image to analyze its properties (optional)
+            avatar_image = Image.open(io.BytesIO(response.content))
+            avatar_description = f"an avatar with dimensions {avatar_image.size} in {avatar_image.mode} mode."
+            
+            # Convert the avatar to base64 for OpenAI (if supported)
+            buffer = io.BytesIO()
+            avatar_image.save(buffer, format="PNG")
+            buffer.seek(0)
+            avatar_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        except Exception as e:
+            print(f"Failed to process avatar image: {e}")
+            avatar_description = "No avatar could be processed."
+
 
     if winner == "OkraStrut":
         prompt = (
@@ -412,32 +418,26 @@ def generate_round_summary_image(round_data, winner):
     
     else:
         prompts = [
-            f"Create a Renaissance painting of a personification of {winner} holding a piece of okra. Make the painting elegant and refined. Use the following profile information about {winner} to draw what you think {winner} looks like. Profile Information: {reddit_info}.",
-            f"A 1-panel comic of a personification of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers. Use the following profile information about {winner} to draw what you think {winner} looks like. Profile Information: {reddit_info}.",
-            f"A personification of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal. Use the following profile information about {winner} to draw what you think {winner} looks like. Profile Information: {reddit_info}.",
-            f"A personification of {winner} getting yelled at by an angry, giant okra. Use the following profile information about {winner} to draw what you think {winner} looks like. Profile Information: {reddit_info}."
+            f"Create a Renaissance painting of a personification of {winner} holding a piece of okra. Make the painting elegant and refined. ",
+            f"A 1-panel comic of a personification of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers. ",
+            f"A personification of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal. ",
+            f"A personification of {winner} getting yelled at by an angry, giant okra. "
         ]
 
         message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
         message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
         
         prompt = random.choice(prompts)
-
-        max_length = 1000
-
-        if len(prompt) > max_length:
-            keep_start = int(max_length * 0.)  # Keep 70% from the start
-            keep_end = max_length - keep_start - 10  # Allow for '...' in between
     
-            # Truncate the middle portion
-            prompt = prompt[:keep_start] + "\n...\n" + prompt[-keep_end:]
-        
+    prompt += f"Incorporate the included avatar into the design: {avatar_description}. "
+
         print(prompt)
     
     # Generate the image using DALL-E
     try:
         response = openai.Image.create(
             prompt=prompt,
+            image=avatar_base64,
             n=1,
             size="512x512"  # Adjust size as needed
         )

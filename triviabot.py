@@ -430,7 +430,6 @@ def generate_round_summary_image(round_data, winner):
     try:
         response = openai.Image.create(
             prompt=prompt,
-            image=avatar_base64,
             n=1,
             size="512x512"  # Adjust size as needed
         )

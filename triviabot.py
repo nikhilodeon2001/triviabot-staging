@@ -131,7 +131,7 @@ reddit = praw.Reddit(
 
 def describe_image_with_vision(image_url):
     """
-    Use OpenAI's Vision API to describe the image.
+    Use OpenAI's GPT-4 Vision model to describe the image.
     """
     try:
         # Fetch the image from the URL
@@ -142,14 +142,18 @@ def describe_image_with_vision(image_url):
         image_data = io.BytesIO(response.content)
         image_data.seek(0)  # Ensure the file pointer is at the start
 
-        # Send the image to OpenAI for analysis
-        vision_response = openai.Image.create(
-            file=image_data,  # Pass the image data as a binary file
-            purpose="vision"
+        # Send the image to OpenAI's GPT-4 Vision API
+        gpt_response = openai.ChatCompletion.create(
+            model="gpt-4-vision",
+            messages=[
+                {"role": "system", "content": "You are an AI that describes images."},
+                {"role": "user", "content": "What is this image?"}
+            ],
+            files={"image": image_data}  # Attach the image file
         )
 
-        # Extract the description from the response
-        description = vision_response.get("description", "No description available.")
+        # Extract the response content
+        description = gpt_response["choices"][0]["message"]["content"]
         return description
 
     except Exception as e:

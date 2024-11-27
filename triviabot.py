@@ -130,11 +130,17 @@ reddit = praw.Reddit(
 
 
 def describe_image_with_vision(image_url):
+    """
+    Use OpenAI's Vision API to describe the image.
+    """
     try:
         # Fetch the image from the URL
         response = requests.get(image_url)
         response.raise_for_status()
+
+        # Save the image to a file-like object (BytesIO)
         image_data = io.BytesIO(response.content)
+        image_data.seek(0)  # Ensure the file pointer is at the start
 
         # Send the image to OpenAI for analysis
         vision_response = openai.Image.create(
@@ -143,7 +149,7 @@ def describe_image_with_vision(image_url):
         )
 
         # Extract the description from the response
-        description = vision_response["description"]
+        description = vision_response.get("description", "No description available.")
         return description
 
     except Exception as e:

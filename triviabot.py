@@ -128,14 +128,34 @@ reddit = praw.Reddit(
     user_agent="TriviaBot/1.0"
 )
 
+
+def describe_image_with_vision(image_url):
+    try:
+        # Fetch the image from the URL
+        response = requests.get(image_url)
+        response.raise_for_status()
+        image_data = BytesIO(response.content)
+
+        # Send the image to OpenAI for analysis
+        vision_response = openai.Image.create(
+            file=image_data,  # Pass the image data as a binary file
+            purpose="vision"
+        )
+
+        # Extract the description from the response
+        description = vision_response["description"]
+        return description
+
+    except Exception as e:
+        print(f"Error describing the image: {e}")
+        return None
+
+
 def get_user_data(username):
     try:
         # Fetch user profile
         user = reddit.redditor(username)
         avatar_url = user.icon_img  # User avatar URL
-
-        print(f"Avatar for {username}: {avatar_url}")
-        print("\nFetching last 20 posts...")
 
         # Fetch last 20 posts
         posts = []
@@ -146,11 +166,6 @@ def get_user_data(username):
                 "subreddit": post.subreddit.display_name,
                 "created_utc": post.created_utc
             })
-        
-        for i, post in enumerate(posts, 1):
-            print(f"{i}. {post['title']} ({post['url']}) - r/{post['subreddit']}")
-
-        print("\nFetching last 20 comments...")
 
         # Fetch last 20 comments
         comments = []
@@ -160,9 +175,6 @@ def get_user_data(username):
                 "subreddit": comment.subreddit.display_name,
                 "created_utc": comment.created_utc
             })
-        
-        for i, comment in enumerate(comments, 1):
-            print(f"{i}. {comment['body']} - r/{comment['subreddit']}")
 
         return {"avatar_url": avatar_url, "posts": posts, "comments": comments}
 
@@ -380,27 +392,8 @@ def generate_round_summary_image(round_data, winner):
     recent_posts = user_data.get("posts", [])
     recent_comments = user_data.get("comments", [])
 
-    avatar_base64 = None
-    avatar_description = "No avatar provided."
-    if reddit_avatar_url:
-        try:
-            # Download the avatar image
-            response = requests.get(reddit_avatar_url)
-            response.raise_for_status()  # Check if request was successful
-            
-            # Load the image to analyze its properties (optional)
-            avatar_image = Image.open(io.BytesIO(response.content))
-            avatar_description = f"an avatar with dimensions {avatar_image.size} in {avatar_image.mode} mode."
-            
-            # Convert the avatar to base64 for OpenAI (if supported)
-            buffer = io.BytesIO()
-            avatar_image.save(buffer, format="PNG")
-            buffer.seek(0)
-            avatar_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-        except Exception as e:
-            print(f"Failed to process avatar image: {e}")
-            avatar_description = "No avatar could be processed."
-
+    image_description = describe_image_with_vision(reddit_avatar_url)
+    print(image_description)
 
     if winner == "OkraStrut":
         prompt = (
@@ -429,7 +422,7 @@ def generate_round_summary_image(round_data, winner):
         
         prompt = random.choice(prompts)
     
-    prompt += f"Incorporate the included avatar into the design: {avatar_description}. "
+    prompt += f"Incorporate this avatar description to create what {winner} looks like: {image_description}. "
 
     print(prompt)
     

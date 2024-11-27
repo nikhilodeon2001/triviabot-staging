@@ -119,6 +119,73 @@ fixed_letters = ['O', 'K', 'R', 'A']
 categories_to_exclude = []  
 
 
+def fetch_reddit_user_data(username):
+    base_url = "https://www.reddit.com/user"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Authorization": f"Bearer {token_v2}",  # Include token_v2
+    }
+    
+    try:
+        # Fetch user profile (avatar and basic details)
+        profile_url = f"{base_url}/{username}/about.json"
+        profile_response = requests.get(profile_url, headers=headers)
+        profile_data = profile_response.json()
+
+        if profile_response.status_code != 200:
+            print(f"Failed to fetch user profile: {profile_response.status_code}")
+            return None
+
+        avatar = profile_data.get("data", {}).get("icon_img", "No avatar found")
+        print(f"Avatar: {avatar}")
+
+        # Fetch user posts
+        posts_url = f"{base_url}/{username}/submitted.json"
+        posts_response = requests.get(posts_url, headers=headers)
+        posts_data = posts_response.json()
+
+        if posts_response.status_code != 200:
+            print(f"Failed to fetch user posts: {posts_response.status_code}")
+            return None
+
+        posts = [
+            {
+                "title": post.get("data", {}).get("title", "No title"),
+                "url": post.get("data", {}).get("url", "No URL"),
+                "subreddit": post.get("data", {}).get("subreddit", "Unknown subreddit"),
+            }
+            for post in posts_data.get("data", {}).get("children", [])
+        ]
+
+        # Fetch user comments
+        comments_url = f"{base_url}/{username}/comments.json"
+        comments_response = requests.get(comments_url, headers=headers)
+        comments_data = comments_response.json()
+
+        if comments_response.status_code != 200:
+            print(f"Failed to fetch user comments: {comments_response.status_code}")
+            return None
+
+        comments = [
+            {
+                "body": comment.get("data", {}).get("body", "No comment body"),
+                "subreddit": comment.get("data", {}).get("subreddit", "Unknown subreddit"),
+            }
+            for comment in comments_data.get("data", {}).get("children", [])
+        ]
+
+        return {"avatar": avatar, "posts": posts, "comments": comments}
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+
+
+
+
+
 def sovereign_check(user):
     db = connect_to_mongodb()
     sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
@@ -3940,6 +4007,10 @@ try:
     
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    
+
+    print("fetching")
+    fetch_reddit_user_data("nsharma2")
+    print("done fetching")
     
     # Start the trivia round
     start_trivia_round()

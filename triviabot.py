@@ -139,7 +139,7 @@ def describe_image_with_vision(image_url):
         response.raise_for_status()
 
         # Save the image to a file-like object (BytesIO)
-        image_data = BytesIO(response.content)
+        image_data = io.BytesIO(response.content)
         image_data.seek(0)  # Ensure the file pointer is at the start
 
         # Send the image to OpenAI's GPT-4 Vision API

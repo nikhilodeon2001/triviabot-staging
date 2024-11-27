@@ -1847,10 +1847,42 @@ def generate_round_summary(round_data, winner):
 
     winner_coffees = get_coffees(winner)
     is_sovereign = sovereign_check(winner)
+    
     if winner_coffees > 0 and wf_winner == False:
         nice_okra_option(winner)
     
     winner_at = f"@{winner}"
+
+    try:
+        user_data = get_user_data(winner)
+        if not user_data:
+            print(f"Failed to fetch data for {winner}. Proceeding with trivia data only.")
+            user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
+    except Exception as e:
+        print(f"Error fetching Reddit data for {winner}: {e}")
+        user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
+
+    # Extract user data
+    reddit_avatar = user_data.get("avatar_url", "No avatar available.")
+    recent_posts = user_data.get("posts", [])
+    recent_comments = user_data.get("comments", [])
+
+    # Build personalized content using Reddit data
+    reddit_info = f"{winner_at}'s avatar: {reddit_avatar}\n\n"
+    if recent_posts:
+        reddit_info += "Recent Posts:\n"
+        for post in recent_posts:
+            reddit_info += f"- {post['title']} (r/{post['subreddit']}, {post['url']})\n"
+    else:
+        reddit_info += "No recent posts.\n"
+    
+    if recent_comments:
+        reddit_info += "\nRecent Comments:\n"
+        for comment in recent_comments:
+            reddit_info += f"- {comment['body']} (r/{comment['subreddit']})\n"
+    else:
+        reddit_info += "No recent comments.\n"
+
      
     # Construct the base prompt with different instructions if the winner is "username"
     if winner == "OkraStrut":
@@ -1858,8 +1890,9 @@ def generate_round_summary(round_data, winner):
             f"You are {winner_at}. You played trivia against everyone and dominated by a huge margin. "
             "Roast everyone except OkraStrut about how terrible they are and how easily you beat them. Rudely call out specific players except OkraStrut in your roast and call our specific wrong answers they gave. "
             "Create no more than 4 sentences in total. Be sarcastic, angry, offensive, and use emojis in your comments. End by complimenting yourself, OkraStrut, on how great you are. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
+            f"Reddit Profile Information:\n{reddit_info}\n\n"
+            "Trivia Data:\n"
         )
 
     elif (magic_number_correct == True or wf_winner == True) and is_sovereign == True:
@@ -1867,8 +1900,9 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Give them a lot of admiration for being a previous Sovereign. Then mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
             "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
+            f"Reddit Profile Information:\n{reddit_info}\n\n"
+            "Trivia Data:\n"
         )
 
     elif (magic_number_correct == True or wf_winner == True) and is_sovereign == False:
@@ -1876,8 +1910,9 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             "Love bomb the winning player about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
             "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
+            f"Reddit Profile Information:\n{reddit_info}\n\n"
+            "Trivia Data:\n"
         )
 
     elif nice_okra == True and is_sovereign == True:
@@ -1885,8 +1920,9 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause and make sure to give them a lot of kudos for being a previous Sovereign. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
-            "Create no more than 4 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
+            f"Reddit Profile Information:\n{reddit_info}\n\n"
+            "Trivia Data:\n"
         )
     
     elif nice_okra == True and is_sovereign == False:
@@ -1894,8 +1930,9 @@ def generate_round_summary(round_data, winner):
             f"The winner of the trivia round is {winner_at}. "
             f"Start by mentioning that {winner_at} donated to the trivia cause. You are very grateful. Then compliment {winner_at} about their username and be very specific about why you like it. "
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
-            "Create no more than 4 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
+            "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
+            f"Reddit Profile Information:\n{reddit_info}\n\n"
+            "Trivia Data:\n"
         )
   
     else:
@@ -3993,10 +4030,6 @@ try:
     
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    
-
-    print("fetching")
-    get_user_data("nsharma2")
-    print("done fetching")
     
     # Start the trivia round
     start_trivia_round()

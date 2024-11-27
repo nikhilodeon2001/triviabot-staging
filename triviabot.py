@@ -132,7 +132,7 @@ reddit = praw.Reddit(
 
 def describe_image_with_vision(image_url):
     """
-    Use OpenAI's GPT-4 Vision model to describe the image by saving it as a temporary file.
+    Use OpenAI's GPT-4 Vision model to describe an image by saving it temporarily and using the files parameter.
     """
     try:
         # Fetch the image from the URL
@@ -144,7 +144,7 @@ def describe_image_with_vision(image_url):
             temp_file.write(response.content)
             temp_file_path = temp_file.name
 
-        # Send the image to OpenAI's GPT-4 Vision API
+        # Use the temporary file with OpenAI's GPT-4 Vision API
         with open(temp_file_path, "rb") as image_file:
             gpt_response = openai.ChatCompletion.create(
                 model="gpt-4-vision",
@@ -152,7 +152,7 @@ def describe_image_with_vision(image_url):
                     {"role": "system", "content": "You are an AI that describes images."},
                     {"role": "user", "content": "Describe the image attached."}
                 ],
-                files={"image_file": image_file}
+                files={"file": image_file}  # Correctly pass the file using "files"
             )
 
         # Extract the response content
@@ -162,6 +162,14 @@ def describe_image_with_vision(image_url):
     except Exception as e:
         print(f"Error describing the image: {e}")
         return None
+
+    finally:
+        # Clean up the temporary file
+        try:
+            if temp_file_path:
+                os.remove(temp_file_path)
+        except Exception as cleanup_error:
+            print(f"Error cleaning up temporary file: {cleanup_error}")
 
 
 

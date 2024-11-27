@@ -1963,34 +1963,34 @@ def generate_round_summary(round_data, winner):
         prompt = random.choice(prompts)
 
     # Add questions, their correct answers, users' responses, and scoreboard status after each question
-    for question_data in round_data["questions"]:
-        question_number = question_data["question_number"]
-        question_text = question_data["question_text"]
-        question_category = question_data["question_category"]
-        question_url = question_data["question_url"]
-        correct_answers = question_data["correct_answers"]
+    #for question_data in round_data["questions"]:
+    #    question_number = question_data["question_number"]
+    #    question_text = question_data["question_text"]
+    #    question_category = question_data["question_category"]
+    #    question_url = question_data["question_url"]
+    #    correct_answers = question_data["correct_answers"]
 
         # Convert all items in correct_answers to strings before joining
-        correct_answers_str = ', '.join(map(str, correct_answers))
+    #    correct_answers_str = ', '.join(map(str, correct_answers))
         
         #prompt += f"Question {question_number}: {question_text}\n"
         #prompt += f"Correct Answers: {', '.join(correct_answers)}\n"
         
         # Add users and their responses for each question
         #prompt += "Users and their responses:\n"
-        if question_data["user_responses"]:
-            for response in question_data["user_responses"]:
-                username = response["username"]
-                user_response = response["response"]
-                is_correct = "Correct" if any(fuzzy_match(user_response, answer, question_category, question_url) for answer in correct_answers) else "Incorrect"
+        #if question_data["user_responses"]:
+        #    for response in question_data["user_responses"]:
+        #        username = response["username"]
+        #        user_response = response["response"]
+        #        is_correct = "Correct" if any(fuzzy_match(user_response, answer, question_category, question_url) for answer in correct_answers) else "Incorrect"
                 #prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
         #else:
             #prompt += "No responses recorded for this question.\n"
         
         # Add scoreboard status after the question
         #prompt += f"\nScoreboard after Question {question_number}:\n"
-        if "scoreboard_after_question" in question_data:
-            for user, score in question_data["scoreboard_after_question"].items():
+        #if "scoreboard_after_question" in question_data:
+        #    for user, score in question_data["scoreboard_after_question"].items():
                 #prompt += f"{user}: {score}\n"
         #else:
             #prompt += "No responses recorded.\n"

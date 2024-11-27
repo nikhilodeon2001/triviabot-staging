@@ -1892,7 +1892,7 @@ def generate_round_summary(round_data, winner):
             "Create no more than 4 sentences in total. Be sarcastic, angry, offensive, and use emojis in your comments. End by complimenting yourself, OkraStrut, on how great you are. "
             "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
             f"Reddit Profile Information:\n{reddit_info}\n\n"
-            "Trivia Data:\n"
+            #"Trivia Data:\n"
         )
 
     elif (magic_number_correct == True or wf_winner == True) and is_sovereign == True:
@@ -1902,7 +1902,7 @@ def generate_round_summary(round_data, winner):
             "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
             "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
             f"Reddit Profile Information:\n{reddit_info}\n\n"
-            "Trivia Data:\n"
+            #"Trivia Data:\n"
         )
 
     elif (magic_number_correct == True or wf_winner == True) and is_sovereign == False:
@@ -1912,7 +1912,7 @@ def generate_round_summary(round_data, winner):
             "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
             "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
             f"Reddit Profile Information:\n{reddit_info}\n\n"
-            "Trivia Data:\n"
+            #"Trivia Data:\n"
         )
 
     elif nice_okra == True and is_sovereign == True:
@@ -1922,7 +1922,7 @@ def generate_round_summary(round_data, winner):
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
             "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
             f"Reddit Profile Information:\n{reddit_info}\n\n"
-            "Trivia Data:\n"
+            #"Trivia Data:\n"
         )
     
     elif nice_okra == True and is_sovereign == False:
@@ -1932,7 +1932,7 @@ def generate_round_summary(round_data, winner):
             "Specifically mention and compliment specific responses they gave during the round. Tell them they are than eveyone else including yourself, the great OkraStrut. "
             "Use the following trivia data and Reddit profile data to personalize your response:\n\n"
             f"Reddit Profile Information:\n{reddit_info}\n\n"
-            "Trivia Data:\n"
+            #"Trivia Data:\n"
         )
   
     else:
@@ -1973,27 +1973,27 @@ def generate_round_summary(round_data, winner):
         # Convert all items in correct_answers to strings before joining
         correct_answers_str = ', '.join(map(str, correct_answers))
         
-        prompt += f"Question {question_number}: {question_text}\n"
-        prompt += f"Correct Answers: {', '.join(correct_answers)}\n"
+        #prompt += f"Question {question_number}: {question_text}\n"
+        #prompt += f"Correct Answers: {', '.join(correct_answers)}\n"
         
         # Add users and their responses for each question
-        prompt += "Users and their responses:\n"
+        #prompt += "Users and their responses:\n"
         if question_data["user_responses"]:
             for response in question_data["user_responses"]:
                 username = response["username"]
                 user_response = response["response"]
                 is_correct = "Correct" if any(fuzzy_match(user_response, answer, question_category, question_url) for answer in correct_answers) else "Incorrect"
-                prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
+                #prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
         else:
-            prompt += "No responses recorded for this question.\n"
+            #prompt += "No responses recorded for this question.\n"
         
         # Add scoreboard status after the question
-        prompt += f"\nScoreboard after Question {question_number}:\n"
+       #prompt += f"\nScoreboard after Question {question_number}:\n"
         if "scoreboard_after_question" in question_data:
             for user, score in question_data["scoreboard_after_question"].items():
-                prompt += f"{user}: {score}\n"
+                #prompt += f"{user}: {score}\n"
         else:
-            prompt += "No responses recorded.\n"
+            #prompt += "No responses recorded.\n"
         
         prompt += "\n"
 

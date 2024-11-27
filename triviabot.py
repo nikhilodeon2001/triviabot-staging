@@ -139,37 +139,38 @@ def describe_image_with_vision(image_url):
         response = requests.get(image_url, stream=True)
         response.raise_for_status()
 
-        # Save the image to a temporary file
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
-            temp_file.write(response.content)
-            temp_file_path = temp_file.name
+        # Convert image bytes to a Base64 string
+        image_bytes = response.content
+        image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+        
+        # Get the file extension (default to 'png' if not determinable)
+        file_extension = image_url.split('.')[-1] if '.' in image_url else "png"
+        image_payload = f"data:image/{file_extension};base64,{image_base64}"
 
-        # Use the temporary file with OpenAI's GPT-4 Vision API
-        with open(temp_file_path, "rb") as image_file:
-            gpt_response = openai.ChatCompletion.create(
-                model="gpt-4-vision",
-                messages=[
-                    {"role": "system", "content": "You are an AI that describes images."},
-                    {"role": "user", "content": "Describe the image attached."}
-                ],
-                files={"file": image_file}  # Correctly pass the file using "files"
-            )
+     gpt_response = openai.ChatCompletion.create(
+            model="gpt-4-vision",
+            messages=[
+                {"role": "system", "content": "You are an AI that describes images."},
+                {"role": "user", "content": "Describe the image attached."}
+            ],
+            functions=[
+                {
+                    "name": "process_image",
+                    "description": "Provide an image to be described.",
+                    "parameters": {"type": "string", "image_url": image_payload}
+                }
+            ],
+            function_call={"name": "process_image"}
+        )
 
-        # Extract the response content
-        description = gpt_response["choices"][0]["message"]["content"]
+        # Extract the description from the response
+        description = gpt_response.choices[0].message["content"]
         return description
 
     except Exception as e:
         print(f"Error describing the image: {e}")
         return None
 
-    finally:
-        # Clean up the temporary file
-        try:
-            if temp_file_path:
-                os.remove(temp_file_path)
-        except Exception as cleanup_error:
-            print(f"Error cleaning up temporary file: {cleanup_error}")
 
 
 

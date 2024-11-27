@@ -32,6 +32,7 @@ import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 import logging
 import praw
+import tempfile
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"

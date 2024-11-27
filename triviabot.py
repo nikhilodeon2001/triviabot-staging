@@ -412,10 +412,10 @@ def generate_round_summary_image(round_data, winner):
     
     else:
         prompts = [
-            f"Create a Renaissance painting of a personification of {winner} holding a piece of okra. Make the painting elegant and refined. Use the following information from {winner}'s Reddit profile to draw what you think {winner} looks like. Reddit Profile Information: {reddit_info}.",
-            f"A 1-panel comic of a personification of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers. Use the following information from {winner}'s Reddit profile to draw what you think {winner} looks like. Reddit Profile Information: {reddit_info}.",
-            f"A personification of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal. Use the following information from {winner}'s Reddit profile to draw what you think {winner} looks like. Reddit Profile Information: {reddit_info}.",
-            f"A personification of {winner} getting yelled at by an angry, giant okra. Use the following information from {winner}'s Reddit profile to draw what you think {winner} looks like. Reddit Profile Information: {reddit_info}."
+            f"Create a Renaissance painting of a personification of {winner} holding a piece of okra. Make the painting elegant and refined. Use the following profile information about {winner} to draw what you think {winner} looks like. Profile Information: {reddit_info}.",
+            f"A 1-panel comic of a personification of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers. Use the following profile information about {winner} to draw what you think {winner} looks like. Profile Information: {reddit_info}.",
+            f"A personification of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal. Use the following profile information about {winner} to draw what you think {winner} looks like. Profile Information: {reddit_info}.",
+            f"A personification of {winner} getting yelled at by an angry, giant okra. Use the following profile information about {winner} to draw what you think {winner} looks like. Profile Information: {reddit_info}."
         ]
 
         message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
@@ -423,8 +423,10 @@ def generate_round_summary_image(round_data, winner):
         
         prompt = random.choice(prompts)
 
-        if len(prompt) > 1000:
-            keep_start = int(max_length * 0.7)  # Keep 70% from the start
+        max_length = 1000
+
+        if len(prompt) > max_length:
+            keep_start = int(max_length * 0.)  # Keep 70% from the start
             keep_end = max_length - keep_start - 10  # Allow for '...' in between
     
             # Truncate the middle portion

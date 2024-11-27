@@ -132,11 +132,7 @@ reddit = praw.Reddit(
 
 
 def describe_image_with_vision(image_url):
-  """
-    Use OpenAI's GPT-4 Vision API to describe the content of an image.
-    """
     try:
-        # Construct the payload for the API request
         payload = {
             "model": "gpt-4-vision-preview",
             "messages": [

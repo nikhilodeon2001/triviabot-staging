@@ -431,7 +431,7 @@ def generate_round_summary_image(round_data, winner):
     
     prompt += f"Incorporate the included avatar into the design: {avatar_description}. "
 
-        print(prompt)
+    print(prompt)
     
     # Generate the image using DALL-E
     try:

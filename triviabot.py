@@ -131,26 +131,28 @@ reddit = praw.Reddit(
 
 def describe_image_with_vision(image_url):
     """
-    Use OpenAI's GPT-4 Vision model to describe the image.
+    Use OpenAI's GPT-4 Vision model to describe the image by saving it as a temporary file.
     """
     try:
         # Fetch the image from the URL
-        response = requests.get(image_url)
+        response = requests.get(image_url, stream=True)
         response.raise_for_status()
 
-        # Save the image to a file-like object (BytesIO)
-        image_data = io.BytesIO(response.content)
-        image_data.seek(0)  # Ensure the file pointer is at the start
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file.write(response.content)
+            temp_file_path = temp_file.name
 
         # Send the image to OpenAI's GPT-4 Vision API
-        gpt_response = openai.ChatCompletion.create(
-            model="gpt-4-vision",
-            messages=[
-                {"role": "system", "content": "You are an AI that describes images."},
-                {"role": "user", "content": "Describe the image attached."}
-            ],
-            files={"image_file": ("image.png", image_data, "image/png")}  # Specify name and MIME type
-        )
+        with open(temp_file_path, "rb") as image_file:
+            gpt_response = openai.ChatCompletion.create(
+                model="gpt-4-vision",
+                messages=[
+                    {"role": "system", "content": "You are an AI that describes images."},
+                    {"role": "user", "content": "Describe the image attached."}
+                ],
+                files={"image_file": image_file}
+            )
 
         # Extract the response content
         description = gpt_response["choices"][0]["message"]["content"]
@@ -159,6 +161,7 @@ def describe_image_with_vision(image_url):
     except Exception as e:
         print(f"Error describing the image: {e}")
         return None
+
 
 
 

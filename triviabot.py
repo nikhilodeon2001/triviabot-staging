@@ -449,7 +449,7 @@ def generate_round_summary_image(round_data, winner):
         
         prompt = random.choice(prompts)
     
-    prompt += f"Incorporate this avatar description to create what {winner} looks like: {image_description}. "
+    prompt += f"Incorporate this avatar description to create what {winner} looks like: {image_description}. Ensure that okra is prominently displayed in the final image."
 
     print(prompt)
     

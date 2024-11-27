@@ -133,39 +133,49 @@ reddit = praw.Reddit(
 
 def describe_image_with_vision(image_url):
     """
-    Use OpenAI's GPT-4 Vision model to describe an image by saving it temporarily and using the files parameter.
+    Use OpenAI's GPT-4 model to describe an image using a valid schema.
     """
     try:
         # Fetch the image from the URL
         response = requests.get(image_url, stream=True)
         response.raise_for_status()
 
-        # Convert image bytes to a Base64 string
-        image_bytes = response.content
-        image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-        
-        # Get the file extension (default to 'png' if not determinable)
-        file_extension = image_url.split('.')[-1] if '.' in image_url else "png"
-        image_payload = f"data:image/{file_extension};base64,{image_base64}"
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file.write(response.content)
+            temp_file_path = temp_file.name
 
-        gpt_response = openai.ChatCompletion.create(
-            model="gpt-4-turbo",
-            messages=[
-                {"role": "system", "content": "You are an AI that describes images."},
-                {"role": "user", "content": "Describe the image attached."}
-            ],
-            functions=[
-                {
+        # Send the image and request description
+        with open(temp_file_path, "rb") as image_file:
+            gpt_response = openai.ChatCompletion.create(
+                model="gpt-4-vision",
+                messages=[
+                    {"role": "system", "content": "You are an AI that describes images."},
+                    {"role": "user", "content": "Describe the image in detail."}
+                ],
+                functions=[
+                    {
+                        "name": "process_image",
+                        "description": "Processes an image to extract its description.",
+                        "parameters": {
+                            "type": "object",  # Ensuring this matches the expected schema type
+                            "properties": {
+                                "image_file": {"type": "string", "description": "Image file for analysis"}
+                            },
+                            "required": ["image_file"]
+                        }
+                    }
+                ],
+                function_call={
                     "name": "process_image",
-                    "description": "Provide an image to be described.",
-                    "parameters": {"type": "string", "image_url": image_payload}
+                    "arguments": {
+                        "image_file": image_file
+                    }
                 }
-            ],
-            function_call={"name": "process_image"}
-        )
+            )
 
         # Extract the description from the response
-        description = gpt_response.choices[0].message["content"]
+        description = gpt_response["choices"][0]["message"]["content"]
         return description
 
     except Exception as e:

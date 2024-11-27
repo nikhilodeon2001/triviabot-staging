@@ -149,7 +149,7 @@ def describe_image_with_vision(image_url):
         image_payload = f"data:image/{file_extension};base64,{image_base64}"
 
         gpt_response = openai.ChatCompletion.create(
-            model="gpt-4-vision",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are an AI that describes images."},
                 {"role": "user", "content": "Describe the image attached."}

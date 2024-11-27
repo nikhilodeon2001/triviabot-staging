@@ -422,6 +422,14 @@ def generate_round_summary_image(round_data, winner):
         message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
         
         prompt = random.choice(prompts)
+
+        if len(prompt) > 1000
+            keep_start = int(max_length * 0.7)  # Keep 70% from the start
+            keep_end = max_length - keep_start - 10  # Allow for '...' in between
+    
+            # Truncate the middle portion
+            prompt = prompt[:keep_start] + "\n...\n" + prompt[-keep_end:]
+        
         print(prompt)
     
     # Generate the image using DALL-E

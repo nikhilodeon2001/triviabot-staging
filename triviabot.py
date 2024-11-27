@@ -134,7 +134,7 @@ def describe_image_with_vision(image_url):
         # Fetch the image from the URL
         response = requests.get(image_url)
         response.raise_for_status()
-        image_data = BytesIO(response.content)
+        image_data = io.BytesIO(response.content)
 
         # Send the image to OpenAI for analysis
         vision_response = openai.Image.create(

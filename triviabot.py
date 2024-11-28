@@ -1496,7 +1496,7 @@ def prompt_user_for_response(round_winner, winner_points):
         
                     if "jeopardy" in message_content.lower():
                         num_jeopardy_clues = 6
-                        send_message(target_room_id, f"🟦✋ @{round_winner} has added 5 Jeopardy questions.\n")
+                        send_message(target_room_id, f"🟦✋ @{round_winner} has added {num_jeopardy_clues} Jeopardy questions.\n")
         
                     if "trebek" in message_content.lower():
                         num_jeopardy_clues = 0

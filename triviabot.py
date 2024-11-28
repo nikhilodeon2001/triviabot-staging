@@ -150,7 +150,7 @@ def describe_image_with_vision(image_url):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Based on what you see in the image, give the image a name with 5 words maximum."
+                            "text": "Based on what you see in the image, give the image a name with 5 words maximum and ensure the name is okra themed."
                         },
                         {
                             "type": "image_url",

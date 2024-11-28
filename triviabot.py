@@ -547,7 +547,7 @@ def ask_category(winner, categories):
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Display categories
-    category_message = "🎨🖍️ Choose your drawing:?\n"
+    category_message = f"🎨🖍️ {winner} Pick one. Or don't.\n"
     for key, value in categories.items():
         category_message += f"{key}: {value}\n"
     send_message(target_room_id, category_message)

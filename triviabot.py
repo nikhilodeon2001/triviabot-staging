@@ -443,7 +443,7 @@ def generate_round_summary_image(round_data, winner):
 
         prompt = random.choice(prompts)
     
-    prompt += f"Incorporate the name '{winner}' prominently into image."
+    prompt += f"Make sure that the word '{winner}' is featured prominently in image."
 
 
     print(prompt)
@@ -457,7 +457,7 @@ def generate_round_summary_image(round_data, winner):
         )
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
-        image_description = describe_image_with_vision(reddit_avatar_url)
+        image_description = describe_image_with_vision(image_url)
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 

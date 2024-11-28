@@ -500,7 +500,7 @@ def generate_round_summary_image(round_data, winner):
         selected_category = ask_category(winner, categories)
 
         # Select a prompt based on the chosen category
-       if selected_category and selected_category in prompts_by_category:
+        if selected_category and selected_category in prompts_by_category:
             prompt = random.choice(prompts_by_category[selected_category])
         else:
             prompt = f"Create an artistic depiction of {winner} interacting with okra in a unique way."

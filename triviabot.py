@@ -434,7 +434,7 @@ def generate_round_summary_image(round_data, winner):
         message = f"✊🔥 {winner_at}, thank you for your donation to the cause. And nice streak!\n"
     
     else:
-      prompts = [
+        prompts = [
           f"Create a Renaissance painting of a personification of {winner} holding a piece of okra. Make the painting elegant and refined. ",
           f"A 1-panel comic of a personification of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers. ",
           f"A personification of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal. ",
@@ -457,7 +457,6 @@ def generate_round_summary_image(round_data, winner):
           f"Show a personification of {winner} in a cozy library, surrounded by stacks of ancient books about okra. They are holding a quill and parchment, writing about the secrets of okra while a magical okra glows softly on the desk.",
           f"Create a winter wonderland scene where a personification of {winner} is sculpting an elaborate okra ice statue. Snowflakes are falling gently, and the landscape is covered in sparkling white snow, with twinkling lights in the background."
     ]
-
         prompt = random.choice(prompts)
     
     prompt += f"The word '{winner}' MUST be in the image."

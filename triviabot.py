@@ -141,7 +141,7 @@ def describe_image_with_vision(image_url):
                     "content": [
                         {
                             "type": "text",
-                            "text": "You are a cool image analyst. Your goal is to describe what is in this image."
+                            "text": "You are a cool image analyst. Your goal is to create image titles."
                         }
                     ]
                 },
@@ -150,7 +150,7 @@ def describe_image_with_vision(image_url):
                     "content": [
                         {
                             "type": "text",
-                            "text": "What is in the image?"
+                            "text": "Based on what you see in the image, give the image a name with 5 words maximum."
                         },
                         {
                             "type": "image_url",
@@ -462,7 +462,7 @@ def generate_round_summary_image(round_data, winner):
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
         message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
-        message += f"\n{image_description}\n"
+        message += f"\nI call this masterpiece '{image_description}'\n"
         message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
         send_message(target_room_id, message)
 

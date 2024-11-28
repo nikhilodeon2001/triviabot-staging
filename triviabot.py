@@ -459,7 +459,7 @@ def generate_round_summary_image(round_data, winner):
     ]
         prompt = random.choice(prompts)
     
-    prompt += f"The word '{winner}' MUST be in the image."
+    prompt += f" The word '{winner}' MUST be in the image."
 
 
     print(prompt)

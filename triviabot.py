@@ -507,8 +507,6 @@ def generate_round_summary_image(round_data, winner):
         else:
             prompt = f"Create an artistic depiction of {winner} interacting with okra in a unique way."
 
-        prompt += f" The word '{winner}' MUST be in the image."
-
     print(prompt)
     
     # Generate the image using DALL-E

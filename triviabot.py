@@ -418,8 +418,7 @@ def generate_round_summary_image(round_data, winner):
     reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
     recent_posts = user_data.get("posts", [])
     recent_comments = user_data.get("comments", [])
-
-    image_description = describe_image_with_vision(reddit_avatar_url)
+    
     print(image_description)
 
     if winner == "OkraStrut":
@@ -444,12 +443,12 @@ def generate_round_summary_image(round_data, winner):
             f"A personification of {winner} getting yelled at by an angry, giant okra. "
         ]
 
-        message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
-        message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
+
         
         prompt = random.choice(prompts)
     
-    prompt += f"Incorporate this avatar description to create what {winner} looks like: {image_description}. Ensure that okra is prominently displayed in the final image."
+    prompt += f"Incorporate the name '{winner}' prominently into image."
+
 
     print(prompt)
     
@@ -462,9 +461,13 @@ def generate_round_summary_image(round_data, winner):
         )
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
- 
+        image_description = describe_image_with_vision(reddit_avatar_url)
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+
+        message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
+        message += f"\n{image_description}\n"
+        message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
         send_message(target_room_id, message)
 
          # Download and resize the image to 256x256

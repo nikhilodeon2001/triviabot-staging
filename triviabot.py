@@ -229,7 +229,7 @@ def upload_image_to_s3(buffer, winner, description):
         pst = pytz.timezone('America/Los_Angeles')
         now = datetime.datetime.now(pst)
         formatted_time = now.strftime('%B %d, %Y %H%M')  # Format: "November 25, 2024 1950"
-        object_name = f"{folder_name}/{description} - {winner} ({formatted_time}).png"
+        object_name = f"{folder_name}/{description} & {winner} ({formatted_time}).png"
              
         # Step 3: Connect to S3 and upload the file
         s3_client = boto3.client("s3")

@@ -441,52 +441,37 @@ def generate_round_summary_image(round_data, winner):
             "3": "Medieval & Fantasy",
             "4": "Superheroes & Action",
             "5": "Country & Nature",
-            "6": "Cooking & Foods",
-            "7": "Pirates & Exploration",
-            "8": "Winter & Seasonal",
             "0": "ANGRY OKRA"
         }
         
         prompts_by_category = {
             "1": [
-                f"Create a Renaissance painting of {winner} holding a piece of okra. Make the painting elegant and refined.",
-                f"Depict {winner} sitting majestically on a throne made entirely of golden okra pods. Surround {winner} with loyal followers, all bowing with smaller okra in their hands. The throne room should be grand, with marble floors, tall stained-glass windows depicting okra fields, and warm golden light illuminating the scene."
+                f"Create a Renaissance painting of an anthropomorphism of {winner} holding a piece of okra. Make the painting elegant and refined.",
+                f"Depict an anthropomorphism of {winner} sitting majestically on a throne made entirely of golden okra pods. Surround {winner} with loyal followers, all bowing with smaller okra in their hands. The throne room should be grand, with marble floors, tall stained-glass windows depicting okra fields, and warm golden light illuminating the scene."
             ],
             "2": [
-                f"{winner} is an astronaut floating in space, holding a glowing piece of okra as if it’s a sacred artifact. The background features the Earth, stars, and a distant okra-shaped space station. The okra emits a mysterious green aura, symbolizing its importance in an intergalactic quest.",
-                f"Show {winner} as a scientist in a high-tech lab, examining a glowing okra under a microscope. The lab is futuristic, with holographic okra diagrams floating in the air and robotic arms assisting with the research."
+                f"an anthropomorphism of {winner} is an astronaut floating in space, holding a glowing piece of okra as if it’s a sacred artifact. The background features the Earth, stars, and a distant okra-shaped space station. The okra emits a mysterious green aura, symbolizing its importance in an intergalactic quest.",
+                f"Show an anthropomorphism of {winner} as a scientist in a high-tech lab, examining a glowing okra under a microscope. The lab is futuristic, with holographic okra diagrams floating in the air and robotic arms assisting with the research."
             ],
             "3": [
-                f"Create a whimsical garden where {winner} is planting and watering okra plants. The okra are enchanted, glowing faintly and growing into fantastical shapes. Butterflies and fireflies hover around, adding a magical atmosphere.",
-                f"Create a magical underwater kingdom where {winner} is a merperson holding a sparkling okra trident. Surround them with colorful fish and coral shaped like okra pods. The scene is vibrant, mystical, and otherworldly.",
-                f"Illustrate {winner} as a medieval knight clad in okra-themed armor. {winner} wields an okra-shaped sword while battling a fearsome dragon made of fiery okra pods. The battlefield is vibrant and epic, with a castle in the distance.",
-                f"Picture {winner} leading an army of animated okra soldiers into battle. The okra soldiers are armed with tiny shields and spears, and the battlefield is vibrant and intense, with banners made of okra leaves flying in the wind."
+                f"Create a whimsical garden where an anthropomorphism of  {winner} is planting and watering okra plants. The okra are enchanted, glowing faintly and growing into fantastical shapes. Butterflies and fireflies hover around, adding a magical atmosphere.",
+                f"Create a magical underwater kingdom where an anthropomorphism of {winner} is a merperson holding a sparkling okra trident. Surround them with colorful fish and coral shaped like okra pods. The scene is vibrant, mystical, and otherworldly.",
+                f"Illustrate an anthropomorphism of {winner} as a medieval knight clad in okra-themed armor. {winner} wields an okra-shaped sword while battling a fearsome dragon made of fiery okra pods. The battlefield is vibrant and epic, with a castle in the distance.",
+                f"Picture an anthropomorphism of {winner} leading an army of animated okra soldiers into battle. The okra soldiers are armed with tiny shields and spears, and the battlefield is vibrant and intense, with banners made of okra leaves flying in the wind."
+            ],
+            "4": [
+                f"an anthropomorphism of {winner} is portrayed as a superhero with an okra emblem on their chest. They are flying through a bustling city, holding a giant okra pod to save the day. The scene is dynamic, with people cheering below and bright comic book-style effects.",
+                f"Illustrate an anthropomorphism of {winner} as a circus performer juggling flaming okra pods under a bright spotlight. The crowd is cheering, and the atmosphere is lively and full of energy, with colorful streamers and a big top tent in the background."
             ],
             "5": [
-                f"{winner} is portrayed as a superhero with an okra emblem on their chest. They are flying through a bustling city, holding a giant okra pod to save the day. The scene is dynamic, with people cheering below and bright comic book-style effects.",
-                f"Illustrate {winner} as a circus performer juggling flaming okra pods under a bright spotlight. The crowd is cheering, and the atmosphere is lively and full of energy, with colorful streamers and a big top tent in the background."
-            ],
-            "6": [
-                f"Imagine a serene countryside setting where {winner} is sitting by a calm river, fishing with an okra-shaped fishing rod. The surrounding landscape is lush and idyllic, with okra plants growing abundantly by the riverbanks.",
-                f"Depict {winner} as an explorer in a dense jungle, uncovering a hidden temple shaped like a giant okra pod. Vines and moss cover the temple, and beams of sunlight break through the canopy, highlighting the discovery."
-            ],
-            "7": [
-                f"{winner} is a chef in a grand kitchen, cooking a feast centered around okra. They are flipping okra in a flaming pan while holding a plate of beautifully arranged okra dishes. The kitchen is bustling with energy, filled with vibrant colors and aromas.",
-                f"Show {winner} at the head of a royal banquet table, hosting a grand feast where every dish is made of okra. Guests in elegant attire are toasting {winner}, who is holding a golden goblet filled with okra juice."
-            ],
-            "9": [
-                f"Illustrate {winner} as a pirate captain aboard a grand okra-shaped ship. {winner} holds a map marked with an 'X' where a treasure of golden okra lies. The scene is vibrant, with waves crashing and a dramatic sunset in the background.",
-                f"Depict {winner} as an explorer in a dense jungle, uncovering a hidden temple shaped like a giant okra pod. Vines and moss cover the temple, and beams of sunlight break through the canopy, highlighting the discovery."
-            ],
-            "10": [
-                f"Create a winter wonderland scene where {winner} is sculpting an elaborate okra ice statue. Snowflakes are falling gently, and the landscape is covered in sparkling white snow, with twinkling lights in the background.",
-                f"Picture a serene countryside where {winner} is leading a festive holiday parade of okra-shaped floats. The streets are decorated with twinkling lights, and snow is gently falling as people cheer."
+                f"Imagine a serene countryside setting where an anthropomorphism of {winner} is sitting by a calm river, fishing with an okra-shaped fishing rod. The surrounding landscape is lush and idyllic, with okra plants growing abundantly by the riverbanks.",
+                f"Depict an anthropomorphism of {winner} as an explorer in a dense jungle, uncovering a hidden temple shaped like a giant okra pod. Vines and moss cover the temple, and beams of sunlight break through the canopy, highlighting the discovery."
             ],
             "0": [
-                f"{winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style. The scene should be exaggerated and dramatic, with the okra towering over {winner}, veins bulging and steam rising from its 'head.' Use bold, expressive colors and a chaotic background, such as a stormy sky or a shattered kitchen, to amplify the tension and humor.",
-                f"Illustrate {winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them. The background is an apocalyptic wasteland, with debris flying around and thunderclouds lit by ominous green lightning. The okra's expression is outrageously exaggerated, with glowing red 'eyes' and an angry scowl.",
-                f"A dramatic scene where {winner} is tied to a giant okra pod on a conveyor belt headed for a chopping block, while an evil okra overlord laughs maniacally in the background. The atmosphere is a mix of dark humor and cartoonish suspense, with sharp knives glinting and a fiery inferno below.",
-                f"Show {winner} running away from a stampede of enraged, anthropomorphic okra pods, each with furious expressions and tiny weapons like forks and spoons. The setting is a surreal cityscape with okra-shaped buildings, and {winner} is sweating and panicking, looking over their shoulder as the okra mob closes in."
+                f"an anthropomorphism of {winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style. The scene should be exaggerated and dramatic, with the okra towering over {winner}, veins bulging and steam rising from its 'head.' Use bold, expressive colors and a chaotic background, such as a stormy sky or a shattered kitchen, to amplify the tension and humor.",
+                f"Illustrate an anthropomorphism of {winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them. The background is an apocalyptic wasteland, with debris flying around and thunderclouds lit by ominous green lightning. The okra's expression is outrageously exaggerated, with glowing red 'eyes' and an angry scowl.",
+                f"A dramatic scene where an anthropomorphism of {winner} is tied to a giant okra pod on a conveyor belt headed for a chopping block, while an evil okra overlord laughs maniacally in the background. The atmosphere is a mix of dark humor and cartoonish suspense, with sharp knives glinting and a fiery inferno below.",
+                f"Show an anthropomorphism of {winner} running away from a stampede of enraged, anthropomorphic okra pods, each with furious expressions and tiny weapons like forks and spoons. The setting is a surreal cityscape with okra-shaped buildings, and {winner} is sweating and panicking, looking over their shoulder as the okra mob closes in."
             ]
         }
 
@@ -497,7 +482,7 @@ def generate_round_summary_image(round_data, winner):
         if selected_category and selected_category in prompts_by_category:
             prompt = random.choice(prompts_by_category[selected_category])
         else:
-            prompt = f"Create an artistic depiction of {winner} interacting with okra in a unique way."
+            prompt = f"Create an artistic depiction of an anthropomorphism of {winner} interacting with okra in a unique way."
 
     print(prompt)
     
@@ -547,7 +532,7 @@ def ask_category(winner, categories):
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Display categories
-    category_message = f"🎨🖍️ {winner} Pick one. Or don't.\n"
+    category_message = f"\n🎨🖍️ {winner} Pick one. Or don't.\n"
     for key, value in categories.items():
         category_message += f"{key}: {value}\n"
     send_message(target_room_id, category_message)

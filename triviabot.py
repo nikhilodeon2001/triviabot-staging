@@ -220,7 +220,7 @@ def sovereign_check(user):
         return False
 
 
-def upload_image_to_s3(buffer, winner):
+def upload_image_to_s3(buffer, winner, description):
     try:
         bucket_name='triviabotwebsite'
         folder_name='generated-images'
@@ -229,7 +229,7 @@ def upload_image_to_s3(buffer, winner):
         pst = pytz.timezone('America/Los_Angeles')
         now = datetime.datetime.now(pst)
         formatted_time = now.strftime('%B %d, %Y %H%M')  # Format: "November 25, 2024 1950"
-        object_name = f"{folder_name}/{winner} ({formatted_time}).png"
+        object_name = f"{folder_name}/{description} - {winner} ({formatted_time}).png"
              
         # Step 3: Connect to S3 and upload the file
         s3_client = boto3.client("s3")
@@ -476,7 +476,7 @@ def generate_round_summary_image(round_data, winner):
         image.save(buffer, format="PNG")
         buffer.seek(0)
         
-        upload_image_to_s3(buffer, winner)
+        upload_image_to_s3(buffer, winner, image_description)
         return None
         
     except openai.OpenAIError as e:

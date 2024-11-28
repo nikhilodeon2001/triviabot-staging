@@ -419,8 +419,6 @@ def generate_round_summary_image(round_data, winner):
     recent_posts = user_data.get("posts", [])
     recent_comments = user_data.get("comments", [])
     
-    print(image_description)
-
     if winner == "OkraStrut":
         prompt = (
             "The setting is a fiery Hell, where a giant and angry piece of okra holds a massive golden trophy while looking down on and smiting all other players. "
@@ -443,8 +441,6 @@ def generate_round_summary_image(round_data, winner):
             f"A personification of {winner} getting yelled at by an angry, giant okra. "
         ]
 
-
-        
         prompt = random.choice(prompts)
     
     prompt += f"Incorporate the name '{winner}' prominently into image."

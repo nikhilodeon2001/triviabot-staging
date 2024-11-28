@@ -438,14 +438,13 @@ def generate_round_summary_image(round_data, winner):
         categories = {
             "1": "Renaissance & Art",
             "2": "Space & Future",
-            "3": "Whimsical & Magical",
-            "4": "Medieval & Fantasy",
-            "5": "Superheroes & Action",
-            "6": "Country & Nature",
-            "7": "Cooking & Foods",
-            "8": "Creative Arts",
-            "9": "Pirates & Exploration",
-            "10": "Winter & Seasonal"
+            "3": "Medieval & Fantasy",
+            "4": "Superheroes & Action",
+            "5": "Country & Nature",
+            "6": "Cooking & Foods",
+            "7": "Pirates & Exploration",
+            "8": "Winter & Seasonal",
+            "0": "ANGRY OKRA"
         }
         
         prompts_by_category = {
@@ -459,9 +458,7 @@ def generate_round_summary_image(round_data, winner):
             ],
             "3": [
                 f"Create a whimsical garden where {winner} is planting and watering okra plants. The okra are enchanted, glowing faintly and growing into fantastical shapes. Butterflies and fireflies hover around, adding a magical atmosphere.",
-                f"Create a magical underwater kingdom where {winner} is a merperson holding a sparkling okra trident. Surround them with colorful fish and coral shaped like okra pods. The scene is vibrant, mystical, and otherworldly."
-            ],
-            "4": [
+                f"Create a magical underwater kingdom where {winner} is a merperson holding a sparkling okra trident. Surround them with colorful fish and coral shaped like okra pods. The scene is vibrant, mystical, and otherworldly.",
                 f"Illustrate {winner} as a medieval knight clad in okra-themed armor. {winner} wields an okra-shaped sword while battling a fearsome dragon made of fiery okra pods. The battlefield is vibrant and epic, with a castle in the distance.",
                 f"Picture {winner} leading an army of animated okra soldiers into battle. The okra soldiers are armed with tiny shields and spears, and the battlefield is vibrant and intense, with banners made of okra leaves flying in the wind."
             ],
@@ -477,10 +474,6 @@ def generate_round_summary_image(round_data, winner):
                 f"{winner} is a chef in a grand kitchen, cooking a feast centered around okra. They are flipping okra in a flaming pan while holding a plate of beautifully arranged okra dishes. The kitchen is bustling with energy, filled with vibrant colors and aromas.",
                 f"Show {winner} at the head of a royal banquet table, hosting a grand feast where every dish is made of okra. Guests in elegant attire are toasting {winner}, who is holding a golden goblet filled with okra juice."
             ],
-            "8": [
-                f"Depict {winner} as an artist in a studio, painting a giant canvas of a surreal okra landscape. The studio is filled with okra-inspired sculptures, paintbrushes, and palettes. The painting on the canvas glows as if it's coming to life.",
-                f"Create a 1-panel comic of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers."
-            ],
             "9": [
                 f"Illustrate {winner} as a pirate captain aboard a grand okra-shaped ship. {winner} holds a map marked with an 'X' where a treasure of golden okra lies. The scene is vibrant, with waves crashing and a dramatic sunset in the background.",
                 f"Depict {winner} as an explorer in a dense jungle, uncovering a hidden temple shaped like a giant okra pod. Vines and moss cover the temple, and beams of sunlight break through the canopy, highlighting the discovery."
@@ -489,7 +482,7 @@ def generate_round_summary_image(round_data, winner):
                 f"Create a winter wonderland scene where {winner} is sculpting an elaborate okra ice statue. Snowflakes are falling gently, and the landscape is covered in sparkling white snow, with twinkling lights in the background.",
                 f"Picture a serene countryside where {winner} is leading a festive holiday parade of okra-shaped floats. The streets are decorated with twinkling lights, and snow is gently falling as people cheer."
             ],
-            "O": [
+            "0": [
                 f"{winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style. The scene should be exaggerated and dramatic, with the okra towering over {winner}, veins bulging and steam rising from its 'head.' Use bold, expressive colors and a chaotic background, such as a stormy sky or a shattered kitchen, to amplify the tension and humor.",
                 f"Illustrate {winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them. The background is an apocalyptic wasteland, with debris flying around and thunderclouds lit by ominous green lightning. The okra's expression is outrageously exaggerated, with glowing red 'eyes' and an angry scowl.",
                 f"A dramatic scene where {winner} is tied to a giant okra pod on a conveyor belt headed for a chopping block, while an evil okra overlord laughs maniacally in the background. The atmosphere is a mix of dark humor and cartoonish suspense, with sharp knives glinting and a fiery inferno below.",
@@ -554,7 +547,7 @@ def ask_category(winner, categories):
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Display categories
-    category_message = "What should I draw?\n"
+    category_message = "🎨🖍️ Choose your drawing:?\n"
     for key, value in categories.items():
         category_message += f"{key}: {value}\n"
     send_message(target_room_id, category_message)
@@ -3340,6 +3333,7 @@ def update_round_streaks(user):
         send_message(target_room_id, gpt_message)
         
         if current_longest_round_streak['streak'] % image_wins == 0:
+            time.sleep(3)
             generate_round_summary_image(round_data, user)
         else:
             number_to_emoji = {

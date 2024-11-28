@@ -434,16 +434,33 @@ def generate_round_summary_image(round_data, winner):
         message = f"✊🔥 {winner_at}, thank you for your donation to the cause. And nice streak!\n"
     
     else:
-        prompts = [
-            f"Create a Renaissance painting of a personification of {winner} holding a piece of okra. Make the painting elegant and refined. ",
-            f"A 1-panel comic of a personification of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers. ",
-            f"A personification of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal. ",
-            f"A personification of {winner} getting yelled at by an angry, giant okra. "
-        ]
+      prompts = [
+          f"Create a Renaissance painting of a personification of {winner} holding a piece of okra. Make the painting elegant and refined. ",
+          f"A 1-panel comic of a personification of {winner} holding a piece of okra. The comic is colorful like in the Sunday morning newspapers. ",
+          f"A personification of {winner} as a deity holding a piece of okra. The ambiance is holy, elegant, and ethereal. ",
+          f"A personification of {winner} getting yelled at by an angry, giant okra. ",
+          f"Depict a personification of {winner} sitting majestically on a throne made entirely of golden okra pods. Surround {winner} with loyal followers, all bowing with smaller okra in their hands. The throne room should be grand, with marble floors, tall stained-glass windows depicting okra fields, and warm golden light illuminating the scene.",
+          f"A personification of {winner} is an astronaut floating in space, holding a glowing piece of okra as if it’s a sacred artifact. The background features the Earth, stars, and a distant okra-shaped space station. The okra emits a mysterious green aura, symbolizing its importance in an intergalactic quest.",
+          f"Create a whimsical garden where a personification of {winner} is planting and watering okra plants. The okra are enchanted, glowing faintly and growing into fantastical shapes. Butterflies and fireflies hover around, adding a magical atmosphere.",
+          f"Illustrate a personification of {winner} as a medieval knight clad in okra-themed armor. {winner} wields an okra-shaped sword while battling a fearsome dragon made of fiery okra pods. The battlefield is vibrant and epic, with a castle in the distance.",
+          f"A personification of {winner} is portrayed as a superhero with an okra emblem on their chest. They are flying through a bustling city, holding a giant okra pod to save the day. The scene is dynamic, with people cheering below and bright comic book-style effects.",
+          f"Imagine a serene countryside setting where a personification of {winner} is sitting by a calm river, fishing with an okra-shaped fishing rod. The surrounding landscape is lush and idyllic, with okra plants growing abundantly by the riverbanks.",
+          f"A personification of {winner} is a chef in a grand kitchen, cooking a feast centered around okra. They are flipping okra in a flaming pan while holding a plate of beautifully arranged okra dishes. The kitchen is bustling with energy, filled with vibrant colors and aromas.",
+          f"Show a personification of {winner} at the head of a royal banquet table, hosting a grand feast where every dish is made of okra. Guests in elegant attire are toasting {winner}, who is holding a golden goblet filled with okra juice.",
+          f"Depict a personification of {winner} as an artist in a studio, painting a giant canvas of a surreal okra landscape. The studio is filled with okra-inspired sculptures, paintbrushes, and palettes. The painting on the canvas glows as if it's coming to life.",
+          f"Illustrate a personification of {winner} as a pirate captain aboard a grand okra-shaped ship. {winner} holds a map marked with an 'X' where a treasure of golden okra lies. The scene is vibrant, with waves crashing and a dramatic sunset in the background.",
+          f"Picture a personification of {winner} leading an army of animated okra soldiers into battle. The okra soldiers are armed with tiny shields and spears, and the battlefield is vibrant and intense, with banners made of okra leaves flying in the wind.",
+          f"Show a personification of {winner} as a scientist in a high-tech lab, examining a glowing okra under a microscope. The lab is futuristic, with holographic okra diagrams floating in the air and robotic arms assisting with the research.",
+          f"Create a magical underwater kingdom where a personification of {winner} is a merperson holding a sparkling okra trident. Surround them with colorful fish and coral shaped like okra pods. The scene is vibrant, mystical, and otherworldly.",
+          f"Illustrate a personification of {winner} as a circus performer juggling flaming okra pods under a bright spotlight. The crowd is cheering, and the atmosphere is lively and full of energy, with colorful streamers and a big top tent in the background.",
+          f"Depict a personification of {winner} as an explorer in a dense jungle, uncovering a hidden temple shaped like a giant okra pod. Vines and moss cover the temple, and beams of sunlight break through the canopy, highlighting the discovery.",
+          f"Show a personification of {winner} in a cozy library, surrounded by stacks of ancient books about okra. They are holding a quill and parchment, writing about the secrets of okra while a magical okra glows softly on the desk.",
+          f"Create a winter wonderland scene where a personification of {winner} is sculpting an elaborate okra ice statue. Snowflakes are falling gently, and the landscape is covered in sparkling white snow, with twinkling lights in the background."
+    ]
 
         prompt = random.choice(prompts)
     
-    prompt += f"Make sure that the word '{winner}' is featured prominently in image."
+    prompt += f"The word '{winner}' MUST be in the image."
 
 
     print(prompt)

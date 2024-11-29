@@ -521,7 +521,7 @@ def generate_round_summary_image(round_data, winner):
                 f"An anthropomorphism of {winner} as an explorer in a dense jungle holding an okra weapon."
             ],
             "9": [
-                f"An anthropomorphism of what you think {winner} would look like based on these most visited Reddit subreddits:\n"
+                f"An anthropomorphism of what you think {winner} would look like based on this avatar description and these most visited Reddit subreddits:\n"
             ],
             "0": [
                 f"An anthropomorphism of {winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",

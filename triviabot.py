@@ -472,8 +472,6 @@ def nice_creep_okra_option(winner):
 def generate_round_summary_image(round_data, winner):
     winner_coffees = get_coffees(winner)
     winner_at = f"@{winner}"
-
-    try:
     
     if winner == "OkraStrut":
         prompt = (

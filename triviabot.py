@@ -352,8 +352,8 @@ def nice_creep_okra_option(winner):
     # Initialize the sync and message to prompt user for letters
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n☕🤝 @{winner}, thanks for the coffee. Say 'okra' and no roast.\n"
-    message += f"\n👀🔭Or...say 'creep' and I'll roast you with your reddit history.\n"
+    message = f"\n☕🤝 Thank you @{winner}. Say 'okra' and no roast.\n"
+    message += f"👀🔭 Say 'creep' for a roast you with your Reddit profile.\n\n"
     send_message(target_room_id, message)
     
     while time.time() - start_time < magic_time:
@@ -2195,7 +2195,7 @@ def generate_round_summary(round_data, winner):
                 temperature=1.0,
             )
 
-        elif okra_creep == True:
+        elif creep_okra == True:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[

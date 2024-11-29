@@ -378,7 +378,7 @@ def nice_creep_okra_option(winner):
     initialize_sync()
     start_time = time.time()  # Track when the question starts
     
-    message = f"\n☕🤝 Thank you @{winner}.\n\n" 
+    message = f"\n☕🤝 Thank you @{winner} for your support.\n\n" 
     message += f"🥒😊 Say 'okra' and I'll be nice.\n"
     message += f"👀🔭 Say 'creep' and I'll snoop your Reddit profile.\n"
     message += f"🔥🍗 Say neither and I roast you.\n\n"

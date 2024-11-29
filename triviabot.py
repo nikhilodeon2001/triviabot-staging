@@ -429,7 +429,7 @@ def generate_round_summary_image(round_data, winner):
         
     elif winner_coffees > 100:
         prompt = (
-            f"The scene shows {winner} surrounded by okra and money. "
+            f"An anthropomorphism of {winner} surrounded by okra and money. "
             "Add glowing lights, hearts, and a festive atmosphere."
         )
         message = f"✊🔥 {winner_at}, thank you for your donation to the cause. And nice streak!\n"
@@ -446,32 +446,30 @@ def generate_round_summary_image(round_data, winner):
         
         prompts_by_category = {
             "1": [
-                f"Create a Renaissance painting of an anthropomorphism of {winner} holding a piece of okra. Make the painting elegant and refined.",
-                f"Depict an anthropomorphism of {winner} sitting majestically on a throne made entirely of golden okra pods. Surround {winner} with loyal followers, all bowing with smaller okra in their hands. The throne room should be grand, with marble floors, tall stained-glass windows depicting okra fields, and warm golden light illuminating the scene."
+                f"A Renaissance painting of an anthropomorphism of {winner} holding a piece of okra. Make the painting elegant and refined.",
+                f"A Renaissance painting of an anthropomorphism of {winner} sitting majestically on a throne and holding a jeweled okra."
             ],
             "2": [
-                f"an anthropomorphism of {winner} is an astronaut floating in space, holding a glowing piece of okra as if it’s a sacred artifact. The background features the Earth, stars, and a distant okra-shaped space station. The okra emits a mysterious green aura, symbolizing its importance in an intergalactic quest.",
-                f"Show an anthropomorphism of {winner} as a scientist in a high-tech lab, examining a glowing okra under a microscope. The lab is futuristic, with holographic okra diagrams floating in the air and robotic arms assisting with the research."
+                f"An anthropomorphism of {winner} as an astronaut floating in space, holding a glowing piece of okra as if it’s a sacred artifact.",
+                f"An anthropomorphism of {winner} as a scientist in a high-tech lab, examining a glowing okra."
             ],
             "3": [
-                f"Create a whimsical garden where an anthropomorphism of  {winner} is planting and watering okra plants. The okra are enchanted, glowing faintly and growing into fantastical shapes. Butterflies and fireflies hover around, adding a magical atmosphere.",
-                f"Create a magical underwater kingdom where an anthropomorphism of {winner} is a merperson holding a sparkling okra trident. Surround them with colorful fish and coral shaped like okra pods. The scene is vibrant, mystical, and otherworldly.",
-                f"Illustrate an anthropomorphism of {winner} as a medieval knight clad in okra-themed armor. {winner} wields an okra-shaped sword while battling a fearsome dragon made of fiery okra pods. The battlefield is vibrant and epic, with a castle in the distance.",
-                f"Picture an anthropomorphism of {winner} leading an army of animated okra soldiers into battle. The okra soldiers are armed with tiny shields and spears, and the battlefield is vibrant and intense, with banners made of okra leaves flying in the wind."
+                f"An anthropomorphism of {winner} in a whimsical garden planting and watering an enchanted okra.",
+                f"An anthropomorphism of {winner} as a merperson holding a sparkling okra trident in a magical underwater kingdom.",
+                f"An anthropomorphism of {winner} as a medieval knight clad in okra-themed armor."
             ],
             "4": [
-                f"an anthropomorphism of {winner} is portrayed as a superhero with an okra emblem on their chest. They are flying through a bustling city, holding a giant okra pod to save the day. The scene is dynamic, with people cheering below and bright comic book-style effects.",
-                f"Illustrate an anthropomorphism of {winner} as a circus performer juggling flaming okra pods under a bright spotlight. The crowd is cheering, and the atmosphere is lively and full of energy, with colorful streamers and a big top tent in the background."
+                f"An anthropomorphism of {winner} is portrayed as a superhero with an okra emblem on their chest.",
+                f"An anthropomorphism of {winner} as an action movie star holding an okra weapon."
             ],
             "5": [
-                f"Imagine a serene countryside setting where an anthropomorphism of {winner} is sitting by a calm river, fishing with an okra-shaped fishing rod. The surrounding landscape is lush and idyllic, with okra plants growing abundantly by the riverbanks.",
-                f"Depict an anthropomorphism of {winner} as an explorer in a dense jungle, uncovering a hidden temple shaped like a giant okra pod. Vines and moss cover the temple, and beams of sunlight break through the canopy, highlighting the discovery."
+                f"An anthropomorphism of {winner} is sitting by a calm river in a serene countryside holding an okra.",
+                f"An anthropomorphism of {winner} as an explorer in a dense jungle holding an okra weapon."
             ],
             "0": [
-                f"an anthropomorphism of {winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style. The scene should be exaggerated and dramatic, with the okra towering over {winner}, veins bulging and steam rising from its 'head.' Use bold, expressive colors and a chaotic background, such as a stormy sky or a shattered kitchen, to amplify the tension and humor.",
-                f"Illustrate an anthropomorphism of {winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them. The background is an apocalyptic wasteland, with debris flying around and thunderclouds lit by ominous green lightning. The okra's expression is outrageously exaggerated, with glowing red 'eyes' and an angry scowl.",
-                f"A dramatic scene where an anthropomorphism of {winner} is tied to a giant okra pod on a conveyor belt headed for a chopping block, while an evil okra overlord laughs maniacally in the background. The atmosphere is a mix of dark humor and cartoonish suspense, with sharp knives glinting and a fiery inferno below.",
-                f"Show an anthropomorphism of {winner} running away from a stampede of enraged, anthropomorphic okra pods, each with furious expressions and tiny weapons like forks and spoons. The setting is a surreal cityscape with okra-shaped buildings, and {winner} is sweating and panicking, looking over their shoulder as the okra mob closes in."
+                f"An anthropomorphism of {winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
+                f"An anthropomorphism of {winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them.",
+                f"An anthropomorphism of {winner} running from a massive angry okra."
             ]
         }
 
@@ -532,7 +530,7 @@ def ask_category(winner, categories):
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Display categories
-    category_message = f"\n🎨🖍️ {winner} Pick one. Or don't.\n"
+    category_message = f"\n🎨🖍️ @{winner} Pick one. Or don't.\n\n"
     for key, value in categories.items():
         category_message += f"{key}: {value}\n"
     send_message(target_room_id, category_message)
@@ -541,6 +539,9 @@ def ask_category(winner, categories):
     
     while time.time() - start_time < magic_time:
         try:
+            if since_token:
+                params["since"] = since_token
+
             response = requests.get(sync_url, headers=headers, params=params)
 
             if response.status_code != 200:

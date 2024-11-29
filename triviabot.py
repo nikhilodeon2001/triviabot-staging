@@ -507,7 +507,7 @@ def generate_round_summary_image(round_data, winner):
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
-        message = f"🔥💖 {winner_at} nice streak. I drew this for you.\n"
+        message = f"🔥💖 {winner_at} nice streak. I drew this of you.\n"
         message += f"\nI call this masterpiece '{image_description}'\n"
         message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
         send_message(target_room_id, message)

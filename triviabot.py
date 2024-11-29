@@ -509,7 +509,7 @@ def generate_round_summary_image(round_data, winner):
             "3": "Medieval & Fantasy",
             "4": "Superheroes & Action",
             "5": "Country & Nature",
-            "9": f"@{winner} Self Portrait"
+            "9": f"@{winner} Self Portrait "
         }
         
         prompts_by_category = {
@@ -2134,7 +2134,7 @@ def generate_round_summary(round_data, winner):
          prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
             f"Roast and deeply insult them about their username, post history, and information from their profile. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
-            f"Create no more than 8 sentences in total. Here are their profile details for you to use in your roast:\n"
+            f"Create no more than 10 sentences in total. Here are their profile details for you to use in your roast:\n"
             f"{winner_at}'s Profile Information:\n"
         )
 
@@ -2280,7 +2280,7 @@ def generate_round_summary(round_data, winner):
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are a ruthless and sarcastic comedian specializing in roasting people. Your job is to be mean, cutting, and hilariously offensive while delivering a brutal roast of the winning trivia player. Use dark humor, biting sarcasm, and clever wit to insult the person based on their username, profile picture description, recent posts, and recent comments. Do not hold back and aim to make the roast as harsh and over-the-top as possible. Use plenty of emojis for flair, but stay within 8 sentences."},
+                    {"role": "system", "content": "You are a ruthless and sarcastic comedian specializing in roasting people. Your job is to be mean, cutting, and hilariously offensive while delivering a brutal roast of the winning trivia player. Use dark humor, biting sarcasm, and clever wit to insult the person based on their username, profile picture description, recent posts, and recent comments. Do not hold back and aim to make the roast as harsh and over-the-top as possible. Use plenty of emojis for flair, but stay within 10 sentences."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=200,
@@ -2304,7 +2304,6 @@ def generate_round_summary(round_data, winner):
 
         # Extract the generated summary from the response
         print(prompt)
-        print(response)
         summary = response.choices[0].message['content'].strip()
         return summary
 

@@ -133,9 +133,42 @@ reddit = praw.Reddit(
 )
 
 
-def describe_image_with_vision(image_url):
+def describe_image_with_vision(image_url, mode):
     try:
-        payload = {
+
+        if mode == "okra":
+            payload = {
+                "model": "gpt-4o",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "You are a cool image analyst. Your goal is to create image titles."
+                            }
+                        ]
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Based on what you see in the image, give the image a name with 5 words maximum and ensure the name is okra themed."
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": image_url
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "max_tokens": 500
+            }
+        else:
+            payload = {
             "model": "gpt-4o",
             "messages": [
                 {
@@ -143,7 +176,7 @@ def describe_image_with_vision(image_url):
                     "content": [
                         {
                             "type": "text",
-                            "text": "You are a cool image analyst. Your goal is to create image titles."
+                            "text": "You are aanimage analyst. Your goal is to accurately describe the image to provide to someone who will roast the image in combination with other user profile information."
                         }
                     ]
                 },
@@ -152,7 +185,7 @@ def describe_image_with_vision(image_url):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Based on what you see in the image, give the image a name with 5 words maximum and ensure the name is okra themed."
+                            "text": "Describe what you see in this image as accurately as you can.."
                         },
                         {
                             "type": "image_url",
@@ -502,7 +535,7 @@ def generate_round_summary_image(round_data, winner):
                 f"An anthropomorphism of {winner} as an explorer in a dense jungle holding an okra weapon."
             ],
             "9": [
-                f"An anthropomorphism of {winner} based on their following profile information:\n"
+                f"An anthropomorphism of what you think {winner} would look like based on these most visited Reddit subreddits:\n"
             ],
             "0": [
                 f"An anthropomorphism of {winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
@@ -533,7 +566,7 @@ def generate_round_summary_image(round_data, winner):
         
         # Extract user data
         reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url)
+        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "regular")
         top_subreddits = user_data.get("top_subreddits", [])
         
         # Format the top subreddits
@@ -557,7 +590,7 @@ def generate_round_summary_image(round_data, winner):
         )
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
-        image_description = describe_image_with_vision(image_url)
+        image_description = describe_image_with_vision(image_url, "okra")
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
@@ -2152,7 +2185,7 @@ def generate_round_summary(round_data, winner):
     
         # Extract user data
         reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url)
+        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "regular")
         top_subreddits = user_data.get("top_subreddits", [])
         
         # Format the top subreddits

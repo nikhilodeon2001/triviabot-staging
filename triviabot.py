@@ -509,7 +509,7 @@ def generate_round_summary_image(round_data, winner):
             "3": "Medieval & Fantasy",
             "4": "Superheroes & Action",
             "5": "Country & Nature",
-            "9": f"{winner} Self Portrait"
+            "9": f"@{winner} Self Portrait"
         }
         
         prompts_by_category = {

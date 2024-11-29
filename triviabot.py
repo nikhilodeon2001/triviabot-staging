@@ -379,9 +379,9 @@ def nice_creep_okra_option(winner):
     start_time = time.time()  # Track when the question starts
     
     message = f"\n☕🤝 Thank you @{winner}.\n\n" 
-    message += f"🥒😊 Say 'okra' and no roast.\n"
-    message += f"👀🔭 Say 'creep' for a roast using your Reddit profile.\n"
-    message += f"🏷️👈 Say neither for a brutal roast of your username only.\n\n"
+    message += f"🥒😊 Say 'okra' and I'll be nice.\n"
+    message += f"👀🔭 Say 'creep' and I'll snoop your Reddit profile.\n"
+    message += f"🔥🍗 Say neither and I roast you.\n\n"
     send_message(target_room_id, message)
     
     while time.time() - start_time < magic_time:

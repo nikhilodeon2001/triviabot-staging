@@ -342,9 +342,10 @@ def load_parameters():
 
 
 def nice_creep_okra_option(winner):
-    global since_token, params, headers, max_retries, delay_between_retries, nice_okra, creep_okra
+    global since_token, params, headers, max_retries, delay_between_retries, nice_okra, creep_okra, wf_winner
     nice_okra = False
     creep_okra = False
+    wf_winner = False
 
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
@@ -352,8 +353,11 @@ def nice_creep_okra_option(winner):
     # Initialize the sync and message to prompt user for letters
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-    message = f"\n☕🤝 Thank you @{winner}. Say 'okra' and no roast.\n"
-    message += f"👀🔭 Say 'creep' for a roast you with your Reddit profile.\n\n"
+    
+    message = f"\n☕🤝 Thank you @{winner}.\n\n" 
+    message += f"🥒😊 Say 'okra' and no roast.\n"
+    message += f"👀🔭 Say 'creep' for a roast using your Reddit profile.\n"
+    message += f"🏷️👈 Say neither for a brutal roast of your username only.\n\n"
     send_message(target_room_id, message)
     
     while time.time() - start_time < magic_time:
@@ -395,6 +399,7 @@ def nice_creep_okra_option(winner):
                     if "okra" in message_content.lower():
                         react_to_message(event_id, target_room_id, "okra21")
                         nice_okra = True
+                        wf_winner = True
                         return None
                     if "creep" in message_content.lower():
                         react_to_message(event_id, target_room_id, "okra21")
@@ -403,7 +408,7 @@ def nice_creep_okra_option(winner):
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
-            
+
     return None
 
 
@@ -1999,12 +2004,13 @@ def scramble_text(input_text):
 
 
 def generate_round_summary(round_data, winner):
-    global nice_okra, creep_okra
+    global nice_okra, creep_okra, wf_winner
     #ask_magic_number(winner) 
 
     winner_coffees = get_coffees(winner)
     is_sovereign = sovereign_check(winner)
-    if winner_coffees > 0 and wf_winner == False:
+    
+    if winner_coffees > 0:
         nice_creep_okra_option(winner)
     
     winner_at = f"@{winner}"
@@ -2018,25 +2024,7 @@ def generate_round_summary(round_data, winner):
             "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
             "Questions asked:\n"
         )
-
-    elif (magic_number_correct == True or wf_winner == True) and is_sovereign == True:
-         prompt = (
-            f"{winner_at} is the username of the winner of the trivia round. "
-            "Love bomb them about their username and be very specific, positive, and loving. Give them a lot of admiration for being a previous Sovereign. Then mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
-            "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
-        )
-
-    elif (magic_number_correct == True or wf_winner == True) and is_sovereign == False:
-         prompt = (
-            f"{winner_at} is the username of the winner of the trivia round. "
-            "Love bomb them about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
-            "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
-            "Questions asked:\n"
-        )
-
+        
     elif nice_okra == True and is_sovereign == True:
          prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
@@ -2063,28 +2051,36 @@ def generate_round_summary(round_data, winner):
             f"{winner_at}'s Profile Information:\n"
         )
 
+    elif wf_winner == True and is_sovereign == True:
+         prompt = (
+            f"{winner_at} is the username of the winner of the trivia round. "
+            "Love bomb them about their username and be very specific, positive, and loving. Give them a lot of admiration for being a previous Sovereign. Then mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
+            "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+
+    elif wf_winner == True and is_sovereign == False:
+         prompt = (
+            f"{winner_at} is the username of the winner of the trivia round. "
+            "Love bomb them about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
+            "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
+            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Questions asked:\n"
+        )
+
     else:
         prompts = [
             f"The winner of the trivia round is {winner_at}. Roast the winning player about their username and be very specific and negative in your roast. Insult specific responses they gave during the round. Create no more than 4 sentences in total. Be sarcastic, very angry, offensive, and use emojis in your response. Deeply insult the winner using angry and rough language. Here is a detailed summary of the trivia round with explicit mappings of user responses:\nQuestions asked:\n",
-        
             f"Congratulations to {winner_at}, our so-called 'winner' this round. Mock their username in a hilariously petty way and pick apart their responses with sharp sarcasm. Use no more than 4 sentences. Pretend you’re a sore loser begrudgingly announcing their victory, and make it painfully clear how unimpressed you are. Include emojis to spice it up. Here’s the summary of the trivia round with all the juicy details:\nQuestions asked:\n",
-            
             f"Against all odds, {winner_at} somehow won this round. Mock their username brutally and dig into how undeserved this win feels. Be witty and cutting, and call out their dumb luck and ridiculous guesses that somehow worked. Limit it to 4 sentences, and don’t hold back on the emojis to add insult to injury. Here’s the summary of their 'performance':\nQuestions asked:\n",
-            
             f"And the winner is {winner_at}... yawn. Roast their username and rip into how underwhelming their answers were, even if they were correct. Keep it savage, sarcastic, and peppered with emojis to show how little you think of their so-called victory. No more than 4 sentences. Detailed trivia summary for your ammo:\nQuestions asked:\n",
-            
             f"All hail {winner_at}, the king/queen of try-hards this round! Make fun of their username like a middle school bully and destroy their overly enthusiastic responses with ruthless sarcasm. Call out their desperation to win and how unimpressive their actual performance was. Use no more than 4 sentences, and go hard with emojis to hammer the point home. Summary of their desperate efforts:\nQuestions asked:\n",
-            
             f"{winner_at} squeaked by with a win, but let’s not pretend it was impressive. Tear into their username and roast how they scraped by with questionable answers. Make it snarky, mean, and emoji-heavy while implying the win is barely worth celebrating. Limit to 4 sentences. Here’s the summary of this tragic triumph:\nQuestions asked:\n",
-            
             f"Let’s all congratulate {winner_at}, the luckiest loser who somehow won this round. Roast their username into oblivion and highlight their dumbest, most laughable responses. Be savagely sarcastic, offensive, and pepper it with emojis. Keep it short (4 sentences) but devastating. Here’s the summary of their cringe-worthy 'win':\nQuestions asked:\n",
-            
             f"{winner_at} won? Really? Roast their username mercilessly and humiliate them for their most embarrassingly bad responses during the round. Destroy their ego with biting sarcasm, insults, and an onslaught of emojis. Keep it concise (4 sentences max). Trivia summary for your arsenal:\nQuestions asked:\n",
-            
             f"Apparently, {winner_at} won this round. This feels rigged. Mock their username with scathing sarcasm and destroy their responses like a sore loser who can’t believe they lost to this. Use an angry, ridiculous tone with plenty of 🤬 and 🫠 emojis, and cap it at 4 sentences. Here’s the evidence of this travesty:\nQuestions asked:\n",
-            
             f"{winner_at} won, and everyone else should be embarrassed. Roast their username and mock their answers to prove they only won because everyone else was worse. Be hilariously mean, sarcastic, and over-the-top in your insults. Keep it to 4 sentences, and sprinkle liberally with emojis. Summary of this sad state of affairs:\nQuestions asked:\n",
-            
             f"A big 'congratulations' to {winner_at} 🙄. Use their username as fodder for the most sarcastic roast ever, and tear into their most ridiculous responses during the game. Be mean, petty, and emoji-heavy, like you’re fake-smiling through gritted teeth. No more than 4 sentences. Here’s the trivia summary:\nQuestions asked:\n"
         ]   
 
@@ -2102,7 +2098,7 @@ def generate_round_summary(round_data, winner):
     
         # Extract user data
         reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-        reddit_avatar_desdription = describe_image_with_vision(reddit_avatar_url)
+        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url)
         recent_posts = user_data.get("posts", [])
         recent_comments = user_data.get("comments", [])
 

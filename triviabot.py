@@ -496,7 +496,7 @@ def generate_round_summary_image(round_data, winner):
         else:
             prompt = f"Create an artistic depiction of an anthropomorphism of {winner} interacting with okra in a unique way."
 
-        if selected_category == 9:
+        if selected_category == "9":
             
             try:
                 user_data = get_user_data(winner)

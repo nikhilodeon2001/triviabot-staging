@@ -2218,7 +2218,7 @@ def generate_round_summary(round_data, winner):
             )
 
         # Extract the generated summary from the response
-        print(primpt)
+        print(prompt)
         print(response)
         summary = response.choices[0].message['content'].strip()
         return summary

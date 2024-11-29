@@ -4175,7 +4175,8 @@ def start_trivia_round():
                 round_preview(selected_questions)
                 time.sleep(10)
             else:
-                send_message(target_room_id, f"\n💚 Friendly OkraStrut? Buy coffee with your Reddit name.\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                #send_message(target_room_id, f"\n💚 Friendly OkraStrut? Buy coffee with your Reddit name.\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
+                send_message(target_room_id, f"\n💚 Friendly OkraStrut? Buy coffee with your Reddit name.\n☕️ https://buymeacoffee.com/livetrivia\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds

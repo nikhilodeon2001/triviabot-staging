@@ -2055,7 +2055,7 @@ def generate_round_summary(round_data, winner):
             "Questions asked:\n"
         )
 
-     elif creep_okra == True:
+    elif creep_okra == True:
          prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
             f"Roast and deeply insult them about their username, post history, and information from their profile. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."

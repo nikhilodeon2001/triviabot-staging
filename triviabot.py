@@ -446,12 +446,13 @@ def generate_round_summary_image(round_data, winner):
     
     else:
         categories = {
+            "0": "ANGRY OKRA",
             "1": "Renaissance & Art",
             "2": "Space & Future",
             "3": "Medieval & Fantasy",
             "4": "Superheroes & Action",
             "5": "Country & Nature",
-            "0": "ANGRY OKRA"
+            "9": f"{winner} Self Portrait"
         }
         
         prompts_by_category = {
@@ -476,6 +477,9 @@ def generate_round_summary_image(round_data, winner):
                 f"An anthropomorphism of {winner} is sitting by a calm river in a serene countryside holding an okra.",
                 f"An anthropomorphism of {winner} as an explorer in a dense jungle holding an okra weapon."
             ],
+            "9": [
+                f"An anthropomorphism of {winner} based on their following profile information:\n"
+            ],
             "0": [
                 f"An anthropomorphism of {winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
                 f"An anthropomorphism of {winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them.",
@@ -492,6 +496,34 @@ def generate_round_summary_image(round_data, winner):
         else:
             prompt = f"Create an artistic depiction of an anthropomorphism of {winner} interacting with okra in a unique way."
 
+        if selected_category == 9:
+            
+            try:
+                user_data = get_user_data(winner)
+                if not user_data:
+                    print(f"Failed to fetch data for {winner}.")
+                    user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
+            except Exception as e:
+                print(f"Error fetching Reddit data for {winner}: {e}")
+                user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
+        
+            # Extract user data
+            reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
+            reddit_avatar_description = describe_image_with_vision(reddit_avatar_url)
+            recent_posts = user_data.get("posts", [])
+            recent_comments = user_data.get("comments", [])
+    
+            # Example formatting of posts and comments
+            formatted_posts = "\n".join([f"- {post}" for post in recent_posts])
+            formatted_comments = "\n".join([f"- {comment}" for comment in recent_comments])
+    
+            prompt += (
+                f"Username: {winner}\n"
+                f"Avatar Description: {reddit_avatar_description}\n"
+                f"Recent Posts:\n{formatted_posts if formatted_posts else 'No recent posts available.'}\n"
+                f"Recent Comments:\n{formatted_comments if formatted_comments else 'No recent comments available.'}\n"
+            )
+            
     print(prompt)
     
     # Generate the image using DALL-E

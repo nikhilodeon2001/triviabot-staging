@@ -35,6 +35,7 @@ import logging
 import praw
 import tempfile
 import base64
+from collections import Counter
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
@@ -179,32 +180,55 @@ def describe_image_with_vision(image_url):
 
 
 
+
+
 def get_user_data(username):
     try:
         # Fetch user profile
         user = reddit.redditor(username)
         avatar_url = user.icon_img  # User avatar URL
 
-        # Fetch last 20 posts
-        posts = []
-        for post in user.submissions.new(limit=20):
-            posts.append({
-                "title": post.title,
-                "url": post.url,
-                "subreddit": post.subreddit.display_name,
-                "created_utc": post.created_utc
+        # Fetch last 100 submissions (posts)
+        submissions = list(user.submissions.new(limit=100))
+
+        # Fetch last 100 comments
+        comments = list(user.comments.new(limit=100))
+
+        # Combine submissions and comments into a single list
+        activities = []
+        for submission in submissions:
+            activities.append({
+                "type": "submission",
+                "created_utc": submission.created_utc,
+                "subreddit": submission.subreddit.display_name
             })
 
-        # Fetch last 20 comments
-        comments = []
-        for comment in user.comments.new(limit=20):
-            comments.append({
-                "body": comment.body,
-                "subreddit": comment.subreddit.display_name,
-                "created_utc": comment.created_utc
+        for comment in comments:
+            activities.append({
+                "type": "comment",
+                "created_utc": comment.created_utc,
+                "subreddit": comment.subreddit.display_name
             })
 
-        return {"avatar_url": avatar_url, "posts": posts, "comments": comments}
+        # Sort activities by creation time in descending order
+        activities.sort(key=lambda x: x["created_utc"], reverse=True)
+
+        # Take the most recent 100 activities
+        recent_activities = activities[:100]
+
+        # Count the number of posts/comments per subreddit
+        subreddit_counts = Counter()
+        for activity in recent_activities:
+            subreddit = activity["subreddit"]
+            subreddit_counts[subreddit] += 1
+
+        # Get the top 10 subreddits with their counts
+        top_subreddits = subreddit_counts.most_common(10)
+
+        return {
+            "avatar_url": avatar_url,
+            "top_subreddits": top_subreddits
+        }
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -507,22 +531,20 @@ def generate_round_summary_image(round_data, winner):
                 print(f"Error fetching Reddit data for {winner}: {e}")
                 user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
         
-            # Extract user data
-            reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-            reddit_avatar_description = describe_image_with_vision(reddit_avatar_url)
-            recent_posts = user_data.get("posts", [])
-            recent_comments = user_data.get("comments", [])
-    
-            # Example formatting of posts and comments
-            formatted_posts = "\n".join([f"- {post}" for post in recent_posts])
-            formatted_comments = "\n".join([f"- {comment}" for comment in recent_comments])
-    
-            prompt += (
-                f"Username: {winner}\n"
-                f"Avatar Description: {reddit_avatar_description}\n"
-                f"Recent Posts:\n{formatted_posts if formatted_posts else 'No recent posts available.'}\n"
-                f"Recent Comments:\n{formatted_comments if formatted_comments else 'No recent comments available.'}\n"
-            )
+        # Extract user data
+        reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
+        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url)
+        top_subreddits = user_data.get("top_subreddits", [])
+        
+        # Format the top subreddits
+        formatted_subreddits = "\n".join([f"- {subreddit}: {count} posts/comments" for subreddit, count in top_subreddits])
+        
+        # Build the prompt
+        prompt += (
+            f"Username: {winner}\n"
+            f"Avatar Description: {reddit_avatar_description}\n"
+            f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
+        )
             
     print(prompt)
     
@@ -2131,18 +2153,16 @@ def generate_round_summary(round_data, winner):
         # Extract user data
         reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
         reddit_avatar_description = describe_image_with_vision(reddit_avatar_url)
-        recent_posts = user_data.get("posts", [])
-        recent_comments = user_data.get("comments", [])
-
-        # Example formatting of posts and comments
-        formatted_posts = "\n".join([f"- {post}" for post in recent_posts])
-        formatted_comments = "\n".join([f"- {comment}" for comment in recent_comments])
-
+        top_subreddits = user_data.get("top_subreddits", [])
+        
+        # Format the top subreddits
+        formatted_subreddits = "\n".join([f"- {subreddit}: {count} posts/comments" for subreddit, count in top_subreddits])
+        
+        # Build the prompt
         prompt += (
             f"Username: {winner}\n"
             f"Avatar Description: {reddit_avatar_description}\n"
-            f"Recent Posts:\n{formatted_posts if formatted_posts else 'No recent posts available.'}\n"
-            f"Recent Comments:\n{formatted_comments if formatted_comments else 'No recent comments available.'}\n"
+            f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
         )
 
     else:

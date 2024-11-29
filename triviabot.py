@@ -474,18 +474,6 @@ def generate_round_summary_image(round_data, winner):
     winner_at = f"@{winner}"
 
     try:
-        user_data = get_user_data(winner)
-        if not user_data:
-            print(f"Failed to fetch data for {winner}. Proceeding with trivia data only.")
-            user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
-    except Exception as e:
-        print(f"Error fetching Reddit data for {winner}: {e}")
-        user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
-
-    # Extract user data
-    reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-    recent_posts = user_data.get("posts", [])
-    recent_comments = user_data.get("comments", [])
     
     if winner == "OkraStrut":
         prompt = (
@@ -564,20 +552,20 @@ def generate_round_summary_image(round_data, winner):
                 print(f"Error fetching Reddit data for {winner}: {e}")
                 user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
         
-        # Extract user data
-        reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "regular")
-        top_subreddits = user_data.get("top_subreddits", [])
-        
-        # Format the top subreddits
-        formatted_subreddits = "\n".join([f"- {subreddit}: {count} posts/comments" for subreddit, count in top_subreddits])
-        
-        # Build the prompt
-        prompt += (
-            f"Username: {winner}\n"
-            f"Avatar Description: {reddit_avatar_description}\n"
-            f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
-        )
+            # Extract user data
+            reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
+            reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "regular")
+            top_subreddits = user_data.get("top_subreddits", [])
+            
+            # Format the top subreddits
+            formatted_subreddits = "\n".join([f"- {subreddit}: {count} posts/comments" for subreddit, count in top_subreddits])
+            
+            # Build the prompt
+            prompt += (
+                f"Username: {winner}\n"
+                f"Avatar Description: {reddit_avatar_description}\n"
+                f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
+            )
             
     print(prompt)
     
@@ -2133,9 +2121,9 @@ def generate_round_summary(round_data, winner):
     elif creep_okra == True:
          prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
-            f"Roast and deeply insult them about their username, post history, and information from their profile. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
-            f"Create no more than 10 sentences in total. Here are their profile details for you to use in your roast:\n"
-            f"{winner_at}'s Profile Information:\n"
+            f"Roast and deeply insult them about their username, avatar description, and the subreddits they interact with the most. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
+            f"Create no more than 10 sentences in total. Here are their most interacted with subreddits for you to use in your roast:\n"
+            f"{winner_at}'s Avatar Description and Top Subreddit Interactions:\n"
         )
 
     elif wf_winner == True and is_sovereign == True:

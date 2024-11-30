@@ -559,7 +559,7 @@ def generate_round_summary_image(round_data, winner):
                     f"Avatar Description: {reddit_avatar_description}\n"
                     f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
                 )
-            elif if selected_category == "8":
+            elif selected_category == "8":
                 prompt += (
                     f"Username: {winner}\n"
                     f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"

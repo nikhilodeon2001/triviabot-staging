@@ -168,6 +168,38 @@ def describe_image_with_vision(image_url, mode):
                 ],
                 "max_tokens": 500
             }
+         
+        elif mode == "portrait-roast":
+            payload = {
+                "model": "gpt-4o",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "You are a cool image analyst. Your goal is to create image titles of portaits that roasts people."
+                            }
+                        ]
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Based on what you see in the image, give the image a name with 5 words maximum. Your goal is to humiliate the person the portrait is of."
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": image_url
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "max_tokens": 500
+            }
         else:
             payload = {
             "model": "gpt-4o",
@@ -578,7 +610,7 @@ def generate_round_summary_image(round_data, winner):
         image_url = response["data"][0]["url"]
         
         if selected_category == "8" or selected_category == "9":
-            image_description = describe_image_with_vision(image_url, "regular")
+            image_description = describe_image_with_vision(image_url, "portrait-roast")
         else:
             image_description = describe_image_with_vision(image_url, "okra")
             

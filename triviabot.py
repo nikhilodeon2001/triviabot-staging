@@ -582,7 +582,7 @@ def generate_round_summary_image(round_data, winner):
             top_subreddits = user_data.get("top_subreddits", [])
             
             # Format the top subreddits
-            formatted_subreddits = "\n".join([f"- {subreddit}: {count} posts/comments" for subreddit, count in top_subreddits])
+            formatted_subreddits = "\n".join([f"- {subreddit}" for subreddit in top_subreddits])
             
             # Build the prompt
             if selected_category == "9":
@@ -2253,7 +2253,7 @@ def generate_round_summary(round_data, winner):
         top_subreddits = user_data.get("top_subreddits", [])
         
         # Format the top subreddits
-        formatted_subreddits = "\n".join([f"- {subreddit}: {count} posts/comments" for subreddit, count in top_subreddits])
+        formatted_subreddits = "\n".join([f"- {subreddit}" for subreddit in top_subreddits])
         
         # Build the prompt
         prompt += (

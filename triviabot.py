@@ -490,44 +490,38 @@ def generate_round_summary_image(round_data, winner):
     
     else:
         categories = {
-            "0": "ANGRY OKRA",
-            "1": "Renaissance & Art",
-            "2": "Space & Future",
-            "3": "Medieval & Fantasy",
-            "4": "Superheroes & Action",
-            "5": "Country & Nature",
-            "9": f"@{winner} Portrait *Profile Based*"
+            "1": "🌹🏰 Renaissance Portrait",
+            "2": "😇✨ Holy & Divine",
+            "3": "🦸‍♂️🦸‍♀️ Superheroe",
+            "4": "🎲🔀 Truly Madly Deeply Random",
+            "8": f"🖼️1️⃣ @{winner} *Portrait 1*",
+            "9": f"🖼️2️⃣ @{winner} *Portrait 2*",
+            "0": "😠🥒 Okra's Choice"
         }
         
         prompts_by_category = {
             "1": [
-                f"A Renaissance painting of an anthropomorphism of {winner} holding a piece of okra. Make the painting elegant and refined.",
-                f"A Renaissance painting of an anthropomorphism of {winner} sitting majestically on a throne and holding a jeweled okra."
+                f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined."
             ],
             "2": [
-                f"An anthropomorphism of {winner} as an astronaut floating in space, holding a glowing piece of okra as if it’s a sacred artifact.",
-                f"An anthropomorphism of {winner} as a scientist in a high-tech lab, examining a glowing okra."
+                f"{winner} worshipping an okra. Make it appealing and accepting of religions of all types."
             ],
-            "3": [
-                f"An anthropomorphism of {winner} in a whimsical garden planting and watering an enchanted okra.",
-                f"An anthropomorphism of {winner} as a merperson holding a sparkling okra trident in a magical underwater kingdom.",
-                f"An anthropomorphism of {winner} as a medieval knight clad in okra-themed armor."
+            "3: [
+                f"{winner} as a superhero with an Okra theme."
             ],
-            "4": [
-                f"An anthropomorphism of {winner} is portrayed as a superhero with an okra emblem on their chest.",
-                f"An anthropomorphism of {winner} as an action movie star holding an okra weapon."
+            "4: [
+                f"{winner} intereracting with an okra in some really random way."
             ],
-            "5": [
-                f"An anthropomorphism of {winner} is sitting by a calm river in a serene countryside holding an okra.",
-                f"An anthropomorphism of {winner} as an explorer in a dense jungle holding an okra weapon."
+            "8": [
+                f"Draw what you think {winner} looks like based on their username and their most active subreddits.\n"
             ],
             "9": [
-                f"An caricature of what you think {winner} looks like based on their username, avatar description, and their most visited subreddits:\n"
+                f"Draw what you think {winner} looks like based on their username, avatar description, and their most visited subreddit.\n"
             ],
             "0": [
-                f"An anthropomorphism of {winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
-                f"An anthropomorphism of {winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them.",
-                f"An anthropomorphism of {winner} running from a massive angry okra."
+                f"{winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
+                f"{winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them.",
+                f"{winner} being chased by an okra in a scary horror movie setting."
             ]
         }
 
@@ -538,9 +532,9 @@ def generate_round_summary_image(round_data, winner):
         if selected_category and selected_category in prompts_by_category:
             prompt = random.choice(prompts_by_category[selected_category])
         else:
-            prompt = f"Create an artistic depiction of an anthropomorphism of {winner} interacting with okra in a unique way."
+            prompt = f"{winner} being chased by an okra in a scary horror movie setting."
 
-        if selected_category == "9":
+        if selected_category == "8" or selected_category == "9":
             
             try:
                 user_data = get_user_data(winner)
@@ -560,11 +554,17 @@ def generate_round_summary_image(round_data, winner):
             formatted_subreddits = "\n".join([f"- {subreddit}: {count} posts/comments" for subreddit, count in top_subreddits])
             
             # Build the prompt
-            prompt += (
-                f"Username: {winner}\n"
-                f"Avatar Description: {reddit_avatar_description}\n"
-                f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
-            )
+            if selected_category == "9":
+                prompt += (
+                    f"Username: {winner}\n"
+                    f"Avatar Description: {reddit_avatar_description}\n"
+                    f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
+                )
+            elif if selected_category == "8":
+                prompt += (
+                    f"Username: {winner}\n"
+                    f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
+                )
             
     print(prompt)
     
@@ -577,7 +577,12 @@ def generate_round_summary_image(round_data, winner):
         )
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
-        image_description = describe_image_with_vision(image_url, "okra")
+        
+        if selected_category == "8" or selected_category == "9":
+            image_description = describe_image_with_vision(image_url, "regular")
+        else:
+            image_description = describe_image_with_vision(image_url, "okra")
+            
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
@@ -600,7 +605,47 @@ def generate_round_summary_image(round_data, winner):
         return None
         
     except openai.OpenAIError as e:
-        print(f"Error generating image: {e}")
+    print(f"Error generating image: {e}")
+    # Check if the error is due to the safety system
+    if "Your request was rejected as a result of our safety system" in str(e):
+        # Use a default safe prompt
+        default_prompt = f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined."
+        try:
+            response = openai.Image.create(
+                prompt=default_prompt,
+                n=1,
+                size="512x512"
+            )
+            
+            # Return the image URL from the API response
+            image_url = response["data"][0]["url"]
+            image_description = describe_image_with_vision(image_url, "okra")
+            image_mxc, image_width, image_height = download_image_from_url(image_url)
+            send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    
+            message = f"😈😉 {winner_at} Naughty naughty, I'll have to pick another.\n\n"
+            message += f"🔥💖 Nice streak. I drew this of you.\n"
+            message += f"\nI call this masterpiece '{image_description}'\n"
+            message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
+            send_message(target_room_id, message)
+    
+             # Download and resize the image to 256x256
+            image_data = requests.get(image_url).content
+            image = Image.open(io.BytesIO(image_data))
+            image = image.resize((256, 256))  # Resize to 256x256
+            
+            # Save resized image to a buffer
+            buffer = io.BytesIO()
+            image.save(buffer, format="PNG")
+            buffer.seek(0)
+            
+            upload_image_to_s3(buffer, winner, image_description)
+            return None
+        
+        except openai.OpenAIError as e2:
+            print(f"Error generating default image: {e2}")
+            return "Image generation failed!"
+    else:
         return "Image generation failed!"
 
 

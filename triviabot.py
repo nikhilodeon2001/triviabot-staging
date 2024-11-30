@@ -2282,6 +2282,8 @@ def generate_round_summary(round_data, winner):
             if question_data["user_responses"]:
                 for response in question_data["user_responses"]:
                     username = response["username"]
+                    if username != winner:
+                        continue
                     user_response = response["response"]
                     is_correct = "Correct" if any(fuzzy_match(user_response, answer, question_category, question_url) for answer in correct_answers) else "Incorrect"
                     prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
@@ -2289,12 +2291,12 @@ def generate_round_summary(round_data, winner):
                 prompt += "No responses recorded for this question.\n"
             
             # Add scoreboard status after the question
-            prompt += f"\nScoreboard after Question {question_number}:\n"
-            if "scoreboard_after_question" in question_data:
-                for user, score in question_data["scoreboard_after_question"].items():
-                    prompt += f"{user}: {score}\n"
-            else:
-                prompt += "No responses recorded.\n"
+            #prompt += f"\nScoreboard after Question {question_number}:\n"
+            #if "scoreboard_after_question" in question_data:
+            #    for user, score in question_data["scoreboard_after_question"].items():
+            #        prompt += f"{user}: {score}\n"
+            #else:
+            #    prompt += "No responses recorded.\n"
             
             prompt += "\n"
 
@@ -2303,7 +2305,7 @@ def generate_round_summary(round_data, winner):
     try:
         if winner == "OkraStrut":
             response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": f"You are {winner_at}, an arrogant trivia master who always wins."},
                     {"role": "user", "content": prompt}
@@ -2316,7 +2318,7 @@ def generate_round_summary(round_data, winner):
 
         elif nice_okra == True:
             response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a grateful old man who is super grateful for their donations."},
                     {"role": "user", "content": prompt}
@@ -2329,7 +2331,7 @@ def generate_round_summary(round_data, winner):
 
         elif magic_number_correct == True or wf_winner == True:
             response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a loving old man who is completely in love with the winning trivia player."},
                     {"role": "user", "content": prompt}
@@ -2355,7 +2357,7 @@ def generate_round_summary(round_data, winner):
             
         else:
             response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a bitter, dirty, and raunchy old curmudgeon who is completely fed up with all the trivia players."},
                     {"role": "user", "content": prompt}

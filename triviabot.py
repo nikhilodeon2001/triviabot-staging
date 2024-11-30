@@ -106,6 +106,7 @@ emoji_mode = emoji_mode_default
 magic_number_correct = False
 wf_winner = False
 nice_okra = False
+creep_okra = False
 
 image_questions_default = True
 image_questions = image_questions_default
@@ -495,7 +496,7 @@ def generate_round_summary_image(round_data, winner):
             "3": "Medieval & Fantasy",
             "4": "Superheroes & Action",
             "5": "Country & Nature",
-            "9": f"@{winner} Self Portrait "
+            "9": f"@{winner} Portrait *Profile Based*"
         }
         
         prompts_by_category = {
@@ -521,7 +522,7 @@ def generate_round_summary_image(round_data, winner):
                 f"An anthropomorphism of {winner} as an explorer in a dense jungle holding an okra weapon."
             ],
             "9": [
-                f"An anthropomorphism of what you think {winner} would look like based on this avatar description and these most visited Reddit subreddits:\n"
+                f"An caricature of what you think {winner} looks like based on their username, avatar description, and their most visited subreddits:\n"
             ],
             "0": [
                 f"An anthropomorphism of {winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
@@ -1543,7 +1544,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -1556,6 +1557,7 @@ def process_round_options(round_winner, winner_points):
     magic_number_correct = False
     wf_winner = False
     nice_okra = False
+    creep_okra = False
     num_math_questions = num_math_questions_default
     num_stats_questions = num_stats_questions_default
     image_questions = image_questions_default
@@ -2119,9 +2121,9 @@ def generate_round_summary(round_data, winner):
     elif creep_okra == True:
          prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
-            f"Roast and deeply insult them about their username, avatar description, and the subreddits they interact with the most. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
-            f"Create no more than 10 sentences in total. Here are their most interacted with subreddits for you to use in your roast:\n"
-            f"{winner_at}'s Avatar Description and Top Subreddit Interactions:\n"
+            f"Roast and deeply insult them about their username, post history, and information from their profile. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
+            f"Create no more than 10 sentences in total. Here are their profile details for you to use in your roast:\n"
+            f"{winner_at}'s Profile Information:\n"
         )
 
     elif wf_winner == True and is_sovereign == True:
@@ -2225,12 +2227,12 @@ def generate_round_summary(round_data, winner):
     try:
         if winner == "OkraStrut":
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 messages=[
                     {"role": "system", "content": f"You are {winner_at}, an arrogant trivia master who always wins."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=200,
+                max_tokens=500,
                 n=1,
                 stop=None,
                 temperature=1.0,
@@ -2238,12 +2240,12 @@ def generate_round_summary(round_data, winner):
 
         elif nice_okra == True:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 messages=[
                     {"role": "system", "content": "You are a grateful old man who is super grateful for their donations."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=200,
+                max_tokens=500,
                 n=1,
                 stop=None,
                 temperature=1.0,
@@ -2251,12 +2253,12 @@ def generate_round_summary(round_data, winner):
 
         elif magic_number_correct == True or wf_winner == True:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 messages=[
                     {"role": "system", "content": "You are a loving old man who is completely in love with the winning trivia player."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=200,
+                max_tokens=500,
                 n=1,
                 stop=None,
                 temperature=1.0,
@@ -2264,12 +2266,12 @@ def generate_round_summary(round_data, winner):
 
         elif creep_okra == True:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 messages=[
                     {"role": "system", "content": "You are a ruthless and sarcastic comedian specializing in roasting people. Your job is to be mean, cutting, and hilariously offensive while delivering a brutal roast of the winning trivia player. Use dark humor, biting sarcasm, and clever wit to insult the person based on their username, profile picture description, recent posts, and recent comments. Do not hold back and aim to make the roast as harsh and over-the-top as possible. Use plenty of emojis for flair, but stay within 10 sentences."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=200,
+                max_tokens=500,
                 n=1,
                 stop=None,
                 temperature=1.0,
@@ -2277,12 +2279,12 @@ def generate_round_summary(round_data, winner):
             
         else:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 messages=[
                     {"role": "system", "content": "You are a bitter, dirty, and raunchy old curmudgeon who is completely fed up with all the trivia players."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=200,
+                max_tokens=500,
                 n=1,
                 stop=None,
                 temperature=1.0,
@@ -4246,7 +4248,7 @@ def start_trivia_round():
                 time.sleep(10)
             else:
                 #send_message(target_room_id, f"\n💚 Friendly OkraStrut? Buy coffee with your Reddit name.\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
-                send_message(target_room_id, f"\n💚 Friendly OkraStrut? Buy coffee with your Reddit name.\n☕️ https://buymeacoffee.com/livetrivia\n")
+                send_message(target_room_id, f"\n💚 Buy with your Reddit name for roast controls.\n☕️ https://buymeacoffee.com/livetrivia\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds

@@ -506,10 +506,10 @@ def generate_round_summary_image(round_data, winner):
             "2": [
                 f"{winner} worshipping an okra. Make it appealing and accepting of religions of all types."
             ],
-            "3: [
+            "3": [
                 f"{winner} as a superhero with an Okra theme."
             ],
-            "4: [
+            "4": [
                 f"{winner} intereracting with an okra in some really random way."
             ],
             "8": [

@@ -1,5 +1,6 @@
 
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -524,10 +525,10 @@ def generate_round_summary_image(round_data, winner):
             "1": "🌹🏰 Renaissance",
             "2": "😇✨ Holy",
             "3": "🦸‍♂️🦸‍♀️ Superhero",
-            "4": "🎲🔀 Random",
-            "8": f"🖼️1️⃣ @{winner} *Portrait 1*",
-            "9": f"🖼️2️⃣ @{winner} *Portrait 2*",
-            "0": "😠🥒 Okra's Choice"
+            "4": "🎲🔀 Really Random",
+            #"8": f"🖼️1️⃣ @{winner} *Portrait 1*",
+            #"9": f"🖼️2️⃣ @{winner} *Portrait 2*",
+            "0": "😠🥒 Okra Horror"
         }
         
         prompts_by_category = {
@@ -543,14 +544,14 @@ def generate_round_summary_image(round_data, winner):
             "4": [
                 f"{winner} intereracting with an okra in some really random way."
             ],
-            "8": [
-                f"Draw what you think {winner} looks like based on their username and their most active subreddits.\n"
-            ],
-            "9": [
-                f"Draw what you think {winner} looks like based on their username, avatar description, and their most visited subreddit.\n"
-            ],
+            #"8": [
+            #    f"Draw what you think {winner} looks like based on their username and their most active subreddits.\n"
+            #],
+            #"9": [
+            #    f"Draw what you think {winner} looks like based on their username, avatar description, and their most visited subreddit.\n"
+            #],
             "0": [
-                f"{winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
+                #f"{winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
                 f"{winner} being chased by an okra in a scary horror movie setting."
             ]
         }
@@ -584,17 +585,17 @@ def generate_round_summary_image(round_data, winner):
             formatted_subreddits = "\n".join([f"- {subreddit}" for subreddit in top_subreddits])
             
             # Build the prompt
-            if selected_category == "9":
-                prompt += (
-                    f"Username: {winner}\n"
-                    f"Avatar Description: {reddit_avatar_description}\n"
-                    f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
-                )
-            elif selected_category == "8":
-                prompt += (
-                    f"Username: {winner}\n"
-                    f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
-                )
+            #if selected_category == "9":
+            #    prompt += (
+            #        f"Username: {winner}\n"
+            #        f"Avatar Description: {reddit_avatar_description}\n"
+            #        f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
+            #    )
+            #elif selected_category == "8":
+            #    prompt += (
+            #        f"Username: {winner}\n"
+            #        f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
+            #    )
             
     print(prompt)
     
@@ -608,10 +609,11 @@ def generate_round_summary_image(round_data, winner):
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
         
-        if selected_category == "8" or selected_category == "9":
-            image_description = describe_image_with_vision(image_url, "portrait-roast")
-        else:
-            image_description = describe_image_with_vision(image_url, "okra")
+        #if selected_category == "8" or selected_category == "9":
+        #    image_description = describe_image_with_vision(image_url, "portrait-roast")
+        #else:
+        #    image_description = describe_image_with_vision(image_url, "okra")
+        image_description = describe_image_with_vision(image_url, "okra")
             
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
@@ -2343,9 +2345,9 @@ def generate_round_summary(round_data, winner):
 
         elif creep_okra == True:
             response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
+                model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are a ruthless and sarcastic comedian specializing in roasting people. Your job is to be mean, cutting, and hilariously offensive while delivering a brutal roast of the winning trivia player. Use dark humor, biting sarcasm, and clever wit to insult the person based on their username, profile picture description, recent posts, and recent comments. Do not hold back and aim to make the roast as harsh and over-the-top as possible. Use plenty of emojis for flair, but stay within 10 sentences."},
+                    {"role": "system", "content": "You are a ruthless and sarcastic comedian specializing in roasting people. Your job is to be mean, cutting, and hilariously offensive while delivering a brutal roast of the winning trivia player. Use dark humor, biting sarcasm, and clever wit to insult the person based on their username, profile picture description, recent posts, and recent comments. Do not hold back and aim to make the roast as harsh and over-the-top as possible. Use plenty of emojis for flair, but stay within 8 sentences."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=500,

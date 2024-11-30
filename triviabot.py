@@ -140,7 +140,7 @@ def describe_image_with_vision(image_url, mode):
 
         if mode == "okra":
             payload = {
-                "model": "gpt-4o",
+                "model": "gpt-4o-mini",
                 "messages": [
                     {
                         "role": "system",
@@ -172,7 +172,7 @@ def describe_image_with_vision(image_url, mode):
          
         elif mode == "portrait-roast":
             payload = {
-                "model": "gpt-4o",
+                "model": "gpt-4o-mini",
                 "messages": [
                     {
                         "role": "system",
@@ -203,7 +203,7 @@ def describe_image_with_vision(image_url, mode):
             }
         else:
             payload = {
-            "model": "gpt-4o",
+            "model": "gpt-4o-mini",
             "messages": [
                 {
                     "role": "system",
@@ -1783,7 +1783,7 @@ def generate_okra_joke(winner_name):
     try:
         # Use OpenAI's ChatCompletion to generate a response
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a sarcastic, dirty comedian who makes jokes about okra."},
                 {"role": "user", "content": prompt}
@@ -2306,7 +2306,7 @@ def generate_round_summary(round_data, winner):
     try:
         if winner == "OkraStrut":
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": f"You are {winner_at}, an arrogant trivia master who always wins."},
                     {"role": "user", "content": prompt}
@@ -2319,7 +2319,7 @@ def generate_round_summary(round_data, winner):
 
         elif nice_okra == True:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a grateful old man who is super grateful for their donations."},
                     {"role": "user", "content": prompt}
@@ -2332,7 +2332,7 @@ def generate_round_summary(round_data, winner):
 
         elif magic_number_correct == True or wf_winner == True:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a loving old man who is completely in love with the winning trivia player."},
                     {"role": "user", "content": prompt}
@@ -2345,7 +2345,7 @@ def generate_round_summary(round_data, winner):
 
         elif creep_okra == True:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a ruthless and sarcastic comedian specializing in roasting people. Your job is to be mean, cutting, and hilariously offensive while delivering a brutal roast of the winning trivia player. Use dark humor, biting sarcasm, and clever wit to insult the person based on their username, profile picture description, recent posts, and recent comments. Do not hold back and aim to make the roast as harsh and over-the-top as possible. Use plenty of emojis for flair, but stay within 8 sentences."},
                     {"role": "user", "content": prompt}
@@ -2358,7 +2358,7 @@ def generate_round_summary(round_data, winner):
             
         else:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a bitter, dirty, and raunchy old curmudgeon who is completely fed up with all the trivia players."},
                     {"role": "user", "content": prompt}

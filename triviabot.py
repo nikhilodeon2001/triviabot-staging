@@ -288,8 +288,8 @@ def get_user_data(username):
             subreddit = activity["subreddit"]
             subreddit_counts[subreddit] += 1
 
-        # Get the top 10 subreddits with their counts
-        top_subreddits = subreddit_counts.most_common(10)
+        # Get the top 10 subreddits without counts
+        top_subreddits = [subreddit for subreddit, _ in subreddit_counts.most_common(10)]
 
         return {
             "avatar_url": avatar_url,

@@ -604,48 +604,48 @@ def generate_round_summary_image(round_data, winner):
         return None
         
     except openai.OpenAIError as e:
-    print(f"Error generating image: {e}")
-    # Check if the error is due to the safety system
-    if "Your request was rejected as a result of our safety system" in str(e):
-        # Use a default safe prompt
-        default_prompt = f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined."
-        try:
-            response = openai.Image.create(
-                prompt=default_prompt,
-                n=1,
-                size="512x512"
-            )
-            
-            # Return the image URL from the API response
-            image_url = response["data"][0]["url"]
-            image_description = describe_image_with_vision(image_url, "okra")
-            image_mxc, image_width, image_height = download_image_from_url(image_url)
-            send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-    
-            message = f"😈😉 {winner_at} Naughty naughty, I'll have to pick another.\n\n"
-            message += f"🔥💖 Nice streak. I drew this of you.\n"
-            message += f"\nI call this masterpiece '{image_description}'\n"
-            message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
-            send_message(target_room_id, message)
-    
-             # Download and resize the image to 256x256
-            image_data = requests.get(image_url).content
-            image = Image.open(io.BytesIO(image_data))
-            image = image.resize((256, 256))  # Resize to 256x256
-            
-            # Save resized image to a buffer
-            buffer = io.BytesIO()
-            image.save(buffer, format="PNG")
-            buffer.seek(0)
-            
-            upload_image_to_s3(buffer, winner, image_description)
-            return None
+        print(f"Error generating image: {e}")
+        # Check if the error is due to the safety system
+        if "Your request was rejected as a result of our safety system" in str(e):
+            # Use a default safe prompt
+            default_prompt = f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined."
+            try:
+                response = openai.Image.create(
+                    prompt=default_prompt,
+                    n=1,
+                    size="512x512"
+                )
+                
+                # Return the image URL from the API response
+                image_url = response["data"][0]["url"]
+                image_description = describe_image_with_vision(image_url, "okra")
+                image_mxc, image_width, image_height = download_image_from_url(image_url)
+                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         
-        except openai.OpenAIError as e2:
-            print(f"Error generating default image: {e2}")
+                message = f"😈😉 {winner_at} Naughty naughty, I'll have to pick another.\n\n"
+                message += f"🔥💖 Nice streak. I drew this of you.\n"
+                message += f"\nI call this masterpiece '{image_description}'\n"
+                message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
+                send_message(target_room_id, message)
+        
+                 # Download and resize the image to 256x256
+                image_data = requests.get(image_url).content
+                image = Image.open(io.BytesIO(image_data))
+                image = image.resize((256, 256))  # Resize to 256x256
+                
+                # Save resized image to a buffer
+                buffer = io.BytesIO()
+                image.save(buffer, format="PNG")
+                buffer.seek(0)
+                
+                upload_image_to_s3(buffer, winner, image_description)
+                return None
+            
+            except openai.OpenAIError as e2:
+                print(f"Error generating default image: {e2}")
+                return "Image generation failed!"
+        else:
             return "Image generation failed!"
-    else:
-        return "Image generation failed!"
 
 
 def ask_category(winner, categories):

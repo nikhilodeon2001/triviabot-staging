@@ -490,10 +490,10 @@ def generate_round_summary_image(round_data, winner):
     
     else:
         categories = {
-            "1": "🌹🏰 Renaissance Portrait",
-            "2": "😇✨ Holy & Divine",
-            "3": "🦸‍♂️🦸‍♀️ Superheroe",
-            "4": "🎲🔀 Truly Madly Deeply Random",
+            "1": "🌹🏰 Renaissance",
+            "2": "😇✨ Holy",
+            "3": "🦸‍♂️🦸‍♀️ Superhero",
+            "4": "🎲🔀 Random",
             "8": f"🖼️1️⃣ @{winner} *Portrait 1*",
             "9": f"🖼️2️⃣ @{winner} *Portrait 2*",
             "0": "😠🥒 Okra's Choice"
@@ -520,7 +520,6 @@ def generate_round_summary_image(round_data, winner):
             ],
             "0": [
                 f"{winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
-                f"{winner} cowering as a massive, furious okra looms overhead, pointing an accusatory okra pod at them.",
                 f"{winner} being chased by an okra in a scary horror movie setting."
             ]
         }

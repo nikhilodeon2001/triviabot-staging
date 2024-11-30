@@ -327,7 +327,6 @@ def upload_image_to_s3(buffer, winner, description):
         s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=buffer.getvalue(), ContentType="image/png")
 
         # Step 4: Generate and return the S3 URL
-        print("Image uploaded successfully")
         return None
 
     except (BotoCoreError, ClientError) as boto_err:

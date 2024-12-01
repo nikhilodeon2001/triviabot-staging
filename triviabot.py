@@ -711,7 +711,7 @@ def ask_category(winner, categories, winner_coffees):
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Display categories
-    category_message = f"\n🎨🖍️ @{winner} Pick one. Or don't.\n\n"
+    category_message = f"\n🎨🖍️ @{winner} Pick one. Some require ☕☕.\n\n"
     for key, value in categories.items():
         category_message += f"{key}: {value}\n"
     send_message(target_room_id, category_message)

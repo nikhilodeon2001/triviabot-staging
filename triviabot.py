@@ -535,7 +535,7 @@ def generate_round_summary_image(round_data, winner):
         selected_category = ask_category(winner, categories, winner_coffees)
 
         additional_prompt = ""
-        if selected_category == 4 or selected_category == 5 or selected_catgegory == 6:
+        if selected_category == 4 or selected_category == 5 or selected_category == 6:
             additional_prompt = request_prompt(winner)
         
         prompts_by_category = {

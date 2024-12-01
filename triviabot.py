@@ -532,7 +532,11 @@ def generate_round_summary_image(round_data, winner):
         }
 
         # Ask the user to choose a category
-        selected_category, additional_prompt = ask_category(winner, categories, winner_coffees)
+        selected_category = ask_category(winner, categories, winner_coffees)
+
+        additional_prompt = ""
+        if selected_category == 4 or selected_category == 5 or selected_catgegory == 6:
+            additional_prompt = request_prompt(winner)
         
         prompts_by_category = {
             "0": [
@@ -690,7 +694,6 @@ def ask_category(winner, categories, winner_coffees):
 
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
-    additional_prompt = ""
 
     # Display categories
     category_message = f"\n🎨🖍️ @{winner} Pick one. Or don't.\n\n"
@@ -744,18 +747,17 @@ def ask_category(winner, categories, winner_coffees):
                     if message_content.lower() in ['4', '5', '6'] and winner_coffees > 0:
                         print("coffee")
                         react_to_message(event_id, target_room_id, "okra21")
-                        additional_prompt = request_prompt(winner)
-                        return message_content, additional_prompt
+                        return message_content
                         
                     react_to_message(event_id, target_room_id, "okra21")
-                    return message_content, additional_prompt
+                    return message_content
     
         except requests.exceptions.RequestException as e:
             print(f"Error collecting responses: {e}")                    
     
     # Return None if no valid response is received within the time limit
     print("No response received in time.")
-    return None, additional_prompt
+    return None
 
 
 def request_prompt(winner):

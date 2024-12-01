@@ -2328,8 +2328,8 @@ def generate_round_summary(round_data, winner):
         
         prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
-            f"Roast and deeply insult them about their username, {winner} and their top subreddits. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
-            f"Create no more than 10 sentences in total. Here are their top 5 subreddits for you to use in your roast: {top_subreddits}.\n"
+            f"Roast and deeply insult them about their username, {winner}, their avatar description, {reddit_avatar_description}, and their top 5 subreddits, '{top_subreddits}'. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
+            f"Create no more than 10 sentences in total.\n"
         )
 
     elif wf_winner == True and is_sovereign == True:

@@ -532,11 +532,7 @@ def generate_round_summary_image(round_data, winner):
         }
 
         # Ask the user to choose a category
-        selected_category = ask_category(winner, categories, winner_coffees)
-
-        additional_prompt = ""
-        if selected_category == "4" or selected_category == "5" or selected_category == "6":
-            additional_prompt = request_prompt(winner)
+        selected_category, additional_prompt = ask_category(winner, categories, winner_coffees)            
         
         prompts_by_category = {
             "0": [
@@ -561,8 +557,6 @@ def generate_round_summary_image(round_data, winner):
                 f"Draw what you think {winner} looks like based on their 5 most visited subreddits. You MUST include '{additional_prompt}' in the image.\n"
             ]
         }
-
-        
 
         # Select a prompt based on the chosen category
         if selected_category and selected_category in prompts_by_category:
@@ -693,6 +687,7 @@ def ask_category(winner, categories, winner_coffees):
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
+    additional_prompt = ""
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Display categories
@@ -747,27 +742,27 @@ def ask_category(winner, categories, winner_coffees):
                     if message_content.lower() in ['4', '5', '6'] and winner_coffees > 0:
                         print("coffee")
                         react_to_message(event_id, target_room_id, "okra21")
-                        return message_content
+                        additional_prompt = request_prompt(winner, processed_events)
+                        return message_content, additional_prompt
                         
                     react_to_message(event_id, target_room_id, "okra21")
-                    return message_content
+                    return message_content, additional_prompt
     
         except requests.exceptions.RequestException as e:
             print(f"Error collecting responses: {e}")                    
     
     # Return None if no valid response is received within the time limit
     print("No response received in time.")
-    return None
+    return None, additional_prompt
 
 
-def request_prompt(winner):
+def request_prompt(winner, done_events):
     global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id
 
     sync_url = f"{matrix_base_url}/sync"
-    processed_events = set()  # Track processed event IDs to avoid duplicates
+    processed_events = done_events  # Track processed event IDs to avoid duplicates
 
     # Initialize the sync and message to prompt user for input
-    initialize_sync()
     initialize_sync()
 
     if since_token:

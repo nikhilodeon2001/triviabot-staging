@@ -147,7 +147,7 @@ def describe_image_with_vision(image_url, mode):
                         "content": [
                             {
                                 "type": "text",
-                                "text": "You are a cool image analyst. Your goal is to create image titles."
+                                "text": "You are a cool image analyst. Your goal is to create image titles of portaits that roasts people."
                             }
                         ]
                     },
@@ -156,7 +156,7 @@ def describe_image_with_vision(image_url, mode):
                         "content": [
                             {
                                 "type": "text",
-                                "text": "Based on what you see in the image, give the image a name with 5 words maximum and ensure the name is okra themed."
+                                "text": "Based on what you see in the image, give the image a name with 5 words maximum and ensure the name is okra themed. YYour goal is to humiliate the person the portrait is of."
                             },
                             {
                                 "type": "image_url",
@@ -561,8 +561,8 @@ def generate_round_summary_image(round_data, winner):
             "2": "😇✨ Okroly and Divine",
             "3": "🎲🔀 (OK)Random",
             "4": f"🖼️🔤 Okraverse (Interactive) ☕☕",
-            "5": f"🖼️👤 Okra Themed Avatar ☕☕",
-            "6": f"🖼️📜 Okra Portrait: Top Subreddits ☕☕"
+            "5": f"🖼️👤 Okravatar (Reddit Avatar) ☕☕",
+            "6": f"🖼️📜 Okraricature (Top Subreddits) ☕☕"
         }
 
         # Ask the user to choose a category
@@ -605,7 +605,7 @@ def generate_round_summary_image(round_data, winner):
                 f"Draw an okra themed picture of what you think {winner} looks like based on their avatar, which looks like '{reddit_avatar_description}'.\n"
             ],
             "6": [
-                f"Draw a picture of what you think {winner} looks like based on their 5 most visited subreddits, which are '{top_subreddits}'.\n"
+                f"Draw an okra themed caricature of what you think {winner} looks like based on their 5 most visited subreddits, which are '{top_subreddits}'.\n"
             ]
         }
 
@@ -629,7 +629,7 @@ def generate_round_summary_image(round_data, winner):
         image_url = response["data"][0]["url"]
         
         if selected_category == "4" or selected_category == "5" or selected_category == "6":
-            image_description = describe_image_with_vision(image_url, "roast-title")
+            image_description = describe_image_with_vision(image_url, "okra-title")
         else:
             image_description = describe_image_with_vision(image_url, "okra-title")
 

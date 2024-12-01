@@ -560,9 +560,9 @@ def generate_round_summary_image(round_data, winner):
             "1": "🌹🏰 Okrenaissance",
             "2": "😇✨ Okroly and Divine",
             "3": "🎲🔀 (OK)Random",
-            "4": f"🖼️🔤 Username + Prompt ☕☕",
-            "5": f"🖼️👤 Avatar + Prompt ☕☕",
-            "6": f"🖼️📜 Subreddits + Prompt ☕☕"
+            "4": f"🖼️🔤 Okraverse (Interactive) ☕☕",
+            "5": f"🖼️👤 Okra Themed Avatar ☕☕",
+            "6": f"🖼️📜 Okra Portrait: Top Subreddits ☕☕"
         }
 
         # Ask the user to choose a category
@@ -597,13 +597,13 @@ def generate_round_summary_image(round_data, winner):
                 f"{winner} intereracting with an okra in the most crazy, ridiculous, and over the top random way. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
             ],
             "4": [
-                f"Draw what you think {winner} looks like based on their username. You MUST include '{additional_prompt}' in the image.\n"
+                f"Draw an okra themed picture that MUST include '{additional_prompt}'.\n"
             ],
             "5": [
-                f"Draw what you think {winner} looks like based on their avatar, which looks like {reddit_avatar_description}. You MUST include '{additional_prompt}' in the image.\n"
+                f"Draw an okra themed picture of what you think {winner} looks like based on their avatar, which looks like '{reddit_avatar_description}'.\n"
             ],
             "6": [
-                f"Draw what you think {winner} looks like based on their 5 most visited subreddits, which are: {top_subreddits}. You MUST include '{additional_prompt}' in the image.\n"
+                f"Draw a picture of what you think {winner} looks like based on their 5 most visited subreddits, which are '{top_subreddits}'.\n"
             ]
         }
 
@@ -753,17 +753,14 @@ def ask_category(winner, categories, winner_coffees):
 
                     # Check if the winner can select options A, B, or C
                     if message_content in ['4', '5', '6'] and winner_coffees <= 0:
-                        print("no coffee")
                         react_to_message(event_id, target_room_id, "okra5")
                         continue
 
-                    if message_content.lower() in ['4', '5', '6'] and winner_coffees > 0:
-                        print("coffee")
-                        react_to_message(event_id, target_room_id, "okra21")
-                        additional_prompt = request_prompt(winner, processed_events)
-                        return message_content, additional_prompt
-                        
                     react_to_message(event_id, target_room_id, "okra21")
+
+                    if message_content.lower() in ['4'] and winner_coffees > 0:
+                        additional_prompt = request_prompt(winner, processed_events)                        
+
                     return message_content, additional_prompt
     
         except requests.exceptions.RequestException as e:

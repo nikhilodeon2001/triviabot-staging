@@ -3165,6 +3165,7 @@ def initialize_sync():
             if response.status_code == 200:
                 sync_data = response.json()
                 since_token = sync_data.get("next_batch")  # Update the since token without processing messages
+                params["since"] = since_token
                 return  # Exit the function if successful
             else:
                 print(f"Failed to initialize sync. Status code: {response.status_code}")

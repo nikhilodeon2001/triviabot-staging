@@ -2313,11 +2313,24 @@ def generate_round_summary(round_data, winner):
         )
 
     elif creep_okra == True:
-         prompt = (
+        try:
+            user_data = get_user_data(winner)
+            if not user_data:
+                print(f"Failed to fetch data for {winner}.")
+                user_data = {"avatar_url": "N/A", "subreddits": ""}
+        except Exception as e:
+            print(f"Error fetching Reddit data for {winner}: {e}")
+            user_data = {"avatar_url": "N/A", "subreddits": ""}
+    
+        # Extract user data
+        reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
+        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "describe")
+        top_subreddits = user_data.get("top_subreddits", "")
+        
+        prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
-            f"Roast and deeply insult them about their username, post history, and information from their profile. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
-            f"Create no more than 10 sentences in total. Here are their profile details for you to use in your roast:\n"
-            f"{winner_at}'s Profile Information:\n"
+            f"Roast and deeply insult them about their username, {winner} and their top subreddits. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response."
+            f"Create no more than 10 sentences in total. Here are their top 5 subreddits for you to use in your roast: {top_subreddits}.\n"
         )
 
     elif wf_winner == True and is_sovereign == True:
@@ -2355,32 +2368,7 @@ def generate_round_summary(round_data, winner):
 
         prompt = random.choice(prompts)
 
-    if creep_okra == True:
-        try:
-            user_data = get_user_data(winner)
-            if not user_data:
-                print(f"Failed to fetch data for {winner}.")
-                user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
-        except Exception as e:
-            print(f"Error fetching Reddit data for {winner}: {e}")
-            user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
-    
-        # Extract user data
-        reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "describe")
-        top_subreddits = user_data.get("top_subreddits", [])
-        
-        # Format the top subreddits
-        formatted_subreddits = "\n".join([f"- {subreddit}" for subreddit in top_subreddits])
-        
-        # Build the prompt
-        prompt += (
-            f"Username: {winner}\n"
-            f"Avatar Description: {reddit_avatar_description}\n"
-            f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
-        )
-
-    else:
+    if creep_okra == False:
         # Add questions, their correct answers, users' responses, and scoreboard status after each question
         for question_data in round_data["questions"]:
             question_number = question_data["question_number"]
@@ -2407,14 +2395,6 @@ def generate_round_summary(round_data, winner):
                     prompt += f"Username: {username} | Response: '{user_response}' | Result: {is_correct}\n"
             else:
                 prompt += "No responses recorded for this question.\n"
-            
-            # Add scoreboard status after the question
-            #prompt += f"\nScoreboard after Question {question_number}:\n"
-            #if "scoreboard_after_question" in question_data:
-            #    for user, score in question_data["scoreboard_after_question"].items():
-            #        prompt += f"{user}: {score}\n"
-            #else:
-            #    prompt += "No responses recorded.\n"
             
             prompt += "\n"
 

@@ -522,42 +522,43 @@ def generate_round_summary_image(round_data, winner):
     
     else:
         categories = {
-            "1": "🌹🏰 Renaissance",
-            "2": "😇✨ Holy",
-            "3": "🦸‍♂️🦸‍♀️ Superhero",
-            "4": "🎲🔀 Really Random",
-            #"8": f"🖼️1️⃣ @{winner} *Portrait 1*",
-            #"9": f"🖼️2️⃣ @{winner} *Portrait 2*",
-            "0": "😠🥒 Okra Horror"
-        }
-        
-        prompts_by_category = {
-            "1": [
-                f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined."
-            ],
-            "2": [
-                f"{winner} worshipping an okra. Make it appealing and accepting of religions of all types."
-            ],
-            "3": [
-                f"{winner} as a superhero with an Okra theme."
-            ],
-            "4": [
-                f"{winner} intereracting with an okra in some really random way."
-            ],
-            #"8": [
-            #    f"Draw what you think {winner} looks like based on their username and their most active subreddits.\n"
-            #],
-            #"9": [
-            #    f"Draw what you think {winner} looks like based on their username, avatar description, and their most visited subreddit.\n"
-            #],
-            "0": [
-                #f"{winner} being yelled at by an angry, giant piece of okra in a surreal, cartoonish style.",
-                f"{winner} being chased by an okra in a scary horror movie setting."
-            ]
+            "0": "😠🥒 Okrap (Horror)",
+            "1": "🌹🏰 Okrenaissance",
+            "2": "😇✨ Okroly and Divine",
+            "3": "🎲🔀 (OK)Random,
+            "A": f"🖼️🔤 @{winner} Username++ ☕☕",
+            "B": f"🖼️👤 @{winner} Avatar++ ☕☕",
+            "C": f"🖼️📜 @{winner} Subreddits++ ☕☕"
         }
 
         # Ask the user to choose a category
-        selected_category = ask_category(winner, categories)
+        selected_category, additional_prompt = ask_category(winner, categories, winner_coffees)
+        
+        prompts_by_category = {
+            "0": [
+                f"{winner} being chased by an okra in a scary horror movie setting. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
+            ],
+            "1": [
+                f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
+            ],
+            "2": [
+                f"{winner} worshipping an okra. Make it appealing and accepting of religions of all types. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
+            ],
+            "3": [
+                f"{winner} intereracting with an okra in the most crazy, ridiculous, and over the top random way. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
+            ],
+            "A": [
+                f"Draw what you think {winner} looks like based on their username and their most active subreddits and you MUST include the following in your image: {additional_prompt}.\n"
+            ],
+            "B": [
+                f"Draw what you think {winner} looks like based on their username and you MUST include the following in the image: {additonal_prompt}.\n"
+            ],
+            "C": [
+                f"Draw what you think {winner} looks like based on their most visited subreddits and you MUST include the following in the image: {additional_prompt}.\n"
+            ]
+        }
+
+        
 
         # Select a prompt based on the chosen category
         if selected_category and selected_category in prompts_by_category:
@@ -681,7 +682,7 @@ def generate_round_summary_image(round_data, winner):
             return "Image generation failed!"
 
 
-def ask_category(winner, categories):
+def ask_category(winner, categories, winner_coffees):
     """
     Ask the winner to choose a category and return their choice, or None if no valid response is received.
     """
@@ -689,6 +690,7 @@ def ask_category(winner, categories):
 
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
+    additional_prompt = ""
 
     # Display categories
     category_message = f"\n🎨🖍️ @{winner} Pick one. Or don't.\n\n"
@@ -725,11 +727,19 @@ def ask_category(winner, categories):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if message_content in categories:
-                        react_to_message(event_id, target_room_id, "okra21")
-                        return message_content
-                    else:
+                    if message_content not in categories:
                         react_to_message(event_id, target_room_id, "okra5")
+                        continue
+
+                    # Check if the winner can select options A, B, or C
+                    if message_content in ['A', 'B', 'C'] and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        additional_prompt = request_prompt(winner)
+                        continue
+                        
+                    # Valid selection
+                    react_to_message(event_id, target_room_id, "okra21")
+                    return message_content, additional_prompt
     
         except requests.exceptions.RequestException as e:
             print(f"Error collecting responses: {e}")                    
@@ -737,6 +747,84 @@ def ask_category(winner, categories):
     # Return None if no valid response is received within the time limit
     print("No response received in time.")
     return None
+
+
+def request_prompt(winner):
+    global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id
+
+    sync_url = f"{matrix_base_url}/sync"
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+
+    # Initialize the sync and message to prompt user for input
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+    message = f"\n🖼️🔟 @{winner}, customize your image (10 words max). Be good.\n"
+    send_message(target_room_id, message)
+
+    collected_words = []
+
+    while time.time() - start_time < magic_time:
+        try:
+            if len(collected_words) >= 10:
+                break
+
+            if since_token:
+                params["since"] = since_token
+
+            time.sleep(1)  # Slight delay to avoid overwhelming the server
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")
+
+                # Only process if the event type is "m.room.message"
+                if event_type == "m.room.message" and event_id not in processed_events:
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "").strip()
+
+                    if sender == bot_user_id or sender_display_name != winner:
+                        continue
+
+                    # Split the message content into words and add them to collected_words
+                    words = message_content.split()
+                    for word in words:
+                        if len(collected_words) < 10:
+                            collected_words.append(word)
+                        else:
+                            break
+
+                    # React to the user's message
+                    react_to_message(event_id, target_room_id, "okra21")
+
+                    # Check if we have collected enough words
+                    if len(collected_words) >= 10:
+                        break
+
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting responses: {e}")
+
+    if not collected_words:
+        message = "Nothing. Okra time."
+    else:
+        message = f"Ok(ra) I got: {' '.join(collected_words)}"
+    send_message(target_room_id, message)
+    return ' '.join(collected_words)
+
+
+
+
 
 
 
@@ -4327,7 +4415,7 @@ def start_trivia_round():
                 time.sleep(10)
             else:
                 #send_message(target_room_id, f"\n💚 Friendly OkraStrut? Buy coffee with your Reddit name.\n☕️ https://buymeacoffee.com/livetrivia\n👕 https://merch.redditlivetrivia.com\n")
-                send_message(target_room_id, f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Buy with your Reddit name for roast controls.\n")
+                send_message(target_room_id, f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Buy with your Reddit name for in-game perks.\n")
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds

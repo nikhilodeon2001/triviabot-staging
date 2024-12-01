@@ -526,9 +526,9 @@ def generate_round_summary_image(round_data, winner):
             "1": "🌹🏰 Okrenaissance",
             "2": "😇✨ Okroly and Divine",
             "3": "🎲🔀 (OK)Random",
-            "A": f"🖼️🔤 @{winner} Username++ ☕☕",
-            "B": f"🖼️👤 @{winner} Avatar++ ☕☕",
-            "C": f"🖼️📜 @{winner} Subreddits++ ☕☕"
+            "A": f"🖼️🔤 Username + Prompt ☕☕",
+            "B": f"🖼️👤 Avatar + Prompt ☕☕",
+            "C": f"🖼️📜 Subreddits + Prompt ☕☕"
         }
 
         # Ask the user to choose a category

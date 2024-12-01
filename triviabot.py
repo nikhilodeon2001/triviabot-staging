@@ -138,7 +138,7 @@ reddit = praw.Reddit(
 def describe_image_with_vision(image_url, mode):
     try:
 
-        if mode == "okra":
+        if mode == "okra-title":
             payload = {
                 "model": "gpt-4o-mini",
                 "messages": [
@@ -170,7 +170,7 @@ def describe_image_with_vision(image_url, mode):
                 "max_tokens": 500
             }
          
-        elif mode == "portrait-roast":
+        elif mode == "roast-title":
             payload = {
                 "model": "gpt-4o-mini",
                 "messages": [
@@ -201,6 +201,40 @@ def describe_image_with_vision(image_url, mode):
                 ],
                 "max_tokens": 500
             }
+
+
+         elif mode == "title":
+            payload = {
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "You are a cool image analyst. Your goal is to create image titles."
+                            }
+                        ]
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Based on what you see in the image, give the image a name with 5 words maximum."
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": image_url
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "max_tokens": 500
+            }
+             
         else:
             payload = {
             "model": "gpt-4o-mini",
@@ -210,7 +244,7 @@ def describe_image_with_vision(image_url, mode):
                     "content": [
                         {
                             "type": "text",
-                            "text": "You are aanimage analyst. Your goal is to accurately describe the image to provide to someone who will roast the image in combination with other user profile information."
+                            "text": "You are an image analyst. Your goal is to accurately describe the image to provide to someone as accurately as possible."
                         }
                     ]
                 },
@@ -219,7 +253,7 @@ def describe_image_with_vision(image_url, mode):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Describe what you see in this image as accurately as you can.."
+                            "text": "Describe what you see in this image as accurately as you can."
                         },
                         {
                             "type": "image_url",
@@ -290,7 +324,7 @@ def get_user_data(username):
             subreddit_counts[subreddit] += 1
 
         # Get the top 5 subreddits without counts
-        top_subreddits = [subreddit for subreddit, _ in subreddit_counts.most_common(5)]
+        top_subreddits = ", ".join([subreddit for subreddit, _ in subreddit_counts.most_common(5)])
 
         return {
             "avatar_url": avatar_url,
@@ -532,29 +566,44 @@ def generate_round_summary_image(round_data, winner):
         }
 
         # Ask the user to choose a category
-        selected_category, additional_prompt = ask_category(winner, categories, winner_coffees)            
+        selected_category, additional_prompt = ask_category(winner, categories, winner_coffees)     
+
+        if selected_category == "5" or selected_category == "6":
+            try:
+                user_data = get_user_data(winner)
+                if not user_data:
+                    print(f"Failed to fetch data for {winner}.")
+                    user_data = {"avatar_url": "N/A", "subreddits": []}
+            except Exception as e:
+                print(f"Error fetching Reddit data for {winner}: {e}")
+                user_data = {"avatar_url": "N/A", "subreddits": []}
         
+            # Extract user data
+            reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
+            reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "describe")
+            top_subreddits = user_data.get("top_subreddits", "")
+                    
         prompts_by_category = {
             "0": [
-                f"{winner} being chased by an okra in a scary horror movie setting. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
+                f"{winner} being chased by an okra in a scary horror movie setting. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
             ],
             "1": [
-                f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
+                f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
             ],
             "2": [
-                f"{winner} worshipping an okra. Make it appealing and accepting of religions of all types. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
+                f"{winner} worshipping an okra. Make it appealing and accepting of religions of all types. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
             ],
             "3": [
-                f"{winner} intereracting with an okra in the most crazy, ridiculous, and over the top random way. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
+                f"{winner} intereracting with an okra in the most crazy, ridiculous, and over the top random way. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
             ],
             "4": [
                 f"Draw what you think {winner} looks like based on their username. You MUST include '{additional_prompt}' in the image.\n"
             ],
             "5": [
-                f"Draw what you think {winner} looks like based on their avatar. You MUST include '{additional_prompt}' in the image.\n"
+                f"Draw what you think {winner} looks like based on their avatar, which looks like {reddit_avatar_description}. You MUST include '{additional_prompt}' in the image.\n"
             ],
             "6": [
-                f"Draw what you think {winner} looks like based on their 5 most visited subreddits. You MUST include '{additional_prompt}' in the image.\n"
+                f"Draw what you think {winner} looks like based on their 5 most visited subreddits, which are: {top_subreddits}. You MUST include '{additional_prompt}' in the image.\n"
             ]
         }
 
@@ -562,39 +611,8 @@ def generate_round_summary_image(round_data, winner):
         if selected_category and selected_category in prompts_by_category:
             prompt = random.choice(prompts_by_category[selected_category])
         else:
-            prompt = f"{winner} being chased by an okra in a scary horror movie setting."
+            prompt = f"{winner} being chased by an okra in a scary horror movie setting. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
 
-        if selected_category == "5" or selected_category == "6":
-            
-            try:
-                user_data = get_user_data(winner)
-                if not user_data:
-                    print(f"Failed to fetch data for {winner}.")
-                    user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
-            except Exception as e:
-                print(f"Error fetching Reddit data for {winner}: {e}")
-                user_data = {"avatar_url": "N/A", "posts": [], "comments": []}
-        
-            # Extract user data
-            reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-            reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "regular")
-            top_subreddits = user_data.get("top_subreddits", [])
-            
-            # Format the top subreddits
-            formatted_subreddits = "\n".join([f"- {subreddit}" for subreddit in top_subreddits])
-            
-            if selected_category == "5":
-                prompt += (
-                    f"Avatar Description: {reddit_avatar_description}\n"
-                )
-            elif selected_category == "6":
-                prompt += (
-                    f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
-                )
-            else:
-                prompt += (
-                    f"Username: {winner}\n"
-                )
             
     print(prompt)
     
@@ -608,11 +626,11 @@ def generate_round_summary_image(round_data, winner):
         # Return the image URL from the API response
         image_url = response["data"][0]["url"]
         
-        #if selected_category == "8" or selected_category == "9":
-        #    image_description = describe_image_with_vision(image_url, "portrait-roast")
-        #else:
-        #    image_description = describe_image_with_vision(image_url, "okra")
-        image_description = describe_image_with_vision(image_url, "okra")
+        if selected_category == "4" or selected_category == "5" or selected_category == "6":
+            image_description = describe_image_with_vision(image_url, "roast-title")
+        else:
+            image_description = describe_image_with_vision(image_url, "okra-title")
+
             
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
@@ -640,7 +658,7 @@ def generate_round_summary_image(round_data, winner):
         # Check if the error is due to the safety system
         if "Your request was rejected as a result of our safety system" in str(e):
             # Use a default safe prompt
-            default_prompt = f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined."
+            default_prompt = f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
             try:
                 response = openai.Image.create(
                     prompt=default_prompt,
@@ -650,7 +668,7 @@ def generate_round_summary_image(round_data, winner):
                 
                 # Return the image URL from the API response
                 image_url = response["data"][0]["url"]
-                image_description = describe_image_with_vision(image_url, "okra")
+                image_description = describe_image_with_vision(image_url, "okra-title")
                 image_mxc, image_width, image_height = download_image_from_url(image_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         
@@ -2349,7 +2367,7 @@ def generate_round_summary(round_data, winner):
     
         # Extract user data
         reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "regular")
+        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "describe")
         top_subreddits = user_data.get("top_subreddits", [])
         
         # Format the top subreddits

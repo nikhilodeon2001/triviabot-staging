@@ -585,7 +585,6 @@ def generate_round_summary_image(round_data, winner):
             # Format the top subreddits
             formatted_subreddits = "\n".join([f"- {subreddit}" for subreddit in top_subreddits])
             
-             Build the prompt
             if selected_category == "B":
                 prompt += (
                     f"Avatar Description: {reddit_avatar_description}\n"

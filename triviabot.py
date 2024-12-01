@@ -526,9 +526,9 @@ def generate_round_summary_image(round_data, winner):
             "1": "🌹🏰 Okrenaissance",
             "2": "😇✨ Okroly and Divine",
             "3": "🎲🔀 (OK)Random",
-            "A": f"🖼️🔤 Username + Prompt ☕☕",
-            "B": f"🖼️👤 Avatar + Prompt ☕☕",
-            "C": f"🖼️📜 Subreddits + Prompt ☕☕"
+            "4": f"🖼️🔤 Username + Prompt ☕☕",
+            "5": f"🖼️👤 Avatar + Prompt ☕☕",
+            "6": f"🖼️📜 Subreddits + Prompt ☕☕"
         }
 
         # Ask the user to choose a category
@@ -547,14 +547,14 @@ def generate_round_summary_image(round_data, winner):
             "3": [
                 f"{winner} intereracting with an okra in the most crazy, ridiculous, and over the top random way. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
             ],
-            "A": [
-                f"Draw what you think {winner} looks like based on their username and you MUST include the following in your image: {additional_prompt}.\n"
+            "4": [
+                f"Draw what you think {winner} looks like based on their username. You MUST surround them with '{additional_prompt}'.\n"
             ],
-            "B": [
-                f"Draw what you think {winner} looks like based on their avatar and you MUST include the following in the image: {additional_prompt}.\n"
+            "5": [
+                f"Draw what you think {winner} looks like based on their avatar. You MUST surround them with '{additional_prompt}'.\n"
             ],
-            "C": [
-                f"Draw what you think {winner} looks like based on their most visited subreddits and you MUST include the following in the image: {additional_prompt}.\n"
+            "6": [
+                f"Draw what you think {winner} looks like based on their 5 most visited subreddits. You MUST surround them with '{additional_prompt}'.\n"
             ]
         }
 
@@ -566,7 +566,7 @@ def generate_round_summary_image(round_data, winner):
         else:
             prompt = f"{winner} being chased by an okra in a scary horror movie setting."
 
-        if selected_category == "B" or selected_category == "C":
+        if selected_category == "5" or selected_category == "6":
             
             try:
                 user_data = get_user_data(winner)
@@ -585,11 +585,11 @@ def generate_round_summary_image(round_data, winner):
             # Format the top subreddits
             formatted_subreddits = "\n".join([f"- {subreddit}" for subreddit in top_subreddits])
             
-            if selected_category == "B":
+            if selected_category == "5":
                 prompt += (
                     f"Avatar Description: {reddit_avatar_description}\n"
                 )
-            elif selected_category == "C":
+            elif selected_category == "6":
                 prompt += (
                     f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
                 )
@@ -736,12 +736,12 @@ def ask_category(winner, categories, winner_coffees):
                         continue
 
                     # Check if the winner can select options A, B, or C
-                    if message_content.lower() in ['a', 'b', 'c'] and winner_coffees <= 0:
+                    if message_content in ['4', '5', '6'] and winner_coffees <= 0:
                         print("no coffee")
                         react_to_message(event_id, target_room_id, "okra5")
                         continue
 
-                    if message_content.lower() in ['a', 'b', 'c'] and winner_coffees > 0:
+                    if message_content.lower() in ['4', '5', '6'] and winner_coffees > 0:
                         print("coffee")
                         react_to_message(event_id, target_room_id, "okra21")
                         additional_prompt = request_prompt(winner)
@@ -3619,7 +3619,7 @@ def update_round_streaks(user):
         send_message(target_room_id, gpt_message)
         
         if current_longest_round_streak['streak'] % image_wins == 0:
-            time.sleep(3)
+            time.sleep(5)
             generate_round_summary_image(round_data, user)
         else:
             number_to_emoji = {

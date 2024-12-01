@@ -566,7 +566,9 @@ def generate_round_summary_image(round_data, winner):
         }
 
         # Ask the user to choose a category
-        selected_category, additional_prompt = ask_category(winner, categories, winner_coffees)     
+        selected_category, additional_prompt = ask_category(winner, categories, winner_coffees)
+        reddit_avatar_description = ""
+        top_subreddits = ""
 
         if selected_category == "5" or selected_category == "6":
             try:

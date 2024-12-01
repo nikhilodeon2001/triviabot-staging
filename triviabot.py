@@ -552,13 +552,13 @@ def generate_round_summary_image(round_data, winner):
                 f"{winner} intereracting with an okra in the most crazy, ridiculous, and over the top random way. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
             ],
             "4": [
-                f"Draw what you think {winner} looks like based on their username. You MUST surround them with '{additional_prompt}'.\n"
+                f"Draw what you think {winner} looks like based on their username. You MUST include '{additional_prompt}' in the image.\n"
             ],
             "5": [
-                f"Draw what you think {winner} looks like based on their avatar. You MUST surround them with '{additional_prompt}'.\n"
+                f"Draw what you think {winner} looks like based on their avatar. You MUST include '{additional_prompt}' in the image.\n"
             ],
             "6": [
-                f"Draw what you think {winner} looks like based on their 5 most visited subreddits. You MUST surround them with '{additional_prompt}'.\n"
+                f"Draw what you think {winner} looks like based on their 5 most visited subreddits. You MUST include '{additional_prompt}' in the image.\n"
             ]
         }
 

@@ -548,10 +548,10 @@ def generate_round_summary_image(round_data, winner):
                 f"{winner} intereracting with an okra in the most crazy, ridiculous, and over the top random way. Try hard to bring and merge elements from the username into a humanoid depiction of {winner}."
             ],
             "A": [
-                f"Draw what you think {winner} looks like based on their username and their most active subreddits and you MUST include the following in your image: {additional_prompt}.\n"
+                f"Draw what you think {winner} looks like based on their username and you MUST include the following in your image: {additional_prompt}.\n"
             ],
             "B": [
-                f"Draw what you think {winner} looks like based on their username and you MUST include the following in the image: {additional_prompt}.\n"
+                f"Draw what you think {winner} looks like based on their avatar and you MUST include the following in the image: {additional_prompt}.\n"
             ],
             "C": [
                 f"Draw what you think {winner} looks like based on their most visited subreddits and you MUST include the following in the image: {additional_prompt}.\n"
@@ -566,7 +566,7 @@ def generate_round_summary_image(round_data, winner):
         else:
             prompt = f"{winner} being chased by an okra in a scary horror movie setting."
 
-        if selected_category == "8" or selected_category == "9":
+        if selected_category == "B" or selected_category == "C":
             
             try:
                 user_data = get_user_data(winner)
@@ -585,18 +585,19 @@ def generate_round_summary_image(round_data, winner):
             # Format the top subreddits
             formatted_subreddits = "\n".join([f"- {subreddit}" for subreddit in top_subreddits])
             
-            # Build the prompt
-            #if selected_category == "9":
-            #    prompt += (
-            #        f"Username: {winner}\n"
-            #        f"Avatar Description: {reddit_avatar_description}\n"
-            #        f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
-            #    )
-            #elif selected_category == "8":
-            #    prompt += (
-            #        f"Username: {winner}\n"
-            #        f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
-            #    )
+             Build the prompt
+            if selected_category == "B":
+                prompt += (
+                    f"Avatar Description: {reddit_avatar_description}\n"
+                )
+            elif selected_category == "C":
+                prompt += (
+                    f"Top Subreddits:\n{formatted_subreddits if formatted_subreddits else 'No subreddit data available.'}\n"
+                )
+            else:
+                prompt += (
+                    f"Username: {winner}\n"
+                )
             
     print(prompt)
     

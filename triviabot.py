@@ -737,10 +737,12 @@ def ask_category(winner, categories, winner_coffees):
 
                     # Check if the winner can select options A, B, or C
                     if message_content.lower() in ['a', 'b', 'c'] and winner_coffees <= 0:
+                        print("no coffee")
                         react_to_message(event_id, target_room_id, "okra5")
                         continue
 
                     if message_content.lower() in ['a', 'b', 'c'] and winner_coffees > 0:
+                        print("coffee")
                         react_to_message(event_id, target_room_id, "okra21")
                         additional_prompt = request_prompt(winner)
                         return message_content, additional_prompt

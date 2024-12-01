@@ -732,12 +732,15 @@ def ask_category(winner, categories, winner_coffees):
                         continue
 
                     # Check if the winner can select options A, B, or C
-                    if message_content in ['A', 'B', 'C'] and winner_coffees <= 0:
+                    if message_content.lower() in ['a', 'b', 'c'] and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
+                        continue
+
+                    if message_content.lower() in ['a', 'b', 'c'] and winner_coffees > 0:
+                        react_to_message(event_id, target_room_id, "okra21")
                         additional_prompt = request_prompt(winner)
                         continue
                         
-                    # Valid selection
                     react_to_message(event_id, target_room_id, "okra21")
                     return message_content, additional_prompt
     
@@ -746,7 +749,7 @@ def ask_category(winner, categories, winner_coffees):
     
     # Return None if no valid response is received within the time limit
     print("No response received in time.")
-    return None
+    return None, additional_prompt
 
 
 def request_prompt(winner):

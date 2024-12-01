@@ -765,7 +765,7 @@ def request_prompt(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Initialize the sync and message to prompt user for input
-    initialize_sync()
+    #initialize_sync()
     start_time = time.time()  # Track when the question starts
     message = f"\n🖼️🔟 @{winner}, customize your image (10 words max). Be good.\n"
     send_message(target_room_id, message)
@@ -774,13 +774,13 @@ def request_prompt(winner):
 
     while time.time() - start_time < magic_time:
         try:
-            if len(collected_words) >= 10:
-                break
-
+            time.sleep(1)  # Slight delay to avoid overwhelming the server
             if since_token:
                 params["since"] = since_token
-
-            time.sleep(1)  # Slight delay to avoid overwhelming the server
+                
+            if len(collected_words) >= 10:
+                break
+                
             response = requests.get(sync_url, headers=headers, params=params)
 
             if response.status_code != 200:

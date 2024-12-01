@@ -551,7 +551,7 @@ def generate_round_summary_image(round_data, winner):
                 f"Draw what you think {winner} looks like based on their username and their most active subreddits and you MUST include the following in your image: {additional_prompt}.\n"
             ],
             "B": [
-                f"Draw what you think {winner} looks like based on their username and you MUST include the following in the image: {additonal_prompt}.\n"
+                f"Draw what you think {winner} looks like based on their username and you MUST include the following in the image: {additional_prompt}.\n"
             ],
             "C": [
                 f"Draw what you think {winner} looks like based on their most visited subreddits and you MUST include the following in the image: {additional_prompt}.\n"

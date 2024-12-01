@@ -156,7 +156,7 @@ def describe_image_with_vision(image_url, mode):
                         "content": [
                             {
                                 "type": "text",
-                                "text": "Based on what you see in the image, give the image a name with 5 words maximum and ensure the name is okra themed. YYour goal is to humiliate the person the portrait is of."
+                                "text": "Based on what you see in the image, give the image a name with 5 words maximum and ensure the name is okra themed. Your goal is to humiliate the person the portrait is of."
                             },
                             {
                                 "type": "image_url",
@@ -652,7 +652,7 @@ def generate_round_summary_image(round_data, winner):
         image.save(buffer, format="PNG")
         buffer.seek(0)
         
-        #upload_image_to_s3(buffer, winner, image_description)
+        upload_image_to_s3(buffer, winner, image_description)
         return None
         
     except openai.OpenAIError as e:
@@ -690,7 +690,7 @@ def generate_round_summary_image(round_data, winner):
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
                 
-                #upload_image_to_s3(buffer, winner, image_description)
+                upload_image_to_s3(buffer, winner, image_description)
                 return None
             
             except openai.OpenAIError as e2:

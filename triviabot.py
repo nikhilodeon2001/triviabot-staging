@@ -203,7 +203,7 @@ def describe_image_with_vision(image_url, mode):
             }
 
 
-         elif mode == "title":
+        elif mode == "title":
             payload = {
                 "model": "gpt-4o-mini",
                 "messages": [

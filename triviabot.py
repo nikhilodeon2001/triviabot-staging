@@ -712,6 +712,10 @@ def ask_category(winner, categories, winner_coffees):
 
             sync_data = response.json()
             since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            
+            if since_token:
+                params["since"] = since_token
+                
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
             for event in room_events:
@@ -739,7 +743,7 @@ def ask_category(winner, categories, winner_coffees):
                     if message_content.lower() in ['a', 'b', 'c'] and winner_coffees > 0:
                         react_to_message(event_id, target_room_id, "okra21")
                         additional_prompt = request_prompt(winner)
-                        continue
+                        return message_content, additional_prompt
                         
                     react_to_message(event_id, target_room_id, "okra21")
                     return message_content, additional_prompt

@@ -136,6 +136,73 @@ reddit = praw.Reddit(
 )
 
 
+import requests
+import re
+
+def get_random_wikipedia_title_and_intro(max_words=3, max_length=16):
+    base_url = "https://en.wikipedia.org/w/api.php"
+    
+    while True:
+        # Fetch a random page from Wikipedia
+        response = requests.get(base_url, {
+            "action": "query",
+            "format": "json",
+            "generator": "random",
+            "grnnamespace": 0,  # Only fetch content pages
+            "grnlimit": 1  # Fetch one page at a time
+        })
+        
+        if response.status_code != 200:
+            print("Error fetching from Wikipedia API")
+            return None, None
+        
+        data = response.json()
+        pages = data.get("query", {}).get("pages", {})
+        
+        for page_id, page_info in pages.items():
+            title = page_info.get("title", "")
+            
+            # Check if the title has at most `max_words` and is within `max_length` characters
+            word_count = len(title.split())
+            total_length = len(title)
+            if word_count <= max_words and total_length <= max_length:
+                # Fetch the introductory text (summary)
+                pageid = page_info.get("pageid")
+                intro_text = fetch_wikipedia_intro(pageid)
+                return title, intro_text
+
+def fetch_wikipedia_intro(pageid):
+    base_url = "https://en.wikipedia.org/w/api.php"
+    response = requests.get(base_url, {
+        "action": "query",
+        "format": "json",
+        "prop": "extracts",
+        "exintro": True,  # Fetch only the introductory text
+        "explaintext": True,  # Return plaintext instead of HTML
+        "pageids": pageid
+    })
+    
+    if response.status_code != 200:
+        print("Error fetching Wikipedia introduction")
+        return None
+    
+    data = response.json()
+    pages = data.get("query", {}).get("pages", {})
+    return pages.get(str(pageid), {}).get("extract", "")
+
+def redact_intro_text(title, intro_text):
+    if not title or not intro_text:
+        return intro_text
+    
+    # Split the title into words and build a regex pattern
+    words_to_redact = re.escape(title).split()
+    pattern = re.compile(r'\b(' + '|'.join(words_to_redact) + r')\b', re.IGNORECASE)
+    
+    # Replace matching words with "REDACTED"
+    redacted_text = pattern.sub("REDACTED", intro_text)
+    return redacted_text
+    
+
 def describe_image_with_vision(image_url, mode):
     try:
 
@@ -4339,6 +4406,20 @@ def start_trivia_round():
     
     try:
         while True:  # Endless loop
+
+            title, intro_text = get_random_wikipedia_title_and_intro(3, 16)
+            if title and intro_text:
+                print(f"Title: {title}\n")
+                redacted_intro = redact_intro_text(title, intro_text)
+                print("\n\nIntroductory Text:\n")
+                print(intro_text)
+                print("\n\nRedacted Introductory Text:\n")
+                print(redacted_intro)
+            else:
+                print("Failed to fetch a valid Wikipedia page.")
+
+
+            
             # Check if it's been more than an hour since the last login
             current_time = time.time()
             

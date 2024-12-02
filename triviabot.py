@@ -137,10 +137,44 @@ reddit = praw.Reddit(
 
 
 
-import requests
-import re
 
-def get_random_wikipedia_title_and_intro_with_category(max_words=3, max_length=16):
+def categorize_text(input_text, title):
+    try:
+        # Call OpenAI GPT-4 to generate a category
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a categorization assistant. Your job is to analyze text and return a 1-2 word category that best describes the content. Do not include words from the title in the category."
+                },
+                {
+                    "role": "user",
+                    "content": f"Title: {title}\n\nPlease categorize the following text into a 1-2 word category:\n\n{input_text}"
+                }
+            ],
+            max_tokens=10,  # Limit response length
+            temperature=0.3  # Lower temperature for more focused output
+        )
+        
+        # Extract the generated category
+        category = response["choices"][0]["message"]["content"].strip()
+
+        # Normalize title and category for comparison
+        title_words = set(re.sub(r"[^\w\s]", "", title).lower().split())  # Remove punctuation and split
+        category_words = set(re.sub(r"[^\w\s]", "", category).lower().split())  # Remove punctuation and split
+
+        # Ensure the category does not overlap with the title words
+        if category_words & title_words:  # Check for intersection
+            return "Hint Fail"  # Fallback if there's a match
+        return category
+
+    except Exception as e:
+        print(f"Error calling OpenAI API: {e}")
+        return "Unknown"
+
+
+def get_wikipedia_article(max_words=3, max_length=16):
     base_url = "https://en.wikipedia.org/w/api.php"
     
     while True:
@@ -180,8 +214,9 @@ def get_random_wikipedia_title_and_intro_with_category(max_words=3, max_length=1
 
                 # Fetch the first category
                 first_category = get_first_category(pageid)
+                category categorize_text(intro_text, title)
 
-                return title, redacted_text, first_category
+                return title, redacted_text, category
 
 
 def fetch_wikipedia_intro(pageid):
@@ -1172,7 +1207,7 @@ def select_wof_questions(winner):
             image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
         
         else:
-            title, redacted_intro, first_category = get_random_wikipedia_title_and_intro_with_category(3, 16)
+            title, redacted_intro, first_category = get_wikipedia_article(3, 16)
             image_mxc, image_width, image_height, display_string = generate_wof_image(title, first_category, fixed_letters)
             wikipedia_message = f"\n{redacted_intro}\n"
             
@@ -4564,7 +4599,7 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
-    title, redacted_text, first_category = get_random_wikipedia_title_and_intro_with_category(3, 16)
+    title, redacted_text, first_category = get_wikipedia_article(3, 16)
     if title and redacted_text and first_category:
         print(f"Title: {title}\n")
         print("\n\nIntroductory Text:\n")

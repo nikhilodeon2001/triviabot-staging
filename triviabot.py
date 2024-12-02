@@ -1188,7 +1188,7 @@ def select_wof_questions(winner):
             send_message(target_room_id, message)
         
         if selected_wof_category == "4":
-            send_message(rarget_room_id, wikipedia_message)
+            send_message(target_room_id, wikipedia_message)
             
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
         

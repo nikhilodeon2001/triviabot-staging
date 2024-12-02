@@ -200,7 +200,7 @@ def get_wikipedia_article(max_words=3, max_length=16):
             # Check if the title has at most `max_words` and is within `max_length` characters
             word_count = len(title.split())
             total_length = len(title)
-            if word_count <= max_words and total_length <= max_length:
+            if word_count <= 2 and total_length <= 11 and total_length >= 4:
                 # Check capitalization rule
                 words = title.split()
                 if len(words) > 1 and any(word[0].isupper() for word in words[1:]):

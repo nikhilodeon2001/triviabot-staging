@@ -1,6 +1,7 @@
 
 
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -587,7 +588,7 @@ def generate_round_summary_image(round_data, winner):
                     
         prompts_by_category = {
             "0": [
-                f"{winner} being chased by an okra in a scary horror movie setting. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+                f"{winner} is being chased by someone holding an okra in a hyperrealistic scary horror movie setting. The image should be in 1st person view of the person chasing {winner}. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
             ],
             "1": [
                 f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
@@ -613,7 +614,7 @@ def generate_round_summary_image(round_data, winner):
         if selected_category and selected_category in prompts_by_category:
             prompt = random.choice(prompts_by_category[selected_category])
         else:
-            prompt = f"{winner} being chased by an okra in a scary horror movie setting. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+            prompt = f"{winner} is being chased by someone holding an okra in a hyperrealistic scary horror movie setting. The image should be in 1st person view of the person chasing {winner}. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
 
             
     print(prompt)
@@ -756,20 +757,25 @@ def ask_category(winner, categories, winner_coffees):
                     # Check if the winner can select options A, B, or C
                     if message_content in ['4', '5', '6'] and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\nSorry {winner}. Choice {message_content} requires ☕️☕️.\n"
+                        send_message(target_room_id, message)
                         continue
 
                     react_to_message(event_id, target_room_id, "okra21")
 
-                    if message_content.lower() in ['4'] and winner_coffees > 0:
-                        additional_prompt = request_prompt(winner, processed_events)                        
-
+                    if message_content in ['4'] and winner_coffees > 0:
+                        additional_prompt = request_prompt(winner, processed_events)    
+                    
+                    message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
+                    send_message(target_room_id, message)
                     return message_content, additional_prompt
     
         except requests.exceptions.RequestException as e:
-            print(f"Error collecting responses: {e}")                    
+            print(f"Error collecting responses: {e}")  
     
     # Return None if no valid response is received within the time limit
-    print("No response received in time.")
+    message = f"🐢⏳ Too slow. Okra time.\n"
+    send_message(target_room_id, message)
     return None, additional_prompt
 
 

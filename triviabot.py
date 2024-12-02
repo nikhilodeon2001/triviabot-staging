@@ -1161,7 +1161,7 @@ def select_wof_questions(winner):
 
         selected_wof_category = ask_wof_number(winner)
         
-        if selected_wof_category != "4"
+        if selected_wof_category != "4":
             wof_question = wof_questions[int(selected_wof_category) - 1]
             print(wof_question["answers"][0])
                     
@@ -1171,7 +1171,7 @@ def select_wof_questions(winner):
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
             image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
         
-        else
+        else:
             title, redacted_intro, first_category = get_random_wikipedia_title_and_intro_with_category(max_words=3, max_length=16):
             image_mxc, image_width, image_height, display_string = generate_wof_image(title, first_category, fixed_letters)
             wikipedia_message = f"\n{redacted_intro}\n"
@@ -1442,7 +1442,7 @@ def ask_wof_number(winner):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if str(message_content) in {"1", "2", "3"}:
+                    if str(message_content) in {"1", "2", "3", "4"}:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra21")
                         return selected_question

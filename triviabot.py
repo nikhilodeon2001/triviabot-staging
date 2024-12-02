@@ -136,9 +136,6 @@ reddit = praw.Reddit(
 )
 
 
-import requests
-import re
-
 def get_random_wikipedia_title_and_intro(max_words=3, max_length=16):
     base_url = "https://en.wikipedia.org/w/api.php"
     

@@ -1198,18 +1198,25 @@ def select_wof_questions(winner):
         
         if selected_wof_category != "4":
             wof_question = wof_questions[int(selected_wof_category) - 1]
+            wof_answer = wof_question["answers"][0]
+            wof_clue = wof_question["question"]
             print(wof_question["answers"][0])
                     
            # Store the ID of this single question in MongoDB if it's not empty
             wof_question_id = wof_question["_id"]  # Get the ID of the selected question
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
-            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
         
         else:
-            title, redacted_intro, first_category = get_wikipedia_article(3, 16)
-            image_mxc, image_width, image_height, display_string = generate_wof_image(title, first_category, fixed_letters)
+            wof_answer, redacted_intro, wof_clue = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n{redacted_intro}\n"
+            send_message(target_room_id, wikipedia_message)
+            time.sleep(3)
+            total_characters = len(wof_answer)
+            word_count = len(wof_answer.split())
+            
+            
+        image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
             
         image_size = 100
         
@@ -1220,9 +1227,10 @@ def select_wof_questions(winner):
         else:
             fixed_letters_str = "Revealed Letters: " + ' '.join(fixed_letters)
             message = f"{display_string}\n{wof_question['question']}\n{fixed_letters_str}\n"
-            send_message(target_room_id, message)
-        
-        if selected_wof_category == "4":
+            send_message(target_room_id, message)    
+
+        if selected_category == "4":
+            wikipedia_message = f"\n📝🔤 {word_count} words, {total_characters} characters\n"
             send_message(target_room_id, wikipedia_message)
             
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])

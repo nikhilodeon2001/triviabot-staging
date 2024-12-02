@@ -825,11 +825,13 @@ def ask_category(winner, categories, winner_coffees):
 
                     # Check if the winner can select options A, B, or C
                     if message_content in ['4', '5', '6'] and winner_coffees <= 0:
+                        print(f"reacting to message: {message_content}")
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\nSorry {winner}. Choice {message_content} requires ☕️☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
+                    print(f"reacting to message: {message_content}")
                     react_to_message(event_id, target_room_id, "okra21")
 
                     if message_content in ['4'] and winner_coffees > 0:

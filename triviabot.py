@@ -190,15 +190,20 @@ def fetch_wikipedia_intro(pageid):
 def redact_intro_text(title, intro_text):
     if not title or not intro_text:
         return intro_text
-    
-    # Split the title into words and build a regex pattern
-    words_to_redact = re.escape(title).split()
+
+    # Split the title into words, escape regex characters, and construct the pattern
+    words_to_redact = [re.escape(word) for word in title.split()]
     pattern = re.compile(r'\b(' + '|'.join(words_to_redact) + r')\b', re.IGNORECASE)
-    
+
+    # Debugging: Print regex and words
+    print(f"Title Words to Redact: {words_to_redact}")
+    print(f"Regex Pattern: {pattern}")
+
     # Replace matching words with "REDACTED"
     redacted_text = pattern.sub("REDACTED", intro_text)
     return redacted_text
-    
+
+ 
 
 def describe_image_with_vision(image_url, mode):
     try:
@@ -4402,21 +4407,7 @@ def start_trivia_round():
     selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     
     try:
-        while True:  # Endless loop
-
-            title, intro_text = get_random_wikipedia_title_and_intro(3, 16)
-            if title and intro_text:
-                print(f"Title: {title}\n")
-                redacted_intro = redact_intro_text(title, intro_text)
-                print("\n\nIntroductory Text:\n")
-                print(intro_text)
-                print("\n\nRedacted Introductory Text:\n")
-                print(redacted_intro)
-            else:
-                print("Failed to fetch a valid Wikipedia page.")
-
-
-            
+        while True:  # Endless loop            
             # Check if it's been more than an hour since the last login
             current_time = time.time()
             
@@ -4521,6 +4512,17 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
+    title, intro_text = get_random_wikipedia_title_and_intro(3, 16)
+    if title and intro_text:
+        print(f"Title: {title}\n")
+        redacted_intro = redact_intro_text(title, intro_text)
+        print("\n\nIntroductory Text:\n")
+        print(intro_text)
+        print("\n\nRedacted Introductory Text:\n")
+        print(redacted_intro)
+    else:
+        print("Failed to fetch a valid Wikipedia page.")
+        
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()
     login_to_chat()

@@ -211,9 +211,6 @@ def get_wikipedia_article(max_words=3, max_length=16):
                 pageid = page_info.get("pageid")
                 intro_text = fetch_wikipedia_intro(pageid)
                 redacted_text = redact_intro_text(title, intro_text)
-
-                # Fetch the first category
-                first_category = get_first_category(pageid)
                 category = categorize_text(intro_text, title)
 
                 return title, redacted_text, category

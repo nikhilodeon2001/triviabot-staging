@@ -1172,12 +1172,12 @@ def select_wof_questions(winner):
             image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
         
         else:
-            title, redacted_intro, first_category = get_random_wikipedia_title_and_intro_with_category(max_words=3, max_length=16):
+            title, redacted_intro, first_category = get_random_wikipedia_title_and_intro_with_category(3, 16)
             image_mxc, image_width, image_height, display_string = generate_wof_image(title, first_category, fixed_letters)
             wikipedia_message = f"\n{redacted_intro}\n"
+            
         image_size = 100
         
-       
         if image_questions == True:    
             response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
             if response is None:                      

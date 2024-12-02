@@ -136,9 +136,11 @@ reddit = praw.Reddit(
 )
 
 
-import requests
 
-def get_random_wikipedia_title_and_intro(max_words=3, max_length=16):
+import requests
+import re
+
+def get_random_wikipedia_title_and_intro_with_category(max_words=3, max_length=16):
     base_url = "https://en.wikipedia.org/w/api.php"
     
     while True:
@@ -153,7 +155,7 @@ def get_random_wikipedia_title_and_intro(max_words=3, max_length=16):
         
         if response.status_code != 200:
             print("Error fetching from Wikipedia API")
-            return None, None
+            return None, None, None
         
         data = response.json()
         pages = data.get("query", {}).get("pages", {})
@@ -174,7 +176,13 @@ def get_random_wikipedia_title_and_intro(max_words=3, max_length=16):
                 # Fetch the introductory text (summary)
                 pageid = page_info.get("pageid")
                 intro_text = fetch_wikipedia_intro(pageid)
-                return title, intro_text
+                redacted_text = redact_intro_text(title, intro_text)
+
+                # Fetch the first category
+                first_category = get_first_category(pageid)
+
+                return title, redacted_text, first_category
+
 
 def fetch_wikipedia_intro(pageid):
     base_url = "https://en.wikipedia.org/w/api.php"
@@ -195,21 +203,43 @@ def fetch_wikipedia_intro(pageid):
     pages = data.get("query", {}).get("pages", {})
     return pages.get(str(pageid), {}).get("extract", "")
 
+
 def redact_intro_text(title, intro_text):
     if not title or not intro_text:
         return intro_text
-
-    # Split the title into words, escape regex characters, and construct the pattern
+    
+    # Split the title into words and build a regex pattern
     words_to_redact = [re.escape(word) for word in title.split()]
     pattern = re.compile(r'\b(' + '|'.join(words_to_redact) + r')\b', re.IGNORECASE)
-
-    # Debugging: Print regex and words
-    print(f"Title Words to Redact: {words_to_redact}")
-    print(f"Regex Pattern: {pattern}")
-
+    
     # Replace matching words with "REDACTED"
     redacted_text = pattern.sub("REDACTED", intro_text)
     return redacted_text
+
+
+def get_first_category(pageid):
+    base_url = "https://en.wikipedia.org/w/api.php"
+    response = requests.get(base_url, {
+        "action": "query",
+        "format": "json",
+        "prop": "categories",
+        "cllimit": "1",  # Fetch only the first category
+        "pageids": pageid
+    })
+    
+    if response.status_code != 200:
+        print("Error fetching from Wikipedia API")
+        return None
+    
+    data = response.json()
+    pages = data.get("query", {}).get("pages", {})
+    page_data = pages.get(str(pageid), {})
+    
+    # Extract the first category
+    categories = page_data.get("categories", [])
+    if categories:
+        return categories[0].get("title", "").replace("Category:", "")
+    return None
 
  
 
@@ -1126,18 +1156,27 @@ def select_wof_questions(winner):
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
             counter = counter + 1
+        message += f"{couter}. Wikipedia Roulette\n"
         send_message(target_room_id, message)  
 
-        wof_question = wof_questions[int(ask_wof_number(winner)) - 1]
-        print(wof_question["answers"][0])
+        selected_wof_category = ask_wof_number(winner)
+        
+        if selected_wof_category != "4"
+            wof_question = wof_questions[int(selected_wof_category) - 1]
+            print(wof_question["answers"][0])
                     
-       # Store the ID of this single question in MongoDB if it's not empty
-        wof_question_id = wof_question["_id"]  # Get the ID of the selected question
-        if wof_question_id:
-            store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
-
+           # Store the ID of this single question in MongoDB if it's not empty
+            wof_question_id = wof_question["_id"]  # Get the ID of the selected question
+            if wof_question_id:
+                store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
+            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
+        
+        else
+            title, redacted_intro, first_category = get_random_wikipedia_title_and_intro_with_category(max_words=3, max_length=16):
+            image_mxc, image_width, image_height, display_string = generate_wof_image(title, first_category, fixed_letters)
+            wikipedia_message = f"\n{redacted_intro}\n"
         image_size = 100
-        image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
+        
        
         if image_questions == True:    
             response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -1147,7 +1186,10 @@ def select_wof_questions(winner):
             fixed_letters_str = "Revealed Letters: " + ' '.join(fixed_letters)
             message = f"{display_string}\n{wof_question['question']}\n{fixed_letters_str}\n"
             send_message(target_room_id, message)
-
+        
+        if selected_wof_category == "4":
+            send_message(rarget_room_id, wikipedia_message)
+            
         wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
         
         if wf_winner == False:
@@ -4522,14 +4564,13 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
-    title, intro_text = get_random_wikipedia_title_and_intro(3, 16)
-    if title and intro_text:
+    title, redacted_text, first_category = get_random_wikipedia_title_and_intro_with_category(max_words=3, max_length=16):
+    if title and redacted_text and first_category:
         print(f"Title: {title}\n")
-        redacted_intro = redact_intro_text(title, intro_text)
         print("\n\nIntroductory Text:\n")
-        print(intro_text)
-        print("\n\nRedacted Introductory Text:\n")
-        print(redacted_intro)
+        print(redacted_text)
+        print(f"\n\nCategory: {first_category}\n")
+
     else:
         print("Failed to fetch a valid Wikipedia page.")
         

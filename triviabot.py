@@ -4564,7 +4564,7 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
-    title, redacted_text, first_category = get_random_wikipedia_title_and_intro_with_category(max_words=3, max_length=16):
+    title, redacted_text, first_category = get_random_wikipedia_title_and_intro_with_category(3, 16)
     if title and redacted_text and first_category:
         print(f"Title: {title}\n")
         print("\n\nIntroductory Text:\n")

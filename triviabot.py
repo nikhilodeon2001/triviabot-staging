@@ -136,6 +136,8 @@ reddit = praw.Reddit(
 )
 
 
+import requests
+
 def get_random_wikipedia_title_and_intro(max_words=3, max_length=16):
     base_url = "https://en.wikipedia.org/w/api.php"
     
@@ -163,6 +165,12 @@ def get_random_wikipedia_title_and_intro(max_words=3, max_length=16):
             word_count = len(title.split())
             total_length = len(title)
             if word_count <= max_words and total_length <= max_length:
+                # Check capitalization rule
+                words = title.split()
+                if len(words) > 1 and any(word[0].isupper() for word in words[1:]):
+                    print(f"Skipping title '{title}' due to improper capitalization.")
+                    continue
+                
                 # Fetch the introductory text (summary)
                 pageid = page_info.get("pageid")
                 intro_text = fetch_wikipedia_intro(pageid)

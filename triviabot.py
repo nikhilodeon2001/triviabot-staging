@@ -1,6 +1,3 @@
-
-
-
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -24,6 +21,7 @@ from pymongo import MongoClient
 import difflib
 import string
 from urllib.parse import urlparse 
+from urllib.parse import quote
 import io            
 from PIL import Image, ImageDraw, ImageFont 
 import openai
@@ -134,6 +132,148 @@ reddit = praw.Reddit(
     user_agent="TriviaBot/1.0"
 )
 
+
+
+
+def categorize_text(input_text, title):
+    try:
+        # Call OpenAI GPT-4 to generate a category
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a categorization assistant. Your job is to analyze text and return a 1-2 word category that best describes the content. Do not include words from the title in the category."
+                },
+                {
+                    "role": "user",
+                    "content": f"Title: {title}\n\nPlease categorize the following text into a 1-2 word category:\n\n{input_text}"
+                }
+            ],
+            max_tokens=10,  # Limit response length
+            temperature=0.3  # Lower temperature for more focused output
+        )
+        
+        # Extract the generated category
+        category = response["choices"][0]["message"]["content"].strip()
+
+        # Normalize title and category for comparison
+        title_words = set(re.sub(r"[^\w\s]", "", title).lower().split())  # Remove punctuation and split
+        category_words = set(re.sub(r"[^\w\s]", "", category).lower().split())  # Remove punctuation and split
+
+        # Ensure the category does not overlap with the title words
+        if category_words & title_words:  # Check for intersection
+            return "Hint Fail"  # Fallback if there's a match
+        return category
+
+    except Exception as e:
+        print(f"Error calling OpenAI API: {e}")
+        return "Unknown"
+
+
+def get_wikipedia_article(max_words=3, max_length=16):
+    base_url = "https://en.wikipedia.org/w/api.php"
+    
+    while True:
+        # Fetch a random page from Wikipedia
+        response = requests.get(base_url, {
+            "action": "query",
+            "format": "json",
+            "generator": "random",
+            "grnnamespace": 0,  # Only fetch content pages
+            "grnlimit": 1  # Fetch one page at a time
+        })
+        
+        if response.status_code != 200:
+            print("Error fetching from Wikipedia API")
+            return None, None, None
+        
+        data = response.json()
+        pages = data.get("query", {}).get("pages", {})
+        
+        for page_id, page_info in pages.items():
+            title = page_info.get("title", "")
+            norm_title = remove_diacritics(title)
+            
+            # Check if the title has at most `max_words` and is within `max_length` characters
+            word_count = len(title.split())
+            total_length = len(title)
+            if word_count <= 2 and total_length <= 11 and total_length >= 4:
+                # Check capitalization rule
+                words = title.split()
+                if len(words) > 1 and any(word[0].isupper() for word in words[1:]):
+                    continue
+                
+                # Fetch the introductory text (summary)
+                pageid = page_info.get("pageid")
+                intro_text = fetch_wikipedia_intro(pageid)
+                redacted_text = redact_intro_text(title, intro_text)
+                category = categorize_text(intro_text, title)
+
+                # Construct the Wikipedia article URL
+                wiki_url = f"https://en.wikipedia.org/wiki/{quote(title)}"
+
+                return norm_title, redacted_text, category, wiki_url
+
+
+def fetch_wikipedia_intro(pageid):
+    base_url = "https://en.wikipedia.org/w/api.php"
+    response = requests.get(base_url, {
+        "action": "query",
+        "format": "json",
+        "prop": "extracts",
+        "exintro": True,  # Fetch only the introductory text
+        "explaintext": True,  # Return plaintext instead of HTML
+        "pageids": pageid
+    })
+    
+    if response.status_code != 200:
+        print("Error fetching Wikipedia introduction")
+        return None
+    
+    data = response.json()
+    pages = data.get("query", {}).get("pages", {})
+    return pages.get(str(pageid), {}).get("extract", "")
+
+
+def redact_intro_text(title, intro_text):
+    if not title or not intro_text:
+        return intro_text
+    
+    # Split the title into words and build a regex pattern
+    words_to_redact = [re.escape(word) for word in title.split()]
+    pattern = re.compile(r'\b(' + '|'.join(words_to_redact) + r')\b', re.IGNORECASE)
+    
+    # Replace matching words with "REDACTED"
+    redacted_text = pattern.sub("OKRA", intro_text)
+    return redacted_text
+
+
+def get_first_category(pageid):
+    base_url = "https://en.wikipedia.org/w/api.php"
+    response = requests.get(base_url, {
+        "action": "query",
+        "format": "json",
+        "prop": "categories",
+        "cllimit": "1",  # Fetch only the first category
+        "pageids": pageid
+    })
+    
+    if response.status_code != 200:
+        print("Error fetching from Wikipedia API")
+        return None
+    
+    data = response.json()
+    pages = data.get("query", {}).get("pages", {})
+    page_data = pages.get(str(pageid), {})
+    
+    # Extract the first category
+    categories = page_data.get("categories", [])
+    if categories:
+        return categories[0].get("title", "").replace("Category:", "")
+    return None
+
+ 
 
 def describe_image_with_vision(image_url, mode):
     try:
@@ -524,11 +664,23 @@ def nice_creep_okra_option(winner):
                         react_to_message(event_id, target_room_id, "okra21")
                         nice_okra = True
                         wf_winner = True
+                        creep_okra = False
                         return None
+                        
                     if "creep" in message_content.lower():
                         react_to_message(event_id, target_room_id, "okra21")
                         creep_okra = True
-            
+                        nice_okra = False
+                        wf_winner = False
+                        return None
+                        
+                    if "neither" in message-content.lower():
+                        react_to_message(event_id, target_room_id, "okra21")
+                        nice_okra = False
+                        creep_okra = False
+                        wf_winner = False
+                        return None
+                        
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
@@ -587,7 +739,7 @@ def generate_round_summary_image(round_data, winner):
                     
         prompts_by_category = {
             "0": [
-                f"{winner} is being chased by someone holding an okra in a hyperrealistic scary horror movie setting. The image should be in 1st person view of the person chasing {winner}. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+                f"{winner} is being chased by someone holding an okra in a hyperrealistic scary horror movie type situation. The image should be in 1st person view of the person chasing {winner} and elicit intense fear. Try hard to bring and merge elements from the username {winner} into their humanoid depiction."
             ],
             "1": [
                 f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
@@ -755,18 +907,20 @@ def ask_category(winner, categories, winner_coffees):
 
                     # Check if the winner can select options A, B, or C
                     if message_content in ['4', '5', '6'] and winner_coffees <= 0:
+                        print(f"reacting to message: {message_content}")
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\nSorry {winner}. Choice {message_content} requires ☕️☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
+                    print(f"reacting to message: {message_content}")
                     react_to_message(event_id, target_room_id, "okra21")
+                    message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
+                    send_message(target_room_id, message)
 
                     if message_content in ['4'] and winner_coffees > 0:
                         additional_prompt = request_prompt(winner, processed_events)    
                     
-                    message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
-                    send_message(target_room_id, message)
                     return message_content, additional_prompt
     
         except requests.exceptions.RequestException as e:
@@ -1031,34 +1185,41 @@ def select_wof_questions(winner):
             {"$sample": {"size": 3}}  # Sample 3 unique questions
         ]
 
-        #pipeline_wof = [
-        #    {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-        #    {"$sample": {"size": 3}}  # Sample 3 random questions
-        #]
-
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
-        message = f"\n@{winner}: Choose a Category (#):\n\n"
+        message = f"\n🍷⚔️ @{winner}: Choose wisely.  Some require ☕☕.\n\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 1
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
             counter = counter + 1
+        message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕☕\n"
         send_message(target_room_id, message)  
 
-        wof_question = wof_questions[int(ask_wof_number(winner)) - 1]
-        print(wof_question["answers"][0])
+        selected_wof_category = ask_wof_number(winner)
+        
+        if selected_wof_category != "4":
+            wof_question = wof_questions[int(selected_wof_category) - 1]
+            wof_answer = wof_question["answers"][0]
+            wof_clue = wof_question["question"]
+            print(wof_question["answers"][0])
                     
-       # Store the ID of this single question in MongoDB if it's not empty
-        wof_question_id = wof_question["_id"]  # Get the ID of the selected question
-        if wof_question_id:
-            store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
-
+           # Store the ID of this single question in MongoDB if it's not empty
+            wof_question_id = wof_question["_id"]  # Get the ID of the selected question
+            if wof_question_id:
+                store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
+        
+        else:
+            wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
+            wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
+            print(f"{wof_clue}: {wof_answer}")
+                    
+        image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
+            
         image_size = 100
-        image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], fixed_letters)
-       
+        
         if image_questions == True:    
             response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
             if response is None:                      
@@ -1066,13 +1227,17 @@ def select_wof_questions(winner):
         else:
             fixed_letters_str = "Revealed Letters: " + ' '.join(fixed_letters)
             message = f"{display_string}\n{wof_question['question']}\n{fixed_letters_str}\n"
-            send_message(target_room_id, message)
+            send_message(target_room_id, message)    
 
-        wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
+        if selected_wof_category == "4":
+            send_message(target_room_id, wikipedia_message)
+            time.sleep(3)
+            
+        wof_letters = ask_wof_letters(winner, wof_answer, 5)
         
         if wf_winner == False:
             time.sleep(1.5)
-            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
+            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, wof_letters) 
             
             if image_questions == True:
                 response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -1083,7 +1248,13 @@ def select_wof_questions(winner):
                 message = f"{display_string}\n{wof_question['question']}\n{wof_letters_str}\n"
                 send_message(target_room_id, message)
 
-            process_wof_guesses(winner, wof_question["answers"][0])
+            process_wof_guesses(winner, wof_answer, 5)
+
+        if selected_wof_category == "4":
+            time.sleep(1.5)
+            wikipedia_message = f"\n🌐📄 Wikipedia Link {wiki_url}\n"
+            send_message(target_room_id, wikipedia_message)
+            time.sleep(1.5)
         
         return None
 
@@ -1099,7 +1270,7 @@ def select_wof_questions(winner):
 
     
 
-def process_wof_guesses(winner, answer):
+def process_wof_guesses(winner, answer, extra_time):
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
 
     sync_url = f"{matrix_base_url}/sync"
@@ -1112,7 +1283,7 @@ def process_wof_guesses(winner, answer):
     message = f"\n@{winner} ❓Your Answer❓\n"
     send_message(target_room_id, message)
     
-    while time.time() - start_time < magic_time:
+    while time.time() - start_time < (magic_time + extra_time):
         try:
             if since_token:
                 params["since"] = since_token
@@ -1171,7 +1342,7 @@ def process_wof_guesses(winner, answer):
 
 
 
-def ask_wof_letters(winner, answer):
+def ask_wof_letters(winner, answer, extra_time):
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
 
     answer = answer.upper()
@@ -1190,7 +1361,7 @@ def ask_wof_letters(winner, answer):
     
     wf_letters = []
     
-    while time.time() - start_time < magic_time:
+    while time.time() - start_time < (magic_time + extra_time):
         try:
             if len(wf_letters) == num_wf_letters:
                 break
@@ -1259,7 +1430,7 @@ def ask_wof_letters(winner, answer):
     if len(wf_letters) < num_wf_letters:
         needed_letters = num_wf_letters - len(wf_letters)
         
-        available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in wf_letters and l not in answer_letters]
+        available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in wf_letters]
         
         if len(available_letters) < num_wf_letters:
             wf_letters.extend(['Q', 'X', 'Z'][:needed_letters])  
@@ -1282,6 +1453,8 @@ def ask_wof_number(winner):
     collected_responses = []  # Store all responses
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
+    winner_coffees = get_coffees(winner)
+    
     initialize_sync()
     start_time = time.time()  # Track when the question starts
     
@@ -1320,9 +1493,18 @@ def ask_wof_number(winner):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if str(message_content) in {"1", "2", "3"}:
+                    if str(message_content) in {"4"} and winner_coffees <= 0:
+                        selected_question = str(message_content)
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. Wikipedia Roulette requires ☕️☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"1", "2", "3", "4"}:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra21")
+                        message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
+                        send_message(target_room_id, message)
                         return selected_question
                     else:
                         react_to_message(event_id, target_room_id, "okra5")
@@ -1334,7 +1516,6 @@ def ask_wof_number(winner):
     return selected_question
 
         
-
 
 def generate_wof_image(word, clue, revealed_letters):
     word = word.upper()
@@ -4337,7 +4518,7 @@ def start_trivia_round():
     selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     
     try:
-        while True:  # Endless loop
+        while True:  # Endless loop            
             # Check if it's been more than an hour since the last login
             current_time = time.time()
             

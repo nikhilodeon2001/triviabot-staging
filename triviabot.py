@@ -664,11 +664,23 @@ def nice_creep_okra_option(winner):
                         react_to_message(event_id, target_room_id, "okra21")
                         nice_okra = True
                         wf_winner = True
+                        creep_okra = False
                         return None
+                        
                     if "creep" in message_content.lower():
                         react_to_message(event_id, target_room_id, "okra21")
                         creep_okra = True
-            
+                        nice_okra = False
+                        wf_winner = False
+                        return None
+                        
+                    if "neither" in message.content.lower():
+                        react_to_message(event_id, target_room_id, "okra21")
+                        nice_okra = False
+                        creep_okra = False
+                        wf_winner = False
+                        return None
+                        
         except requests.exceptions.RequestException as e:
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")

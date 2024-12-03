@@ -1229,7 +1229,7 @@ def select_wof_questions(winner):
         
         if wf_winner == False:
             time.sleep(1.5)
-            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters)
+            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters) <----- HERE HERE HERE
             
             if image_questions == True:
                 response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)

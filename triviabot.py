@@ -224,7 +224,7 @@ cities = [
 
 
 
-def get_random_city_weather():
+def get_random_weather(type):
     # Select a random city from the list
     random_city = random.choice(cities)
     city_name = random_city["city"]
@@ -261,26 +261,65 @@ def get_random_city_weather():
         local_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=timezone_offset)
         local_time_str = local_time.strftime("%I:%M:%S %p")
         returned_name = data["name"]
+
+        input_text = (
+            f"Temperature: {temperature_c}°C ({temperature_f}°F)\n"
+            f"Feels Like: {temperature_c_feelslike}°C ({temperature_f_feelslike}°F)\n"
+            f"Weather Conditions: {weather_conditions}\n"
+            f"Local Time: {local_time}\n"
+        )
         
         # Return the information
         #wof_answer, wof_clue, weather_report = get_random_city_weather()
-        return {
-            "city": city_name,
-            "country": country_name,
-            "returned_name": returned_name,
-            "temperature_c": round(temperature_c, 1),
-            "temperature_f": round(temperature_f, 1),
-            "temperature_c_feelslike": round(temperature_c_feelslike, 1),
-            "temperature_f_feelslike": round(temperature_f_feelslike, 1),
-            "weather_conditions": weather_conditions,
-            "local_time": local_time_str
-        }
+
+        try:
+        # Call OpenAI GPT-4 to generate a category
+            response = openai.ChatCompletion.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You create prompts in a style of 'Where in the world is Carmen San Diego?'. Your job is to incorporate given weather and time facts from a city into a mysterious prompt that gives clues to a user who will then guess the city. Make sure to incorporate all the following facts in your output. You can be creative but don't make up any other facts about the city."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Please incorporate the following facts into a mysterious 'Where Am I?' description up to 4 sentences in length:\n\n{input_text}"
+                    }
+                ],
+                max_tokens=10,  # Limit response length
+                temperature=0.3  # Lower temperature for more focused output
+            )
+            
+            # Extract the generated category
+            where_am_i = response["choices"][0]["message"]["content"].strip()
+            if where_am_i = None:
+                where_am_i = "I'm somewhere mysterious. Figure it out from that."
+            
+        except Exception as e:
+            print(f"Error calling OpenAI API: {e}")
+            where_am_i = "I'm somewhere mysterious. Figure it out from that."
+
+        
+        #return {
+        #    "city": city_name,
+        #    "country": country_name,
+        #    "returned_name": returned_name,
+        #    "temperature_c": round(temperature_c, 1),
+        #    "temperature_f": round(temperature_f, 1),
+        #    "temperature_c_feelslike": round(temperature_c_feelslike, 1),
+        #    "temperature_f_feelslike": round(temperature_f_feelslike, 1),
+        #    "weather_conditions": weather_conditions,
+        #    "local_time": local_time_str
+        #}
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
+    #wof_answer, wof_clue, weather_report = get_random_city_weather()
+    return city, "Capital City", where_am_i
 
 weather_info = get_random_city_weather()
 print(weather_info)
+
 
 
 def categorize_text(input_text, title):

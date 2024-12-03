@@ -193,7 +193,7 @@ def get_wikipedia_article(max_words=3, max_length=16):
         
         for page_id, page_info in pages.items():
             title = page_info.get("title", "")
-            title = remove_diacritics(title)
+            norm_title = remove_diacritics(title)
             
             # Check if the title has at most `max_words` and is within `max_length` characters
             word_count = len(title.split())
@@ -214,7 +214,7 @@ def get_wikipedia_article(max_words=3, max_length=16):
                 # Construct the Wikipedia article URL
                 wiki_url = f"https://en.wikipedia.org/wiki/{quote(title)}"
 
-                return title, redacted_text, category, wiki_url
+                return norm_title, redacted_text, category, wiki_url
 
 
 def fetch_wikipedia_intro(pageid):
@@ -898,7 +898,7 @@ def ask_category(winner, categories, winner_coffees):
                     if message_content in ['4', '5', '6'] and winner_coffees <= 0:
                         print(f"reacting to message: {message_content}")
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\nSorry {winner}. Choice {message_content} requires ☕️☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
@@ -1485,7 +1485,7 @@ def ask_wof_number(winner):
                     if str(message_content) in {"4"} and winner_coffees <= 0:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\nSorry {winner}. Wikipedia Roulette requires ☕️☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. Wikipedia Roulette requires ☕️☕️.\n"
                         send_message(target_room_id, message)
                         continue
 

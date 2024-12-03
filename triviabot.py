@@ -174,11 +174,14 @@ def get_random_city_weather():
         
         # Extract weather information
         temperature_c = data["main"]["temp"]
+        temperature_feelslike_c = data["main"["feels_like"]
         temperature_f = temperature_c * 9 / 5 + 32
-        weather_conditions = data["weather"][0]["description"].capitalize()
+        temperature_f_feelslike = temperature_c_feelslike * 9 / 5 + 32
+        humidity = data["main"]["humidity"]
+        weather_conditions = ". ".join([item["description"].capitalize() for item in data["weather"]]) + "."
         timezone_offset = data["timezone"]  # Timezone offset in seconds
         local_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=timezone_offset)
-        local_time_str = local_time.strftime("%Y-%m-%d %H:%M:%S")
+        local_time_str = local_time.strftime("%I:%M:%S %p")
         
         # Return the information
         return {
@@ -186,6 +189,8 @@ def get_random_city_weather():
             "country": country_name,
             "temperature_c": round(temperature_c, 1),
             "temperature_f": round(temperature_f, 1),
+            "temperature_c_feelslike": round(temperature_c_feelslike, 1),
+            "temperature_f_feelslike": round(temperature_f_feelslike, 1),
             "weather_conditions": weather_conditions,
             "local_time": local_time_str
         }

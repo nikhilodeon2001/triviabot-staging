@@ -208,7 +208,7 @@ def get_random_city_weather():
         
         # Extract weather information
         temperature_c = data["main"]["temp"]
-        temperature_feelslike_c = data["main"["feels_like"]
+        temperature_feelslike_c = data["main"]["feels_like"]
         temperature_f = temperature_c * 9 / 5 + 32
         temperature_f_feelslike = temperature_c_feelslike * 9 / 5 + 32
         humidity = data["main"]["humidity"]

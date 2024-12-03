@@ -267,6 +267,7 @@ def get_random_city_weather():
         return {
             "city": city_name,
             "country": country_name,
+            "returned_name": returned_name,
             "temperature_c": round(temperature_c, 1),
             "temperature_f": round(temperature_f, 1),
             "temperature_c_feelslike": round(temperature_c_feelslike, 1),

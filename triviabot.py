@@ -82,6 +82,7 @@ openai.api_key = os.getenv("open_api_key")  # Store your API key securely
 buymeacoffee_api_key = os.getenv("buy_me_a_coffee_api_key")
 reddit_client_id = os.getenv("reddit_client_id")
 reddit_secret_id = os.getenv("reddit_secret_id")
+openweather_api_key = os.getenv("openweather_api_key")
 target_room_id = os.getenv("target_room_id")
 question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
@@ -135,6 +136,68 @@ reddit = praw.Reddit(
 )
 
 
+# List of world capitals and major cities
+cities = [
+    {"city": "Tokyo", "country": "Japan", "lat": 35.6895, "lon": 139.6917},
+    {"city": "Paris", "country": "France", "lat": 48.8566, "lon": 2.3522},
+    {"city": "New York", "country": "USA", "lat": 40.7128, "lon": -74.0060},
+    {"city": "Cairo", "country": "Egypt", "lat": 30.0444, "lon": 31.2357},
+    {"city": "Sydney", "country": "Australia", "lat": -33.8688, "lon": 151.2093},
+    {"city": "Mumbai", "country": "India", "lat": 19.0760, "lon": 72.8777},
+    {"city": "Moscow", "country": "Russia", "lat": 55.7558, "lon": 37.6173},
+    {"city": "London", "country": "UK", "lat": 51.5074, "lon": -0.1278},
+    {"city": "Beijing", "country": "China", "lat": 39.9042, "lon": 116.4074},
+    {"city": "Rio de Janeiro", "country": "Brazil", "lat": -22.9068, "lon": -43.1729}
+    # Add more cities as needed
+]
+
+def get_random_city_weather():
+    # Select a random city from the list
+    random_city = random.choice(cities)
+    city_name = random_city["city"]
+    country_name = random_city["country"]
+    lat = random_city["lat"]
+    lon = random_city["lon"]
+    
+    # OpenWeather One Call API URL
+    base_url = "https://api.openweathermap.org/data/3.0/onecall"
+    
+    # Parameters for the API
+    params = {
+        "lat": lat,
+        "lon": lon,
+        "appid": openweather_api_key,
+        "units": "metric",  # Metric for temperature in Celsius
+        "exclude": "minutely,hourly,daily,alerts"  # We only need current weather
+    }
+    
+    # Make the API call
+    response = requests.get(base_url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        
+        # Extract weather information
+        temperature_c = data["current"]["temp"]
+        temperature_f = temperature_c * 9 / 5 + 32
+        weather_conditions = data["current"]["weather"][0]["description"].capitalize()
+        timezone_offset = data["timezone_offset"]  # Timezone offset in seconds
+        local_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=timezone_offset)
+        local_time_str = local_time.strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Return the information
+        return {
+            "city": city_name,
+            "country": country_name,
+            "temperature_c": round(temperature_c, 1),
+            "temperature_f": round(temperature_f, 1),
+            "weather_conditions": weather_conditions,
+            "local_time": local_time_str
+        }
+    else:
+        return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
+
+weather_info = get_random_city_weather()
+print(weather_info)
 
 
 def categorize_text(input_text, title):

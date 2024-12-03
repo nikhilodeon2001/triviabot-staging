@@ -202,7 +202,6 @@ def get_wikipedia_article(max_words=3, max_length=16):
                 # Check capitalization rule
                 words = title.split()
                 if len(words) > 1 and any(word[0].isupper() for word in words[1:]):
-                    print(f"Skipping title '{title}' due to improper capitalization.")
                     continue
                 
                 # Fetch the introductory text (summary)

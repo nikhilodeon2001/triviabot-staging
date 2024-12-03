@@ -1187,7 +1187,7 @@ def select_wof_questions(winner, winner_coffees):
         message += f"{counter}. 🌐🎲 Wikipedia Roulette\n"
         send_message(target_room_id, message)  
 
-        selected_wof_category = ask_wof_number(winner)
+        selected_wof_category = ask_wof_number(winner, winner_coffees)
         
         if selected_wof_category != "4":
             wof_question = wof_questions[int(selected_wof_category) - 1]
@@ -1433,7 +1433,7 @@ def ask_wof_letters(winner, answer):
     return final_letters
             
 
-def ask_wof_number(winner):
+def ask_wof_number(winner, winner_coffees):
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
@@ -1478,6 +1478,12 @@ def ask_wof_number(winner):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
+                    if str(message_content) in {"4"} and winner_coffees <= 0:
+                        selected_question = str(message_content)
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\nSorry {winner}. Wikipedia Roulette requires ☕️☕️.\n"
+                        continue
+
                     if str(message_content) in {"1", "2", "3", "4"}:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra21")
@@ -1492,7 +1498,6 @@ def ask_wof_number(winner):
     return selected_question
 
         
-
 
 def generate_wof_image(word, clue, revealed_letters):
     word = word.upper()

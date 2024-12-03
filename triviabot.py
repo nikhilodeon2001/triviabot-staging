@@ -1200,7 +1200,7 @@ def select_wof_questions(winner):
         
         else:
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
-            wikipedia_message = f"\n🥒⬛ Okracted Clue:\n{redacted_intro}\n"
+            wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(3)
             total_characters = len(wof_answer)

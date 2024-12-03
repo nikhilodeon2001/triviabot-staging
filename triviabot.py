@@ -4612,7 +4612,6 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
-    title, redacted_text, category, wiki_url = get_wikipedia_article(3, 16)
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()
     login_to_chat()

@@ -209,7 +209,10 @@ def get_wikipedia_article(max_words=3, max_length=16):
                 redacted_text = redact_intro_text(title, intro_text)
                 category = categorize_text(intro_text, title)
 
-                return title, redacted_text, category
+                # Construct the Wikipedia article URL
+                wiki_url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(title)}"
+
+                return title, redacted_text, category, wiki_url
 
 
 def fetch_wikipedia_intro(pageid):
@@ -1196,7 +1199,7 @@ def select_wof_questions(winner):
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
         else:
-            wof_answer, redacted_intro, wof_clue = get_wikipedia_article(3, 16)
+            wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n{redacted_intro}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(3)
@@ -1221,7 +1224,7 @@ def select_wof_questions(winner):
             wikipedia_message = f"\n📝🔤 {word_count} words, {total_characters} characters\n"
             send_message(target_room_id, wikipedia_message)
             
-        wof_letters = ask_wof_letters(winner, wof_question["answers"][0])
+        wof_letters = ask_wof_letters(winner, wof_answer)
         
         if wf_winner == False:
             time.sleep(1.5)
@@ -1237,6 +1240,11 @@ def select_wof_questions(winner):
                 send_message(target_room_id, message)
 
             process_wof_guesses(winner, wof_question["answers"][0])
+
+        if selected_wof_category == "4":
+            time.sleep(1.5)
+            wikipedia_message = f"\n🌐📄 Wikipedia Link: {wiki_url}\n"
+        
         
         return None
 
@@ -4602,12 +4610,13 @@ def start_trivia_round():
         time.sleep(10)  
 
 try:
-    title, redacted_text, first_category = get_wikipedia_article(3, 16)
-    if title and redacted_text and first_category:
+    title, redacted_text, category, wiki_url = get_wikipedia_article(3, 16)
+    if title and redacted_text and first_category and wiki_url:
         print(f"Title: {title}\n")
         print("\n\nIntroductory Text:\n")
         print(redacted_text)
-        print(f"\n\nCategory: {first_category}\n")
+        print(f"\n\nCategory: {category}\n")
+        print(f"\n\nURL: {wiki_url}\n")
 
     else:
         print("Failed to fetch a valid Wikipedia page.")

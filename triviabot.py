@@ -1226,7 +1226,7 @@ def select_wof_questions(winner):
             message = f"{display_string}\n{wof_question['question']}\n{fixed_letters_str}\n"
             send_message(target_room_id, message)    
 
-        if selected_category == "4":
+        if selected_wof_category == "4":
             wikipedia_message = f"\n📝🔤 {word_count} words, {total_characters} characters\n"
             send_message(target_room_id, wikipedia_message)
             

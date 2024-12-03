@@ -138,17 +138,88 @@ reddit = praw.Reddit(
 
 # List of world capitals and major cities
 cities = [
-    {"city": "Tokyo", "country": "Japan", "lat": 35.6895, "lon": 139.6917},
-    {"city": "Paris", "country": "France", "lat": 48.8566, "lon": 2.3522},
-    {"city": "New York", "country": "USA", "lat": 40.7128, "lon": -74.0060},
-    {"city": "Cairo", "country": "Egypt", "lat": 30.0444, "lon": 31.2357},
-    {"city": "Sydney", "country": "Australia", "lat": -33.8688, "lon": 151.2093},
-    {"city": "Mumbai", "country": "India", "lat": 19.0760, "lon": 72.8777},
-    {"city": "Moscow", "country": "Russia", "lat": 55.7558, "lon": 37.6173},
-    {"city": "London", "country": "UK", "lat": 51.5074, "lon": -0.1278},
-    {"city": "Beijing", "country": "China", "lat": 39.9042, "lon": 116.4074},
-    {"city": "Rio de Janeiro", "country": "Brazil", "lat": -22.9068, "lon": -43.1729}
-    # Add more cities as needed
+{"city": "Kabul", "country": "Afghanistan", "lat": 34.5289, "lon": 69.1725, "capital": True},
+{"city": "Tirana", "country": "Albania", "lat": 41.3275, "lon": 19.8189, "capital": True},
+{"city": "Algiers", "country": "Algeria", "lat": 36.7525, "lon": 3.0420, "capital": True},
+{"city": "Andorra la Vella", "country": "Andorra", "lat": 42.5063, "lon": 1.5218, "capital": True},
+{"city": "Luanda", "country": "Angola", "lat": -8.8390, "lon": 13.2894, "capital": True},
+{"city": "Saint John's", "country": "Antigua and Barbuda", "lat": 17.1274, "lon": -61.8468, "capital": True},
+{"city": "Buenos Aires", "country": "Argentina", "lat": -34.6037, "lon": -58.3816, "capital": True},
+{"city": "Yerevan", "country": "Armenia", "lat": 40.1792, "lon": 44.4991, "capital": True},
+{"city": "Canberra", "country": "Australia", "lat": -35.2820, "lon": 149.1287, "capital": True},
+{"city": "Vienna", "country": "Austria", "lat": 48.2082, "lon": 16.3738, "capital": True},
+{"city": "Baku", "country": "Azerbaijan", "lat": 40.4093, "lon": 49.8671, "capital": True},
+{"city": "Nassau", "country": "Bahamas", "lat": 25.0343, "lon": -77.3963, "capital": True},
+{"city": "Manama", "country": "Bahrain", "lat": 26.2285, "lon": 50.5860, "capital": True},
+{"city": "Dhaka", "country": "Bangladesh", "lat": 23.8103, "lon": 90.4125, "capital": True},
+{"city": "Bridgetown", "country": "Barbados", "lat": 13.1132, "lon": -59.5988, "capital": True},
+{"city": "Minsk", "country": "Belarus", "lat": 53.9045, "lon": 27.5615, "capital": True},
+{"city": "Brussels", "country": "Belgium", "lat": 50.8503, "lon": 4.3517, "capital": True},
+{"city": "Belmopan", "country": "Belize", "lat": 17.2510, "lon": -88.7590, "capital": True},
+{"city": "Porto-Novo", "country": "Benin", "lat": 6.4969, "lon": 2.6289, "capital": True},
+{"city": "Thimphu", "country": "Bhutan", "lat": 27.4728, "lon": 89.6390, "capital": True},
+{"city": "Sucre", "country": "Bolivia", "lat": -19.0196, "lon": -65.2619, "capital": True},
+{"city": "Sarajevo", "country": "Bosnia and Herzegovina", "lat": 43.8563, "lon": 18.4131, "capital": True},
+{"city": "Gaborone", "country": "Botswana", "lat": -24.6282, "lon": 25.9231, "capital": True},
+{"city": "Brasília", "country": "Brazil", "lat": -15.8267, "lon": -47.9218, "capital": True},
+{"city": "Bandar Seri Begawan", "country": "Brunei", "lat": 4.9031, "lon": 114.9398, "capital": True},
+{"city": "Sofia", "country": "Bulgaria", "lat": 42.6977, "lon": 23.3219, "capital": True},
+{"city": "Ouagadougou", "country": "Burkina Faso", "lat": 12.3714, "lon": -1.5197, "capital": True},
+{"city": "Gitega", "country": "Burundi", "lat": -3.4264, "lon": 29.9306, "capital": True},
+{"city": "Praia", "country": "Cabo Verde", "lat": 14.9330, "lon": -23.5133, "capital": True},
+{"city": "Phnom Penh", "country": "Cambodia", "lat": 11.5564, "lon": 104.9282, "capital": True},
+{"city": "Yaoundé", "country": "Cameroon", "lat": 3.8480, "lon": 11.5021, "capital": True},
+{"city": "Ottawa", "country": "Canada", "lat": 45.4215, "lon": -75.6972, "capital": True},
+{"city": "Bangui", "country": "Central African Republic", "lat": 4.3947, "lon": 18.5582, "capital": True},
+{"city": "N'Djamena", "country": "Chad", "lat": 12.1348, "lon": 15.0557, "capital": True},
+{"city": "Santiago", "country": "Chile", "lat": -33.4489, "lon": -70.6693, "capital": True},
+{"city": "Beijing", "country": "China", "lat": 39.9042, "lon": 116.4074, "capital": True},
+{"city": "Bogotá", "country": "Colombia", "lat": 4.7110, "lon": -74.0721, "capital": True},
+{"city": "Moroni", "country": "Comoros", "lat": -11.7172, "lon": 43.2473, "capital": True},
+{"city": "Brazzaville", "country": "Congo", "lat": 4.2634, "lon": 15.2429, "capital": True},
+{"city": "San José", "country": "Costa Rica", "lat": 9.9281, "lon": -84.0907, "capital": True},
+{"city": "Zagreb", "country": "Croatia", "lat": 45.8150, "lon": 15.9819, "capital": True},
+{"city": "Havana", "country": "Cuba", "lat": 23.1136, "lon": -82.3666, "capital": True},
+{"city": "Nicosia", "country": "Cyprus", "lat": 35.1856, "lon": 33.3823, "capital": True},
+{"city": "Prague", "country": "Czech Republic", "lat": 50.0755, "lon": 14.4378, "capital": True},
+{"city": "Kinshasa", "country": "Democratic Republic of the Congo", "lat": -4.4419, "lon": 15.2663, "capital": True},
+{"city": "Copenhagen", "country": "Denmark", "lat": 55.6761, "lon": 12.5683, "capital": True},
+{"city": "Djibouti", "country": "Djibouti", "lat": 11.8251, "lon": 42.5903, "capital": True},
+{"city": "Roseau", "country": "Dominica", "lat": 15.3092, "lon": -61.3794, "capital": True},
+{"city": "Santo Domingo", "country": "Dominican Republic", "lat": 18.4861, "lon": -69.9312, "capital": True},
+{"city": "Quito", "country": "Ecuador", "lat": -0.1807, "lon": -78.4678, "capital": True},
+{"city": "Cairo", "country": "Egypt", "lat": 30.0444, "lon": 31.2357, "capital": True},
+{"city": "San Salvador", "country": "El Salvador", "lat": 13.6929, "lon": -89.2182, "capital": True},
+{"city": "Malabo", "country": "Equatorial Guinea", "lat": 3.7500, "lon": 8.7833, "capital": True},
+{"city": "Asmara", "country": "Eritrea", "lat": 15.3229, "lon": 38.9251, "capital": True},
+{"city": "Tallinn", "country": "Estonia", "lat": 59.4370, "lon": 24.7535, "capital": True},
+{"city": "Addis Ababa", "country": "Ethiopia", "lat": 9.0300, "lon": 38.7400, "capital": True},
+{"city": "Suva", "country": "Fiji", "lat": -18.1248, "lon": 178.4501, "capital": True},
+{"city": "Helsinki", "country": "Finland", "lat": 60.1695, "lon": 24.9354, "capital": True},
+{"city": "Paris", "country": "France", "lat": 48.8566, "lon": 2.3522, "capital": True},
+{"city": "Libreville", "country": "Gabon", "lat": 0.4162, "lon": 9.4673, "capital": True},
+{"city": "Banjul", "country": "Gambia", "lat": 13.4549, "lon": -16.5790, "capital": True},
+{"city": "Tbilisi", "country": "Georgia", "lat": 41.7151, "lon": 44.8271, "capital": True},
+{"city": "Berlin", "country": "Germany", "lat": 52.5200, "lon": 13.4050, "capital": True},
+{"city": "Accra", "country": "Ghana", "lat": 5.6037, "lon": -0.1870, "capital": True},
+{"city": "Athens", "country": "Greece", "lat": 37.9838, "lon": 23.7275, "capital": True},
+{"city": "Saint George's", "country": "Grenada", "lat": 12.0561, "lon": -61.7488, "capital": True},
+{"city": "Guatemala City", "country": "Guatemala", "lat": 14.6349, "lon": -90.5069, "capital": True},
+{"city": "Conakry", "country": "Guinea", "lat": 9.6412, "lon": -13.5784, "capital": True},
+{"city": "Bissau", "country": "Guinea-Bissau", "lat": 11.8817, "lon": -15.6170, "capital": True},
+{"city": "Georgetown", "country": "Guyana", "lat": 6.8013, "lon": -58.1551, "capital": True},
+{"city": "Port-au-Prince", "country": "Haiti", "lat": 18.5944, "lon": -72.3074, "capital": True},
+{"city": "Tegucigalpa", "country": "Honduras", "lat": 14.0723, "lon": -87.1921, "capital": True},
+{"city": "Budapest", "country": "Hungary", "lat": 47.4979, "lon": 19.0402, "capital": True},
+{"city": "Reykjavik", "country": "Iceland", "lat": 64.1355, "lon": -21.8954, "capital": True},
+{"city": "New Delhi", "country": "India", "lat": 28.6139, "lon": 77.2090, "capital": True},
+{"city": "Jakarta", "country": "Indonesia", "lat": -6.2088, "lon": 106.8456, "capital": True},
+{"city": "Tehran", "country": "Iran", "lat": 35.6892, "lon": 51.3890, "capital": True},
+{"city": "Baghdad", "country": "Iraq", "lat": 33.3152, "lon": 44.3661, "capital": True},
+{"city": "Dublin", "country": "Ireland", "lat": 53.3498, "lon": -6.2603, "capital": True},
+{"city": "Jerusalem", "country": "Israel", "lat": 31.7683, "lon": 35.2137, "capital": True},
+{"city": "Rome", "country": "Italy", "lat": 41.9028, "lon": 12.4964, "capital": True},
+{"city": "Kingston", "country": "Jamaica", "lat": 17.9712, "lon": -76.7936, "capital": True},
 ]
 
 
@@ -158,13 +229,18 @@ def get_random_city_weather():
     random_city = random.choice(cities)
     city_name = random_city["city"]
     country_name = random_city["country"]
+    is_capital = random_city["capital"]
+    lat = random_city["lat"]
+    lon = random_city["lon"]
     
     # OpenWeather Current Weather API URL
     base_url = "https://api.openweathermap.org/data/2.5/weather"
     
     # Parameters for the API
     params = {
-        "q": city_name,  # Query by city name
+        #"q": city_name,  # Query by city name
+        "lat": lat,
+        "lon": lon,
         "appid": openweather_api_key,  # Your API key
         "units": "metric"  # Metric for temperature in Celsius
     }

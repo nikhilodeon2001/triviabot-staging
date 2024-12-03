@@ -193,6 +193,7 @@ def get_wikipedia_article(max_words=3, max_length=16):
         
         for page_id, page_info in pages.items():
             title = page_info.get("title", "")
+            title = remove_diacritics(title)
             
             # Check if the title has at most `max_words` and is within `max_length` characters
             word_count = len(title.split())
@@ -727,7 +728,7 @@ def generate_round_summary_image(round_data, winner):
                     
         prompts_by_category = {
             "0": [
-                f"{winner} is being chased by someone holding an okra in a hyperrealistic scary horror movie setting. The image should be in 1st person view of the person chasing {winner}. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+                f"{winner} is being chased by someone holding an okra in a hyperrealistic scary horror movie type situation. The image should be in 1st person view of the person chasing {winner} and elicit intense fear. Try hard to bring and merge elements from the username {winner} into their humanoid depiction."
             ],
             "1": [
                 f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
@@ -1202,6 +1203,7 @@ def select_wof_questions(winner):
         else:
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
+            print(f"{wof_clue}: {wof_answer}")
                     
         image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
             
@@ -1484,11 +1486,14 @@ def ask_wof_number(winner):
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\nSorry {winner}. Wikipedia Roulette requires ☕️☕️.\n"
+                        send_message(target_room_id, message)
                         continue
 
                     if str(message_content) in {"1", "2", "3", "4"}:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra21")
+                        message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
+                        send_message(target_room_id, message)
                         return selected_question
                     else:
                         react_to_message(event_id, target_room_id, "okra5")

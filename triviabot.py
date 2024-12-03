@@ -156,19 +156,15 @@ def get_random_city_weather():
     random_city = random.choice(cities)
     city_name = random_city["city"]
     country_name = random_city["country"]
-    lat = random_city["lat"]
-    lon = random_city["lon"]
     
-    # OpenWeather One Call API URL
-    base_url = "https://api.openweathermap.org/data/3.0/onecall"
+    # OpenWeather Current Weather API URL
+    base_url = "https://api.openweathermap.org/data/2.5/weather"
     
     # Parameters for the API
     params = {
-        "lat": lat,
-        "lon": lon,
-        "appid": openweather_api_key,
-        "units": "metric",  # Metric for temperature in Celsius
-        "exclude": "minutely,hourly,daily,alerts"  # We only need current weather
+        "q": city_name,  # Query by city name
+        "appid": openweather_api_key,  # Your API key
+        "units": "metric"  # Metric for temperature in Celsius
     }
     
     # Make the API call
@@ -177,10 +173,10 @@ def get_random_city_weather():
         data = response.json()
         
         # Extract weather information
-        temperature_c = data["current"]["temp"]
+        temperature_c = data["main"]["temp"]
         temperature_f = temperature_c * 9 / 5 + 32
-        weather_conditions = data["current"]["weather"][0]["description"].capitalize()
-        timezone_offset = data["timezone_offset"]  # Timezone offset in seconds
+        weather_conditions = data["weather"][0]["description"].capitalize()
+        timezone_offset = data["timezone"]  # Timezone offset in seconds
         local_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=timezone_offset)
         local_time_str = local_time.strftime("%Y-%m-%d %H:%M:%S")
         

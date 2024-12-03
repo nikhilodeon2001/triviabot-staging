@@ -1153,7 +1153,7 @@ def create_factors_question():
         "answers": [""]
     }
         
-def select_wof_questions(winner):
+def select_wof_questions(winner, winner_coffees):
     try:
         time.sleep(2)
         db = connect_to_mongodb()
@@ -1181,14 +1181,14 @@ def select_wof_questions(winner):
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
-        message = f"\n@{winner}: Choose a Category (#):\n\n"
+        message = f"\n🍷⚔️ @{winner}: Choose wisely.  Some require ☕☕.\n\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 1
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
             counter = counter + 1
-        message += f"{counter}. Wikipedia Roulette\n"
+        message += f"{counter}. 🌐🎲 Wikipedia Roulette\n"
         send_message(target_room_id, message)  
 
         selected_wof_category = ask_wof_number(winner)

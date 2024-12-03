@@ -4612,7 +4612,7 @@ def start_trivia_round():
 
 try:
     title, redacted_text, category, wiki_url = get_wikipedia_article(3, 16)
-    if title and redacted_text and first_category and wiki_url:
+    if title and redacted_text and category and wiki_url:
         print(f"Title: {title}\n")
         print("\n\nIntroductory Text:\n")
         print(redacted_text)

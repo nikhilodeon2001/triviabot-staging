@@ -260,6 +260,7 @@ def get_random_city_weather():
         timezone_offset = data["timezone"]  # Timezone offset in seconds
         local_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=timezone_offset)
         local_time_str = local_time.strftime("%I:%M:%S %p")
+        returned_name = data["name"]
         
         # Return the information
         #wof_answer, wof_clue, weather_report = get_random_city_weather()

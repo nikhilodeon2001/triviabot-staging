@@ -152,38 +152,6 @@ cities = [
 ]
 
 
-def get_weather_overview():
-    # Select a random city from the list
-    random_city = random.choice(cities)
-    city_name = random_city["city"]
-    country_name = random_city["country"]
-    lat = random_city["lat"]
-    lon = random_city["lon"]
-    
-    # OpenWeather custom endpoint URL
-    base_url = f"https://api.openweathermap.org/data/3.0/onecall/overview"
-    
-    # Parameters for the API
-    params = {
-        "lat": lat,
-        "lon": lon,
-        "appid": openweather_api_key
-    }
-    
-    # Make the API call
-    response = requests.get(base_url, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        # Extract `weather_overview`
-        weather_overview = data.get("weather_overview", "No overview available.")
-        return {
-            "city": city_name,
-            "country": country_name,
-            "weather_overview": weather_overview
-        }
-    else:
-        return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
-
 
 def get_random_city_weather():
     # Select a random city from the list
@@ -232,10 +200,6 @@ def get_random_city_weather():
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
-
-
-weather_overview = get_weather_overview()
-print(weather_overview)
 
 weather_info = get_random_city_weather()
 print(weather_info)
@@ -299,8 +263,12 @@ def get_wikipedia_article(max_words=3, max_length=16):
         
         for page_id, page_info in pages.items():
             title = page_info.get("title", "")
-            norm_title = remove_diacritics(title)
+
+            if not title.replace(" ", "").isalpha():
+                continue
             
+            norm_title = remove_diacritics(title)
+
             # Check if the title has at most `max_words` and is within `max_length` characters
             word_count = len(title.split())
             total_length = len(title)

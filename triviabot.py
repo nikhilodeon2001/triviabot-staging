@@ -214,7 +214,7 @@ def get_random_city_weather():
         humidity = data["main"]["humidity"]
         weather_conditions = ". ".join([item["description"].capitalize() for item in data["weather"]]) + "."
         timezone_offset = data["timezone"]  # Timezone offset in seconds
-        local_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=timezone_offset)
+        local_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=timezone_offset)
         local_time_str = local_time.strftime("%I:%M:%S %p")
         
         # Return the information

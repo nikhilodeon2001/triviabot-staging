@@ -1229,7 +1229,7 @@ def select_wof_questions(winner):
         
         if wf_winner == False:
             time.sleep(1.5)
-            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_question["answers"][0], wof_question["question"], wof_letters) <----- HERE HERE HERE
+            image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, wof_letters) 
             
             if image_questions == True:
                 response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
@@ -1240,7 +1240,7 @@ def select_wof_questions(winner):
                 message = f"{display_string}\n{wof_question['question']}\n{wof_letters_str}\n"
                 send_message(target_room_id, message)
 
-            process_wof_guesses(winner, wof_question["answers"][0])
+            process_wof_guesses(winner, wof_answer)
 
         if selected_wof_category == "4":
             time.sleep(1.5)

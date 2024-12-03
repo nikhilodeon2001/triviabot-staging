@@ -4608,16 +4608,6 @@ def start_trivia_round():
 
 try:
     title, redacted_text, category, wiki_url = get_wikipedia_article(3, 16)
-    if title and redacted_text and category and wiki_url:
-        print(f"Title: {title}\n")
-        print("\n\nIntroductory Text:\n")
-        print(redacted_text)
-        print(f"\n\nCategory: {category}\n")
-        print(f"\n\nURL: {wiki_url}\n")
-
-    else:
-        print("Failed to fetch a valid Wikipedia page.")
-        
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     reddit_login()
     login_to_chat()

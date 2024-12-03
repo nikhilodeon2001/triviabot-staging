@@ -151,6 +151,45 @@ cities = [
     # Add more cities as needed
 ]
 
+
+def get_weather_overview():
+    # Select a random city from the list
+    random_city = random.choice(cities)
+    city_name = random_city["city"]
+    country_name = random_city["country"]
+    lat = random_city["lat"]
+    lon = random_city["lon"]
+    
+    # OpenWeather custom endpoint URL
+    base_url = f"https://api.openweathermap.org/data/3.0/onecall/overview"
+    
+    # Parameters for the API
+    params = {
+        "lat": lat,
+        "lon": lon,
+        "appid": openweather_api_key
+    }
+    
+    # Make the API call
+    response = requests.get(base_url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        # Extract `weather_overview`
+        weather_overview = data.get("weather_overview", "No overview available.")
+        return {
+            "city": city_name,
+            "country": country_name,
+            "weather_overview": weather_overview
+        }
+    else:
+        return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
+
+weather_info = get_weather_overview(openweather_api_key)
+print(weather_info)
+
+
+
+
 def get_random_city_weather():
     # Select a random city from the list
     random_city = random.choice(cities)
@@ -184,6 +223,7 @@ def get_random_city_weather():
         local_time_str = local_time.strftime("%I:%M:%S %p")
         
         # Return the information
+        #wof_answer, wof_clue, weather_report = get_random_city_weather()
         return {
             "city": city_name,
             "country": country_name,
@@ -1261,28 +1301,34 @@ def select_wof_questions(winner):
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
             counter = counter + 1
+        premium_counts = counter
         message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕☕\n"
+        counter = counter + 1
+        message += f"{counter}. 🌍❔ Where in the World is Okra? ☕☕\n"
         send_message(target_room_id, message)  
 
         selected_wof_category = ask_wof_number(winner)
         
-        if selected_wof_category != "4":
+        if selected_wof_category < premium_counts:
             wof_question = wof_questions[int(selected_wof_category) - 1]
             wof_answer = wof_question["answers"][0]
             wof_clue = wof_question["question"]
-            print(wof_question["answers"][0])
                     
-           # Store the ID of this single question in MongoDB if it's not empty
             wof_question_id = wof_question["_id"]  # Get the ID of the selected question
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
-        else:
+        elif selected_wof_category == 4:
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
-            print(f"{wof_clue}: {wof_answer}")
+
+        elif selected_wof_category == 5:
+            wof_answer, wof_clue, weather_report = get_random_city_weather()
+            weather_message = f"\n🌦️📊 Weather Report:\n\n{weather_report}\n"
+            
                     
         image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
+        print(f"{wof_clue}: {wof_answer}")
             
         image_size = 100
         

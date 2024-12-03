@@ -1417,7 +1417,7 @@ def ask_wof_letters(winner, answer, extra_time):
     if len(wf_letters) < num_wf_letters:
         needed_letters = num_wf_letters - len(wf_letters)
         
-        available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in wf_letters and l not in answer_letters]
+        available_letters = [l for l in "BCDEFGHIJLMNPQSTUVWXYZ" if l not in wf_letters]
         
         if len(available_letters) < num_wf_letters:
             wf_letters.extend(['Q', 'X', 'Z'][:needed_letters])  

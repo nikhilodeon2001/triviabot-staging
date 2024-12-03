@@ -1182,7 +1182,7 @@ def select_wof_questions(winner):
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
             counter = counter + 1
-        message += f"{counter}. 🌐🎲 Wikipedia Roulette\n"
+        message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕☕\n"
         send_message(target_room_id, message)  
 
         selected_wof_category = ask_wof_number(winner)

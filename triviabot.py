@@ -1149,7 +1149,7 @@ def create_factors_question():
         "answers": [""]
     }
         
-def select_wof_questions(winner, winner_coffees):
+def select_wof_questions(winner):
     try:
         time.sleep(2)
         db = connect_to_mongodb()
@@ -1169,11 +1169,6 @@ def select_wof_questions(winner, winner_coffees):
             {"$sample": {"size": 3}}  # Sample 3 unique questions
         ]
 
-        #pipeline_wof = [
-        #    {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},  # Exclude recent IDs
-        #    {"$sample": {"size": 3}}  # Sample 3 random questions
-        #]
-
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
@@ -1187,7 +1182,7 @@ def select_wof_questions(winner, winner_coffees):
         message += f"{counter}. 🌐🎲 Wikipedia Roulette\n"
         send_message(target_room_id, message)  
 
-        selected_wof_category = ask_wof_number(winner, winner_coffees)
+        selected_wof_category = ask_wof_number(winner)
         
         if selected_wof_category != "4":
             wof_question = wof_questions[int(selected_wof_category) - 1]
@@ -1433,13 +1428,15 @@ def ask_wof_letters(winner, answer):
     return final_letters
             
 
-def ask_wof_number(winner, winner_coffees):
+def ask_wof_number(winner):
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
     collected_responses = []  # Store all responses
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
+    winner_coffees = get_coffees(winner)
+    
     initialize_sync()
     start_time = time.time()  # Track when the question starts
     

@@ -80,6 +80,8 @@ password = os.getenv("password")
 mongo_db_string = os.getenv("mongo_db_string")
 openai.api_key = os.getenv("open_api_key")  # Store your API key securely
 buymeacoffee_api_key = os.getenv("buy_me_a_coffee_api_key")
+reddit_client_id = os.getenv("reddit_client_id")
+reddit_secret_id = os.getenv("reddit_secret_id")
 target_room_id = os.getenv("target_room_id")
 question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
@@ -127,8 +129,8 @@ categories_to_exclude = []
 
 # Configure your Reddit client
 reddit = praw.Reddit(
-    client_id="kUvV9DPbLHKL9QyJdWhsZw",
-    client_secret="2LngaKlWKwo92aAq9UnL_Ota1-mtlw",
+    client_id = reddit_client_id,
+    client_secret = reddit_secret_id,
     user_agent="TriviaBot/1.0"
 )
 

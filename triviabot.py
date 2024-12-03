@@ -674,7 +674,7 @@ def nice_creep_okra_option(winner):
                         wf_winner = False
                         return None
                         
-                    if "neither" in message.content.lower():
+                    if "neither" in message-content.lower():
                         react_to_message(event_id, target_room_id, "okra21")
                         nice_okra = False
                         creep_okra = False

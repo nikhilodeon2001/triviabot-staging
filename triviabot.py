@@ -792,7 +792,7 @@ def generate_round_summary_image(round_data, winner):
         image.save(buffer, format="PNG")
         buffer.seek(0)
         
-        upload_image_to_s3(buffer, winner, image_description)
+        #upload_image_to_s3(buffer, winner, image_description)
         return None
         
     except openai.OpenAIError as e:
@@ -830,7 +830,7 @@ def generate_round_summary_image(round_data, winner):
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
                 
-                upload_image_to_s3(buffer, winner, image_description)
+                #upload_image_to_s3(buffer, winner, image_description)
                 return None
             
             except openai.OpenAIError as e2:
@@ -903,12 +903,12 @@ def ask_category(winner, categories, winner_coffees):
 
                     print(f"reacting to message: {message_content}")
                     react_to_message(event_id, target_room_id, "okra21")
+                    message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
+                    send_message(target_room_id, message)
 
                     if message_content in ['4'] and winner_coffees > 0:
                         additional_prompt = request_prompt(winner, processed_events)    
                     
-                    message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
-                    send_message(target_room_id, message)
                     return message_content, additional_prompt
     
         except requests.exceptions.RequestException as e:
@@ -1202,12 +1202,7 @@ def select_wof_questions(winner):
         else:
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
-            send_message(target_room_id, wikipedia_message)
-            time.sleep(3)
-            total_characters = len(wof_answer)
-            word_count = len(wof_answer.split())
-            
-            
+                    
         image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
             
         image_size = 100
@@ -1222,10 +1217,10 @@ def select_wof_questions(winner):
             send_message(target_room_id, message)    
 
         if selected_wof_category == "4":
-            wikipedia_message = f"\n📝🔤 {word_count} words, {total_characters} characters\n"
             send_message(target_room_id, wikipedia_message)
+            time.sleep(3)
             
-        wof_letters = ask_wof_letters(winner, wof_answer)
+        wof_letters = ask_wof_letters(winner, wof_answer, 5)
         
         if wf_winner == False:
             time.sleep(1.5)
@@ -1240,12 +1235,13 @@ def select_wof_questions(winner):
                 message = f"{display_string}\n{wof_question['question']}\n{wof_letters_str}\n"
                 send_message(target_room_id, message)
 
-            process_wof_guesses(winner, wof_answer)
+            process_wof_guesses(winner, wof_answer, 5)
 
         if selected_wof_category == "4":
             time.sleep(1.5)
-            wikipedia_message = f"\n🌐📄 Wikipedia Link: {wiki_url}\n"
-        
+            wikipedia_message = f"\n🌐📄 Wikipedia Link {wiki_url}\n"
+            send_message(target_room_id, wikipedia_message)
+            time.sleep(1.5)
         
         return None
 
@@ -1261,7 +1257,7 @@ def select_wof_questions(winner):
 
     
 
-def process_wof_guesses(winner, answer):
+def process_wof_guesses(winner, answer, extra_time):
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
 
     sync_url = f"{matrix_base_url}/sync"
@@ -1274,7 +1270,7 @@ def process_wof_guesses(winner, answer):
     message = f"\n@{winner} ❓Your Answer❓\n"
     send_message(target_room_id, message)
     
-    while time.time() - start_time < magic_time:
+    while time.time() - start_time < (magic_time + extra_time):
         try:
             if since_token:
                 params["since"] = since_token
@@ -1333,7 +1329,7 @@ def process_wof_guesses(winner, answer):
 
 
 
-def ask_wof_letters(winner, answer):
+def ask_wof_letters(winner, answer, extra_time):
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
 
     answer = answer.upper()
@@ -1352,7 +1348,7 @@ def ask_wof_letters(winner, answer):
     
     wf_letters = []
     
-    while time.time() - start_time < magic_time:
+    while time.time() - start_time < (magic_time + extra_time):
         try:
             if len(wf_letters) == num_wf_letters:
                 break

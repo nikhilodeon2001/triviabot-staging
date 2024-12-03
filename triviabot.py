@@ -21,6 +21,7 @@ from pymongo import MongoClient
 import difflib
 import string
 from urllib.parse import urlparse 
+from urllib.parse import quote
 import io            
 from PIL import Image, ImageDraw, ImageFont 
 import openai
@@ -210,7 +211,7 @@ def get_wikipedia_article(max_words=3, max_length=16):
                 category = categorize_text(intro_text, title)
 
                 # Construct the Wikipedia article URL
-                wiki_url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(title)}"
+                wiki_url = f"https://en.wikipedia.org/wiki/{quote(title)}"
 
                 return title, redacted_text, category, wiki_url
 

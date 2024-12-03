@@ -241,7 +241,7 @@ def redact_intro_text(title, intro_text):
     pattern = re.compile(r'\b(' + '|'.join(words_to_redact) + r')\b', re.IGNORECASE)
     
     # Replace matching words with "REDACTED"
-    redacted_text = pattern.sub("REDACTED", intro_text)
+    redacted_text = pattern.sub("OKRA", intro_text)
     return redacted_text
 
 
@@ -1197,7 +1197,7 @@ def select_wof_questions(winner):
         
         else:
             wof_answer, redacted_intro, wof_clue = get_wikipedia_article(3, 16)
-            wikipedia_message = f"\n{redacted_intro}\n"
+            wikipedia_message = f"\n🥒⬛ Okracted Clue:\n{redacted_intro}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(3)
             total_characters = len(wof_answer)

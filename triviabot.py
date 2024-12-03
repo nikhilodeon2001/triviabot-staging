@@ -804,7 +804,7 @@ def generate_round_summary_image(round_data, winner):
         image.save(buffer, format="PNG")
         buffer.seek(0)
         
-        #upload_image_to_s3(buffer, winner, image_description)
+        upload_image_to_s3(buffer, winner, image_description)
         return None
         
     except openai.OpenAIError as e:
@@ -842,7 +842,7 @@ def generate_round_summary_image(round_data, winner):
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
                 
-                #upload_image_to_s3(buffer, winner, image_description)
+                upload_image_to_s3(buffer, winner, image_description)
                 return None
             
             except openai.OpenAIError as e2:
@@ -1494,7 +1494,6 @@ def ask_wof_number(winner):
                         continue
 
                     if str(message_content) in {"4"} and winner_coffees <= 0:
-                        selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. Wikipedia Roulette requires ☕️☕️.\n"
                         send_message(target_room_id, message)

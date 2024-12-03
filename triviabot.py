@@ -804,7 +804,7 @@ def generate_round_summary_image(round_data, winner):
         image.save(buffer, format="PNG")
         buffer.seek(0)
         
-        #upload_image_to_s3(buffer, winner, image_description)
+        upload_image_to_s3(buffer, winner, image_description)
         return None
         
     except openai.OpenAIError as e:
@@ -842,7 +842,7 @@ def generate_round_summary_image(round_data, winner):
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
                 
-                #upload_image_to_s3(buffer, winner, image_description)
+                upload_image_to_s3(buffer, winner, image_description)
                 return None
             
             except openai.OpenAIError as e2:

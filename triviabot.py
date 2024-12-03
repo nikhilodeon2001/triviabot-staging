@@ -1245,7 +1245,7 @@ def select_wof_questions(winner):
                     print("Error: Failed to send image.")
             else:
                 wof_letters_str = "Revealed Letters: " + ' '.join(wof_letters)
-                message = f"{display_string}\n{wof_question['question']}\n{wof_letters_str}\n"
+                message = f"{display_string}\n{wof_clue}\n{wof_letters_str}\n"
                 send_message(target_room_id, message)
 
             process_wof_guesses(winner, wof_answer, 5)

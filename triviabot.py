@@ -184,11 +184,6 @@ def get_weather_overview():
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
-weather_info = get_weather_overview(openweather_api_key)
-print(weather_info)
-
-
-
 
 def get_random_city_weather():
     # Select a random city from the list
@@ -236,6 +231,11 @@ def get_random_city_weather():
         }
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
+
+
+
+weather_overview = get_weather_overview()
+print(weather_overview)
 
 weather_info = get_random_city_weather()
 print(weather_info)

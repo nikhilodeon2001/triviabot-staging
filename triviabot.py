@@ -179,7 +179,7 @@ cities = [
 {"city": "Ouagadougou", "country": "Burkina Faso", "lat": 12.3714, "lon": -1.5197, "capital": True},
 {"city": "Paris", "country": "France", "lat": 48.8566, "lon": 2.3522, "capital": True},
 {"city": "Phnom Penh", "country": "Cambodia", "lat": 11.5564, "lon": 104.9282, "capital": True},
-{"city": "Port-au-Prince", "country": "Haiti", "lat": 18.5944, "lon": -72.3074, "capital": True},
+{"city": "Port au Prince", "country": "Haiti", "lat": 18.5944, "lon": -72.3074, "capital": True},
 {"city": "Prague", "country": "Czech Republic", "lat": 50.0755, "lon": 14.4378, "capital": True},
 {"city": "Quito", "country": "Ecuador", "lat": -0.1807, "lon": -78.4678, "capital": True},
 {"city": "Reykjavik", "country": "Iceland", "lat": 64.1355, "lon": -21.8954, "capital": True},

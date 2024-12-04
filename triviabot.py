@@ -206,7 +206,14 @@ cities = [
 
 
 
-def get_google_maps_views(lat, lon):
+def get_google_maps():
+
+    random_city = random.choice(cities)
+    city_name = random_city["city"]
+    country_name = random_city["country"]
+    lat = random_city["lat"]
+    lon = random_city["lon"]
+    
     base_street_view_url = "https://maps.googleapis.com/maps/api/streetview"
     base_static_map_url = "https://maps.googleapis.com/maps/api/staticmap"
     
@@ -230,16 +237,15 @@ def get_google_maps_views(lat, lon):
         "key": googlemaps_api_key
     }
     satellite_view_url = f"{base_static_map_url}?{requests.compat.urlencode(static_map_params)}"
+
+    print("Street View URL:", street_view)
+    print("Satellite View URL:", satellite_view)
+    print(f"City, Country: {city_name}, {country_name}")
     
     return street_view_url, satellite_view_url
 
-# Example usage
-latitude = 37.7749  # Latitude for San Francisco
-longitude = -122.4194  # Longitude for San Francisco
+get_google_maps()
 
-street_view, satellite_view = get_google_maps_views(latitude, longitude)
-print("Street View URL:", street_view)
-print("Satellite View URL:", satellite_view)
 
 
 def get_random_weather(winner):

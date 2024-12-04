@@ -307,7 +307,7 @@ def get_random_city(winner):
                 messages=[
                     {
                         "role": "system",
-                        "content": f"You are OkraStrut and are running from {winner} in the style of 'Where in the world is Carmen San Diego?'. Incorporate the given weather and time data into a transmission that's been intercepted and sent to {winner} who will then have to guess what city you're in. Make sure to incorporate all the following facts in your output. Be rcreative and use emojis to make your response more engaging, but don't make up any facts about the city. "
+                        "content": f"You are OkraStrut and are running from @{winner} in the style of 'Where in the world is Carmen San Diego?'. Incorporate the given weather and time data into a transmission that's been intercepted and sent to @{winner} who will then have to guess what city you're in. Make sure to incorporate all the following facts in your output. Be creative and use emojis to make your response more engaging, but don't make up any facts about the city. "
                     },
                     {
                         "role": "user",
@@ -1607,7 +1607,7 @@ def ask_wof_letters(winner, answer, extra_time):
     message = f"\n@{winner}:❓Pick {num_wf_letters} Letters❓\n"
     if fixed_letters != []:
         message += f"\n🥒 I'll give you O K R A 🥒\n"
-        send_message(target_room_id, message)
+    send_message(target_room_id, message)
     
     wf_letters = []
     

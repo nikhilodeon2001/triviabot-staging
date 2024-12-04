@@ -1426,7 +1426,7 @@ def select_wof_questions(winner):
             wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url, satellite_view_live_url = get_random_city(winner)
             location_clue = f"\n🌦️📊 Transmission Intercepted\n\n{location_clue}\n"
             send_message(target_room_id, location_clue)
-            times.sleep(3)
+            time.sleep(3)
 
             if image_questions == True:    
                 image_size = 100

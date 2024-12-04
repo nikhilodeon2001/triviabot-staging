@@ -259,14 +259,14 @@ def get_random_weather(winner):
         weather_conditions = ". ".join([item["description"].capitalize() for item in data["weather"]]) + "."
         timezone_offset = data["timezone"]  # Timezone offset in seconds
         local_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=timezone_offset)
-        local_time_str = local_time.strftime("%I:%M:%S %p")
+        local_time_str = local_time.strftime("%B %-d, %Y %-I:%M%p").lower()
         returned_name = data["name"]
 
         input_text = (
-            f"Temperature: {temperature_c}°C ({temperature_f}°F)\n"
-            f"Feels Like: {temperature_c_feelslike}°C ({temperature_f_feelslike}°F)\n"
+            f"Fahrenheit Temperature: {temperature_f}°F\n"
+            f"Celsius Temperature: {temperature_c}°C\n"
             f"Weather Conditions: {weather_conditions}\n"
-            f"Local Time: {local_time}\n"
+            f"Local Date and Time: {local_time_str}\n"
         )
 
         print(input_text)

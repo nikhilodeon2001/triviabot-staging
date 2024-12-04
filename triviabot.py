@@ -208,7 +208,7 @@ cities = [
 
 
 
-def get_google_maps(lat, lon, googlemaps_api_key):
+def get_google_maps(lat, lon:
     base_street_view_url = "https://maps.googleapis.com/maps/api/streetview"
     base_static_map_url = "https://maps.googleapis.com/maps/api/staticmap"
     base_metadata_url = "https://maps.googleapis.com/maps/api/streetview/metadata"

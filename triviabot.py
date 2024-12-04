@@ -320,7 +320,7 @@ def get_random_city(winner):
     
     return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url
 
-data = get_random_city(lat, lon)
+data = get_random_city("@nsharma2")
 print(data)
 
 

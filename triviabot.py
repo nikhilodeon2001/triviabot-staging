@@ -231,10 +231,6 @@ def get_google_maps(lat, lon):
         "key": googlemaps_api_key
     }
     satellite_view_url = f"{base_static_map_url}?{requests.compat.urlencode(static_map_params)}"
-
-    print("Street View URL:", street_view_url)
-    print("Satellite View URL:", satellite_view_url)
-    print(f"City, Country: {city_name}, {country_name}")
     
     return street_view_url, satellite_view_url
 

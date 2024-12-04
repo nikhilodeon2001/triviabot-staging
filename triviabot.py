@@ -83,6 +83,7 @@ buymeacoffee_api_key = os.getenv("buy_me_a_coffee_api_key")
 reddit_client_id = os.getenv("reddit_client_id")
 reddit_secret_id = os.getenv("reddit_secret_id")
 openweather_api_key = os.getenv("openweather_api_key")
+googlemaps_api_key = os.getenv("googlemaps_api_key")
 target_room_id = os.getenv("target_room_id")
 question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
@@ -222,6 +223,42 @@ cities = [
 {"city": "Kingston", "country": "Jamaica", "lat": 17.9712, "lon": -76.7936, "capital": True},
 ]
 
+
+
+def get_google_maps_views(lat, lon):
+    base_street_view_url = "https://maps.googleapis.com/maps/api/streetview"
+    base_static_map_url = "https://maps.googleapis.com/maps/api/staticmap"
+    
+    # 1. Get nearest street view image
+    street_view_params = {
+        "size": "600x400",  # Image size
+        "location": f"{lat},{lon}",  # Latitude and longitude
+        "fov": 90,  # Field of view
+        "heading": 0,  # Camera direction
+        "pitch": 0,  # Camera angle
+        "key": googlemaps_api_key
+    }
+    street_view_url = f"{base_street_view_url}?{requests.compat.urlencode(street_view_params)}"
+    
+    # 2. Get zoomed-in satellite view
+    static_map_params = {
+        "center": f"{lat},{lon}",  # Latitude and longitude
+        "zoom": 18,  # Zoom level (higher values for closer views)
+        "size": "600x400",  # Image size
+        "maptype": "satellite",  # Satellite view
+        "key": googlemaps_api_key
+    }
+    satellite_view_url = f"{base_static_map_url}?{requests.compat.urlencode(static_map_params)}"
+    
+    return street_view_url, satellite_view_url
+
+# Example usage
+latitude = 37.7749  # Latitude for San Francisco
+longitude = -122.4194  # Longitude for San Francisco
+
+street_view, satellite_view = get_google_maps_views(latitude, longitude)
+print("Street View URL:", street_view)
+print("Satellite View URL:", satellite_view)
 
 
 def get_random_weather(winner):

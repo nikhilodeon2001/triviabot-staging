@@ -224,7 +224,7 @@ cities = [
 
 
 
-def get_random_weather(type):
+def get_random_weather(winner, type):
     # Select a random city from the list
     random_city = random.choice(cities)
     city_name = random_city["city"]
@@ -279,7 +279,7 @@ def get_random_weather(type):
                 messages=[
                     {
                         "role": "system",
-                        "content": "You create prompts in a style of 'Where in the world is Carmen San Diego?'. Your job is to incorporate given weather and time facts from a city into a mysterious prompt that gives clues to a user who will then guess the city. Make sure to incorporate all the following facts in your output. You can be creative but don't make up any other facts about the city."
+                        "content": f"You are OkraStrut and are running from {winner} in the style of 'Where in the world is Carmen San Diego?'. Incorporate the given weather and time data into a mysterious prompt to {winner} who will then have to guess what city you're in. Make sure to incorporate all the following facts in your output. Be rude and creative but don't make up any facts about the city. "
                     },
                     {
                         "role": "user",
@@ -291,13 +291,13 @@ def get_random_weather(type):
             )
             
             # Extract the generated category
-            where_am_i = response["choices"][0]["message"]["content"].strip()
-            if where_am_i = None:
-                where_am_i = "I'm somewhere mysterious. Figure it out from that."
+            location_clue = response["choices"][0]["message"]["content"].strip()
+            if location_clue = None:
+                location_clue = "I'm somewhere mysterious. Figure it out from that."
             
         except Exception as e:
             print(f"Error calling OpenAI API: {e}")
-            where_am_i = "I'm somewhere mysterious. Figure it out from that."
+            location_clue = "I'm somewhere mysterious. Figure it out from that."
 
         
         #return {
@@ -315,7 +315,7 @@ def get_random_weather(type):
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
     #wof_answer, wof_clue, weather_report = get_random_city_weather()
-    return city, "Capital City", where_am_i
+    return city, "Capital City", location_clue
 
 weather_info = get_random_city_weather()
 print(weather_info)

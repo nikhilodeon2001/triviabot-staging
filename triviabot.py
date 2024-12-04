@@ -225,7 +225,7 @@ def get_google_maps(lat, lon):
     # 2. Get zoomed-in satellite view
     static_map_params = {
         "center": f"{lat},{lon}",  # Latitude and longitude
-        "zoom": 10,  # Zoom level (higher values for closer views)
+        "zoom": 7,  # Zoom level (higher values for closer views)
         "size": "600x400",  # Image size
         "maptype": "satellite",  # Satellite view
         "key": googlemaps_api_key

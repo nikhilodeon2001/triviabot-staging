@@ -315,7 +315,7 @@ def get_random_weather(winner):
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
     #wof_answer, wof_clue, weather_report = get_random_city_weather()
-    return city, "Capital City", location_clue
+    return city_name, country_name, "Capital City", location_clue
 
 weather_info = get_random_weather("@nsharma2")
 print(weather_info)

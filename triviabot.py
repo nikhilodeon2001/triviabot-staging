@@ -320,8 +320,8 @@ def get_random_city(winner):
     
     return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url
 
-    data = get_random_city(lat, lon)
-    print(data)
+data = get_random_city(lat, lon)
+print(data)
 
 
 def categorize_text(input_text, title):

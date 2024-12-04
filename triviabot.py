@@ -315,7 +315,6 @@ def get_random_city(winner):
             f"Local Date and Time: {local_time_str}\n"
         )
 
-        print(input_text)
         
         try:
         # Call OpenAI GPT-4 to generate a category
@@ -352,6 +351,7 @@ def get_random_city(winner):
 
 while True:
     data_return = get_random_city("nsharma2")
+    print(data_return)
     time.sleep(3)
     
 

@@ -211,6 +211,7 @@ def get_google_maps(lat, lon):
     
     base_street_view_url = "https://maps.googleapis.com/maps/api/streetview"
     base_static_map_url = "https://maps.googleapis.com/maps/api/staticmap"
+    base_maps_url = "https://www.google.com/maps"
     
     # 1. Get nearest street view image
     street_view_params = {
@@ -232,8 +233,12 @@ def get_google_maps(lat, lon):
         "key": googlemaps_api_key
     }
     satellite_view_url = f"{base_static_map_url}?{requests.compat.urlencode(static_map_params)}"
+
+    street_view_live_url = f"{base_maps_url}/?q={lat},{lon}&layer=c"
+    satellite_live_url = f"{base_maps_url}/?q={lat},{lon}&t=k"
+
     
-    return street_view_url, satellite_view_url
+    return street_view_url, satellite_view_url, street_view_live_url, satellite_live_url
 
 
 def get_random_city(winner):
@@ -327,10 +332,12 @@ def get_random_city(winner):
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
-    street_view_url, satellite_view_url = get_google_maps(lat, lon)
+    street_view_url, satellite_view_url, street_view_live_url, satellite_view_live_url = get_google_maps(lat, lon)
     
-    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url
+    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, street_view_live_url, satellite_view_live_url
 
+output = get_random_city("@nsharma2")
+print(output)
 
 def categorize_text(input_text, title):
     try:
@@ -1434,6 +1441,7 @@ def select_wof_questions(winner):
                 message = "\n🛰️🌍 Satellite View Obtained\n"
                 send_message(target_room_id, message)
                 satellite_response = send_image(target_room_id, satellite_view_mxc, satellite_view_width, satellite_view_height, image_size)
+                time.sleep(3)
                 
             else:
                 message = f"\n🚫📷 Sorry {winner}, no map views since 'Blank' mode is on.\n"
@@ -1441,9 +1449,6 @@ def select_wof_questions(winner):
             if response is None:                      
                 print("Error: Failed to send image.")
 
-            
-
-            send_image
                     
         image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
         print(f"{wof_clue}: {wof_answer}")

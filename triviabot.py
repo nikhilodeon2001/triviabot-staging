@@ -268,6 +268,8 @@ def get_random_weather(winner):
             f"Weather Conditions: {weather_conditions}\n"
             f"Local Time: {local_time}\n"
         )
+
+        print(input_text)
         
         # Return the information
         #wof_answer, wof_clue, weather_report = get_random_city_weather()
@@ -286,7 +288,7 @@ def get_random_weather(winner):
                         "content": f"Please incorporate the following facts into a mysterious 'Where Am I?' description up to 4 sentences in length:\n\n{input_text}"
                     }
                 ],
-                max_tokens=10,  # Limit response length
+                max_tokens=500,  # Limit response length
                 temperature=0.3  # Lower temperature for more focused output
             )
             

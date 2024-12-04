@@ -1416,13 +1416,13 @@ def select_wof_questions(winner):
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
-        elif int(selected_wof_category) == "4":
+        elif selected_wof_category == "4":
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(3)
 
-        elif int(selected_wof_category) == "5":
+        elif selected_wof_category == "5":
             wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url, satellite_view_live_url = get_random_city(winner)
             location_clue = f"\n🌦️📊 Transmission Intercepted\n\n{location_clue}\n"
             send_message(target_room_id, location_clue)

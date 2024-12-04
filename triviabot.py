@@ -234,11 +234,9 @@ def get_google_maps(lat, lon):
     }
     satellite_view_url = f"{base_static_map_url}?{requests.compat.urlencode(static_map_params)}"
 
-    street_view_live_url = f"{base_maps_url}/?q={lat},{lon}&layer=c"
     satellite_live_url = f"{base_maps_url}/?q={lat},{lon}&t=k"
 
-    
-    return street_view_url, satellite_view_url, street_view_live_url, satellite_live_url
+    return street_view_url, satellite_view_url, satellite_live_url
 
 
 def get_random_city(winner):
@@ -332,12 +330,11 @@ def get_random_city(winner):
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
-    street_view_url, satellite_view_url, street_view_live_url, satellite_view_live_url = get_google_maps(lat, lon)
+    street_view_url, satellite_view_url, satellite_view_live_url = get_google_maps(lat, lon)
     
-    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, street_view_live_url, satellite_view_live_url
+    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, satellite_view_live_url
 
-output = get_random_city("@nsharma2")
-print(output)
+
 
 def categorize_text(input_text, title):
     try:
@@ -1012,7 +1009,7 @@ def generate_round_summary_image(round_data, winner):
         image.save(buffer, format="PNG")
         buffer.seek(0)
         
-        upload_image_to_s3(buffer, winner, image_description)
+        #upload_image_to_s3(buffer, winner, image_description)
         return None
         
     except openai.OpenAIError as e:
@@ -1050,7 +1047,7 @@ def generate_round_summary_image(round_data, winner):
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
                 
-                upload_image_to_s3(buffer, winner, image_description)
+                #upload_image_to_s3(buffer, winner, image_description)
                 return None
             
             except openai.OpenAIError as e2:
@@ -1380,7 +1377,6 @@ def select_wof_questions(winner):
         recent_wof_ids = get_recent_question_ids_from_mongo("wof")
         selected_questions = []
 
-
         # Fetch wheel of fortune questions using the random subset method
         wof_collection = db["wof_questions"]
         pipeline_wof = [
@@ -1423,10 +1419,13 @@ def select_wof_questions(winner):
         elif selected_wof_category == 4:
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
+            send_message(target_room_id, wikipedia_message)
+            time.sleep(3)
 
         elif selected_wof_category == 5:
-            wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url = get_random_city(winner)
+            wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url, satellite_view_live_url = get_random_city(winner)
             location_clue = f"\n🌦️📊 Transmission Intercepted\n\n{location_clue}\n"
+            send_message(target_room_id, location_clue)
             times.sleep(3)
 
             if image_questions == True:    
@@ -1438,18 +1437,26 @@ def select_wof_questions(winner):
                 send_message(target_room_id, message)
                 street_response = send_image(target_room_id, street_view_mxc, street_view_width, street_view_height, image_size)
                 
+                if street_response is None:                      
+                    print("Error: Failed to send street image.")
+                    
+                time.sleep(2)
+                
                 message = "\n🛰️🌍 Satellite View Obtained\n"
                 send_message(target_room_id, message)
                 satellite_response = send_image(target_room_id, satellite_view_mxc, satellite_view_width, satellite_view_height, image_size)
-                time.sleep(3)
+                
+                if satellite_response is None:                      
+                    print("Error: Failed to send satellite image.")
+                    
+                time.sleep(2)
                 
             else:
                 message = f"\n🚫📷 Sorry {winner}, no map views since 'Blank' mode is on.\n"
+                send_message(target_room_id, message)
                 
-            if response is None:                      
-                print("Error: Failed to send image.")
 
-                    
+
         image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
         print(f"{wof_clue}: {wof_answer}")
             
@@ -1464,9 +1471,6 @@ def select_wof_questions(winner):
             message = f"{display_string}\n{wof_clue}\n{fixed_letters_str}\n"
             send_message(target_room_id, message)    
 
-        if selected_wof_category == "4":
-            send_message(target_room_id, wikipedia_message)
-            time.sleep(3)
             
         wof_letters = ask_wof_letters(winner, wof_answer, 5)
         
@@ -1490,7 +1494,13 @@ def select_wof_questions(winner):
             wikipedia_message = f"\n🌐📄 Wikipedia Link {wiki_url}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(1.5)
-        
+
+        if selected_wof_category == "5":
+            time.sleep(1.5)
+            maps_message = f"\n🌍❔ Okra's Location {satellite_view_live_url}\n"
+            send_message(target_room_id, maps_message)
+            time.sleep(1.5)
+            
         return None
 
     except Exception as e:

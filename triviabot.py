@@ -1605,7 +1605,7 @@ def ask_wof_letters(winner, answer, extra_time):
     initialize_sync()
     start_time = time.time()  # Track when the question starts
     message = f"\n@{winner}:❓Pick {num_wf_letters} Letters❓\n"
-    if fixed_letters != []
+    if fixed_letters != []:
         message += f"\n🥒 I'll give you O K R A 🥒\n"
         send_message(target_room_id, message)
     

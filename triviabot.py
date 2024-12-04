@@ -316,7 +316,7 @@ def get_random_city(winner):
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
-    street_view_url, satellite_view_url = get_google_maps()
+    street_view_url, satellite_view_url = get_google_maps(lat, lon)
     
     return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url
 

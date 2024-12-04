@@ -208,24 +208,37 @@ cities = [
 
 
 
-def get_google_maps(lat, lon):
-    
+def get_google_maps(lat, lon, googlemaps_api_key):
     base_street_view_url = "https://maps.googleapis.com/maps/api/streetview"
     base_static_map_url = "https://maps.googleapis.com/maps/api/staticmap"
+    base_metadata_url = "https://maps.googleapis.com/maps/api/streetview/metadata"
     base_maps_url = "https://www.google.com/maps"
     
-    # 1. Get nearest street view image
-    street_view_params = {
-        "size": "600x400",  # Image size
-        "location": f"{lat},{lon}",  # Latitude and longitude
-        "fov": 90,  # Field of view
-        "heading": 0,  # Camera direction
-        "pitch": 0,  # Camera angle
+    # Check Street View availability using the Metadata API
+    metadata_params = {
+        "location": f"{lat},{lon}",
         "key": googlemaps_api_key
     }
-    street_view_url = f"{base_street_view_url}?{requests.compat.urlencode(street_view_params)}"
+    metadata_response = requests.get(base_metadata_url, params=metadata_params)
+    metadata = metadata_response.json()
     
-    # 2. Get zoomed-in satellite view
+    if metadata.get("status") == "OK":
+        street_view_flag = True
+        # Construct the Street View URL
+        street_view_params = {
+            "size": "600x400",  # Image size
+            "location": f"{lat},{lon}",  # Latitude and longitude
+            "fov": 90,  # Field of view
+            "heading": 0,  # Camera direction
+            "pitch": 0,  # Camera angle
+            "key": googlemaps_api_key
+        }
+        street_view_url = f"{base_street_view_url}?{requests.compat.urlencode(street_view_params)}"
+    else:
+        street_view_flag = False
+        street_view_url = None  # No Street View data available
+
+    # Construct Satellite View URLs
     static_map_params = {
         "center": f"{lat},{lon}",  # Latitude and longitude
         "zoom": 7,  # Zoom level (higher values for closer views)
@@ -234,10 +247,10 @@ def get_google_maps(lat, lon):
         "key": googlemaps_api_key
     }
     satellite_view_url = f"{base_static_map_url}?{requests.compat.urlencode(static_map_params)}"
-
     satellite_live_url = f"{base_maps_url}/?q={lat},{lon}&t=k"
 
-    return street_view_url, satellite_view_url, satellite_live_url
+    return street_view_url, satellite_view_url, satellite_live_url, street_view_flag
+
 
 
 def get_random_city(winner):
@@ -260,6 +273,9 @@ def get_random_city(winner):
     # Apply offsets to the original latitude and longitude
     lat = lat + lat_offset
     lon = lon + lon_offset
+
+    street_view_url, satellite_view_url, satellite_view_live_url, street_view_flag = get_google_maps(lat, lon)
+
     
     # OpenWeather Current Weather API URL
     base_url = "https://api.openweathermap.org/data/2.5/weather"
@@ -331,10 +347,13 @@ def get_random_city(winner):
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
-    street_view_url, satellite_view_url, satellite_view_live_url = get_google_maps(lat, lon)
     
-    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, satellite_view_live_url
+    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, satellite_view_live_url, street_view_flag
 
+while True:
+    data_return = get_random_city("nsharma2")
+    time.sleep(3)
+    
 
 
 def categorize_text(input_text, title):

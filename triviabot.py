@@ -1402,7 +1402,7 @@ def select_wof_questions(winner):
         premium_counts = counter
         message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕☕\n"
         counter = counter + 1
-        message += f"{counter}. 🌍❔ Where in the World is Okrandiego? ☕☕\n"
+        message += f"{counter}. 🌍❔ Where's Okra? ☕☕\n"
         send_message(target_room_id, message)  
 
         selected_wof_category = ask_wof_number(winner)
@@ -1740,11 +1740,18 @@ def ask_wof_number(winner):
 
                     if str(message_content) in {"4"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. Wikipedia Roulette requires ☕️☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Wikipedia Roulette' requires ☕️☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"1", "2", "3", "4"}:
+                    
+                    if str(message_content) in {"5"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Where's Okra?' requires ☕️☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"1", "2", "3", "4", "5"}:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"

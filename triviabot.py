@@ -276,9 +276,11 @@ def get_random_city(winner):
         
         # Extract weather information
         temperature_c = data["main"]["temp"]
-        temperature_c_feelslike = data["main"]["feels_like"]
+        #temperature_c_feelslike = data["main"]["feels_like"]
         temperature_f = temperature_c * 9 / 5 + 32
-        temperature_f_feelslike = temperature_c_feelslike * 9 / 5 + 32
+        temperature_f = round(temperature_f)
+        temperature_c = round(temperature_c)
+        #temperature_f_feelslike = temperature_c_feelslike * 9 / 5 + 32
         humidity = data["main"]["humidity"]
         weather_conditions = ". ".join([item["description"].capitalize() for item in data["weather"]]) + "."
         timezone_offset = data["timezone"]  # Timezone offset in seconds

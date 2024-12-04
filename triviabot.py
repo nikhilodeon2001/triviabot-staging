@@ -1406,6 +1406,7 @@ def select_wof_questions(winner):
         send_message(target_room_id, message)  
 
         selected_wof_category = ask_wof_number(winner)
+        print(selected_wof_category)
         
         if int(selected_wof_category) < premium_counts:
             wof_question = wof_questions[int(selected_wof_category) - 1]

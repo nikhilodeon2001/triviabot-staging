@@ -224,7 +224,7 @@ cities = [
 
 
 
-def get_random_weather(winner, type):
+def get_random_weather(winner):
     # Select a random city from the list
     random_city = random.choice(cities)
     city_name = random_city["city"]
@@ -317,7 +317,7 @@ def get_random_weather(winner, type):
     #wof_answer, wof_clue, weather_report = get_random_city_weather()
     return city, "Capital City", location_clue
 
-weather_info = get_random_city_weather()
+weather_info = get_random_weather("@nsharma2")
 print(weather_info)
 
 

@@ -35,6 +35,7 @@ import praw
 import tempfile
 import base64
 from collections import Counter
+import math
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
@@ -243,6 +244,18 @@ def get_random_city(winner):
     is_capital = random_city["capital"]
     lat = random_city["lat"]
     lon = random_city["lon"]
+
+    # Conversion factors
+    miles_per_lat_degree = 1 / 69  # 1 degree latitude ≈ 69 miles
+    miles_per_lon_degree = 1 / (69 * math.cos(math.radians(lat)))  # Adjust for latitude
+
+    # Generate random offsets within ±0.5 miles (to stay within 1 square mile)
+    lat_offset = random.uniform(-0.5, 0.5) * miles_per_lat_degree
+    lon_offset = random.uniform(-0.5, 0.5) * miles_per_lon_degree
+
+    # Apply offsets to the original latitude and longitude
+    lat = lat + lat_offset
+    lon = lon + lon_offset
     
     # OpenWeather Current Weather API URL
     base_url = "https://api.openweathermap.org/data/2.5/weather"

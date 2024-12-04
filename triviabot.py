@@ -1371,11 +1371,14 @@ def create_factors_question():
     }
         
 def select_wof_questions(winner):
+    global fixed_letters
+    
     try:
         time.sleep(2)
         db = connect_to_mongodb()
         recent_wof_ids = get_recent_question_ids_from_mongo("wof")
         selected_questions = []
+        fixed_letters = ['O', 'K', 'R', 'A']
 
         # Fetch wheel of fortune questions using the random subset method
         wof_collection = db["wof_questions"]
@@ -1426,6 +1429,7 @@ def select_wof_questions(winner):
             wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url, satellite_view_live_url = get_random_city(winner)
             location_clue = f"\n🌦️📊 Transmission Intercepted\n\n{location_clue}\n"
             send_message(target_room_id, location_clue)
+            fixed_letters = []
             time.sleep(3)
 
             if image_questions == True:    

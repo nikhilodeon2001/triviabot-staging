@@ -292,7 +292,7 @@ def get_random_weather(winner, type):
             
             # Extract the generated category
             location_clue = response["choices"][0]["message"]["content"].strip()
-            if location_clue = None:
+            if location_clue == None:
                 location_clue = "I'm somewhere mysterious. Figure it out from that."
             
         except Exception as e:

@@ -1491,13 +1491,13 @@ def select_wof_questions(winner):
 
         if selected_wof_category == "4":
             time.sleep(1.5)
-            wikipedia_message = f"\n🌐📄 Wikipedia Link {wiki_url}\n"
+            wikipedia_message = f"\n🌐📄 Wikipedia Link: {wiki_url}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(1.5)
 
         if selected_wof_category == "5":
             time.sleep(1.5)
-            maps_message = f"\n🌍❔ Okra's Location {satellite_view_live_url}\n"
+            maps_message = f"\n🌍❔ Okra's Location: {satellite_view_live_url}\n"
             send_message(target_room_id, maps_message)
             time.sleep(1.5)
             

@@ -172,7 +172,7 @@ cities = [
 {"city": "Kinshasa", "country": "Democratic Republic of the Congo", "lat": -4.4419, "lon": 15.2663, "capital": True},
 {"city": "Manama", "country": "Bahrain", "lat": 26.2285, "lon": 50.5860, "capital": True},
 {"city": "Minsk", "country": "Belarus", "lat": 53.9045, "lon": 27.5615, "capital": True},
-{"city": "N'Djamena", "country": "Chad", "lat": 12.1348, "lon": 15.0557, "capital": True},
+{"city": "NDjamena", "country": "Chad", "lat": 12.1348, "lon": 15.0557, "capital": True},
 {"city": "Nassau", "country": "Bahamas", "lat": 25.0343, "lon": -77.3963, "capital": True},
 {"city": "New Delhi", "country": "India", "lat": 28.6139, "lon": 77.2090, "capital": True},
 {"city": "Nicosia", "country": "Cyprus", "lat": 35.1856, "lon": 33.3823, "capital": True},
@@ -1009,7 +1009,7 @@ def generate_round_summary_image(round_data, winner):
         image.save(buffer, format="PNG")
         buffer.seek(0)
         
-        #upload_image_to_s3(buffer, winner, image_description)
+        upload_image_to_s3(buffer, winner, image_description)
         return None
         
     except openai.OpenAIError as e:
@@ -1047,7 +1047,7 @@ def generate_round_summary_image(round_data, winner):
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
                 
-                #upload_image_to_s3(buffer, winner, image_description)
+                upload_image_to_s3(buffer, winner, image_description)
                 return None
             
             except openai.OpenAIError as e2:
@@ -1112,13 +1112,11 @@ def ask_category(winner, categories, winner_coffees):
 
                     # Check if the winner can select options A, B, or C
                     if message_content in ['4', '5', '6'] and winner_coffees <= 0:
-                        print(f"reacting to message: {message_content}")
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    print(f"reacting to message: {message_content}")
                     react_to_message(event_id, target_room_id, "okra21")
                     message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
                     send_message(target_room_id, message)
@@ -2908,7 +2906,6 @@ def generate_round_summary(round_data, winner):
             )
 
         # Extract the generated summary from the response
-        print(prompt)
         summary = response.choices[0].message['content'].strip()
         return summary
 

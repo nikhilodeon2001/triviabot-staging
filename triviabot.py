@@ -1407,7 +1407,7 @@ def select_wof_questions(winner):
 
         selected_wof_category = ask_wof_number(winner)
         
-        if selected_wof_category < premium_counts:
+        if int(selected_wof_category) < premium_counts:
             wof_question = wof_questions[int(selected_wof_category) - 1]
             wof_answer = wof_question["answers"][0]
             wof_clue = wof_question["question"]

@@ -281,7 +281,7 @@ def get_random_weather(winner):
                 messages=[
                     {
                         "role": "system",
-                        "content": f"You are OkraStrut and are running from {winner} in the style of 'Where in the world is Carmen San Diego?'. Incorporate the given weather and time data into a mysterious prompt to {winner} who will then have to guess what city you're in. Make sure to incorporate all the following facts in your output. Be rude and creative but don't make up any facts about the city. "
+                        "content": f"You are OkraStrut and are running from {winner} in the style of 'Where in the world is Carmen San Diego?'. Incorporate the given weather and time data into a mysterious prompt to {winner} who will then have to guess what city you're in. Make sure to incorporate all the following facts in your output. Be rude and creative and use emojis to make your response more engaging, but don't make up any facts about the city. "
                     },
                     {
                         "role": "user",

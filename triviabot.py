@@ -206,13 +206,7 @@ cities = [
 
 
 
-def get_google_maps():
-
-    random_city = random.choice(cities)
-    city_name = random_city["city"]
-    country_name = random_city["country"]
-    lat = random_city["lat"]
-    lon = random_city["lon"]
+def get_google_maps(lat, lon):
     
     base_street_view_url = "https://maps.googleapis.com/maps/api/streetview"
     base_static_map_url = "https://maps.googleapis.com/maps/api/staticmap"
@@ -238,17 +232,14 @@ def get_google_maps():
     }
     satellite_view_url = f"{base_static_map_url}?{requests.compat.urlencode(static_map_params)}"
 
-    print("Street View URL:", street_view)
-    print("Satellite View URL:", satellite_view)
+    print("Street View URL:", street_view_url)
+    print("Satellite View URL:", satellite_view_url)
     print(f"City, Country: {city_name}, {country_name}")
     
     return street_view_url, satellite_view_url
 
-get_google_maps()
 
-
-
-def get_random_weather(winner):
+def get_random_city(winner):
     # Select a random city from the list
     random_city = random.choice(cities)
     city_name = random_city["city"]
@@ -325,8 +316,12 @@ def get_random_weather(winner):
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
-    #wof_answer, wof_clue, weather_report = get_random_city_weather()
-    return city_name, country_name, "World Capital", location_clue
+    street_view_url, satellite_view_url = get_google_maps()
+    
+    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url
+
+    data = get_random_city(lat, lon)
+    print(data)
 
 
 def categorize_text(input_text, title):

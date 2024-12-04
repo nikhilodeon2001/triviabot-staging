@@ -304,11 +304,11 @@ def get_random_city(winner):
                 messages=[
                     {
                         "role": "system",
-                        "content": f"You are OkraStrut and are running from {winner} in the style of 'Where in the world is Carmen San Diego?'. Incorporate the given weather and time data into a mysterious prompt to {winner} who will then have to guess what city you're in. Make sure to incorporate all the following facts in your output. Be rude and creative and use emojis to make your response more engaging, but don't make up any facts about the city. "
+                        "content": f"You are OkraStrut and are running from {winner} in the style of 'Where in the world is Carmen San Diego?'. Incorporate the given weather and time data into a transmission that's been intercepted and sent to {winner} who will then have to guess what city you're in. Make sure to incorporate all the following facts in your output. Be rcreative and use emojis to make your response more engaging, but don't make up any facts about the city. "
                     },
                     {
                         "role": "user",
-                        "content": f"Please incorporate the following facts into a mysterious 'Where Am I?' description up to 4 sentences in length:\n\n{input_text}"
+                        "content": f"Please incorporate the following facts into a mysterious transmission up to 4 sentences in length:\n\n{input_text}"
                     }
                 ],
                 max_tokens=500,  # Limit response length
@@ -330,9 +330,6 @@ def get_random_city(winner):
     street_view_url, satellite_view_url = get_google_maps(lat, lon)
     
     return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url
-
-data = get_random_city("@nsharma2")
-print(data)
 
 
 def categorize_text(input_text, title):
@@ -1402,7 +1399,7 @@ def select_wof_questions(winner):
         premium_counts = counter
         message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕☕\n"
         counter = counter + 1
-        message += f"{counter}. 🌍❔ Where in the World is Okra? ☕☕\n"
+        message += f"{counter}. 🌍❔ Where in the World is Okrandiego? ☕☕\n"
         send_message(target_room_id, message)  
 
         selected_wof_category = ask_wof_number(winner)
@@ -1421,9 +1418,32 @@ def select_wof_questions(winner):
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
 
         elif selected_wof_category == 5:
-            wof_answer, wof_clue, weather_report = get_random_city_weather()
-            weather_message = f"\n🌦️📊 Weather Report:\n\n{weather_report}\n"
+            wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url = get_random_city(winner)
+            location_clue = f"\n🌦️📊 Transmission Intercepted\n\n{location_clue}\n"
+            times.sleep(3)
+
+            if image_questions == True:    
+                image_size = 100
+                street_view_mxc, street_view_width, street_view_height = download_image_from_url(street_view_url)  
+                satellite_view_mxc, satellite_view_width, satellite_view_height = download_image_from_url(satellite_view_url)  
+
+                message = "\n🏙️👁️ Street View Obtained\n"
+                send_message(target_room_id, message)
+                street_response = send_image(target_room_id, street_view_mxc, street_view_width, street_view_height, image_size)
+                
+                message = "\n🛰️🌍 Satellite View Obtained\n"
+                send_message(target_room_id, message)
+                satellite_response = send_image(target_room_id, satellite_view_mxc, satellite_view_width, satellite_view_height, image_size)
+                
+            else:
+                message = f"\n🚫📷 Sorry {winner}, no map views since 'Blank' mode is on.\n"
+                
+            if response is None:                      
+                print("Error: Failed to send image.")
+
             
+
+            send_image
                     
         image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
         print(f"{wof_clue}: {wof_answer}")

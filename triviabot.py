@@ -1017,7 +1017,7 @@ def generate_round_summary_image(round_data, winner):
                 f"Draw an okra themed picture of what you think {winner} looks like based on their avatar, which looks like '{reddit_avatar_description}'.\n"
             ],
             "6": [
-                f"Draw an okra themed caricature of what you think {winner} looks like based on their 5 most visited subreddits, which are '{top_subreddits}'.\n"
+                f"Draw an okra themed caricature of what you think {winner} looks like based on their most visited subreddit, which is '{top_subreddits}'.\n"
             ]
         }
 

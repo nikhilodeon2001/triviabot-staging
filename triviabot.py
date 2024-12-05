@@ -1510,7 +1510,7 @@ def select_wof_questions(winner):
             time.sleep(2)
 
 
-            message = "\n🛰️🌍 We found this on OkraStrut's Insta...\n"
+            message = "\n📸🥒 We found this on OkraStrut's Insta...\n"
             send_message(target_room_id, message)
             themed_response = send_image(target_room_id, themed_country_mxc, themed_country_width, themed_country_height, image_size)
             

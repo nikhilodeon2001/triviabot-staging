@@ -209,7 +209,7 @@ cities = [
 
 def generate_themed_country_image(country, city):
 
-    prompt = f"Generate an image of an okra in a stereotypical setting in {country}. "
+    prompt = f"Generate an image of a stereotypical setting in {country}. Use elements from {country}'s flag in the picture "
     
     # Generate the image using DALL-E
     try:

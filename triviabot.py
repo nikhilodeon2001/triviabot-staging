@@ -724,7 +724,7 @@ def get_user_data(username):
             subreddit_counts[subreddit] += 1
 
         # Get the top 5 subreddits without counts
-        top_subreddits = ", ".join([subreddit for subreddit, _ in subreddit_counts.most_common(5)])
+        top_subreddits = ", ".join([subreddit for subreddit, _ in subreddit_counts.most_common(1)])
 
         return {
             "avatar_url": avatar_url,
@@ -974,7 +974,7 @@ def generate_round_summary_image(round_data, winner):
             "3": "🎲🔀 (OK)Random",
             "4": f"🖼️🔤 Okraverse (Interactive) ☕☕",
             "5": f"🖼️👤 Okravatar (Reddit Avatar) ☕☕",
-            "6": f"🖼️📜 Okraricature (Top Subreddits) ☕☕"
+            "6": f"🖼️📜 Okraricature (Top Subreddit) ☕☕"
         }
 
         # Ask the user to choose a category
@@ -2276,7 +2276,7 @@ def process_round_options(round_winner, winner_points):
     num_of_players = len(standings)
     
     if winner_points >= god_mode_points and num_of_players >= god_mode_players:
-        message += "🎖🍆 Dicktator (New and Shiny): Control the questions\n\n"
+        message += "🎖🍆 (NEW) Dicktator: Control the Qs\n\n"
     else:
         message += "\n"
 

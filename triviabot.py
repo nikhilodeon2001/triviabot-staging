@@ -209,7 +209,7 @@ cities = [
 
 def generate_themed_country_image(country, city):
 
-    prompt = f"Generate an image of an okra wearing a bikini in a stereotypical setting in {city}, {country}. "
+    prompt = f"Generate an image of an okra in a stereotypical setting in {country}. "
     
     # Generate the image using DALL-E
     try:
@@ -387,11 +387,7 @@ def get_random_city(winner):
     
     return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, satellite_view_live_url, themed_image_url
 
-while True:
-    data_return = get_random_city("nsharma2")
-    print(data_return)
-    time.sleep(3)
-    
+
 
 
 def categorize_text(input_text, title):

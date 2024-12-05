@@ -103,7 +103,8 @@ ghost_mode_default = False
 ghost_mode = ghost_mode_default
 god_mode_default = False
 god_mode = god_mode_default
-god_mode_points = 5000
+god_mode_points = 100
+god_mode_players = 1
 yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
@@ -2271,8 +2272,11 @@ def process_round_options(round_winner, winner_points):
         "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )
 
-    if winner_points >= god_mode_points:
-        message += "🎖🍆 Dicktator: Control the question order\n\n"
+    standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
+    num_of_players = len(standings)
+    
+    if winner_points >= god_mode_points and num_of_players >= god_mode_players:
+        message += "🎖🍆 Dicktator (New and Shiny): Control the questions\n\n"
     else:
         message += "\n"
 
@@ -2285,6 +2289,9 @@ def prompt_user_for_response(round_winner, winner_points):
     
     # Call initialize_sync to set since_token
     initialize_sync()
+
+    standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
+    num_of_players = len(standings)
     
     # Wait for 10 seconds to gather responses
     time.sleep(10)
@@ -2362,7 +2369,7 @@ def prompt_user_for_response(round_winner, winner_points):
                         yolo_mode = True
                         send_message(target_room_id, f"🤘🔥 @{round_winner} has nixed all scores.\n")
 
-                    if "dicktator" in message_content.lower() and winner_points >= god_mode_points:
+                    if "dicktator" in message_content.lower() and winner_points >= god_mode_points and num_of_players >= god_mode_players:
                         god_mode = True
                         send_message(target_room_id, f"🎖🍆 @{round_winner} is a dick.\n")
         
@@ -4171,6 +4178,7 @@ def determine_round_winner():
         return None, None
     else:
         return potential_winners[0], max_points  # Clear-cut winner
+        
 
 
 def show_standings():
@@ -4753,11 +4761,11 @@ def refill_question_slot(questions, old_question):
     # Remove the old question
     questions.remove(old_question)
     
-    # Get a random new question from the database
-    #new_question = get_random_trivia_question()
+    #Get a random new question from the database
+    new_question = get_random_trivia_question()
     
-    # Append the new question to the end of the list to maintain order
-    #questions.append(new_question)
+    #Append the new question to the end of the list to maintain order
+    questions.append(new_question)
 
 
 def get_random_trivia_question():
@@ -4766,21 +4774,45 @@ def get_random_trivia_question():
     try:
         db = connect_to_mongodb()
         trivia_collection = db["trivia_questions"]
-        
         recent_general_ids = get_recent_question_ids_from_mongo("general")
+
+        if image_questions == False:
+            # Define a list of substrings to exclude in URLs
+            excluded_url_substring = "http"
+            pipeline = [
+                {
+                    "$match": {
+                        "_id": {"$nin": list(recent_general_ids)},
+                        "category": {"$nin": categories_to_exclude},
+                        "$or": [
+                            {"url": {"$not": {"$regex": excluded_url_substring}}} 
+                        ]
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": "$category",
+                        "questions": {"$push": "$$ROOT"}  # Push full document to each category group
+                    }
+                },
+                {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
+                {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
+                {"$sample": {"size": 1}}  # Sample from the resulting limited set
+            ]
             
-        pipeline = [
-            {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
-            {
-                "$group": {
-                    "_id": "$category",
-                    "questions": {"$push": "$$ROOT"}  # Push full document to each category group
-                }
-            },
-            {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
-            {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
-            {"$sample": {"size": 1}}  # Sample from the resulting limited set
-        ]
+        else:
+            pipeline = [
+                {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
+                {
+                    "$group": {
+                        "_id": "$category",
+                        "questions": {"$push": "$$ROOT"}  # Push full document to each category group
+                    }
+                },
+                {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
+                {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
+                {"$sample": {"size": 1}}  # Sample from the resulting limited set
+            ]
         
         result = list(trivia_collection.aggregate(pipeline))
 

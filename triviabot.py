@@ -207,6 +207,46 @@ cities = [
 ]
 
 
+def generate_themed_country_image(country, city):
+
+    prompt = f"Generate an image of an okra wearing a bikini in a stereotypical setting in {city}, {country}. "
+    
+    # Generate the image using DALL-E
+    try:
+        response = openai.Image.create(
+            prompt=prompt,
+            n=1,
+            size="512x512"  # Adjust size as needed
+        )
+        # Return the image URL from the API response
+        image_url = response["data"][0]["url"]
+
+        return image_url
+        
+    except openai.OpenAIError as e:
+        print(f"Error generating image: {e}")
+        if "Your request was rejected as a result of our safety system" in str(e):
+            # Use a default safe prompt
+            default_prompt = f"Generate an image of an okra in {country}."
+            try:
+                response = openai.Image.create(
+                    prompt=default_prompt,
+                    n=1,
+                    size="512x512"
+                )
+                
+                # Return the image URL from the API response
+                image_url = response["data"][0]["url"]
+     
+                return image_url
+            
+            except openai.OpenAIError as e2:
+                print(f"Error generating default image: {e2}")
+                return "Image generation failed!"
+        
+        else:
+            return "Image generation failed!"
+
 
 def get_google_maps(lat, lon):
     base_street_view_url = "https://maps.googleapis.com/maps/api/streetview"
@@ -223,8 +263,6 @@ def get_google_maps(lat, lon):
     metadata = metadata_response.json()
     
     if metadata.get("status") == "OK":
-        street_view_flag = True
-        # Construct the Street View URL
         street_view_params = {
             "size": "600x400",  # Image size
             "location": f"{lat},{lon}",  # Latitude and longitude
@@ -235,7 +273,6 @@ def get_google_maps(lat, lon):
         }
         street_view_url = f"{base_street_view_url}?{requests.compat.urlencode(street_view_params)}"
     else:
-        street_view_flag = False
         street_view_url = None  # No Street View data available
 
     # Construct Satellite View URLs
@@ -249,7 +286,7 @@ def get_google_maps(lat, lon):
     satellite_view_url = f"{base_static_map_url}?{requests.compat.urlencode(static_map_params)}"
     satellite_live_url = f"{base_maps_url}/?q={lat},{lon}&t=k"
 
-    return street_view_url, satellite_view_url, satellite_live_url, street_view_flag
+    return street_view_url, satellite_view_url, satellite_live_url
 
 
 
@@ -274,7 +311,7 @@ def get_random_city(winner):
     lat = lat + lat_offset
     lon = lon + lon_offset
 
-    street_view_url, satellite_view_url, satellite_view_live_url, street_view_flag = get_google_maps(lat, lon)
+    street_view_url, satellite_view_url, satellite_view_live_url = get_google_maps(lat, lon)
 
     
     # OpenWeather Current Weather API URL
@@ -346,8 +383,9 @@ def get_random_city(winner):
     else:
         return {"error": f"Failed to fetch weather data for {city_name}, {country_name} (status code: {response.status_code})"}
 
+    themed_image_url = generate_themed_country_image(country_name, city_name)
     
-    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, satellite_view_live_url, street_view_flag
+    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, satellite_view_live_url, themed_image_url
 
 while True:
     data_return = get_random_city("nsharma2")
@@ -1444,40 +1482,46 @@ def select_wof_questions(winner):
             time.sleep(3)
 
         elif selected_wof_category == "5":
-            wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url, satellite_view_live_url = get_random_city(winner)
-            location_clue = f"\n🌦️📊 Transmission Intercepted\n\n{location_clue}\n"
+            wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url, satellite_view_live_url, themed_country_url = get_random_city(winner)
+            location_clue = f"\n🌦️📊 We intercepted this message...\n\n{location_clue}\n"
             send_message(target_room_id, location_clue)
             fixed_letters = []
             time.sleep(3)
 
-            if image_questions == True:    
-                image_size = 100
-                street_view_mxc, street_view_width, street_view_height = download_image_from_url(street_view_url)  
-                satellite_view_mxc, satellite_view_width, satellite_view_height = download_image_from_url(satellite_view_url)  
+            image_size = 100
 
-                message = "\n🏙️👁️ Street View Obtained\n"
+            satellite_view_mxc, satellite_view_width, satellite_view_height = download_image_from_url(satellite_view_url)  
+            themed_country_mxc, themed_country_width, themed_country_height = download_image_from_url(themed_country_url)
+
+            if street_view_url != None:
+                message = "\n🏙️👁️ We saw OkraStrut post this to X...\n"
+                street_view_mxc, street_view_width, street_view_height = download_image_from_url(street_view_url)  
                 send_message(target_room_id, message)
                 street_response = send_image(target_room_id, street_view_mxc, street_view_width, street_view_height, image_size)
-                
+            
                 if street_response is None:                      
                     print("Error: Failed to send street image.")
-                    
+                
                 time.sleep(2)
+            
+            message = "\n🛰️🌍 Our spies tracked him to this area...\n"
+            send_message(target_room_id, message)
+            satellite_response = send_image(target_room_id, satellite_view_mxc, satellite_view_width, satellite_view_height, image_size)
+            
+            if satellite_response is None:                      
+                print("Error: Failed to send satellite image.")
                 
-                message = "\n🛰️🌍 Satellite View Obtained\n"
-                send_message(target_room_id, message)
-                satellite_response = send_image(target_room_id, satellite_view_mxc, satellite_view_width, satellite_view_height, image_size)
-                
-                if satellite_response is None:                      
-                    print("Error: Failed to send satellite image.")
-                    
-                time.sleep(2)
-                
-            else:
-                message = f"\n🚫📷 Sorry {winner}, no map views since 'Blank' mode is on.\n"
-                send_message(target_room_id, message)
-                
+            time.sleep(2)
 
+
+            message = "\n🛰️🌍 We found this on OkraStrut's Insta...\n"
+            send_message(target_room_id, message)
+            themed_response = send_image(target_room_id, themed_country_mxc, themed_country_width, themed_country_height, image_size)
+            
+            if themed_response is None:                      
+                print("Error: Failed to send satellite image.")
+                
+            time.sleep(2)
 
         image_mxc, image_width, image_height, display_string = generate_wof_image(wof_answer, wof_clue, fixed_letters)
         print(f"{wof_clue}: {wof_answer}")

@@ -535,7 +535,7 @@ def get_first_category(pageid):
 
  
 
-def describe_image_with_vision(image_url, mode):
+def describe_image_with_vision(image_url, mode, prompt):
     try:
 
         if mode == "okra-title":
@@ -621,7 +621,7 @@ def describe_image_with_vision(image_url, mode):
                         "content": [
                             {
                                 "type": "text",
-                                "text": "Based on what you see in the image, give the image a name with 5 words maximum."
+                                "text": f"Based on what you see in the image, give the image a name with 5 words maximum. The prompt used to create this image was {prompt}."
                             },
                             {
                                 "type": "image_url",
@@ -994,7 +994,7 @@ def generate_round_summary_image(round_data, winner):
         
             # Extract user data
             reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-            reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "describe")
+            reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "describe", "")
             top_subreddits = user_data.get("top_subreddits", "")
                     
         prompts_by_category = {
@@ -1041,9 +1041,9 @@ def generate_round_summary_image(round_data, winner):
         image_url = response["data"][0]["url"]
         
         if selected_category == "4" or selected_category == "5" or selected_category == "6":
-            image_description = describe_image_with_vision(image_url, "okra-title")
+            image_description = describe_image_with_vision(image_url, "title", prompt)
         else:
-            image_description = describe_image_with_vision(image_url, "okra-title")
+            image_description = describe_image_with_vision(image_url, "title", prompt)
 
             
         image_mxc, image_width, image_height = download_image_from_url(image_url)
@@ -1082,7 +1082,7 @@ def generate_round_summary_image(round_data, winner):
                 
                 # Return the image URL from the API response
                 image_url = response["data"][0]["url"]
-                image_description = describe_image_with_vision(image_url, "okra-title")
+                image_description = describe_image_with_vision(image_url, "title", prompt)
                 image_mxc, image_width, image_height = download_image_from_url(image_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         
@@ -2830,7 +2830,7 @@ def generate_round_summary(round_data, winner):
     
         # Extract user data
         reddit_avatar_url = user_data.get("avatar_url", "No avatar available.")
-        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "describe")
+        reddit_avatar_description = describe_image_with_vision(reddit_avatar_url, "describe", "")
         top_subreddits = user_data.get("top_subreddits", "")
         
         prompt = (

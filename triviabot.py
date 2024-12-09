@@ -2263,23 +2263,21 @@ def process_round_options(round_winner, winner_points):
    
 
     # Notify the round winner about their award
-    message = (
-        f"\n🍔🍟 @{round_winner}, what's your order?\n\n"
-        "⏱️⏳ <3 - 15>:  Time (s) between questions\n"
-        "🟦❌ Trebek:  No Jeopardy questions\n"
-        "🟦✋ Jeopardy:  5 Jeopardy questions\n"
-        
-    )
+    message = f"\n🍔🍟 @{round_winner}, what's your order?\n"
     send_message(target_room_id, message)
     
     message = (
-        "📰❌ Cross:  No Crossword clues\n"
-        "📰✏️ Word:  5 Crossword clues\n"
-        "🔥🤘 Yolo:  No scores shown until the end\n"
+        "⏱️⏳ <3 - 15>: Time (s) between questions\n"
+        "🟦❌ Trebek: No Jeopardy questions\n"
+        "🟦✋ Jeopardy: 5 Jeopardy questions\n"
+        "📰❌ Cross: No Crossword clues\n"
+        "📰✏️ Word: 5 Crossword clues\n"    
     )
+
     send_message(target_room_id, message)
-    
+
     message = (
+        "🔥🤘 Yolo: No scores shown until the end\n"
         "👻🎃 Ghost: Boo! Vanishing answers\n"
         "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )

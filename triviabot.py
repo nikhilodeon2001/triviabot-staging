@@ -208,8 +208,43 @@ cities = [
 ]
 
 
-def generate_themed_country_image(country, city):
+def select_crossword_question():
+    try:
+        db = connect_to_mongodb()
+        
+        # Fetch recent IDs separately for each type
+        recent_crossword_ids = get_recent_question_ids_from_mongo("crossword")
+        
+        # Fetch crossword questions using the random subset method
+        crossword_collection = db["crossword_questions"]
+        pipeline_crossword = [
+            {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
+            {"$sample": {"size": 1}}  # Apply sampling on the filtered subset
+        ]
+        crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
 
+        # Store separate sets of IDs in MongoDB only if they are non-empty
+        crossword_question_ids = [doc["_id"] for doc in crossword_questions]
+        if crossword_question_ids:
+            store_question_ids_in_mongo(crossword_question_ids, "crossword")
+
+        final_selected_questions = [
+            (doc["category"], doc["question"], doc["url"], doc["answers"])
+            for doc in selected_questions
+        ]
+
+        return final_selected_questions
+
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        print(f"Error selecting trivia and crossword questions: {e}")
+        return []  # Return an empty list in case of failure
+
+
+
+
+
+def generate_themed_country_image(country, city):
     prompt = f"Generate a stereotypical image of okra in {country} without any text in the image."
     
     # Generate the image using DALL-E

@@ -221,24 +221,23 @@ def select_crossword_question():
             {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
             {"$sample": {"size": 1}}  # Apply sampling on the filtered subset
         ]
-        crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
+        crossword_question = crossword_collection.aggregate(pipeline_crossword)
 
         # Store separate sets of IDs in MongoDB only if they are non-empty
-        crossword_question_ids = [doc["_id"] for doc in crossword_questions]
-        if crossword_question_ids:
-            store_question_ids_in_mongo(crossword_question_ids, "crossword")
+        crossword_question_id = crossword_question["_id"]
+        
+        if crossword_question_id:
+            store_question_ids_in_mongo(crossword_question_id, "crossword")
 
-        final_selected_questions = [
-            (doc["category"], doc["question"], doc["url"], doc["answers"])
-            for doc in selected_questions
-        ]
-
-        return final_selected_questions
+        final_selected_question = 
+            (crossword_question["category"], crossword_question["question"], crossword_question["url"], crossword_question["answers"])
+    
+        return final_selected_question
 
     except Exception as e:
         sentry_sdk.capture_exception(e)
-        print(f"Error selecting trivia and crossword questions: {e}")
-        return []  # Return an empty list in case of failure
+        print(f"Error selecting crossword question: {e}")
+        return None  # Return an empty list in case of failure
 
 
 
@@ -1492,6 +1491,8 @@ def select_wof_questions(winner):
             message += f"{counter}. {category}\n"
             counter = counter + 1
         premium_counts = counter
+        message += f"{counter}. 🌐🎲 Crossword ☕\n"
+        counter = counter + 1
         message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"

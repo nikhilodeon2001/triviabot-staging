@@ -4705,15 +4705,15 @@ def get_category_title(trivia_category, trivia_url):
         "Religion & Mythology": "🛐🐉",
         "Sports & Leisure": "⚽🌴",
         "World Culture": "🎭🗿",
-        "General Knowledge": "📚💡"
-        "Crossword: "📰✏️"
+        "General Knowledge": "📚💡",
+        "Crossword": "📰✏️"
     }
 
     # Check if the question URL is "jeopardy"
     if trivia_url.lower() == "jeopardy":
         return f"{trivia_category} 🟦🇯"
     # Otherwise, get the emojis based on the lookup table, defaulting to the category itself if not found
-    emojis = emoji_lookup.get(trivia_category, "😊😞")
+    emojis = emoji_lookup.get(trivia_category, "❓❔")
     return f"{trivia_category} {emojis}"
 
 

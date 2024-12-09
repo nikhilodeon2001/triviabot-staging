@@ -2209,7 +2209,7 @@ def generate_crossword_image(answer):
     else:
         prefill_positions = []
 
-     revealed_letters = [answer[i].upper() if i in prefill_positions else '_' for i in range(answer_length)]
+    revealed_letters = [answer[i].upper() if i in prefill_positions else '_' for i in range(answer_length)]
 
     # Draw the crossword grid
     for i, char in enumerate(answer):

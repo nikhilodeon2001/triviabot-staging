@@ -164,7 +164,6 @@ cities = [
 {"city": "Djibouti", "country": "Djibouti", "lat": 11.8251, "lon": 42.5903, "capital": True},
 {"city": "Dublin", "country": "Ireland", "lat": 53.3498, "lon": -6.2603, "capital": True},
 {"city": "Gaborone", "country": "Botswana", "lat": -24.6282, "lon": 25.9231, "capital": True},
-{"city": "Guatemala City", "country": "Guatemala", "lat": 14.6349, "lon": -90.5069, "capital": True},
 {"city": "Havana", "country": "Cuba", "lat": 23.1136, "lon": -82.3666, "capital": True},
 {"city": "Helsinki", "country": "Finland", "lat": 60.1695, "lon": 24.9354, "capital": True},
 {"city": "Jakarta", "country": "Indonesia", "lat": -6.2088, "lon": 106.8456, "capital": True},
@@ -190,7 +189,6 @@ cities = [
 {"city": "San José", "country": "Costa Rica", "lat": 9.9281, "lon": -84.0907, "capital": True},
 {"city": "San Salvador", "country": "El Salvador", "lat": 13.6929, "lon": -89.2182, "capital": True},
 {"city": "Santiago", "country": "Chile", "lat": -33.4489, "lon": -70.6693, "capital": True},
-{"city": "Santo Domingo", "country": "Dominican Republic", "lat": 18.4861, "lon": -69.9312, "capital": True},
 {"city": "Sarajevo", "country": "Bosnia and Herzegovina", "lat": 43.8563, "lon": 18.4131, "capital": True},
 {"city": "Sofia", "country": "Bulgaria", "lat": 42.6977, "lon": 23.3219, "capital": True},
 {"city": "Sucre", "country": "Bolivia", "lat": -19.0196, "lon": -65.2619, "capital": True},
@@ -1204,7 +1202,7 @@ def request_prompt(winner, done_events):
         
     start_time = time.time()  # Track when the question starts
     message = f"\n🖼️🔟 @{winner}, Fill in the blank. 10 words max and be good.\n"
-    message += f"\nDraw an okra themed picture of {winner} _____.\n"
+    message += f"\n'Draw an okra themed picture of @{winner} _____________.'\n"
     send_message(target_room_id, message)
 
     collected_words = []
@@ -1264,7 +1262,7 @@ def request_prompt(winner, done_events):
     if not collected_words:
         message = "Nothing. Okra time."
     else:
-        message = f"Ok(ra) I got: {' '.join(collected_words)}"
+        message = f"💥🤯 Ok...ra I got: 'Draw an okra themed picture of @{winner} {' '.join(collected_words)}'"
     send_message(target_room_id, message)
     return ' '.join(collected_words)
 
@@ -2285,9 +2283,7 @@ def process_round_options(round_winner, winner_points):
         "👻🎃 Ghost: Boo! Vanishing answers\n"
         "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )
-    send_message(target_room_id, message)
 
-    
     standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
     num_of_players = len(standings)
     
@@ -3764,6 +3760,9 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
 
     if user_answer == correct_answer:
         return True
+
+    if category == "Crossword":
+        return user_answer.strip().lower() == correct_answer.strip().lower()
 
     if url == "polynomial factors":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]

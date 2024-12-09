@@ -4706,6 +4706,7 @@ def get_category_title(trivia_category, trivia_url):
         "Sports & Leisure": "⚽🌴",
         "World Culture": "🎭🗿",
         "General Knowledge": "📚💡"
+        "Crossword: "📰✏️"
     }
 
     # Check if the question URL is "jeopardy"

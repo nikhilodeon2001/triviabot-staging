@@ -2285,7 +2285,7 @@ def process_round_options(round_winner, winner_points):
         "👻🎃 Ghost: Boo! Vanishing answers\n"
         "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )
-     send_message(target_room_id, message)
+    send_message(target_room_id, message)
 
     
     standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)

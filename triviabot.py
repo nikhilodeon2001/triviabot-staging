@@ -2380,7 +2380,7 @@ def prompt_user_for_response(round_winner, winner_points):
                         send_message(target_room_id, f"📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n")
         
                     if "cross" in message_content.lower():
-                        num_jeopardy_clues = 0
+                        num_crossword_clues = 0
                         send_message(target_room_id, f"📰❌ @{round_winner} has crossed off all Crossword questions.\n")
 
                     if "yolo" in message_content.lower():

@@ -3614,10 +3614,10 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     elif trivia_category == "Crossword":
         image_mxc, image_width, image_height, string_representation = generate_crossword_image(trivia_answer_list[0])
         if image_questions == True: 
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[{len(trivia_answer_list[0])} Letters] {trivia_question}\n"
             send_image_flag = True
         else:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n\n{string_representation}\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[{len(trivia_answer_list[0])} Letters] {trivia_question}\n\n{string_representation}\n"
         
     elif trivia_url == "multiple choice": 
         if trivia_answer_list[0] in {"True", "False"}:

@@ -4373,7 +4373,7 @@ def select_trivia_questions(questions_per_round):
                     },
                     {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
                     {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
-                    {"$sample": {"size": sample_size}  # Sample from the resulting limited set
+                    {"$sample": {"size": sample_size}}  # Sample from the resulting limited set
                 ]
                 
             else:

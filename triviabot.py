@@ -2269,8 +2269,8 @@ def process_round_options(round_winner, winner_points):
     message = (
         "⏱️⏳ <3 - 15>: Time (s) between questions\n"
         "🟦❌ Trebek: No Jeopardy questions\n"
-        "🟦✋ Jeopardy: 5 Jeopardy questions\n"
         "📰❌ Cross: No Crossword clues\n"
+        "🟦✋ Jeopardy: 5 Jeopardy questions\n"
         "📰✏️ Word: 5 Crossword clues\n"    
     )
 

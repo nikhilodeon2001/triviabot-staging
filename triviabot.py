@@ -94,7 +94,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 15000, "jeopardy": 100000, "wof": 1500}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -2209,6 +2209,8 @@ def generate_crossword_image(answer):
     else:
         prefill_positions = []
 
+     revealed_letters = [answer[i].upper() if i in prefill_positions else '_' for i in range(answer_length)]
+
     # Draw the crossword grid
     for i, char in enumerate(answer):
         x = i * cell_size
@@ -2223,6 +2225,9 @@ def generate_crossword_image(answer):
         else:
             draw.text((x + 20, y + 10), '_', fill="black", font=font)
 
+    # Create the string representation
+    display_string = ' '.join(revealed_letters)
+
     # Save the image to a bytes buffer
     image_buffer = io.BytesIO()
     img.save(image_buffer, format='PNG')
@@ -2232,9 +2237,7 @@ def generate_crossword_image(answer):
     content_uri = upload_image_to_matrix(image_buffer.read())
 
     # Return the content_uri, image width, height, and the answer
-    return content_uri, img_width, img_height
-
-
+    return content_uri, img_width, img_height, display_string
 
 
 
@@ -2265,23 +2268,35 @@ def process_round_options(round_winner, winner_points):
     message = (
         f"\n🍔🍟 @{round_winner}, what's your order?\n\n"
         "⏱️⏳ <3 - 15>:  Time (s) between questions\n"
-        "🟦✋ Jeopardy:  6 Jeopardy questions\n"
-        "🟦❌ Trebek:  0 Jeopardy questions\n"
-        #"🚫👆 <Category>:  Exclude one category\n"
+        "🟦❌ Trebek:  No Jeopardy questions\n"
+        "🟦✋ Jeopardy:  5 Jeopardy questions\n"
+        
+    )
+    send_message(target_room_id, message)
+    
+    message = (
+        "📰❌ Cross:  No Crossword clues\n"
+        "📰✏️ Word:  5 Crossword clues\n"
         "🔥🤘 Yolo:  No scores shown until the end\n"
+    )
+    send_message(target_room_id, message)
+    
+    message = (
         "👻🎃 Ghost: Boo! Vanishing answers\n"
         "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )
+     send_message(target_room_id, message)
 
+    
     standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
     num_of_players = len(standings)
     
     if winner_points >= god_mode_points and num_of_players >= god_mode_players:
-        message += "🎖🍆 (NEW) Dicktator: Control the Qs\n\n"
+        message += "🎖🥒 Dicktator: Bring order to the game\n\n"
     else:
         message += "\n"
-
     send_message(target_room_id, message)
+
     prompt_user_for_response(round_winner, winner_points)
 
 
@@ -2359,16 +2374,24 @@ def prompt_user_for_response(round_winner, winner_points):
                     #    send_message(target_room_id, f"🚫⛔ @{round_winner} has excluded {matched_category}.\n")
         
                     if "jeopardy" in message_content.lower():
-                        num_jeopardy_clues = 6
-                        send_message(target_room_id, f"🟦✋ @{round_winner} has added {num_jeopardy_clues} Jeopardy questions.\n")
+                        num_jeopardy_clues = 5
+                        send_message(target_room_id, f"🟦✋ Daily Double! @{round_winner} wants {num_jeopardy_clues} Jeopardy questions.\n")
         
                     if "trebek" in message_content.lower():
                         num_jeopardy_clues = 0
-                        send_message(target_room_id, f"🟦❌ @{round_winner} has removed all Jeopardy questions.\n")
+                        send_message(target_room_id, f"🟦❌ @{round_winner} says no to Jeopardy. Sorry Alex.\n")
+
+                    if "word" in message_content.lower():
+                        num_crossword_clues = 5
+                        send_message(target_room_id, f"📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n")
+        
+                    if "cross" in message_content.lower():
+                        num_jeopardy_clues = 0
+                        send_message(target_room_id, f"📰❌ @{round_winner} has crossed off all Crossword questions.\n")
 
                     if "yolo" in message_content.lower():
                         yolo_mode = True
-                        send_message(target_room_id, f"🤘🔥 @{round_winner} has nixed all scores.\n")
+                        send_message(target_room_id, f"🤘🔥 Yolo. @{round_winner} says 'don't sweat the small stuff'. No scores till the end.\n")
 
                     if "dicktator" in message_content.lower() and winner_points >= god_mode_points and num_of_players >= god_mode_players:
                         god_mode = True
@@ -2390,8 +2413,6 @@ def cross_reference_category(message_content):
        if category.lower() in message_content.lower() or message_content.lower() in category.lower():
             return category
     return None
-
-
 
 
 def generate_okra_joke(winner_name):
@@ -3591,10 +3612,13 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
             
     elif trivia_category == "Crossword":
-        image_mxc, image_width, image_height = generate_crossword_image(trivia_answer_list[0])
-        message_body += f"\n{number_block}✏️ {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
-        send_image_flag = True
-
+        image_mxc, image_width, image_height, string_representation = generate_crossword_image(trivia_answer_list[0])
+        if image_questions == True: 
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n\n{string_representation}\n"
+        
     elif trivia_url == "multiple choice": 
         if trivia_answer_list[0] in {"True", "False"}:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨TRUE or FALSE🚨 {trivia_question}\n\n"
@@ -4256,52 +4280,76 @@ def select_trivia_questions(questions_per_round):
 
         selected_questions = []
 
-        
-        math_questions = [get_math_question() for _ in range(num_math_questions)]
-        stats_questions = [get_stats_question() for _ in range(num_stats_questions)]
-        selected_questions.extend(math_questions)
-        selected_questions.extend(stats_questions)
-
-        # Fetch wheel of fortune questions using the random subset method
-        wof_collection = db["wof_questions"]
-        pipeline_wof = [
-            {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},
-            {"$sample": {"size": num_wof_clues}}  # Apply sampling on the filtered subset
-        ]
-        wof_questions = list(wof_collection.aggregate(pipeline_wof))
-        selected_questions.extend(wof_questions)
- 
-        # Fetch mysterybox questions using the random subset method
-        mysterybox_collection = db["mysterybox_questions"]
-        pipeline_mysterybox = [
-            {"$match": {"_id": {"$nin": list(recent_mysterybox_ids)}}},
-            {"$sample": {"size": num_mysterybox_clues}}  # Apply sampling on the filtered subset
-        ]
-        mysterybox_questions = list(mysterybox_collection.aggregate(pipeline_mysterybox))
-        selected_questions.extend(mysterybox_questions)
-        
         # Fetch crossword questions using the random subset method
-        crossword_collection = db["crossword_questions"]
-        pipeline_crossword = [
-            {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
-            {"$sample": {"size": num_crossword_clues}}  # Apply sampling on the filtered subset
-        ]
-        crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
-        selected_questions.extend(crossword_questions)
 
-        # Fetch jeopardy questions using the random subset method
-        jeopardy_collection = db["jeopardy_questions"]
-        pipeline_jeopardy = [
-            {"$match": {"_id": {"$nin": list(recent_jeopardy_ids)}}},
-            {"$sample": {"size": num_jeopardy_clues}}  # Apply sampling on the filtered subset
-        ]
-        jeopardy_questions = list(jeopardy_collection.aggregate(pipeline_jeopardy))
-        selected_questions.extend(jeopardy_questions)
+        sample_size = min(num_crossword_clues, questions_per_round - len(selected_questions))
+        if sample_size > 0:
+            crossword_collection = db["crossword_questions"]
+            pipeline_crossword = [
+                {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
+                {"$sample": {"size":sample_size}}  # Apply sampling on the filtered subset
+            ]
+            crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
+            selected_questions.extend(crossword_questions)
 
-        # Calculate the remaining questions needed for general trivia
-        remaining_needed = max(questions_per_round - len(wof_questions) - len(mysterybox_questions) - len(crossword_questions) - len(jeopardy_questions) - len(math_questions) - len(stats_questions), 0)
+            crossword_question_ids = [doc["_id"] for doc in crossword_questions]
+            if crossword_question_ids:
+                store_question_ids_in_mongo(crossword_question_ids, "crossword")
+
+        sample_size = min(num_jeopardy_clues, questions_per_round - len(selected_questions))
+        if sample_size > 0:
+            jeopardy_collection = db["jeopardy_questions"]
+            pipeline_jeopardy = [
+                {"$match": {"_id": {"$nin": list(recent_jeopardy_ids)}}},
+                {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
+            ]
+            jeopardy_questions = list(jeopardy_collection.aggregate(pipeline_jeopardy))
+            selected_questions.extend(jeopardy_questions)
+
+            jeopardy_question_ids = [doc["_id"] for doc in jeopardy_questions]
+            if jeopardy_question_ids:
+                store_question_ids_in_mongo(jeopardy_question_ids, "jeopardy")
+
+        sample_size = min(num_math_questions, questions_per_round - len(selected_questions))
+        if sample_size > 0:
+            math_questions = [get_math_question() for _ in range(sample_size)]
+            selected_questions.extend(math_questions)
+
+        sample_size = min(num_stats_questions, questions_per_round - len(selected_questions))
+        if sample_size > 0:
+            stats_questions = [get_stats_question() for _ in range(sample_size)]
+            selected_questions.extend(stats_questions)
+
+        sample_size = min(num_wof_clues, questions_per_round - len(selected_questions))
+        if sample_size > 0:
+            wof_collection = db["wof_questions"]
+            pipeline_wof = [
+                {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},
+                {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
+            ]
+            wof_questions = list(wof_collection.aggregate(pipeline_wof))
+            selected_questions.extend(wof_questions)
+            
+            wof_question_ids = [doc["_id"] for doc in wof_questions]
+            if wof_question_ids:
+                store_question_ids_in_mongo(wof_question_ids, "wof")
+ 
+        sample_size = min(num_mysterybox_clues, questions_per_round - len(selected_questions))
+        if sample_size > 0:
+            mysterybox_collection = db["mysterybox_questions"]
+            pipeline_mysterybox = [
+                {"$match": {"_id": {"$nin": list(recent_mysterybox_ids)}}},
+                {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
+            ]
+            mysterybox_questions = list(mysterybox_collection.aggregate(pipeline_mysterybox))
+            selected_questions.extend(mysterybox_questions)
+
+            mysterybox_question_ids = [doc["_id"] for doc in mysterybox_questions]
+            if mysterybox_question_ids:
+                store_question_ids_in_mongo(mysterybox_question_ids, "mysterybox")
         
-        if remaining_needed > 0:
+        sample_size = max(questions_per_round - len(selected_questions), 0)
+        if sample_size > 0:
             trivia_collection = db["trivia_questions"]
 
             if image_questions == False:
@@ -4325,7 +4373,7 @@ def select_trivia_questions(questions_per_round):
                     },
                     {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
                     {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
-                    {"$sample": {"size": remaining_needed}}  # Sample from the resulting limited set
+                    {"$sample": {"size": sample_size}  # Sample from the resulting limited set
                 ]
                 
             else:
@@ -4339,33 +4387,16 @@ def select_trivia_questions(questions_per_round):
                     },
                     {"$unwind": "$questions"},  # Unwind the limited question list for each category back into individual documents
                     {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
-                    {"$sample": {"size": remaining_needed}}  # Sample from the resulting limited set
+                    {"$sample": {"size": sample_size}}  # Sample from the resulting limited set
                 ]
 
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
 
-            # Store separate sets of IDs in MongoDB only if they are non-empty
-            wof_question_ids = [doc["_id"] for doc in wof_questions]
-            if wof_question_ids:
-                store_question_ids_in_mongo(wof_question_ids, "wof")
-            
-            mysterybox_question_ids = [doc["_id"] for doc in mysterybox_questions]
-            if mysterybox_question_ids:
-                store_question_ids_in_mongo(mysterybox_question_ids, "mysterybox")
-            
-            crossword_question_ids = [doc["_id"] for doc in crossword_questions]
-            if crossword_question_ids:
-                store_question_ids_in_mongo(crossword_question_ids, "crossword")
-
-            jeopardy_question_ids = [doc["_id"] for doc in jeopardy_questions]
-            if jeopardy_question_ids:
-                store_question_ids_in_mongo(jeopardy_question_ids, "jeopardy")
-
             general_question_ids = [doc["_id"] for doc in trivia_questions]
             if general_question_ids:
                 store_question_ids_in_mongo(general_question_ids, "general")
-
+        
         # Shuffle the combined list of selected questions
         random.shuffle(selected_questions)
 

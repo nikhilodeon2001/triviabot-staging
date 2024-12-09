@@ -208,43 +208,9 @@ cities = [
 ]
 
 
-def select_crossword_question():
-    try:
-        db = connect_to_mongodb()
-        
-        # Fetch recent IDs separately for each type
-        recent_crossword_ids = get_recent_question_ids_from_mongo("crossword")
-        
-        # Fetch crossword questions using the random subset method
-        crossword_collection = db["crossword_questions"]
-        pipeline_crossword = [
-            {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
-            {"$sample": {"size": 1}}  # Apply sampling on the filtered subset
-        ]
-        crossword_question = crossword_collection.aggregate(pipeline_crossword)
-
-        # Store separate sets of IDs in MongoDB only if they are non-empty
-        crossword_question_id = crossword_question["_id"]
-        
-        if crossword_question_id:
-            store_question_ids_in_mongo(crossword_question_id, "crossword")
-
-        final_selected_question = 
-            (crossword_question["category"], crossword_question["question"], crossword_question["url"], crossword_question["answers"])
-    
-        return final_selected_question
-
-    except Exception as e:
-        sentry_sdk.capture_exception(e)
-        print(f"Error selecting crossword question: {e}")
-        return None  # Return an empty list in case of failure
-
-
-
-
-
 def generate_themed_country_image(country, city):
-    prompt = f"Generate a stereotypical image of okra in {country} without any text in the image."
+
+    prompt = f"Generate a detailed stereotypical portrayal of {country}. Primarily the {country}'s official colors as the color palette for the picture."
     
     # Generate the image using DALL-E
     try:
@@ -1491,8 +1457,6 @@ def select_wof_questions(winner):
             message += f"{counter}. {category}\n"
             counter = counter + 1
         premium_counts = counter
-        message += f"{counter}. 🌐🎲 Crossword ☕\n"
-        counter = counter + 1
         message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"

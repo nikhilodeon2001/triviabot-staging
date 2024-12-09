@@ -103,7 +103,7 @@ ghost_mode_default = False
 ghost_mode = ghost_mode_default
 god_mode_default = False
 god_mode = god_mode_default
-god_mode_points = 100
+god_mode_points = 5000
 god_mode_players = 5
 yolo_mode_default = False
 yolo_mode = yolo_mode_default
@@ -210,7 +210,7 @@ cities = [
 
 def generate_themed_country_image(country, city):
 
-    prompt = f"Generate an image of a stereotypical setting in {country}. Use elements and colors from {country}'s flag in the picture "
+    prompt = f"Generate a stereotypical image of okra in {country} without any text in the image."
     
     # Generate the image using DALL-E
     try:
@@ -683,7 +683,7 @@ def describe_image_with_vision(image_url, mode, prompt):
 
 
 
-def get_user_data(username):
+def get_user_data(username, num_of_subreddits):
     try:
         # Fetch user profile
         user = reddit.redditor(username)
@@ -724,7 +724,7 @@ def get_user_data(username):
             subreddit_counts[subreddit] += 1
 
         # Get the top 5 subreddits without counts
-        top_subreddits = ", ".join([subreddit for subreddit, _ in subreddit_counts.most_common(1)])
+        top_subreddits = ", ".join([subreddit for subreddit, _ in subreddit_counts.most_common(num_of_subreddits)])
 
         return {
             "avatar_url": avatar_url,
@@ -961,7 +961,7 @@ def generate_round_summary_image(round_data, winner):
         
     elif winner_coffees > 100:
         prompt = (
-            f"An anthropomorphism of {winner} surrounded by okra and money. "
+            f"Draw What you think {winner} looks like surrounded by okra and money. "
             "Add glowing lights, hearts, and a festive atmosphere."
         )
         message = f"✊🔥 {winner_at}, thank you for your donation to the cause. And nice streak!\n"
@@ -972,9 +972,9 @@ def generate_round_summary_image(round_data, winner):
             "1": "🌹🏰 Okrenaissance",
             "2": "😇✨ Okroly and Divine",
             "3": "🎲🔀 (OK)Random",
-            "4": f"🖼️🔤 Okraverse (Interactive) ☕☕",
-            "5": f"🖼️👤 Okravatar (Reddit Avatar) ☕☕",
-            "6": f"🖼️📜 Okraricature (Top Subreddit) ☕☕"
+            "4": f"🖼️🔤 Provide the Prompt ☕",
+            "5": f"🖼️👤 From your Reddit Avatar ☕",
+            "6": f"🖼️📜 From your Top Subreddit ☕"
         }
 
         # Ask the user to choose a category
@@ -984,7 +984,7 @@ def generate_round_summary_image(round_data, winner):
 
         if selected_category == "5" or selected_category == "6":
             try:
-                user_data = get_user_data(winner)
+                user_data = get_user_data(winner, 1)
                 if not user_data:
                     print(f"Failed to fetch data for {winner}.")
                     user_data = {"avatar_url": "N/A", "subreddits": []}
@@ -999,22 +999,22 @@ def generate_round_summary_image(round_data, winner):
                     
         prompts_by_category = {
             "0": [
-                f"{winner} is being chased by someone holding an okra in a hyperrealistic scary horror movie type situation. The image should be in 1st person view of the person chasing {winner} and elicit intense fear. Try hard to bring and merge elements from the username {winner} into their humanoid depiction."
+                f"A horror image of what you think {winner} looks like being pursued by something okra themed."
             ],
             "1": [
-                f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+                f"A Renaissance painting of what you think {winner} looks like holding an okra. Make the painting elegant and refined."
             ],
             "2": [
-                f"{winner} worshipping an okra. Make it appealing and accepting of religions of all types. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+                f"An image of what you think {winner} looks like worshipping an okra. Make it appealing and accepting of religions of all types."
             ],
             "3": [
-                f"{winner} intereracting with an okra in the most crazy, ridiculous, and over the top random way. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+                f"An image of what you think {winner} looks like intereracting with an okra in the most crazy, ridiculous, and over the top random way."
             ],
             "4": [
-                f"Draw an okra themed picture that MUST include '{additional_prompt}'.\n"
+                f"Draw an okra themed picture of {winner} {additional_prompt}.\n"  
             ],
             "5": [
-                f"Draw an okra themed picture of what you think {winner} looks like based on their avatar, which looks like '{reddit_avatar_description}'.\n"
+                f"Draw an okra themed picture of what you think {winner} looks like based on their avatar, which is described as '{reddit_avatar_description}'.\n"
             ],
             "6": [
                 f"Draw an okra themed caricature of what you think {winner} looks like based on their most visited subreddit, which is '{top_subreddits}'.\n"
@@ -1025,7 +1025,7 @@ def generate_round_summary_image(round_data, winner):
         if selected_category and selected_category in prompts_by_category:
             prompt = random.choice(prompts_by_category[selected_category])
         else:
-            prompt = f"{winner} is being chased by someone holding an okra in a hyperrealistic scary horror movie setting. The image should be in 1st person view of the person chasing {winner}. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+            prompt = f"A horror image of what you think {winner} looks like being pursued by something okra themed."
 
             
     print(prompt)
@@ -1072,7 +1072,7 @@ def generate_round_summary_image(round_data, winner):
         # Check if the error is due to the safety system
         if "Your request was rejected as a result of our safety system" in str(e):
             # Use a default safe prompt
-            default_prompt = f"A Renaissance painting of {winner} holding an okra. Make the painting elegant and refined. Try hard to bring and merge elements from their username {winner} into a humanoid depiction of them."
+            default_prompt = f"A Renaissance painting of what you think {winner} looks like holding an okra. Make the painting elegant and refined."
             try:
                 response = openai.Image.create(
                     prompt=default_prompt,
@@ -1123,7 +1123,7 @@ def ask_category(winner, categories, winner_coffees):
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Display categories
-    category_message = f"\n🎨🖍️ @{winner} Pick one. Some require ☕☕.\n\n"
+    category_message = f"\n🎨🖍️ @{winner} Pick one. Some require ☕.\n\n"
     for key, value in categories.items():
         category_message += f"{key}: {value}\n"
     send_message(target_room_id, category_message)
@@ -1203,7 +1203,8 @@ def request_prompt(winner, done_events):
         params["since"] = since_token
         
     start_time = time.time()  # Track when the question starts
-    message = f"\n🖼️🔟 @{winner}, customize your image (10 words max). Be good.\n"
+    message = f"\n🖼️🔟 @{winner}, Fill in the blank. 10 words max and be good.\n"
+    message += f"\nDraw an okra themed picture of {winner} _____.\n"
     send_message(target_room_id, message)
 
     collected_words = []
@@ -1448,7 +1449,7 @@ def select_wof_questions(winner):
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
-        message = f"\n🍷⚔️ @{winner}: Choose wisely.  Some require ☕☕.\n\n"
+        message = f"\n🍷⚔️ @{winner}: Choose wisely.  Some require ☕.\n\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 1
         for doc in wof_questions:
@@ -1456,9 +1457,9 @@ def select_wof_questions(winner):
             message += f"{counter}. {category}\n"
             counter = counter + 1
         premium_counts = counter
-        message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕☕\n"
+        message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🌍❔ Where's Okra? ☕☕\n"
+        message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         send_message(target_room_id, message)  
 
         selected_wof_category = ask_wof_number(winner)
@@ -2820,7 +2821,7 @@ def generate_round_summary(round_data, winner):
 
     elif creep_okra == True:
         try:
-            user_data = get_user_data(winner)
+            user_data = get_user_data(winner, 5)
             if not user_data:
                 print(f"Failed to fetch data for {winner}.")
                 user_data = {"avatar_url": "N/A", "subreddits": ""}
@@ -2835,7 +2836,7 @@ def generate_round_summary(round_data, winner):
         
         prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
-            f"Roast and deeply insult them about their username, {winner}, their avatar description, {reddit_avatar_description}, and their top 5 subreddits, '{top_subreddits}'. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response. "
+            f"Roast and deeply insult them about their username, {winner}, their avatar description, {reddit_avatar_description}, and their top 5 subreddits, which are '{top_subreddits}'. Be very mean, negative, and use rough language. Be sarcastic and use emojis in your response. "
             f"Create no more than 10 sentences in total.\n"
         )
 

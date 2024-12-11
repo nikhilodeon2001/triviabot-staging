@@ -2291,7 +2291,7 @@ def process_round_options(round_winner, winner_points):
 
     message = (
         "🔥🤘 Yolo: No scores shown until the end\n"
-        "🙈🚫 Blind: No question answers shown
+        "🙈🚫 Blind: No question answers shown\n"
         "👻🎃 Ghost: Boo! Vanishing user responses\n"
         "🚩🔨 Marx: Silence! No celebrating when right\n"
         "❌📷 Blank: No images. None. Nada. Zilch.\n"

@@ -113,6 +113,12 @@ magic_number_correct = False
 wf_winner = False
 nice_okra = False
 creep_okra = False
+blind_mode_default = False
+blind_mode = blind_mode_default
+marx_mode_default = False
+marx_mode = marx_mode_default
+
+
 
 image_questions_default = True
 image_questions = image_questions_default
@@ -466,9 +472,9 @@ def get_wikipedia_article(max_words=3, max_length=16):
                 pageid = page_info.get("pageid")
                 intro_text = fetch_wikipedia_intro(pageid)
 
-                # Ensure the intro text is at least 1000 characters
-                if len(intro_text) < 1000:
+                if len(intro_text) < 500:
                     continue
+
                 
                 redacted_text = redact_intro_text(title, intro_text)
                 category = categorize_text(intro_text, title)
@@ -2245,7 +2251,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra, marx_mode, blind_mode
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -2262,6 +2268,8 @@ def process_round_options(round_winner, winner_points):
     num_math_questions = num_math_questions_default
     num_stats_questions = num_stats_questions_default
     image_questions = image_questions_default
+    marx_mode = marx_mode_default
+    blind_mode = blind_mode_default
     
     if round_winner is None:
         return
@@ -2276,14 +2284,16 @@ def process_round_options(round_winner, winner_points):
         "🟦❌ Trebek: No Jeopardy questions\n"
         "📰❌ Cross: No Crossword clues\n"
         "🟦✋ Jeopardy: 5 Jeopardy questions\n"
-        "📰✏️ Word: 5 Crossword clues\n"    
+        "📰✏️ Word: 5 Crossword clues"    
     )
 
     send_message(target_room_id, message)
 
     message = (
         "🔥🤘 Yolo: No scores shown until the end\n"
-        "👻🎃 Ghost: Boo! Vanishing answers\n"
+        "🙈🚫 Blind: No question answers shown
+        "👻🎃 Ghost: Boo! Vanishing user responses\n"
+        "🚩🔨 Marx: Silence! No celebrating when right\n"
         "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )
 
@@ -2300,7 +2310,7 @@ def process_round_options(round_winner, winner_points):
 
 
 def prompt_user_for_response(round_winner, winner_points):
-    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions, num_stats_questions, image_questions
+    global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions, num_stats_questions, image_questions, marx_mode, blind_mode
     
     # Call initialize_sync to set since_token
     initialize_sync()
@@ -2398,11 +2408,19 @@ def prompt_user_for_response(round_winner, winner_points):
         
                     if "ghost" in message_content.lower():
                         ghost_mode = 1
-                        send_message(target_room_id, f"👻🎃 @{round_winner} says Boo! Answers will disappear.\n")
+                        send_message(target_room_id, f"👻🎃 @{round_winner} says Boo! Your responses will disappear.\n")
 
                     if "blank" in message_content.lower():
                         image_questions = False
                         send_message(target_room_id, f"❌📷 @{round_winner} thinks a word is worth 1000 images.\n")
+
+                    if "blind" in message_content.lower():
+                        blind_mode = True
+                        send_message(target_room_id, f"🙈🚫 @{round_winner} is blind to the truth. No answers will be shown.\n")
+
+                    if "marx" in message_content.lower():
+                        marx_mode = True
+                        send_message(target_room_id, f"🚩🔨 @{round_winner} is a commie. No recognizing right answers.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
@@ -3764,8 +3782,11 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     if user_answer == correct_answer:
         return True
 
+    no_spaces_user = user_answer.replace(" ", "")      
+    no_spaces_correct = correct_answer.replace(" ", "") 
+
     if category == "Crossword":
-        return user_answer.strip().lower() == correct_answer.strip().lower()
+        return no_spaces_user.lower() ==no_spaces_correct.lower()
 
     if url == "polynomial factors":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
@@ -4029,13 +4050,13 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
     # Construct a single message for all the responses
-    if ghost_mode == True:
+    if blind_mode == True:
         message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
     else:
         message = f"\n✅ Answer ✅\n{trivia_answer}\n"
             
     # Notify the chat
-    if correct_responses:    
+    if correct_responses and marx_mode == False:    
         correct_responses_length = len(correct_responses)
         
         # Loop through the responses and append to the message

@@ -465,6 +465,11 @@ def get_wikipedia_article(max_words=3, max_length=16):
                 # Fetch the introductory text (summary)
                 pageid = page_info.get("pageid")
                 intro_text = fetch_wikipedia_intro(pageid)
+
+                # Ensure the intro text is at least 1000 characters
+                if len(intro_text) < 1000:
+                    continue
+                
                 redacted_text = redact_intro_text(title, intro_text)
                 category = categorize_text(intro_text, title)
 

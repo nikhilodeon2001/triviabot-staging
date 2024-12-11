@@ -2293,7 +2293,7 @@ def process_round_options(round_winner, winner_points):
         "🔥🤘 Yolo: No scores shown until the end\n"
         "🙈🚫 Blind: No question answers shown\n"
         "👻🎃 Ghost: Boo! Vanishing user responses\n"
-        "🚩🔨 Marx: Silence! No celebrating when right\n"
+        "🚩🔨 Marx: Silence! No celebrating. No fun.\n"
         "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )
 
@@ -2420,7 +2420,7 @@ def prompt_user_for_response(round_winner, winner_points):
 
                     if "marx" in message_content.lower():
                         marx_mode = True
-                        send_message(target_room_id, f"🚩🔨 @{round_winner} is a commie. No recognizing right answers.\n")
+                        send_message(target_room_id, f"🚩🔨 @{round_winner} is a commie. No celebrating right answers.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")
@@ -5005,6 +5005,7 @@ def start_trivia_round():
             
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
+                time.sleep(10)
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)

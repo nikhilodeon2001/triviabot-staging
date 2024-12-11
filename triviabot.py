@@ -4017,7 +4017,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 fastest_response_time = response_time
                 fastest_correct_event_id = event_id
             
-    if emoji_mode == True and fastest_correct_event_id is not None:
+    if emoji_mode == True and fastest_correct_event_id is not None and blind_mode == False and marx_mode == False:
         react_to_message(fastest_correct_event_id, target_room_id, "fastest")
     
     # Now that we know the fastest responder, iterate over correct_responses to:
@@ -4050,9 +4050,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
     # Construct a single message for all the responses
-    if blind_mode == True:
-        message = f"\n✅ Answer ✅\n👻👻👻👻👻\n"
-    else:
+    if blind_mode == False:
         message = f"\n✅ Answer ✅\n{trivia_answer}\n"
             
     # Notify the chat

@@ -4050,6 +4050,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         current_question_data["scoreboard_after_question"] = dict(scoreboard)
 
     # Construct a single message for all the responses
+    message = None
     if blind_mode == False:
         message = f"\n✅ Answer ✅\n{trivia_answer}\n"
             

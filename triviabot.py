@@ -1,4 +1,5 @@
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -113,6 +114,7 @@ magic_number_correct = False
 wf_winner = False
 nice_okra = False
 creep_okra = False
+seductive_okra = False
 blind_mode_default = False
 blind_mode = blind_mode_default
 marx_mode_default = False
@@ -794,6 +796,7 @@ def load_parameters():
     global num_math_questions
     global num_stats_questions_default
     global num_stats_questions
+    global skip_summary
  
     
     # Default values
@@ -806,7 +809,8 @@ def load_parameters():
         "num_wof_clues_final_default": 3,
         "num_wf_letters": 3,
         "num_math_questions_default": 0,
-        "num_stats_questions_default": 0
+        "num_stats_questions_default": 0,
+        "skip_summary": False
     }
 
     
@@ -835,6 +839,7 @@ def load_parameters():
             num_wf_letters = parameters["num_wf_letters"]
             num_math_questions_default = parameters["num_math_questions_default"]
             num_stats_questions_default = parameters["num_stats_questions_default"]
+            skip_summary = parameters["skip_summary"]
 
             num_mysterybox_clues = num_mysterybox_clues_default
             num_crossword_clues = num_crossword_clues_default
@@ -875,10 +880,11 @@ def load_parameters():
 
 
 def nice_creep_okra_option(winner):
-    global since_token, params, headers, max_retries, delay_between_retries, nice_okra, creep_okra, wf_winner
+    global since_token, params, headers, max_retries, delay_between_retries, nice_okra, creep_okra, wf_winner, seductive_okra
     nice_okra = False
     creep_okra = False
     wf_winner = False
+    seductive_okra = False
 
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
@@ -890,7 +896,8 @@ def nice_creep_okra_option(winner):
     message = f"\n☕🤝 Thank you @{winner} for your support.\n\n" 
     message += f"🥒😊 Say 'okra' and I'll be nice.\n"
     message += f"👀🔭 Say 'creep' and I'll snoop your Reddit profile.\n"
-    message += f"🔥🍗 Say neither and I roast you.\n\n"
+    message += f"💋👠 Say 'love me' and I'll seduce you.\n"
+    message += f"🔥🍗 Say nothing and I roast you.\n\n"
     send_message(target_room_id, message)
     
     while time.time() - start_time < magic_time:
@@ -934,6 +941,7 @@ def nice_creep_okra_option(winner):
                         nice_okra = True
                         wf_winner = True
                         creep_okra = False
+                        seductive_okra = False
                         return None
                         
                     if "creep" in message_content.lower():
@@ -941,13 +949,23 @@ def nice_creep_okra_option(winner):
                         creep_okra = True
                         nice_okra = False
                         wf_winner = False
+                        seductive_okra = False
+                        return None
+
+                    if "love me" in message_content.lower():
+                        react_to_message(event_id, target_room_id, "okra21")
+                        creep_okra = False
+                        nice_okra = False
+                        wf_winner = False
+                        seductive_okra = True 
                         return None
                         
-                    if "neither" in message_content.lower():
+                    if "nothing" in message_content.lower():
                         react_to_message(event_id, target_room_id, "okra21")
                         nice_okra = False
                         creep_okra = False
                         wf_winner = False
+                        seductive_okra = False
                         return None
                         
         except requests.exceptions.RequestException as e:
@@ -958,6 +976,12 @@ def nice_creep_okra_option(winner):
 
 
 def generate_round_summary_image(round_data, winner):
+
+    if skip_summary == True:
+        message += "\nBe sure to drink your Okratine.\n"
+        send_message(target_room_id, message)
+        return None
+        
     winner_coffees = get_coffees(winner)
     winner_at = f"@{winner}"
     
@@ -1288,7 +1312,7 @@ def get_coffees(username):
     donors_collection = db["donors"]  # Ensure this matches the name of your collection
 
     pipeline = [
-        {"$match": {"name": username}},  # Filter by username
+        {"$match": {"name": {"$regex": f"^{username}$", "$options": "i"}}},  # Case-insensitive match
         {"$group": {  # Group by username and calculate total coffees
             "_id": "$name",
             "total_coffees": {"$sum": "$coffees"}
@@ -2251,7 +2275,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra, marx_mode, blind_mode
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra, marx_mode, blind_mode, seductive_okra
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -2265,6 +2289,7 @@ def process_round_options(round_winner, winner_points):
     wf_winner = False
     nice_okra = False
     creep_okra = False
+    seductive_okra = False
     num_math_questions = num_math_questions_default
     num_stats_questions = num_stats_questions_default
     image_questions = image_questions_default
@@ -2818,8 +2843,12 @@ def scramble_text(input_text):
 
 
 def generate_round_summary(round_data, winner):
-    global nice_okra, creep_okra, wf_winner
+    global nice_okra, creep_okra, wf_winner, seductive_okra
     #ask_magic_number(winner) 
+
+    if skip_summary == True:
+        summary = "Make sure to drink your Okratine."
+        return summary
 
     winner_coffees = get_coffees(winner)
     is_sovereign = sovereign_check(winner)
@@ -2878,12 +2907,31 @@ def generate_round_summary(round_data, winner):
             f"Create no more than 10 sentences in total.\n"
         )
 
+
+    elif seductive_okra == True and is_sovereign == True:
+         prompt = (
+            f"{winner_at} is the username of the winner of the trivia round. "
+            f"Start by giving {winner_at} kudos for being a previous Sovereign. Then seduce {winner_at} using multiple pickup lines customized to their username: {winner}. Also mention how sexy specific answers they gave during the round were. "
+            f"Be uncomfortably and embarrasingly forward in your approaches in trying to get them to go out with you. "
+            "Create no more than 4 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of their responses:\n"
+            "Questions asked:\n"
+        )
+    
+    elif seductive_okra == True and is_sovereign == False:
+         prompt = (
+            f"{winner_at} is the username of the winner of the trivia round. "
+            f"Seduce {winner_at} using multiple pickup lines customized to their username: {winner}. Also mention how sexy specific answers they gave during the round were. "
+            f"Be uncomfortably and embarrasingly forward in your approaches in trying to get them to go out with you. "
+            "Create no more than 4 sentences in total. Here is a detailed summary of the trivia round with explicit mappings of their responses:\n"
+            "Questions asked:\n"
+        )
+
     elif wf_winner == True and is_sovereign == True:
          prompt = (
             f"{winner_at} is the username of the winner of the trivia round. "
             "Love bomb them about their username and be very specific, positive, and loving. Give them a lot of admiration for being a previous Sovereign. Then mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut. "
             "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Here is a detailed summary of the trivia round with explicit mappings of their responses:\n"
             "Questions asked:\n"
         )
 
@@ -2892,7 +2940,7 @@ def generate_round_summary(round_data, winner):
             f"{winner_at} is the username of the winner of the trivia round. "
             "Love bomb them about their username and be very specific, positive, and loving. Specifically mention and compliment specific responses they gave during the round. Also mention about how much beter they are than eveyone else including yourself, who is the great OkraStrut."
             "Create no more than 4 sentences in total. Be sweet, happy, positive, and use emojis in your response. "
-            "Here is a detailed summary of the trivia round with explicit mappings of user responses:\n"
+            "Here is a detailed summary of the trivia round with explicit mappings of their responses:\n"
             "Questions asked:\n"
         )
 
@@ -2990,6 +3038,19 @@ def generate_round_summary(round_data, winner):
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a ruthless and sarcastic comedian specializing in roasting people. Your job is to be mean, cutting, and hilariously offensive while delivering a brutal roast of the winning trivia player. Use dark humor, biting sarcasm, and clever wit to insult the person based on their username, profile picture description, recent posts, and recent comments. Do not hold back and aim to make the roast as harsh and over-the-top as possible. Use plenty of emojis for flair, but stay within 8 sentences."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=500,
+                n=1,
+                stop=None,
+                temperature=1.0,
+            )
+
+        elif seductive_okra == True:
+            response = openai.ChatCompletion.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a sleazy man trying to come onto the winner of a trivia game. You use cheesy pick up lines and are embarassingly forward in your approaches. Make the winner uncomfortable and be ruthless in your seduction. Use plenty of emojis for flair, but stay within 8 sentences."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=500,

@@ -1308,6 +1308,7 @@ def request_prompt(winner, done_events):
 
 
 def get_coffees(username):
+    username = username.lower()
     db = connect_to_mongodb()
     donors_collection = db["donors"]  # Ensure this matches the name of your collection
 
@@ -1356,10 +1357,14 @@ def fetch_donations():
                 if isinstance(donor, dict):  # Ensure donor is a dictionary
                     # Extract and process donor details
                     donor_id = donor.get("support_id")
-                    donor_name = donor.get("supporter_name")
+                    donor_name = donor.get("supporter_name", "")
                     donor_coffees = donor.get("support_coffees")
                     donor_coffee_price = donor.get("support_coffee_price")
                     donor_date = donor.get("support_created_on")
+
+                    if donor_name.startswith("@"):
+                        donor_name = donor_name[1:]
+                    donor_name = donor_name.lower()
 
                     # Check if donor already exists in MongoDB
                     if not donors_collection.find_one({"donor_id": donor_id}):

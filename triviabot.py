@@ -1310,6 +1310,7 @@ def request_prompt(winner, done_events):
 def get_coffees(username):
     db = connect_to_mongodb()
     donors_collection = db["donors"]  # Ensure this matches the name of your collection
+    username = username.lower()
 
     pipeline = [
         {"$match": {"name": {"$regex": f"^{username}$", "$options": "i"}}},  # Case-insensitive match

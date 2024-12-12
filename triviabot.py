@@ -5092,6 +5092,12 @@ try:
     # Load needed variables for sync
     load_global_variables()
     load_parameters()
+    print(get_coffees("nsharma2"))
+    print(get_coffees("nsHarma2"))
+    print(get_coffees("Nsharma2"))
+    print(get_coffees("nSharMa2"))
+    print(get_coffees("NSHARMA2"))
+          
     
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    

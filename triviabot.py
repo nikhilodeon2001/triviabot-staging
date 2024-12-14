@@ -317,9 +317,9 @@ def ask_survey_question():
         percentage_positive = (positive_responses / total_responses) * 100
         percentage_negative = 100 - percentage_positive
         if percentage_negative > 50:
-            summary_message = f"🥀 {percentage_negative:.2f}% of people have said NOkra. "
+            summary_message = f"🥀🪦 {percentage_negative:.2f}% of people have said NOkra. "
         else:
-            summary_message = f"🏄‍♂️ {percentage_positive:.2f}% of people have said OkraYeah!"
+            summary_message = f"🏄‍♂️🌟 {percentage_positive:.2f}% of people have said OkraYeah!"
             
         send_message(target_room_id, summary_message)
         time.sleep(3)

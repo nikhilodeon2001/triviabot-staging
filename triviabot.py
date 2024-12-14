@@ -242,9 +242,9 @@ def ask_survey_question():
     initialize_sync()
     start_time = time.time()  # Track when the question starts
        
-    message = f"\n👍👎 YES or NO\n"
-    message += f"\n{question_text}\n"
-    message += f"\nOnly one answer per user will be recorded. Answers can be changed and persist indefinitely.\n"
+    message = f"\n👍👎 SURVEY QUESTION: YES or NO\n"
+    message += f"\n❓ {question_text} ❓\n"
+    message += f"\n🛑1️⃣ No spamming. Only one answer per user recorded. \n"
 
     send_message(target_room_id, message)
     
@@ -311,9 +311,9 @@ def ask_survey_question():
         percentage_positive = (positive_responses / total_responses) * 100
         percentage_negative = 100 - percentage_positive
         if percentage_negative > 50:
-            summary_message = f"🥀🪦 {percentage_negative:.2f}% of people have said NOkra. "
+            summary_message = f"🥀🪦 {int(percentage_negative)}% of people have said NOkra. "
         else:
-            summary_message = f"🏄‍♂️🌟 {percentage_positive:.2f}% of people have said OkraYeah!"
+            summary_message = f"🏄‍♂️🌟 {int(percentage_positive)}% of people have said OkraYeah!"
             
         send_message(target_room_id, summary_message)
         time.sleep(3)

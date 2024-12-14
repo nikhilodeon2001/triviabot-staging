@@ -236,7 +236,7 @@ def ask_survey_question():
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
     collected_responses = {}  # Collect responses locally
-    current_time = datetime.now(timezone.utc).isoformat()
+    current_time = datetime.datetime.now(timezone.utc).isoformat()
 
 
     initialize_sync()

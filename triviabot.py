@@ -15,7 +15,7 @@ import random
 import importlib
 import traceback
 import unicodedata
-import datetime
+from datetime import datetime, timezone
 import time
 import pytz
 import os
@@ -235,7 +235,7 @@ def ask_survey_question():
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
     collected_responses = {}  # Collect responses locally
-    current_time = datetime.datetime.utcnow().isoformat() + "Z"
+    current_time = datetime.now(timezone.utc).isoformat()
 
 
     initialize_sync()

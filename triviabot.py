@@ -287,16 +287,10 @@ def ask_survey_question():
                     if sender == bot_user_id:
                         continue
 
-                    if "yes" in message_content:
-                        react_to_message(event_id, target_room_id, "okra21")
+                    if any(answer.lower() in message_content.lower() for answer in valid_answers):
+                        matched_answer = next(answer for answer in valid_answers if answer.lower() in message_content.lower())
                         collected_responses[sender_display_name] = {
-                            "answer": "Yes",
-                            "timestamp": current_time
-                        }
-                    if "no" in message_content:
-                        react_to_message(event_id, target_room_id, "okra10")
-                        collected_responses[sender_display_name] = {
-                            "answer": "No",
+                            "answer": matched_answer,
                             "timestamp": current_time
                         }
                         

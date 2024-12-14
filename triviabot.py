@@ -5093,6 +5093,8 @@ def start_trivia_round():
             load_global_variables()
             load_parameters()
             
+            ask_survey_question()
+            
             # Load existing streak data from the file
             load_streak_data()
 
@@ -5177,7 +5179,7 @@ def start_trivia_round():
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
 
-            ask_survey_question()
+            #ask_survey_question()
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

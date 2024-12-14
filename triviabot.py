@@ -235,6 +235,7 @@ def ask_survey_question():
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
     collected_responses = {}  # Collect responses locally
+    current_time = datetime.datetime.utcnow().isoformat() + "Z"
 
 
     initialize_sync()
@@ -280,20 +281,24 @@ def ask_survey_question():
                     processed_events.add(event_id)
                     sender = event["sender"]
                     sender_display_name = get_display_name(sender)
-                    message_content = event.get("content", {}).get("body", "")
+                    message_content = event.get("content", {}).get("body", "").lower()
 
                     if sender == bot_user_id:
                         continue
 
-                    if message_content.lower() in (answer.lower() for answer in valid_answers):
+                    if "yes" in message_content:
                         react_to_message(event_id, target_room_id, "okra21")
-
-                        collected_responses[sender] = message_content  # Update local responses
-                        collection.update_one(
-                            {"_id": survey_question["_id"]},
-                            {"$set": {"responses": responses}}
-                        )
-
+                        collected_responses[sender] = {
+                            "answer": "Yes",
+                            "timestamp": current_time
+                        }
+                    if "no" in message_content:
+                        react_to_message(event_id, target_room_id, "okra10")
+                        collected_responses[sender] = {
+                            "answer": "No",
+                            "timestamp": current_time
+                        }
+                        
         except Exception as e:
             print(f"Error processing events: {e}")
 
@@ -310,9 +315,14 @@ def ask_survey_question():
         positive_responses = sum(1 for ans in responses.values() if ans.lower() == "yes")
         percentage_positive = (positive_responses / total_responses) * 100
         percentage_negative = 100 - percentage_positive
-        summary_message = f"{percentage_negative:.2f}% of people responded hated it."
+        if percentage_negative > 50:
+            summary_message = f"🥀 {percentage_negative:.2f}% of people have said NOkra. "
+        else:
+            summary_message = f"🏄‍♂️ {percentage_positive:.2f}% of people have said OkraYeah!"
+            
         send_message(target_room_id, summary_message)
         time.sleep(3)
+        
 
 def generate_themed_country_image(country, city):
 

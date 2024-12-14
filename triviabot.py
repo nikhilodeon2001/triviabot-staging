@@ -215,7 +215,7 @@ cities = [
 
 
 
-def ask_survey_question(mongo_client, collection_name, question_id):
+def ask_survey_question():
     global since_token, params, headers, max_retries, delay_between_retries
     # Connect to the database and collection
     db = connect_to_mongodb()
@@ -224,7 +224,7 @@ def ask_survey_question(mongo_client, collection_name, question_id):
     # Fetch the document by question_id
     random_question = list(collection.aggregate([{"$sample": {"size": 1}}]))
     if not random_question:
-        print(f"No documents found in collection {collection_name}.")
+        print(f"No documents found in collection 'survey_questions'.")
         return None
 
     # Extract relevant details

@@ -242,16 +242,17 @@ def ask_survey_question():
     initialize_sync()
     start_time = time.time()  # Track when the question starts
        
-    message = f"\n👍👎 SURVEY QUESTION: YES or NO\n"
-    message += f"\n🛑1️⃣ No spamming. Only one answer per user recorded. \n"
+    message = f"\n👍👎 Survey: YES or NO\n"
+    message += f"\n🛑1️⃣ No spamming. Only one answer per user recorded.\n"
+    message += f"\n❓ {question_text} ❓\n"
     send_message(target_room_id, message)
     time.sleep(2)
-    message = f"\n❓ {question_text} ❓\n"
+
     send_message(target_room_id, message)
     
     wf_letters = []
     
-    while time.time() - start_time < 10:
+    while time.time() - start_time < 15:
         try:
                 
             if since_token:
@@ -317,7 +318,6 @@ def ask_survey_question():
             summary_message = f"🏄‍♂️🌟 {int(percentage_positive)}% of people have said OkraYeah!"
             
         send_message(target_room_id, summary_message)
-        time.sleep(3)
         
 
 def generate_themed_country_image(country, city):
@@ -5100,8 +5100,6 @@ def start_trivia_round():
             load_global_variables()
             load_parameters()
             
-            ask_survey_question()
-            
             # Load existing streak data from the file
             load_streak_data()
 
@@ -5186,7 +5184,8 @@ def start_trivia_round():
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
 
-            #ask_survey_question()
+            ask_survey_question()
+            time.sleep(5)
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

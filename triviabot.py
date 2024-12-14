@@ -242,7 +242,8 @@ def ask_survey_question():
        
     message = f"\n👍👎 YES or NO\n"
     message += f"\n{question_text}\n"
-    message += f"\nOnly one answer per user will be recorded. Answers can be changed and persist indefitely.\n"
+    message += f"\nOnly one answer per user will be recorded. Answers can be changed and persist indefinitely.\n"
+
     send_message(target_room_id, message)
     
     wf_letters = []
@@ -308,7 +309,7 @@ def ask_survey_question():
     if total_responses > 0:
         positive_responses = sum(1 for ans in responses.values() if ans.lower() == "yes")
         percentage_positive = (positive_responses / total_responses) * 100
-        percentage_negative = 1 - percentage_positive
+        percentage_negative = 100 - percentage_positive
         summary_message = f"{percentage_negative:.2f}% of people responded hated it."
         send_message(target_room_id, summary_message)
         time.sleep(3)

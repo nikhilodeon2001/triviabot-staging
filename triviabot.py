@@ -214,6 +214,105 @@ cities = [
 ]
 
 
+
+def ask_survey_question(mongo_client, collection_name, question_id):
+    global since_token, params, headers, max_retries, delay_between_retries
+    # Connect to the database and collection
+    db = connect_to_mongodb()
+    collection = db["survey_questions"]
+
+    # Fetch the document by question_id
+    random_question = list(collection.aggregate([{"$sample": {"size": 1}}]))
+    if not random_question:
+        print(f"No documents found in collection {collection_name}.")
+        return None
+
+    # Extract relevant details
+    survey_question = random_question[0]
+    question_text = survey_question.get("question", "No question text available.")
+    valid_answers = survey_question.get("valid_answers", [])
+    responses = survey_question.get("responses", {})
+    sync_url = f"{matrix_base_url}/sync"
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+    collected_responses = {}  # Collect responses locally
+
+
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+       
+    message = f"\n👍👎 YES or NO\n"
+    message += f"\n{question_text}\n"
+    message += f"\nOnly one answer per user will be recorded. Answers can be changed and persist indefitely.\n"
+    send_message(target_room_id, message)
+    
+    wf_letters = []
+    
+    while time.time() - start_time < 10:
+        try:
+                
+            if since_token:
+                params["since"] = since_token
+
+            time.sleep(1)
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:                
+                event_id = event["event_id"]
+                event_type = event.get("type")
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "")
+
+                    if sender == bot_user_id:
+                        continue
+
+                    if message_content.lower() in (answer.lower() for answer in valid_answers):
+                        react_to_message(event_id, target_room_id, "okra21")
+
+                        collected_responses[sender] = message_content  # Update local responses
+                        collection.update_one(
+                            {"_id": survey_question["_id"]},
+                            {"$set": {"responses": responses}}
+                        )
+
+        except Exception as e:
+            print(f"Error processing events: {e}")
+
+    # Update MongoDB with all collected responses at once
+    responses.update(collected_responses)
+    collection.update_one(
+        {"_id": survey_question["_id"]},
+        {"$set": {"responses": responses}}
+    )
+
+    # Summarize results after the time is up
+    total_responses = len(responses)
+    if total_responses > 0:
+        positive_responses = sum(1 for ans in responses.values() if ans.lower() == "yes")
+        percentage_positive = (positive_responses / total_responses) * 100
+        percentage_negative = 1 - percentage_positive
+        summary_message = f"{percentage_negative:.2f}% of people responded hated it."
+        send_message(target_room_id, summary_message)
+        time.sleep(3)
+
 def generate_themed_country_image(country, city):
 
     prompt = f"Generate a stereotypical setting in {country} without any text in the image."
@@ -5077,6 +5176,8 @@ def start_trivia_round():
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
+
+            ask_survey_question()
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

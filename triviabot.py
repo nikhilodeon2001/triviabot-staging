@@ -288,13 +288,13 @@ def ask_survey_question():
 
                     if "yes" in message_content:
                         react_to_message(event_id, target_room_id, "okra21")
-                        collected_responses[sender] = {
+                        collected_responses[sender_display_name] = {
                             "answer": "Yes",
                             "timestamp": current_time
                         }
                     if "no" in message_content:
                         react_to_message(event_id, target_room_id, "okra10")
-                        collected_responses[sender] = {
+                        collected_responses[sender_display_name] = {
                             "answer": "No",
                             "timestamp": current_time
                         }

@@ -243,9 +243,10 @@ def ask_survey_question():
     start_time = time.time()  # Track when the question starts
        
     message = f"\n👍👎 SURVEY QUESTION: YES or NO\n"
-    message += f"\n❓ {question_text} ❓\n"
     message += f"\n🛑1️⃣ No spamming. Only one answer per user recorded. \n"
-
+    send_message(target_room_id, message)
+    time.sleep(2)
+    message = f"\n❓ {question_text} ❓\n"
     send_message(target_room_id, message)
     
     wf_letters = []

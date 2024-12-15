@@ -367,15 +367,39 @@ def ask_survey_question():
 
     # Summarize results after the time is up
     total_responses = len(responses)
-    if total_responses > 0 and question_type == "yes-no":
-        positive_responses = sum(1 for ans in responses.values() if ans["answer"].lower() == "yes")
-        percentage_positive = (positive_responses / total_responses) * 100
-        percentage_negative = 100 - percentage_positive
-        if percentage_negative > 50:
-            summary_message = f"🥀🪦 {int(percentage_negative)}% of people have said NOkra. "
-        else:
-            summary_message = f"🏄‍♂️🌟 {int(percentage_positive)}% of people have said OkraYeah!"
-            
+    if total_responses > 0:
+        if question_type == "yes-no":
+            positive_responses = sum(1 for ans in responses.values() if ans["answer"].lower() == "yes")
+            percentage_positive = (positive_responses / total_responses) * 100
+            percentage_negative = 100 - percentage_positive
+            if percentage_negative > 50:
+                summary_message = f"🥀🪦 {int(percentage_negative)}% of people have said NOkra. "
+            else:
+                summary_message = f"🏄‍♂️🌟 {int(percentage_positive)}% of people have said OkraYeah!"
+    
+        elif question_type == "rating-10":
+            total_rating = sum(ans["answer"] for ans in responses.values() if isinstance(ans["answer"], (int, float)))
+            average_rating = total_rating / total_responses
+            summary_message = f"⭐️🔟 The current average rating is {average_rating:.1f} out of 10."
+    
+        elif question_type == "word-3":
+            # Collect all words across all users
+            from collections import Counter
+            all_words = []
+            for ans in responses.values():
+                if isinstance(ans["answer"], list):  # Ensure the answer is a list of words
+                    all_words.extend(ans["answer"])
+    
+            # Normalize words (case and punctuation insensitive)
+            normalized_words = [word.strip(".,!?\"'").lower() for word in all_words]
+            word_counts = Counter(normalized_words)
+            most_common_words = word_counts.most_common(5)  # Get the 5 most common words
+    
+            # Format the summary
+            word_list = ", ".join(f"{word} ({count})" for word, count in most_common_words)
+            summary_message = f"📚🔤 The 5 most common words are: {word_list}."
+    
+        # Send the summary message
         send_message(target_room_id, summary_message)
         
 

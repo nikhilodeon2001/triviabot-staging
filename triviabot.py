@@ -391,13 +391,13 @@ def ask_survey_question():
                     all_words.extend(ans["answer"])
     
             # Normalize words (case and punctuation insensitive)
-            normalized_words = [word.strip(".,!?\"'").lower() for word in all_words]
+            normalized_words = [word.strip(string.punctuation).lower() for word in all_words]
             word_counts = Counter(normalized_words)
             most_common_words = word_counts.most_common(5)  # Get the 5 most common words
     
-            # Format the summary
-            word_list = ", ".join(f"{word}" for word in most_common_words)
-            summary_message = f"📚🔤 The 5 most common words are: {word_list}."
+            # Format the message
+            if most_common_words:
+                summary_message = f"📚🔤 Users say Live Trivia is: {', '.join(most_common_words)}."
     
         # Send the summary message
         send_message(target_room_id, summary_message)

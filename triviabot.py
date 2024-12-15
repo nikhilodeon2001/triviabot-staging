@@ -249,7 +249,7 @@ def ask_survey_question():
     question_type_lookup = {
         "yes-no": {
             "emojis": "👍👎",
-            "intro_text": "Answer YES or NO:"
+            "intro_text": "Answer YES or NO"
         },
         "multiple-choice": {
             "emojis": "🔠📝",
@@ -257,11 +257,11 @@ def ask_survey_question():
         },
         "rating-10": {
             "emojis": "⭐️🔟",
-            "intro_text": "Rate from 1 to 10:"
+            "intro_text": "On a scale from 1 to 10"
         },
          "word-3": {
             "emojis": "3️⃣🔤",
-            "intro_text": "Rate from 1 to 10:"
+            "intro_text": "3 word limit"
         }
     }
 
@@ -373,14 +373,14 @@ def ask_survey_question():
             percentage_positive = (positive_responses / total_responses) * 100
             percentage_negative = 100 - percentage_positive
             if percentage_negative > 50:
-                summary_message = f"🥀🪦 {int(percentage_negative)}% of people have said NOkra. "
+                summary_message = f"🥀🪦 {int(percentage_negative)}% of Okrans have said NOkra. "
             else:
-                summary_message = f"🏄‍♂️🌟 {int(percentage_positive)}% of people have said OkraYeah!"
+                summary_message = f"🏄‍♂️🌟 {int(percentage_positive)}% of Okrans have said OkraYeah!"
     
         elif question_type == "rating-10":
             total_rating = sum(ans["answer"] for ans in responses.values() if isinstance(ans["answer"], (int, float)))
             average_rating = total_rating / total_responses
-            summary_message = f"⭐️🔟 The current average rating is {average_rating:.1f} out of 10."
+            summary_message = f"⭐️🔟 Average rating across all Okrans is {average_rating:.1f} out of 10."
     
         elif question_type == "word-3":
             # Collect all words across all users
@@ -393,7 +393,7 @@ def ask_survey_question():
             # Normalize words (case and punctuation insensitive)
             normalized_words = [word.strip(string.punctuation).lower() for word in all_words]
             word_counts = Counter(normalized_words)
-            most_common_words = [f'"{word.capitalize()}"' for word, _ in word_counts.most_common(5)]
+            most_common_words = [f'"{word.capitalize()}"' for word, _ in word_counts.most_common(3)]
     
             # Format the message
             if most_common_words:

@@ -397,7 +397,7 @@ def ask_survey_question():
     
             # Format the message
             if most_common_words:
-                summary_message = f"📚🔤 Users say Live Trivia is: {', '.join(most_common_words)}."
+                summary_message = f"📚🔤 Okrans say Live Trivia is: {', '.join(most_common_words)}."
     
         # Send the summary message
         send_message(target_room_id, summary_message)

@@ -362,7 +362,7 @@ def ask_survey_question():
 
     # Summarize results after the time is up
     total_responses = len(responses)
-    if total_responses > 0:
+    if total_responses > 0 and question_type == "yes-no":
         positive_responses = sum(1 for ans in responses.values() if ans["answer"].lower() == "yes")
         percentage_positive = (positive_responses / total_responses) * 100
         percentage_negative = 100 - percentage_positive

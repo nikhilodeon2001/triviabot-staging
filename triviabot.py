@@ -396,7 +396,7 @@ def ask_survey_question():
             most_common_words = word_counts.most_common(5)  # Get the 5 most common words
     
             # Format the summary
-            word_list = ", ".join(f"{word} ({count})" for word, count in most_common_words)
+            word_list = ", ".join(f"{word}" for word in most_common_words)
             summary_message = f"📚🔤 The 5 most common words are: {word_list}."
     
         # Send the summary message

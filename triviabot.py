@@ -341,20 +341,14 @@ def ask_survey_question():
                                 "timestamp": current_time
                             }
         
-        # Add the new words to the user's list
-        collected_responses[sender_display_name]["answer"].extend(words)
-        
-        # Keep only the 3 most recent words
-        collected_responses[sender_display_name]["answer"] = collected_responses[sender_display_name]["answer"][-3:]
-
-        # Update the timestamp
-        collected_responses[sender_display_name]["timestamp"] = current_time
-
-
-
-
-
-
+                        # Add the new words to the user's list
+                        collected_responses[sender_display_name]["answer"].extend(words)
+                        
+                        # Keep only the 3 most recent words
+                        collected_responses[sender_display_name]["answer"] = collected_responses[sender_display_name]["answer"][-3:]
+                
+                        # Update the timestamp
+                        collected_responses[sender_display_name]["timestamp"] = current_time
         
         except Exception as e:
             print(f"Error processing events: {e}")

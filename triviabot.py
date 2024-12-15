@@ -223,7 +223,12 @@ def ask_survey_question():
     collection = db["survey_questions"]
 
     # Fetch the document by question_id
-    random_question = list(collection.aggregate([{"$sample": {"size": 1}}]))
+    random_question = list(
+        collection.aggregate([
+            {"$match": {"enabled": True}},  # Only include documents where enabled is true
+            {"$sample": {"size": 1}}       # Randomly select one document
+        ])
+    )
     if not random_question:
         print(f"No documents found in collection 'survey_questions'.")
         return None

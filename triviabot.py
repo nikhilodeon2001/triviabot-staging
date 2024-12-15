@@ -246,9 +246,6 @@ def ask_survey_question():
     message += f"\n🛑1️⃣ No spamming. Only one answer per user recorded.\n"
     message += f"\n❓ {question_text} ❓\n"
     send_message(target_room_id, message)
-    time.sleep(2)
-
-    send_message(target_room_id, message)
     
     wf_letters = []
     
@@ -4358,7 +4355,8 @@ def update_round_streaks(user):
             
             time.sleep(4)
             remaining_games = image_wins - (current_longest_round_streak['streak'] % image_wins)
-            dynamic_emoji = number_to_emoji[remaining_games]
+            #dynamic_emoji = number_to_emoji[remaining_games]
+            dynamic_emoji = number_to_emoji.get(remaining_games, "❗")  # ❓ is the default emoji
             
             if remaining_games == 1:
                 image_message = f"\n{dynamic_emoji}🎨 @{user} Win the next game and I'll draw you something.\n"

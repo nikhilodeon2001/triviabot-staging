@@ -5286,8 +5286,6 @@ try:
     # Load needed variables for sync
     load_global_variables()
     load_parameters()
-    while(True):
-        ask_survey_question()
     
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    

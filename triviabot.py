@@ -231,24 +231,43 @@ def ask_survey_question():
     # Extract relevant details
     survey_question = random_question[0]
     question_text = survey_question.get("question", "No question text available.")
+    question_type = survey_question.get("question_type", "yes/no")
     valid_answers = survey_question.get("valid_answers", [])
     responses = survey_question.get("responses", {})
-    sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
     collected_responses = {}  # Collect responses locally
     current_time = datetime.datetime.now(timezone.utc).isoformat()
 
-
     initialize_sync()
     start_time = time.time()  # Track when the question starts
+
+    question_type_lookup = {
+        "yes-no": {
+            "emojis": "👍👎",
+            "intro_text": "Answer YES or NO:"
+        },
+        "multiple-choice": {
+            "emojis": "🔠📝",
+            "intro_text": "Choose a letter below:"
+        },
+        "rating-10": {
+            "emojis": "⭐️🔟",
+            "intro_text": "Rate from 1 to 10:"
+        },
+         "word-3": {
+            "emojis": "3️⃣🔤",
+            "intro_text": "Rate from 1 to 10:"
+        }
+    }
+
+    question_info = question_type_lookup.get(question_type, {})
+    emojis = question_info.get("emojis", "🤔❓")
+    intro_text = question_info.get("intro_text", "What do you think?")
        
-    message = f"\n👍👎 Survey: YES or NO\n"
-    message += f"\n🛑1️⃣ No spamming. Only one answer per user recorded.\n"
-    message += f"\n❓ {question_text} ❓\n"
+    message = f"\n{emojis} {intro_text}\n"
+    message += f"\n❓ {question_text}\n"
     send_message(target_room_id, message)
-    
-    wf_letters = []
-    
+        
     while time.time() - start_time < 15:
         try:
                 
@@ -281,18 +300,62 @@ def ask_survey_question():
                     processed_events.add(event_id)
                     sender = event["sender"]
                     sender_display_name = get_display_name(sender)
-                    message_content = event.get("content", {}).get("body", "").lower()
+                    message_content = event.get("content", {}).get("body", "")
 
                     if sender == bot_user_id:
                         continue
 
-                    if any(answer.lower() in message_content.lower() for answer in valid_answers):
-                        matched_answer = next(answer for answer in valid_answers if answer.lower() in message_content.lower())
-                        collected_responses[sender_display_name] = {
-                            "answer": matched_answer,
-                            "timestamp": current_time
-                        }
-                        
+                # Process responses based on question type
+                if question_type == "yes-no":
+                   if message_content.lower().startswith("y") or message_content.strip() == "👍":
+                       collected_responses[sender_display_name] = {"answer": "Yes", "timestamp": current_time}
+                   elif message_content.lower().startswith("n") or message_content.strip() == "👎":
+                       collected_responses[sender_display_name] = {"answer": "No", "timestamp": current_time}
+
+                elif question_type == "multiple-choice":
+                    matched_answer = next((answer for answer in valid_answers if answer.lower() in message_content.lower()), None)
+                    if matched_answer:
+                        collected_responses[sender_display_name] = {"answer": matched_answer, "timestamp": current_time}
+                
+                elif question_type == "rating-10":
+                    # Search for any number in the message
+                    match = re.search(r'\b\d+(\.\d+)?\b', message_content)
+                    if match:
+                        try:
+                            rating = float(match.group())
+                            if 1 <= rating <= 10:
+                                collected_responses[sender_display_name] = {
+                                    "answer": round(rating, 1),
+                                    "timestamp": current_time
+                                }
+                        except ValueError:
+                            continue  # Ignore invalid ratings
+
+                elif question_type == "word-3":
+                    words = message_content.split()
+                    if words:  # Check if there are any words in the message
+                        # Initialize or update the user's word list
+                        if sender_display_name not in collected_responses:
+                            collected_responses[sender_display_name] = {
+                                "answer": [],  # Initialize an empty list for words
+                                "timestamp": current_time
+                            }
+        
+        # Add the new words to the user's list
+        collected_responses[sender_display_name]["answer"].extend(words)
+        
+        # Keep only the 3 most recent words
+        collected_responses[sender_display_name]["answer"] = collected_responses[sender_display_name]["answer"][-3:]
+
+        # Update the timestamp
+        collected_responses[sender_display_name]["timestamp"] = current_time
+
+
+
+
+
+
+        
         except Exception as e:
             print(f"Error processing events: {e}")
 
@@ -5200,6 +5263,7 @@ try:
     # Load needed variables for sync
     load_global_variables()
     load_parameters()
+    ask_survey_question()
     
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    

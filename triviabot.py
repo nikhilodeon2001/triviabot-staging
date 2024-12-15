@@ -393,7 +393,7 @@ def ask_survey_question():
             # Normalize words (case and punctuation insensitive)
             normalized_words = [word.strip(string.punctuation).lower() for word in all_words]
             word_counts = Counter(normalized_words)
-            most_common_words = [f'"{word}"' for word, _ in word_counts.most_common(5)] 
+            most_common_words = [f'"{word.capitalize()}"' for word, _ in word_counts.most_common(5)]
     
             # Format the message
             if most_common_words:

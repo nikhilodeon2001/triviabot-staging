@@ -404,7 +404,19 @@ def ask_survey_question():
 
             if all_words:
                 try:
-                    prompt = f"Create a visual representation of an environment described by these words: {all_words}. Remove snd filter out any words from this prompt that are not allowed by your safety system."
+                    response = openai.ChatCompletion.create(
+                        model="gpt-4",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant who removes offensive or inappropriate words from user prompts for use with Dall-e."},
+                            {"role": "user", "content": f"Remove any words that are against openAI's safety filter so I can use them in a Dall-e prompt: {all_words}"}
+                        ],
+                        max_tokens=500
+                    )
+                    sanitized_all_words = response["choices"][0]["message"]["content"]
+                    print("OG Prompt:", all_words)
+                    print("Sanitized Prompt:", sanitized_all_words)
+   
+                    prompt = f"Create a visual representation of an environment described by these words: {sanitized_all_words}."
                     response = openai.Image.create(
                         prompt=prompt,
                         n=1,

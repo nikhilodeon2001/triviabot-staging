@@ -416,7 +416,7 @@ def ask_survey_question():
                     print("OG Prompt:", all_words)
                     print("Sanitized Prompt:", sanitized_all_words)
    
-                    prompt = f"Create a hyperrealistic environment described as: {sanitized_all_words}."
+                    prompt = f"Create a hyperrealistic futuristic setting as {sanitized_all_words}."
                     response = openai.Image.create(
                         #model="dalle-3",  # Use the most advanced DALL-E model available
                         prompt=prompt,

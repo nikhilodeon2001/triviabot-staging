@@ -398,7 +398,7 @@ def ask_survey_question():
             # Format the message
             if most_common_words:
                 summary_message = f"📚🔤 Okrans say Live Trivia is: {', '.join(most_common_words)}."
-                send_message(target_room_id, summary_message)
+        send_message(target_room_id, summary_message)
 
             if all_words:
                 try:

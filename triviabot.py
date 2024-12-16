@@ -5342,8 +5342,11 @@ def start_trivia_round():
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
-
-            ask_survey_question()
+            
+            if len(scoreboard) > 2:
+                print(f"Number of players: {len(scoreboard)}")
+                ask_survey_question()
+                
             time.sleep(5)
 
     except Exception as e:
@@ -5361,7 +5364,7 @@ try:
     # Load needed variables for sync
     load_global_variables()
     load_parameters()
-    ask_survey_question()
+
     
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    

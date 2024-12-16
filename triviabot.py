@@ -416,7 +416,7 @@ def ask_survey_question():
                     image_description = describe_image_with_vision(image_url, "title", prompt)
 
                     pre_message = f"\n🥒🌀 Behold, your Okraverse"
-                    post_message = f"\n'{okraverse_description}'\n"
+                    post_message = f"\n'{image_description}'\n"
                     
                     send_message(target_room_id, pre_message)
                     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
@@ -1061,8 +1061,7 @@ def load_parameters():
         "num_wf_letters": 3,
         "num_math_questions_default": 0,
         "num_stats_questions_default": 0,
-        "skip_summary": False,
-        "okraverse_description": "An Okratastic community!"
+        "skip_summary": False
     }
 
     
@@ -1092,7 +1091,6 @@ def load_parameters():
             num_math_questions_default = parameters["num_math_questions_default"]
             num_stats_questions_default = parameters["num_stats_questions_default"]
             skip_summary = parameters["skip_summary"]
-            okraverse_description = parameters["okraverse_description"]
 
             num_mysterybox_clues = num_mysterybox_clues_default
             num_crossword_clues = num_crossword_clues_default
@@ -1122,7 +1120,6 @@ def load_parameters():
                 num_wf_letters = default_values["num_wf_letters"]
                 num_math_questions_default = default_values["num_math_questions_default"]
                 num_stats_questions_default = default_values["num_stats_questions_default"]
-                okraverse_description = default_values["okraverse_description"]
 
                 num_mysterybox_clues = num_mysterybox_clues_default
                 num_crossword_clues = num_crossword_clues_default

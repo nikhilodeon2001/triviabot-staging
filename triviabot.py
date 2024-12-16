@@ -418,7 +418,7 @@ def ask_survey_question():
    
                     prompt = f"Create a hyperrealistic environment described as: {sanitized_all_words}."
                     response = openai.Image.create(
-                        model="dalle-3",  # Use the most advanced DALL-E model available
+                        #model="dalle-3",  # Use the most advanced DALL-E model available
                         prompt=prompt,
                         n=1,
                         size="512x512"  # Adjust size as needed
@@ -5361,6 +5361,7 @@ try:
     # Load needed variables for sync
     load_global_variables()
     load_parameters()
+    ask_survey_question()
     
     # Call this function at the start of the script to initialize the sync
     initialize_sync()    

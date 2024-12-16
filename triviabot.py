@@ -5343,8 +5343,8 @@ def start_trivia_round():
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
             
+            print(f"Number of players: {len(scoreboard)}")
             if len(scoreboard) > 2:
-                print(f"Number of players: {len(scoreboard)}")
                 ask_survey_question()
                 
             time.sleep(5)

@@ -376,11 +376,13 @@ def ask_survey_question():
                 summary_message = f"🥀🪦 {int(percentage_negative)}% of Okrans have said NOkra. "
             else:
                 summary_message = f"🏄‍♂️🌟 {int(percentage_positive)}% of Okrans have said OkraYeah!"
+            send_message(target_room_id, summary_message)
     
         elif question_type == "rating-10":
             total_rating = sum(ans["answer"] for ans in responses.values() if isinstance(ans["answer"], (int, float)))
             average_rating = total_rating / total_responses
             summary_message = f"⭐️🔟 Average rating across all Okrans is {average_rating:.1f} out of 10."
+            send_message(target_room_id, summary_message)
     
         elif question_type == "word-3":
             # Collect all words across all users
@@ -398,7 +400,7 @@ def ask_survey_question():
             # Format the message
             if most_common_words:
                 summary_message = f"📚🔤 Okrans say Live Trivia is: {', '.join(most_common_words)}."
-        send_message(target_room_id, summary_message)
+                send_message(target_room_id, summary_message)
 
             if all_words:
                 try:

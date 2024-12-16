@@ -418,7 +418,7 @@ def ask_survey_question():
    
                     prompt = f"Create a hyperrealistic futuristic setting as {sanitized_all_words}."
                     response = openai.Image.create(
-                        model="dalle-3",  # Use the most advanced DALL-E model available
+                        model="dall-e-3",  # Use the most advanced DALL-E model available
                         prompt=prompt,
                         n=1,
                         size="1024x1024"  # Adjust size as needed

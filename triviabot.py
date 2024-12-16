@@ -398,9 +398,45 @@ def ask_survey_question():
             # Format the message
             if most_common_words:
                 summary_message = f"📚🔤 Okrans say Live Trivia is: {', '.join(most_common_words)}."
+                send_message(target_room_id, summary_message)
+
+            if all_words:
+                try:
+                    prompt = f"Create a visual representation of an environment described by these words: {all_words}."
+                    response = openai.Image.create(
+                        prompt=prompt,
+                        n=1,
+                        size="512x512"  # Adjust size as needed
+                    )
+                    # Return the image URL from the API response
+                    image_url = response["data"][0]["url"]
+                    image_description = describe_image_with_vision(image_url, "title", prompt)
+                    collection = db["parameters"]
     
-        # Send the summary message
-        send_message(target_room_id, summary_message)
+                    # Step 2: Update or insert the document
+                    collection.update_one(
+                        {"_id": "okraverse_description"},  # Filter to find the document by its _id
+                        {"$set": {"description": image_description}},  # Update the description field with the new value
+                        upsert=True  # Ensure the document is created if it doesn't already exist
+                    )
+                    #image_mxc, image_width, image_height = download_image_from_url(image_url)
+                    #send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+
+                    image_data = requests.get(image_url).content
+                    image = Image.open(io.BytesIO(image_data))
+                    buffer = io.BytesIO()
+                    image.save(buffer, format="PNG")
+                    buffer.seek(0)
+                    upload_okraverse_to_s3(buffer)
+                    return None
+                    
+                except openai.OpenAIError as e:
+                    print(f"Error generating image: {e}")
+                
+
+                
+    
+        
         
 
 def generate_themed_country_image(country, city):
@@ -968,6 +1004,23 @@ def upload_image_to_s3(buffer, winner, description):
         print(f"Error uploading to S3: {boto_err}")
         return None
 
+def upload_okraverse_to_s3(buffer):
+    try:
+        bucket_name='triviabotwebsite'
+        folder_name='okraverse'
+        object_name = "okraverse.png"
+             
+        # Step 3: Connect to S3 and upload the file
+        s3_client = boto3.client("s3")
+        s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=buffer.getvalue(), ContentType="image/png")
+
+        # Step 4: Generate and return the S3 URL
+        return None
+
+    except (BotoCoreError, ClientError) as boto_err:
+        print(f"Error uploading to S3: {boto_err}")
+        return None
+
 def load_parameters():
     global image_wins
     global num_mysterybox_clues_default
@@ -999,7 +1052,8 @@ def load_parameters():
         "num_wf_letters": 3,
         "num_math_questions_default": 0,
         "num_stats_questions_default": 0,
-        "skip_summary": False
+        "skip_summary": False,
+        "okraverse_description": "An Okratastic community!"
     }
 
     
@@ -1029,6 +1083,7 @@ def load_parameters():
             num_math_questions_default = parameters["num_math_questions_default"]
             num_stats_questions_default = parameters["num_stats_questions_default"]
             skip_summary = parameters["skip_summary"]
+            okraverse_description = parameters["okraverse_description"]
 
             num_mysterybox_clues = num_mysterybox_clues_default
             num_crossword_clues = num_crossword_clues_default
@@ -1058,6 +1113,7 @@ def load_parameters():
                 num_wf_letters = default_values["num_wf_letters"]
                 num_math_questions_default = default_values["num_math_questions_default"]
                 num_stats_questions_default = default_values["num_stats_questions_default"]
+                okraverse_description = default_values["okraverse_description"]
 
                 num_mysterybox_clues = num_mysterybox_clues_default
                 num_crossword_clues = num_crossword_clues_default
@@ -5203,9 +5259,12 @@ def start_trivia_round():
                 print(f"Magic number is {magic_number}")
                 send_magic_image(magic_number)
             elif image_questions == True:
-                selected_gif_url = random.choice(okra_gif_urls)
+                #selected_gif_url = random.choice(okra_gif_urls)
+                selected_gif_ufl = "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okraverse/okraverse.png"
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
+                message = f"🥒🌀 A visualization of how my Okrans describe Live Trivia. I call it:\n\n'{okraverse_description}'"
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+                message = 
                 #time.sleep(7)
 
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")

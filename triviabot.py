@@ -404,7 +404,7 @@ def ask_survey_question():
 
             if all_words:
                 try:
-                    prompt = f"Create a visual representation of an environment described by these words: {all_words}."
+                    prompt = f"Create a visual representation of an environment described by these words: {all_words}. Remove snd filter out any words from this prompt that are not allowed by your safety system."
                     response = openai.Image.create(
                         prompt=prompt,
                         n=1,

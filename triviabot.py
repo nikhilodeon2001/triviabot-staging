@@ -2610,6 +2610,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
 
     standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
     num_of_players = len(standings)
+    processed_events = set()  # Track processed event IDs to avoid duplicates
     
     # Wait for 10 seconds to gather responses
     time.sleep(10)
@@ -2631,97 +2632,117 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
         since_token = sync_data.get("next_batch")  # Update the since_token for future requests
         room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
+
+        for event in room_events:
+            event_id = event["event_id"]
+            event_type = event.get("type")
+
+            if event_type == "m.room.message" and event_id not in processed_events:
+                processed_events.add(event_id)
+                sender = event["sender"]
+                sender_display_name = get_display_name(sender)
+                message_content = event.get("content", {}).get("body", "").strip()
+
+                if sender == bot_user_id or sender_display_name != winner:
+                    continue 
+
         # Process all responses in reverse order (latest response first)
         for event in room_events:
-            sender = event["sender"]
-            message_content = event.get("content", {}).get("body", "").strip()
-        
-            # Proceed only if message_content is not empty
-            if message_content:
-                # Fetch the display name for the current user
+            event_id = event["event_id"]
+            event_type = event.get("type")
+
+            if event_type == "m.room.message" and event_id not in processed_events:
+                processed_events.add(event_id)
+                sender = event["sender"]
                 sender_display_name = get_display_name(sender)
-        
-                # If the round winner responded, process the award accordingly
-                if sender_display_name == round_winner:
+                message_content = event.get("content", {}).get("body", "").strip()
 
-                    if message_content.lower() in ['trebek', 'cross', 'jeopardy', 'word', 'ghost', 'dicktator'] and winner_coffees <= 0:
-                        react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️.\n"
-                        send_message(target_room_id, message)
-                        continue
-                    
-                    
-                    if any(str(i) in message_content for i in range(3, 16)):
-                        try:
-                            delay_value = int(''.join(filter(str.isdigit, message_content)))
-        
-                            # Ensure the delay value is within the allowed range (3-15)
-                            delay_value = max(3, min(delay_value, 15))
-                            
-                            # Set time_between_questions to the new value
-                            time_between_questions = delay_value
-        
-                            # Send a confirmation message
-                            send_message(
-                                target_room_id,
-                                f"⏱️⏳ @{round_winner} has set {time_between_questions}s between questions.\n"
-                            )
-                        except ValueError:
-                            pass
-        
-                    #matched_category = cross_reference_category(message_content)
-        
-                    #if matched_category:
-                    #    if matched_category == "Mathematics":
-                    #        num_math_questions = 0
-                    #        num_stats_questions = num_stats_questions_default
-                    #    if matched_category == "Statistics":
-                    #        num_stats_questions = 0
-                    #        num_math_questions = num_math_questions_default
-                    #    categories_to_exclude[:1] = [matched_category]  # Add matched_category to exclude list
-        
-                        # Send message after handling special cases
-                    #    send_message(target_room_id, f"🚫⛔ @{round_winner} has excluded {matched_category}.\n")
-        
-                    if "jeopardy" in message_content.lower():
-                        num_jeopardy_clues = 5
-                        send_message(target_room_id, f"🟦✋ Daily Double! @{round_winner} wants {num_jeopardy_clues} Jeopardy questions.\n")
-        
-                    if "trebek" in message_content.lower():
-                        num_jeopardy_clues = 0
-                        send_message(target_room_id, f"🟦❌ @{round_winner} says no to Jeopardy. Sorry Alex.\n")
-
-                    if "word" in message_content.lower():
-                        num_crossword_clues = 5
-                        send_message(target_room_id, f"📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n")
-        
-                    if "cross" in message_content.lower():
-                        num_crossword_clues = 0
-                        send_message(target_room_id, f"📰❌ @{round_winner} has crossed off all Crossword questions.\n")
-
-                    if "yolo" in message_content.lower():
-                        yolo_mode = True
-                        send_message(target_room_id, f"🤘🔥 Yolo. @{round_winner} says 'don't sweat the small stuff'. No scores till the end.\n")
-
-                    if "dicktator" in message_content.lower() and winner_points >= god_mode_points and num_of_players >= god_mode_players:
-                        god_mode = True
-                        send_message(target_room_id, f"🎖🍆 @{round_winner} is a dick.\n")
-        
-                    if "ghost" in message_content.lower():
-                        ghost_mode = 1
-                        send_message(target_room_id, f"👻🎃 @{round_winner} says Boo! Your responses will disappear.\n")
-
-                    if "blank" in message_content.lower():
-                        image_questions = False
-                        send_message(target_room_id, f"❌📷 @{round_winner} thinks a word is worth 1000 images.\n")
-
-                    if "blind" in message_content.lower():
-                        blind_mode = True
-                        send_message(target_room_id, f"🙈🚫 @{round_winner} is blind to the truth. No answers will be shown.\n")
-
-                    if "marx" in message_content.lower():
-                        marx_mode = True
-                        send_message(target_room_id, f"🚩🔨 @{round_winner} is a commie. No celebrating right answers.\n")
+                # Proceed only if message_content is not empty
+                if message_content:
+                    # Fetch the display name for the current user
+                    sender_display_name = get_display_name(sender)
+            
+                    # If the round winner responded, process the award accordingly
+                    if sender_display_name == round_winner:
+    
+                        if message_content.lower() in ['trebek', 'cross', 'jeopardy', 'word', 'ghost', 'dicktator'] and winner_coffees <= 0:
+                            react_to_message(event_id, target_room_id, "okra5")
+                            message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️.\n"
+                            send_message(target_room_id, message)
+                            continue
+                        
+                        
+                        if any(str(i) in message_content for i in range(3, 16)):
+                            try:
+                                delay_value = int(''.join(filter(str.isdigit, message_content)))
+            
+                                # Ensure the delay value is within the allowed range (3-15)
+                                delay_value = max(3, min(delay_value, 15))
+                                
+                                # Set time_between_questions to the new value
+                                time_between_questions = delay_value
+            
+                                # Send a confirmation message
+                                send_message(
+                                    target_room_id,
+                                    f"⏱️⏳ @{round_winner} has set {time_between_questions}s between questions.\n"
+                                )
+                            except ValueError:
+                                pass
+            
+                        #matched_category = cross_reference_category(message_content)
+            
+                        #if matched_category:
+                        #    if matched_category == "Mathematics":
+                        #        num_math_questions = 0
+                        #        num_stats_questions = num_stats_questions_default
+                        #    if matched_category == "Statistics":
+                        #        num_stats_questions = 0
+                        #        num_math_questions = num_math_questions_default
+                        #    categories_to_exclude[:1] = [matched_category]  # Add matched_category to exclude list
+            
+                            # Send message after handling special cases
+                        #    send_message(target_room_id, f"🚫⛔ @{round_winner} has excluded {matched_category}.\n")
+            
+                        if "jeopardy" in message_content.lower():
+                            num_jeopardy_clues = 5
+                            send_message(target_room_id, f"🟦✋ Daily Double! @{round_winner} wants {num_jeopardy_clues} Jeopardy questions.\n")
+            
+                        if "trebek" in message_content.lower():
+                            num_jeopardy_clues = 0
+                            send_message(target_room_id, f"🟦❌ @{round_winner} says no to Jeopardy. Sorry Alex.\n")
+    
+                        if "word" in message_content.lower():
+                            num_crossword_clues = 5
+                            send_message(target_room_id, f"📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n")
+            
+                        if "cross" in message_content.lower():
+                            num_crossword_clues = 0
+                            send_message(target_room_id, f"📰❌ @{round_winner} has crossed off all Crossword questions.\n")
+    
+                        if "yolo" in message_content.lower():
+                            yolo_mode = True
+                            send_message(target_room_id, f"🤘🔥 Yolo. @{round_winner} says 'don't sweat the small stuff'. No scores till the end.\n")
+    
+                        if "dicktator" in message_content.lower() and winner_points >= god_mode_points and num_of_players >= god_mode_players:
+                            god_mode = True
+                            send_message(target_room_id, f"🎖🍆 @{round_winner} is a dick.\n")
+            
+                        if "ghost" in message_content.lower():
+                            ghost_mode = 1
+                            send_message(target_room_id, f"👻🎃 @{round_winner} says Boo! Your responses will disappear.\n")
+    
+                        if "blank" in message_content.lower():
+                            image_questions = False
+                            send_message(target_room_id, f"❌📷 @{round_winner} thinks a word is worth 1000 images.\n")
+    
+                        if "blind" in message_content.lower():
+                            blind_mode = True
+                            send_message(target_room_id, f"🙈🚫 @{round_winner} is blind to the truth. No answers will be shown.\n")
+    
+                        if "marx" in message_content.lower():
+                            marx_mode = True
+                            send_message(target_room_id, f"🚩🔨 @{round_winner} is a commie. No celebrating right answers.\n")
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching responses: {e}")

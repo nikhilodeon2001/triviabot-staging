@@ -2608,8 +2608,6 @@ def process_round_options(round_winner, winner_points):
 
 def prompt_user_for_response(round_winner, winner_points, winner_coffees):
     global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions, num_stats_questions, image_questions, marx_mode, blind_mode
-
-    print(f"Winner coffees: {winner_coffees}")
     
     # Call initialize_sync to set since_token
     initialize_sync()

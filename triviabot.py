@@ -2643,7 +2643,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                 sender_display_name = get_display_name(sender)
                 message_content = event.get("content", {}).get("body", "").strip()
 
-                if sender == bot_user_id or sender_display_name != winner:
+                if sender == bot_user_id or sender_display_name != round_winner:
                     continue 
 
         # Process all responses in reverse order (latest response first)

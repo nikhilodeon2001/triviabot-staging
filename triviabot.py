@@ -1465,7 +1465,7 @@ def ask_category(winner, categories, winner_coffees):
                     # Check if the winner can select options A, B, or C
                     if message_content in ['4', '5', '6'] and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
@@ -2103,14 +2103,14 @@ def ask_wof_number(winner):
 
                     if str(message_content) in {"4"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Wikipedia Roulette' requires ☕️☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Wikipedia Roulette' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
                     
                     if str(message_content) in {"5"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Where's Okra?' requires ☕️☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Where's Okra?' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
@@ -2560,46 +2560,49 @@ def process_round_options(round_winner, winner_points):
     image_questions = image_questions_default
     marx_mode = marx_mode_default
     blind_mode = blind_mode_default
+
+    winner_coffees = get_coffees(round_winner)
     
     if round_winner is None:
         return
    
 
     # Notify the round winner about their award
-    message = f"\n🍔🍟 @{round_winner}, what's your order?\n"
+    message = f"\n🍔🍟 @{round_winner}, what's your order? Some choices require ☕.\n"
     send_message(target_room_id, message)
     
     message = (
         "⏱️⏳ <3 - 15>: Time (s) between questions\n"
-        "🟦❌ Trebek: No Jeopardy questions\n"
-        "📰❌ Cross: No Crossword clues\n"
-        "🟦✋ Jeopardy: 5 Jeopardy questions\n"
-        "📰✏️ Word: 5 Crossword clues"    
+        "🔥🤘 Yolo: No scores shown until the end\n"
+        "🙈🚫 Blind: No question answers shown\n"
+        "🚩🔨 Marx: Silence! No celebrating. No fun.\n"
+         "❌📷 Blank: No images. None. Nada. Zilch.\n"
     )
 
     send_message(target_room_id, message)
 
     message = (
-        "🔥🤘 Yolo: No scores shown until the end\n"
-        "🙈🚫 Blind: No question answers shown\n"
-        "👻🎃 Ghost: Boo! Vanishing user responses\n"
-        "🚩🔨 Marx: Silence! No celebrating. No fun.\n"
-        "❌📷 Blank: No images. None. Nada. Zilch.\n"
+        "🟦❌ Trebek: No Jeopardy questions ☕\n"
+        "📰❌ Cross: No Crossword clues ☕\n"
+        "🟦✋ Jeopardy: 5 Jeopardy questions ☕\n"
+        "📰✏️ Word: 5 Crossword clues ☕\n"
+        "👻🎃 Ghost: Boo! Vanishing user responses ☕\n"
+        "🎖🥒 Dicktator: Bring order to the game ☕\n\n"
     )
 
-    standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
-    num_of_players = len(standings)
+    #standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
+    #num_of_players = len(standings)
     
-    if winner_points >= god_mode_points and num_of_players >= god_mode_players:
-        message += "🎖🥒 Dicktator: Bring order to the game\n\n"
-    else:
-        message += "\n"
+    #if winner_points >= god_mode_points and num_of_players >= god_mode_players:
+    #    message += "🎖🥒 Dicktator: Bring order to the game\n\n"
+    #else:
+    #    message += "\n"
     send_message(target_room_id, message)
 
-    prompt_user_for_response(round_winner, winner_points)
+    prompt_user_for_response(round_winner, winner_points, winner_coffees)
 
 
-def prompt_user_for_response(round_winner, winner_points):
+def prompt_user_for_response(round_winner, winner_points, winner_coffees):
     global since_token, time_between_questions, ghost_mode, num_jeopardy_clues, num_crossword_clues, num_mysterybox_clues, num_wof_clues, yolo_mode, god_mode, num_math_questions, num_stats_questions, image_questions, marx_mode, blind_mode
     
     # Call initialize_sync to set since_token
@@ -2640,6 +2643,14 @@ def prompt_user_for_response(round_winner, winner_points):
         
                 # If the round winner responded, process the award accordingly
                 if sender_display_name == round_winner:
+
+                    if message_content.lower() in ['trebek', 'cross', 'jeopardy', 'word', 'ghost', 'dicktator'] and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+                    
+                    
                     if any(str(i) in message_content for i in range(3, 16)):
                         try:
                             delay_value = int(''.join(filter(str.isdigit, message_content)))

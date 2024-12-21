@@ -2654,12 +2654,12 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                         # If the round winner responded, process the award accordingly
                         if sender_display_name == round_winner:
         
-                            if message_content.lower() in ['trebek', 'cross', 'jeopardy', 'word', 'ghost', 'dicktator'] and winner_coffees <= 0:
+                            if any(word in message_content.lower() for word in ['trebek', 'cross', 'jeopardy', 'word', 'ghost', 'dicktator']) and winner_coffees <= 0:
                                 react_to_message(event_id, target_room_id, "okra5")
                                 message = f"\n🙏😔 Sorry {round_winner}. Choice {message_content} requires ☕️.\n"
                                 send_message(target_room_id, message)
                                 continue
-                            
+                             
                             if any(str(i) in message_content for i in range(3, 16)):
                                 try:
                                     delay_value = int(''.join(filter(str.isdigit, message_content)))
@@ -2712,7 +2712,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                                 yolo_mode = True
                                 send_message(target_room_id, f"🤘🔥 Yolo. @{round_winner} says 'don't sweat the small stuff'. No scores till the end.\n")
         
-                            if "dicktator" in message_content.lower() and winner_points >= god_mode_points and num_of_players >= god_mode_players:
+                            if "dicktator" in message_content.lower():
                                 god_mode = True
                                 send_message(target_room_id, f"🎖🍆 @{round_winner} is a dick.\n")
                 

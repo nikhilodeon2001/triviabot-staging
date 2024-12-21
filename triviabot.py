@@ -2126,7 +2126,8 @@ def ask_wof_number(winner):
         except requests.exceptions.RequestException as e:
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")                    
-    
+
+    send_message(target_room_id, "\n🐢⏳Too slow. Let's go with 1.\n")
     return selected_question
 
         

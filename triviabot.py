@@ -2566,14 +2566,18 @@ def process_round_options(round_winner, winner_points):
         return
 
     winner_coffees = get_coffees(round_winner)
-   
-    # Notify the round winner about their award
-    message = f"\n🍔🍟 @{round_winner}, what's your order? Some choices require ☕.\n"
-    send_message(target_room_id, message)
+
+    if winner_coffees <= 0:
+        message = f"\n☕✨ Buy coffee to enable the following options.\n"
+    else:
+        message = f"\n🍔🍟 @{round_winner}, what's your order? Some choices require ☕.\n"
     
+    send_message(target_room_id, message)
+
     message = (
         "⏱️⏳ <3 - 15>: Time (s) between questions\n"
         "🔥🤘 Yolo: No scores shown until the end\n"
+        "👻🎃 Ghost: Boo! Vanishing user responses\n"
         "🙈🚫 Blind: No question answers shown\n"
         "🚩🔨 Marx: Silence! No celebrating. No fun.\n"
          "❌📷 Blank: No images. None. Nada. Zilch.\n"
@@ -2582,12 +2586,11 @@ def process_round_options(round_winner, winner_points):
     send_message(target_room_id, message)
 
     message = (
-        "🟦❌ Trebek: No Jeopardy questions ☕\n"
-        "📰❌ Cross: No Crossword clues ☕\n"
-        "🟦✋ Jeopardy: 5 Jeopardy questions ☕\n"
-        "📰✏️ Word: 5 Crossword clues ☕\n"
-        "👻🎃 Ghost: Boo! Vanishing user responses ☕\n"
-        "🎖🥒 Dicktator: Bring order to the game ☕\n\n"
+        "🟦❌ Trebek: No Jeopardy questions\n"
+        "📰❌ Cross: No Crossword clues\n"
+        "🟦✋ Jeopardy: 5 Jeopardy questions\n"
+        "📰✏️ Word: 5 Crossword clues\n"
+        "🎖🥒 Dicktator: Bring order to the game\n\n"
     )
 
     #standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
@@ -2599,7 +2602,8 @@ def process_round_options(round_winner, winner_points):
     #    message += "\n"
     send_message(target_room_id, message)
 
-    prompt_user_for_response(round_winner, winner_points, winner_coffees)
+    if winner_coffees > 0:
+        prompt_user_for_response(round_winner, winner_points, winner_coffees)
 
 
 def prompt_user_for_response(round_winner, winner_points, winner_coffees):

@@ -2561,12 +2561,11 @@ def process_round_options(round_winner, winner_points):
     marx_mode = marx_mode_default
     blind_mode = blind_mode_default
 
-    winner_coffees = get_coffees(round_winner)
-    
     if round_winner is None:
         return
-   
 
+    winner_coffees = get_coffees(round_winner)
+   
     # Notify the round winner about their award
     message = f"\n🍔🍟 @{round_winner}, what's your order? Some choices require ☕.\n"
     send_message(target_room_id, message)

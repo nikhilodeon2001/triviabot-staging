@@ -2633,19 +2633,6 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
         room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
 
-        for event in room_events:
-            event_id = event["event_id"]
-            event_type = event.get("type")
-
-            if event_type == "m.room.message" and event_id not in processed_events:
-                processed_events.add(event_id)
-                sender = event["sender"]
-                sender_display_name = get_display_name(sender)
-                message_content = event.get("content", {}).get("body", "").strip()
-
-                if sender == bot_user_id or sender_display_name != round_winner:
-                    continue 
-
         # Process all responses in reverse order (latest response first)
         for event in room_events:
             event_id = event["event_id"]
@@ -2670,7 +2657,6 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                             message = f"\n🙏😔 Sorry {winner}. Choice {message_content} requires ☕️.\n"
                             send_message(target_room_id, message)
                             continue
-                        
                         
                         if any(str(i) in message_content for i in range(3, 16)):
                             try:

@@ -2567,30 +2567,30 @@ def process_round_options(round_winner, winner_points):
 
     winner_coffees = get_coffees(round_winner)
 
-    if winner_coffees <= 0:
-        message = f"\n☕✨ Buy coffee to enable the following options.\n"
-    else:
-        message = f"\n🍔🍟 @{round_winner}, what's your order? Some choices require ☕.\n"
+    #if winner_coffees <= 0:
+    #    message = f"\n☕✨ Buy coffee to enable the following options.\n"
+    #else:
+    message = f"\n🍔🍟 @{round_winner}, what's your order? Some choices require ☕.\n"
     
     send_message(target_room_id, message)
 
     message = (
         "⏱️⏳ <3 - 15>: Time (s) between questions\n"
         "🔥🤘 Yolo: No scores shown until the end\n"
-        "👻🎃 Ghost: Boo! Vanishing user responses\n"
         "🙈🚫 Blind: No question answers shown\n"
         "🚩🔨 Marx: Silence! No celebrating. No fun.\n"
-         "❌📷 Blank: No images. None. Nada. Zilch.\n"
+        "❌📷 Blank: No images. None. Nada. Zilch."
     )
 
     send_message(target_room_id, message)
 
     message = (
-        "🟦❌ Trebek: No Jeopardy questions\n"
-        "📰❌ Cross: No Crossword clues\n"
-        "🟦✋ Jeopardy: 5 Jeopardy questions\n"
-        "📰✏️ Word: 5 Crossword clues\n"
-        "🎖🥒 Dicktator: Bring order to the game\n\n"
+        "🟦❌ Trebek: No Jeopardy questions ☕\n"
+        "📰❌ Cross: No Crossword clues ☕\n"
+        "🟦✋ Jeopardy: 5 Jeopardy questions ☕\n"
+        "📰✏️ Word: 5 Crossword clues ☕\n"
+        "👻🎃 Ghost: Boo! Vanishing user responses ☕\n"
+        "🎖🥒 Dicktator: Bring order to the game ☕\n\n"
     )
 
     #standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
@@ -2602,8 +2602,8 @@ def process_round_options(round_winner, winner_points):
     #    message += "\n"
     send_message(target_room_id, message)
 
-    if winner_coffees > 0:
-        prompt_user_for_response(round_winner, winner_points, winner_coffees)
+    #if winner_coffees > 0:
+    prompt_user_for_response(round_winner, winner_points, winner_coffees)
 
 
 def prompt_user_for_response(round_winner, winner_points, winner_coffees):
@@ -2655,13 +2655,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                 
                         # If the round winner responded, process the award accordingly
                         if sender_display_name == round_winner:
-        
-                            if any(word in message_content.lower() for word in ['trebek', 'cross', 'jeopardy', 'word', 'ghost', 'dicktator']) and winner_coffees <= 0:
-                                react_to_message(event_id, target_room_id, "okra5")
-                                message = f"\n🙏😔 Sorry {round_winner}. Choice {message_content} requires ☕️.\n"
-                                send_message(target_room_id, message)
-                                continue
-                             
+
                             if any(str(i) in message_content for i in range(3, 16)):
                                 try:
                                     delay_value = int(''.join(filter(str.isdigit, message_content)))
@@ -2679,7 +2673,23 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                                     )
                                 except ValueError:
                                     pass
-                
+
+                            if "blind" in message_content.lower():
+                                blind_mode = True
+                                send_message(target_room_id, f"🙈🚫 @{round_winner} is blind to the truth. No answers will be shown.\n")
+        
+                            if "marx" in message_content.lower():
+                                marx_mode = True
+                                send_message(target_room_id, f"🚩🔨 @{round_winner} is a commie. No celebrating right answers.\n")
+
+                            if "yolo" in message_content.lower():
+                                yolo_mode = True
+                                send_message(target_room_id, f"🤘🔥 Yolo. @{round_winner} says 'don't sweat the small stuff'. No scores till the end.\n")
+
+                            if "blank" in message_content.lower():
+                                image_questions = False
+                                send_message(target_room_id, f"❌📷 @{round_winner} thinks a word is worth 1000 images.\n")
+        
                             #matched_category = cross_reference_category(message_content)
                 
                             #if matched_category:
@@ -2694,46 +2704,60 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                                 # Send message after handling special cases
                             #    send_message(target_room_id, f"🚫⛔ @{round_winner} has excluded {matched_category}.\n")
                 
+                            #if any(word in message_content.lower() for word in ['trebek', 'cross', 'jeopardy', 'word', 'ghost', 'dicktator']) and winner_coffees <= 0:
+                            #    react_to_message(event_id, target_room_id, "okra5")
+                            #    message = f"\n🙏😔 Sorry {round_winner}. Choice {message_content} requires ☕️.\n"
+                            #    send_message(target_room_id, message)
+                            #    continue
+                            
                             if "jeopardy" in message_content.lower():
-                                num_jeopardy_clues = 5
-                                send_message(target_room_id, f"🟦✋ Daily Double! @{round_winner} wants {num_jeopardy_clues} Jeopardy questions.\n")
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'jeopardy'.\n"
+                                else:
+                                    num_jeopardy_clues = 5
+                                    message = f"\n🟦✋ Daily Double! @{round_winner} wants {num_jeopardy_clues} Jeopardy questions.\n"
+                                send_message(target_room_id, message)
                 
                             if "trebek" in message_content.lower():
-                                num_jeopardy_clues = 0
-                                send_message(target_room_id, f"🟦❌ @{round_winner} says no to Jeopardy. Sorry Alex.\n")
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'trebek'.\n"
+                                else:
+                                    num_jeopardy_clues = 0
+                                    message = f"\n🟦❌ @{round_winner} says no to Jeopardy. Sorry Alex.\n"
+                                send_message(target_room_id, message)
         
                             if "word" in message_content.lower():
-                                num_crossword_clues = 5
-                                send_message(target_room_id, f"📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n")
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'word'.\n"
+                                else:
+                                    num_crossword_clues = 5
+                                    message = f"\n📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n"
+                                send_message(target_room_id, message)
                 
                             if "cross" in message_content.lower():
-                                num_crossword_clues = 0
-                                send_message(target_room_id, f"📰❌ @{round_winner} has crossed off all Crossword questions.\n")
-        
-                            if "yolo" in message_content.lower():
-                                yolo_mode = True
-                                send_message(target_room_id, f"🤘🔥 Yolo. @{round_winner} says 'don't sweat the small stuff'. No scores till the end.\n")
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'cross'.\n"
+                                else:
+                                    num_crossword_clues = 0
+                                    message = f"\n📰❌ @{round_winner} has crossed off all Crossword questions.\n"
+                                send_message(target_room_id, message)
         
                             if "dicktator" in message_content.lower():
-                                god_mode = True
-                                send_message(target_room_id, f"🎖🍆 @{round_winner} is a dick.\n")
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'dicktator'.\n"
+                                else:
+                                    god_mode = True
+                                    message = f"\n🎖🍆 @{round_winner} is a dick.\n"
+                                send_message(target_room_id, message)
                 
                             if "ghost" in message_content.lower():
-                                ghost_mode = 1
-                                send_message(target_room_id, f"👻🎃 @{round_winner} says Boo! Your responses will disappear.\n")
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'cross'.\n"
+                                else:
+                                    ghost_mode = 1
+                                    message = f"\n👻🎃 @{round_winner} says Boo! Your responses will disappear.\n"
+                                send_message(target_room_id, message)
         
-                            if "blank" in message_content.lower():
-                                image_questions = False
-                                send_message(target_room_id, f"❌📷 @{round_winner} thinks a word is worth 1000 images.\n")
-        
-                            if "blind" in message_content.lower():
-                                blind_mode = True
-                                send_message(target_room_id, f"🙈🚫 @{round_winner} is blind to the truth. No answers will be shown.\n")
-        
-                            if "marx" in message_content.lower():
-                                marx_mode = True
-                                send_message(target_room_id, f"🚩🔨 @{round_winner} is a commie. No celebrating right answers.\n")
-    
         except requests.exceptions.RequestException as e:
             print(f"Error fetching responses: {e}")
 
@@ -3984,7 +4008,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         else:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[{len(trivia_answer_list[0])} Letters] {trivia_question}\n\n{string_representation}\n"
         
-    elif trivia_url == "multiple choice": 
+    elif "multiple choice" in trivia_url:
         if trivia_answer_list[0] in {"True", "False"}:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨TRUE or FALSE🚨 {trivia_question}\n\n"
         else:

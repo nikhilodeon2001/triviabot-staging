@@ -1972,7 +1972,7 @@ def ask_wof_letters(winner, answer, extra_time):
     revealed_count = sum(ch.lower() in "okra" for ch in answer)
     answer_length = length_without_spaces = len(answer.replace(" ", ""))
     letters_remaining = answer_length - revealed_count
-    num_wf_letters = int(letters_remaining * 0.5) + 1
+    #num_wf_letters = int(letters_remaining * 0.5) + 1
 
     answer = answer.upper()
     sync_url = f"{matrix_base_url}/sync"

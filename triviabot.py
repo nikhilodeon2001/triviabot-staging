@@ -2589,8 +2589,8 @@ def process_round_options(round_winner, winner_points):
         "📰❌ Cross: No Crossword clues ☕\n"
         "🟦✋ Jeopardy: 5 Jeopardy questions ☕\n"
         "📰✏️ Word: 5 Crossword clues ☕\n"
-        "👻🎃 Ghost: Boo! Vanishing user responses ☕\n"
-        "🎖🥒 Dicktator: Bring order to the game ☕\n\n"
+        "👻🎃 Ghost: Boo! Vanishing responses ☕\n"
+        "🎖🥒 Dicktator: Choose the categories ☕\n\n"
     )
 
     #standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
@@ -4008,7 +4008,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         else:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[{len(trivia_answer_list[0])} Letters] {trivia_question}\n\n{string_representation}\n"
         
-    elif "multiple choice" in trivia_url:
+    elif trivia_url == "multiple choice" or trivia_url == "multiple choice opentrivia": 
         if trivia_answer_list[0] in {"True", "False"}:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨TRUE or FALSE🚨 {trivia_question}\n\n"
         else:
@@ -4177,7 +4177,7 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     user_answer = normalize_text(str(user_answer))
     correct_answer = normalize_text(str(correct_answer))
 
-    if url == "multiple choice":
+    if url == "multiple choice" or url == "multiple choice opentrivia":
         return user_answer[0] == correct_answer[0];
     
     if is_number(correct_answer):
@@ -4325,8 +4325,8 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_response_time = None
     fastest_correct_event_id = None
 
-    # Check if trivia_answer_list is a single-element list with a numeric answer
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice", "median", "mean", "polynomial sum", "polynomial product", "polynomial factors"]
+    # Check if trivia_answer_list is a single-element list with a numeric answer  
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "polynomial sum", "polynomial product", "polynomial factors"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}
@@ -4358,7 +4358,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 continue  # Skip non-numeric responses for single numeric questions
         
         # Log user submission (MongoDB operation)
-        log_user_submission(display_name)
+        #log_user_submission(display_name)
                 
         # Indicate that there was at least one response
         has_responses = True
@@ -5388,7 +5388,7 @@ def start_trivia_round():
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
             
-            if len(scoreboard) > 4:
+            if len(scoreboard) > 400:
                 ask_survey_question()
                 
             time.sleep(5)

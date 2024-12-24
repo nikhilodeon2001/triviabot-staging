@@ -2132,6 +2132,11 @@ def ask_wof_number(winner):
 
     
 
+import os
+import io
+import re
+from PIL import Image, ImageDraw, ImageFont
+
 def generate_wof_image(
     phrase,
     clue,
@@ -2147,11 +2152,12 @@ def generate_wof_image(
     base_revealed_font_size=20,
     max_puzzle_width=700  # how wide the puzzle area can be before scaling or line-wrap
 ):
-
-    """Generate a Wheel of Fortune style puzzle image that:
-       - Breaks the puzzle into multiple lines if needed
-       - Never breaks a single word across lines
-       - If a single word is too wide, scale down tiles+font for the entire puzzle.
+    """
+    Generate a Wheel of Fortune style puzzle image that:
+     - Breaks the puzzle into multiple lines if needed
+     - Never breaks a single word across lines
+     - Preserves spaces as their own tiles (green squares)
+     - If a single word is too wide, scale down tiles+font for the entire puzzle.
     """
 
     # Convert everything to uppercase for consistent drawing
@@ -2183,45 +2189,44 @@ def generate_wof_image(
         return None, None, None, None
 
     # --------------------------------------------------
-    # 1) Split the phrase into words (including the spaces as "words"?)
-    #    Actually, let's do a more typical approach: split on spaces
-    #    but remember each word is made of letters. 
+    # 1) Split the phrase into chunks, preserving spaces as separate tokens
+    #    Example: "HELLO WORLD" -> ["HELLO", " ", "WORLD"]
     # --------------------------------------------------
-    words = phrase.split(' ')  # e.g. ["HELLO", "WORLD"]
+    # \S+ matches one or more non-whitespace chars
+    # \s+ matches one or more whitespace chars (incl. spaces)
+    chunks = re.findall(r'\S+|\s+', phrase)
+    # Now each chunk is either a word or a run of spaces.
 
-    # We'll treat each letter (including spaces) as a tile, 
-    # but for line-wrapping, we only break between words.
-
     # --------------------------------------------------
-    # 2) Define a function to measure how wide a word is in tiles
+    # 2) Define a function to measure how wide a chunk is in tiles
+    #    We measure each character (letter or space) as one tile
     # --------------------------------------------------
-    def word_tile_width(word, tile_w, spacing):
+    def chunk_tile_width(chunk, tile_w, spacing):
         """
-        Returns the total pixel width for this word (letters only, no trailing space).
-        A word of length L has L tiles, so width is (L * tile_w + (L-1)*spacing).
+        For a chunk of length L (letters or spaces), we have L tiles,
+        so total width = L * (tile_w + spacing) - spacing
         """
-        L = len(word)
+        L = len(chunk)
         if L == 0:
             return 0
-        return L * (tile_w + spacing) - spacing  # subtract spacing for the last tile
-    
+        return L * (tile_w + spacing) - spacing
+
     # --------------------------------------------------
-    # 3) Check if any single word is too wide for max_puzzle_width
+    # 3) Check if any single chunk (esp. a word) is too wide for max_puzzle_width
     #    If so, scale down until it fits
     # --------------------------------------------------
-    # First, compute how wide the single *largest* word is (unscaled).
-    max_word_length = max(len(w) for w in words) if words else 0
-    unscaled_max_word_width = word_tile_width("X" * max_word_length, base_tile_width, base_spacing)
+    max_chunk_length = max(len(ch) for ch in chunks) if chunks else 0
+    unscaled_max_chunk_width = chunk_tile_width("X" * max_chunk_length, base_tile_width, base_spacing)
 
-    if unscaled_max_word_width > max_puzzle_width:
-        # Scale factor to ensure that the largest single word fits
-        scale_factor = max_puzzle_width / float(unscaled_max_word_width)
-        
+    if unscaled_max_chunk_width > max_puzzle_width:
+        # Scale factor to ensure that the largest chunk fits
+        scale_factor = max_puzzle_width / float(unscaled_max_chunk_width)
+
         # Scale tile sizes, spacing, and fonts
         tile_width     = int(base_tile_width * scale_factor)
         tile_height    = int(base_tile_height * scale_factor)
         spacing        = int(base_spacing * scale_factor)
-        # ensure no zero
+
         tile_width  = max(1, tile_width)
         tile_height = max(1, tile_height)
         spacing     = max(1, spacing)
@@ -2235,115 +2240,96 @@ def generate_wof_image(
         clue_font     = ImageFont.truetype(font_path, scaled_clue_font_size)
         revealed_font = ImageFont.truetype(font_path, scaled_revealed_font_size)
     else:
-        # No scale needed if everything fits
         tile_width  = base_tile_width
         tile_height = base_tile_height
         spacing     = base_spacing
 
     # --------------------------------------------------
-    # 4) Now that we’ve ensured each single word fits,
-    #    break words into lines up to max_puzzle_width
+    # 4) Break chunks (words/spaces) into multiple lines
+    #    without breaking any chunk across lines
     # --------------------------------------------------
     lines = []
     current_line = []
     current_line_width = 0
 
-    for w in words:
-        w_width = word_tile_width(w, tile_width, spacing)
-        
-        # If the line is empty, we add the word no matter what
+    for ch in chunks:
+        w_width = chunk_tile_width(ch, tile_width, spacing)
+
         if not current_line:
-            current_line = [w]
+            # If the line is empty, start with this chunk
+            current_line = [ch]
             current_line_width = w_width
         else:
-            # If we can add this word to the current line without exceeding max width
-            # we also add a "space tile" for separation if we want actual spacing.
-            # However, we've accounted for spacing in the tile calculation for each letter.
-            # The total line width if we add the new word is:
-            prospective_width = current_line_width + spacing + w_width  # extra spacing for gap between word "blocks" 
+            # If we can add this chunk to the current line
+            prospective_width = current_line_width + spacing + w_width
             if prospective_width <= max_puzzle_width:
-                current_line.append(w)
-                # We'll treat it as: new line width = old + spacing + word_width
+                current_line.append(ch)
                 current_line_width = prospective_width
             else:
-                # Start new line
+                # Start a new line
                 lines.append(current_line)
-                current_line = [w]
+                current_line = [ch]
                 current_line_width = w_width
-    
+
     # Add the last line if non-empty
     if current_line:
         lines.append(current_line)
 
     # --------------------------------------------------
-    # 5) Now we have lines of words. Next, we need to draw them.
-    #    For each line, the total pixel width is sum of word widths plus spacing 
-    #    between them. We'll compute that so we can center them horizontally.
+    # 5) Draw the lines of tiles
     # --------------------------------------------------
 
-    # function to compute the total width (in px) of a line
-    def line_tile_width(line_words):
-        if not line_words:
+    def line_tile_width(line_chunks):
+        if not line_chunks:
             return 0
-        # sum of each word’s width plus 1 'extra' spacing in between *words* only
         total = 0
-        for idx, wd in enumerate(line_words):
-            wwidth = word_tile_width(wd, tile_width, spacing)
+        for idx, c in enumerate(line_chunks):
+            cwidth = chunk_tile_width(c, tile_width, spacing)
             if idx == 0:
-                total += wwidth
+                total += cwidth
             else:
-                # extra spacing for the gap between words, e.g. one spacing?
-                total += spacing + wwidth
+                total += spacing + cwidth
         return total
 
-    # We want to place each line at some (start_x, y_position).
-    # Let's decide on a top margin and inter-line spacing
     top_margin = 50
     line_spacing_px = tile_height + 20  # gap between lines
 
     # Figure out total puzzle height
     total_puzzle_height = len(lines) * line_spacing_px
-    # We'll center the puzzle vertically around the middle or place it higher to leave room for the clue
     puzzle_y_start = (img_height - total_puzzle_height) // 2 - 60
 
-    # Actually draw each line
     current_y = puzzle_y_start
     padding = 5
 
-    for line_words in lines:
-        # measure how wide this line is
-        lw = line_tile_width(line_words)
-        line_start_x = (img_width - lw) // 2  # center horizontally
-        
-        # Now place each word in that line
+    for line_chunks in lines:
+        lw = line_tile_width(line_chunks)
+        line_start_x = (img_width - lw) // 2
         current_x = line_start_x
-        for idx, word_str in enumerate(line_words):
-            w_width = word_tile_width(word_str, tile_width, spacing)
-            # Draw that word as a series of tiles
-            for c in word_str:  # each char in the word
-                # Draw a green rectangle as padding
+
+        for chunk in line_chunks:
+            # draw each character as a tile
+            for c in chunk:
+                # Draw green rectangle for tile border/padding
                 draw.rectangle(
                     [current_x - padding, current_y - padding,
                      current_x + tile_width + padding, current_y + tile_height + padding],
                     fill=tile_border_color
                 )
-
                 if c == ' ':
-                    # space tile
+                    # Space tile
                     draw.rectangle(
                         [current_x, current_y, current_x + tile_width, current_y + tile_height],
                         outline=tile_border_color,
                         fill=space_tile_color
                     )
                 else:
-                    # letter tile
+                    # Letter tile
                     draw.rectangle(
                         [current_x, current_y, current_x + tile_width, current_y + tile_height],
                         outline=tile_border_color,
                         fill=tile_fill_color
                     )
                     if c in revealed_letters:
-                        # Center the letter
                         letter_bbox = draw.textbbox((0, 0), c, font=font)
                         letter_w = letter_bbox[2] - letter_bbox[0]
                         letter_h = letter_bbox[3] - letter_bbox[1]
@@ -2351,30 +2337,23 @@ def generate_wof_image(
                         text_y = current_y + (tile_height - letter_h) // 2
                         draw.text((text_x, text_y), c, fill=text_color, font=font)
 
-                # Move x to the next tile
                 current_x += tile_width + spacing
-            
-            # After finishing a word, add extra spacing between words (already included above).
-            # Actually, we've already added spacing in the tile loop. 
-            # But if you want an extra gap between words, you can do it here:
-            #   current_x += spacing
-        
-        # Move down for the next line
+
         current_y += line_spacing_px
 
     # --------------------------------------------------
-    # Draw the clue text below the puzzle
+    # Draw the clue text
     # --------------------------------------------------
     clue_bbox = draw.textbbox((0, 0), clue, font=clue_font)
     clue_w = clue_bbox[2] - clue_bbox[0]
     clue_h = clue_bbox[3] - clue_bbox[1]
 
     clue_x = (img_width - clue_w) // 2
-    clue_y = current_y + 20  # 20px below the last line
+    clue_y = current_y + 20  
     draw.text((clue_x, clue_y), clue, fill=clue_color, font=clue_font)
 
     # --------------------------------------------------
-    # Draw the revealed letters below the clue
+    # Revealed letters below the clue
     # --------------------------------------------------
     revealed_text = ' '.join(revealed_letters)
     revealed_bbox = draw.textbbox((0, 0), revealed_text, font=revealed_font)
@@ -2384,9 +2363,10 @@ def generate_wof_image(
     draw.text((revealed_x, revealed_y), revealed_text, fill=revealed_letters_color, font=revealed_font)
 
     # --------------------------------------------------
-    # Create a puzzle display string
+    # Create a puzzle display string (underscores for unrevealed letters)
     # --------------------------------------------------
-    # For each char in phrase, show if revealed or underscore
+    # Now that we have chunked the phrase, we can just iterate over the original phrase
+    # or reconstruct from chunks.  We'll do from the original phrase to keep it simplest.
     display_string = ' '.join(
         [ch if ch in revealed_letters else ('_' if ch != ' ' else ' ') for ch in phrase]
     )

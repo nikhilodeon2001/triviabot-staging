@@ -1741,7 +1741,7 @@ def select_wof_questions(winner):
                 "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
             }},
             {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
-            {"$sample": {"size": 3}}  # Sample 3 unique questions
+            {"$sample": {"size": 5}}  # Sample 3 unique questions
         ]
 
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
@@ -1754,8 +1754,9 @@ def select_wof_questions(winner):
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
             counter = counter + 1
+        send_message(target_room_id, message)  
         premium_counts = counter
-        message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
+        message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         send_message(target_room_id, message)  
@@ -1771,13 +1772,13 @@ def select_wof_questions(winner):
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
-        elif selected_wof_category == "4":
+        elif selected_wof_category == "6":
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(3)
 
-        elif selected_wof_category == "5":
+        elif selected_wof_category == "7":
             wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url, satellite_view_live_url, themed_country_url = get_random_city(winner)
             location_clue = f"\n🌦️📊 We intercepted this message...\n\n{location_clue}\n"
             send_message(target_room_id, location_clue)
@@ -1950,7 +1951,12 @@ def process_wof_guesses(winner, answer, extra_time):
 
 
 def ask_wof_letters(winner, answer, extra_time):
-    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner, num_wf_letters
+
+    revealed_count = sum(ch.lower() in "okra" for ch in answer)
+    answer_length = length_without_spaces = len(variable.replace(" ", ""))
+    letters_remaining = answer_length - revealed_count
+    num_wf_letters = int(letters_remaining * 0.5) + 1
 
     answer = answer.upper()
     sync_url = f"{matrix_base_url}/sync"

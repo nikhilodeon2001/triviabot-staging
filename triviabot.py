@@ -1954,7 +1954,7 @@ def ask_wof_letters(winner, answer, extra_time):
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner, num_wf_letters
 
     revealed_count = sum(ch.lower() in "okra" for ch in answer)
-    answer_length = length_without_spaces = len(variable.replace(" ", ""))
+    answer_length = length_without_spaces = len(answer.replace(" ", ""))
     letters_remaining = answer_length - revealed_count
     num_wf_letters = int(letters_remaining * 0.5) + 1
 

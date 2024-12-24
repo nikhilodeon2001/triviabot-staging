@@ -2398,6 +2398,17 @@ def generate_wof_image(
     img.save(image_buffer, format='PNG')
     image_buffer.seek(0)
 
+    if image_questions:
+        image_mxc = upload_image_to_matrix(image_buffer.read())
+    else:
+        image_mxc = True
+
+    if image_mxc:
+        return image_mxc, img_width, img_height, display_string
+    else:
+        print("Failed to upload the image.")
+        return None, None, None, None
+
 
         
 

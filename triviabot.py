@@ -2130,13 +2130,7 @@ def ask_wof_number(winner):
     send_message(target_room_id, "\n🐢⏳Too slow. Let's go with 1.\n")
     return selected_question
 
-    
-
-import os
-import io
-import re
-from PIL import Image, ImageDraw, ImageFont
-
+  
 def generate_wof_image(
     phrase,
     clue,

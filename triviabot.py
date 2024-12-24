@@ -2643,7 +2643,7 @@ def generate_crossword_image(answer):
 
     # Determine prefilled letter count and positions
     if answer_length > 2:
-        prefill_count = max(1, int(answer_length * .5))  # At least 1 letter should be filled in
+        prefill_count = int(answer_length * .5) + 1  # At least 1 letter should be filled in
         prefill_positions = random.sample(range(answer_length), prefill_count)
     else:
         prefill_positions = []

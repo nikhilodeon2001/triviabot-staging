@@ -116,6 +116,7 @@ wf_winner = False
 nice_okra = False
 creep_okra = False
 seductive_okra = False
+joke_okra = False
 blind_mode_default = False
 blind_mode = blind_mode_default
 marx_mode_default = False
@@ -1144,11 +1145,12 @@ def load_parameters():
 
 
 def nice_creep_okra_option(winner):
-    global since_token, params, headers, max_retries, delay_between_retries, nice_okra, creep_okra, wf_winner, seductive_okra
+    global since_token, params, headers, max_retries, delay_between_retries, nice_okra, creep_okra, wf_winner, seductive_okra, joke_okra
     nice_okra = False
     creep_okra = False
     wf_winner = False
     seductive_okra = False
+    joke_okra = False
 
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
@@ -1161,7 +1163,8 @@ def nice_creep_okra_option(winner):
     message += f"🥒😊 Say 'okra' and I'll be nice.\n"
     message += f"👀🔭 Say 'creep' and I'll snoop your Reddit profile.\n"
     message += f"💋👠 Say 'love me' and I'll seduce you.\n"
-    message += f"🔥🍗 Say nothing and I roast you.\n\n"
+    message += f"🤡🤣 Say 'joke' and I'll write you a custom joke.\n"
+    message += f"🔥🍗 Say nothing and I'll roast you.\n\n"
     send_message(target_room_id, message)
     
     while time.time() - start_time < magic_time:
@@ -1206,6 +1209,7 @@ def nice_creep_okra_option(winner):
                         wf_winner = True
                         creep_okra = False
                         seductive_okra = False
+                        joke_okra = False
                         return None
                         
                     if "creep" in message_content.lower():
@@ -1214,6 +1218,7 @@ def nice_creep_okra_option(winner):
                         nice_okra = False
                         wf_winner = False
                         seductive_okra = False
+                        joke_okra = False
                         return None
 
                     if "love me" in message_content.lower():
@@ -1222,6 +1227,16 @@ def nice_creep_okra_option(winner):
                         nice_okra = False
                         wf_winner = False
                         seductive_okra = True 
+                        joke_okra = False
+                        return None
+
+                    if "joke" in message_content.lower():
+                        react_to_message(event_id, target_room_id, "okra21")
+                        nice_okra = False
+                        creep_okra = False
+                        wf_winner = False
+                        seductive_okra = False
+                        joke_okra = True
                         return None
                         
                     if "nothing" in message_content.lower():
@@ -1230,6 +1245,7 @@ def nice_creep_okra_option(winner):
                         creep_okra = False
                         wf_winner = False
                         seductive_okra = False
+                        joke_okra = False
                         return None
                         
         except requests.exceptions.RequestException as e:
@@ -2687,7 +2703,7 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra, marx_mode, blind_mode, seductive_okra
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra, marx_mode, blind_mode, seductive_okra, joke_okra
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
@@ -2702,6 +2718,7 @@ def process_round_options(round_winner, winner_points):
     nice_okra = False
     creep_okra = False
     seductive_okra = False
+    joke_okra = False
     num_math_questions = num_math_questions_default
     num_stats_questions = num_stats_questions_default
     image_questions = image_questions_default
@@ -3300,7 +3317,7 @@ def scramble_text(input_text):
 
 
 def generate_round_summary(round_data, winner):
-    global nice_okra, creep_okra, wf_winner, seductive_okra
+    global nice_okra, creep_okra, wf_winner, seductive_okra, joke_okra
     #ask_magic_number(winner) 
 
     if skip_summary == True:
@@ -3364,6 +3381,9 @@ def generate_round_summary(round_data, winner):
             f"Create no more than 10 sentences in total.\n"
         )
 
+    elif joke_okra == True:
+        joke = generate_okra_joke(winner)
+        return joke
 
     elif seductive_okra == True and is_sovereign == True:
          prompt = (

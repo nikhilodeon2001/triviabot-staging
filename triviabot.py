@@ -312,7 +312,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                     if sender == bot_user_id:
                         continue
 
-                    if sender_display_name == winner and mode = "solo":
+                    if sender_display_name == winner and mode == "solo":
                         continue
 
                     current_answers = user_progress[sender_display_name]

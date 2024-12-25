@@ -266,7 +266,12 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     num_of_answers = len(list_question_answers)
     target_num_answers = int(target_percentage * num_of_answers)
     
-    message = f"\n⚠️🚨 Everyone's in for this. List as many as you can:\n\n🧭🗺️ {list_question_clue}\n\n🟢🚀 GO!"
+    message = f"\n⚠️🚨 Everyone's in for this. List as many as you can of...\n"
+    send_message(target_room_id, message)
+
+    time.sleep(2)
+
+    message = f"\n🧭🗺️ {list_question_clue}\n\n🟢🚀 GO!"
     send_message(target_room_id, message)
 
     processed_events = set()  # Track processed event IDs to avoid duplicates
@@ -333,7 +338,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                 
                             # Check if they have enough correct answers total
                             if len(current_answers) >= target_num_answers and mode == "competition":
-                                message = f"\n🏆🎉 {sender_display_name} wins with {len(current_answers)}!"
+                                message = f"\n🏆🎉 @{sender_display_name} got them all with {len(current_answers)}!"
                             
                                 # Now figure out 2nd and 3rd places.
                                 # 1) Build a list of (user, score) for *all* users
@@ -346,20 +351,20 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                                 # But only if they exist
                                 if len(score_list) > 1:
                                     second_user, second_score = score_list[1]
-                                    message += f"\n2nd place: {second_user} with {second_score} answers!"
+                                    message += f"\n2nd place: @{second_user} with {second_score} answers!"
                                 if len(score_list) > 2:
                                     third_user, third_score = score_list[2]
-                                    message += f"\n3rd place: {third_user} with {third_score} answers!\n"
+                                    message += f"\n3rd place: @{third_user} with {third_score} answers!\n"
                 
                                 send_message(target_room_id, message)
                                 return True
 
                             if len(total_progress) >= target_num_answers and mode == "cooperative":
-                                message = f"\n🏆🎉 Okrans did it with {len(current_answers)} answers!"
+                                message = f"\n🏆🎉 Okrans got them all with {len(current_answers)} answers!"
                                 return True
 
                             if len(total_progress) >= target_num_answers and mode == "solo":
-                                message = f"\n🏆🎉 {winner} did it with {len(current_answers)} answers!"
+                                message = f"\n🏆🎉 @{winner} got them all with {len(current_answers)} answers!"
                                 return True
                                 
                             break
@@ -382,15 +387,15 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
         
         if len(score_list) > 0:
             first_user, first_score = score_list[0]
-            message = f"\n🥇🏆 1st place: {first_user} with {first_score} answers!"
+            message = f"\n🥇🏆 1st place: @{first_user} with {first_score} answers!"
     
         if len(score_list) > 1:
             second_user, second_score = score_list[1]
-            message += f"\n🥈🎊 2nd place: {second_user} with {second_score} answers!"
+            message += f"\n🥈🎊 2nd place: @{second_user} with {second_score} answers!"
        
         if len(score_list) > 2:
             third_user, third_score = score_list[2]
-            message += f"\n🥉🎉 3rd place: {third_user} with {third_score} answers!\n"
+            message += f"\n🥉🎉 3rd place: @{third_user} with {third_score} answers!\n"
     
         send_message(target_room_id, message)
         
@@ -404,7 +409,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
         return False
     
     if mode == "solo":
-        message = f"\n😢👎 Sorry. {winner} only collected {len(current_answers)}. Target was {target_num_answers}."
+        message = f"\n😢👎 Sorry. @{winner} only collected {len(current_answers)}. Target was {target_num_answers}."
         return False
 
 

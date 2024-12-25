@@ -261,11 +261,6 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
 
 
     list_category_emojis = get_category_title(list_question_category, "")
-    emojis = question_info.get("emojis", "🤔❓")elif selected_wof_category == "6":
-            wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
-            wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
-            send_message(target_room_id, wikipedia_message)
-            time.sleep(3)
     num_of_answers = len(list_question_answers)
     target_num_answers = int(target_percentage * num_of_answers)
     

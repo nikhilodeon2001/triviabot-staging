@@ -403,10 +403,10 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
             return False
     
     if mode == "cooperative":
-        message = f"\n😢👎 Sorry. Okrans only collected {len(current_answers)}. Target was {target_num_answers.}"
+        message = f"\n😢👎 Sorry. Okrans only collected {len(current_answers)}. Target was {target_num_answers}."
         return False
     
-    if mode == "solo:
+    if mode == "solo":
         message = f"\n😢👎 Sorry. {winner} only collected {len(current_answers)}. Target was {target_num_answers}."
         return False
 

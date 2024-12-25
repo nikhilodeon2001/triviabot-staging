@@ -1,5 +1,7 @@
 
 
+
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -1972,7 +1974,7 @@ def ask_wof_letters(winner, answer, extra_time):
     revealed_count = sum(ch.lower() in "okra" for ch in answer)
     answer_length = length_without_spaces = len(answer.replace(" ", ""))
     letters_remaining = answer_length - revealed_count
-    #num_wf_letters = int(letters_remaining * 0.5) + 1
+    #num_wf_letters = int(letters_remaining * 0.5) - 2
 
     answer = answer.upper()
     sync_url = f"{matrix_base_url}/sync"
@@ -2123,20 +2125,20 @@ def ask_wof_number(winner):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if str(message_content) in {"4"} and winner_coffees <= 0:
+                    if str(message_content) in {"6"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'Wikipedia Roulette' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
                     
-                    if str(message_content) in {"5"} and winner_coffees <= 0:
+                    if str(message_content) in {"7"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'Where's Okra?' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"1", "2", "3", "4", "5"}:
+                    if str(message_content) in {"1", "2", "3", "4", "5", "6", "7"}:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"

@@ -39,7 +39,7 @@ import logging
 import praw
 import tempfile
 import base64
-from collections import Counter
+from collections import Counter, defaultdict
 import math
 
 # Define the base API URL for Matrix
@@ -216,6 +216,200 @@ cities = [
 {"city": "Yerevan", "country": "Armenia", "lat": 40.1792, "lon": 44.4991, "capital": True},
 {"city": "Zagreb", "country": "Croatia", "lat": 45.8150, "lon": 15.9819, "capital": True}
 ]
+
+
+
+def ask_list_question(winner, mode="competition", target_percentage = 1.00):    
+    try:
+        time.sleep(2)
+        db = connect_to_mongodb()
+        recent_list_ids = get_recent_question_ids_from_mongo("list")
+        
+        # Fetch wheel of fortune questions using the random subset method
+        list_collection = db["list_questions"]
+        pipeline_list = [
+            {"$match": {"_id": {"$nin": list(recent_list_ids)}}},  # Exclude recent IDs
+            {"$group": {  # Group by question text to ensure uniqueness
+                "_id": "$question",  # Group by the question text field
+                "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
+            }},
+            {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
+            {"$sample": {"size": 1}}  # Sample 3 unique questions
+        ]
+
+        list_questions = list(list_collection.aggregate(pipeline_list))
+        print(list_question)
+        list_question = list_questions[0]
+        list_question_clue = list_question["question"]
+        list_question_answers = list_question["answers"]   
+        list_question_category = list_quesiton["category"]
+        list_question_url = list_quesiton["url"]
+        list_question_id = list_question["_id"]  # Get the ID of the selected question
+        if list_question_id:
+            store_question_ids_in_mongo([list_question_id], "list")  # Store it as a list containing a single ID
+
+       
+    except Exception as e:
+        # Capture the exception in Sentry and print detailed error information
+        sentry_sdk.capture_exception(e)
+        
+        # Print a detailed error message with traceback
+        error_details = traceback.format_exc()
+        print(f"Error selecting list questions: {e}\nDetailed traceback:\n{error_details}")
+        
+        return None  # Return an empty list in case of failure
+
+
+    list_category_emojis = get_category_title(list_question_category, "")
+    emojis = question_info.get("emojis", "🤔❓")elif selected_wof_category == "6":
+            wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
+            wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
+            send_message(target_room_id, wikipedia_message)
+            time.sleep(3)
+    num_of_answers = len(list_question_answers)
+    target_num_answers = int(target_percentage * num_of_answers)
+    
+    message = f"\📝📚 Everyone's in for this. List as many as you can:\n\n{list_category_emojis}: {list_question_clue}\n"
+    send_message(target_room_id, message)
+
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+    user_progress = defaultdict(set)
+    total_progress = set()
+    
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+
+    
+    while time.time() - start_time < 20:
+        try:
+                
+            if since_token:
+                params["since"] = since_token
+
+            time.sleep(1)
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:                
+                event_id = event["event_id"]
+                event_type = event.get("type")
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "")
+
+                    if sender == bot_user_id:
+                        continue
+
+                    if sender_display_name == winner and mode = "solo":
+                        continue
+
+                    current_answers = user_progress[sender_display_name]
+
+                    # Iterate over all validAnswers
+                    for answer in list_question_answers:
+                        # Skip if user already has this answer
+                        if answer in current_answers:
+                            continue
+                
+                        # Compare user's guess to this official answer
+                        if fuzzy_match(message_content, answer, list_question_category, list_question_url):
+                            # It's a match => store the *official answer* in the user's set
+                            current_answers.add(answer)
+                            total_progress.add(answer)
+                
+                            # Check if they have enough correct answers total
+                            if len(current_answers) >= target_num_answers and mode == "competition":
+                                message = f"\n🏆🎉 {sender_display_name} wins with {len(current_answers)}!"
+                            
+                                # Now figure out 2nd and 3rd places.
+                                # 1) Build a list of (user, score) for *all* users
+                                score_list = [(user, len(answers)) for user, answers in user_progress.items()]
+                
+                                # 2) Sort descending by score
+                                score_list.sort(key=lambda x: x[1], reverse=True)
+                
+                                # The top user is score_list[0], second place = score_list[1], etc.
+                                # But only if they exist
+                                if len(score_list) > 1:
+                                    second_user, second_score = score_list[1]
+                                    message += f"\n2nd place: {second_user} with {second_score} answers!"
+                                if len(score_list) > 2:
+                                    third_user, third_score = score_list[2]
+                                    message += f"\n3rd place: {third_user} with {third_score} answers!\n"
+                
+                                send_message(target_room_id, message)
+                                return True
+
+                            if len(total_progress) >= target_num_answers and mode == "cooperative":
+                                message = f"\n🏆🎉 Okrans did it with {len(current_answers)} answers!"
+                                return True
+
+                            if len(total_progress) >= target_num_answers and mode == "solo:
+                                message = f"\n🏆🎉 {winner} did it with {len(current_answers)} answers!"
+                                return True
+                                
+                            break
+        
+        except Exception as e:
+            print(f"Error processing events: {e}")
+
+
+    if mode == "competition":
+      
+        # Now figure out 2nd and 3rd places.
+        # 1) Build a list of (user, score) for *all* users
+        score_list = [(user, len(answers)) for user, answers in user_progress.items()]
+    
+        # 2) Sort descending by score
+        score_list.sort(key=lambda x: x[1], reverse=True)
+    
+        # The top user is score_list[0], second place = score_list[1], etc.
+        # But only if they exist
+        
+        if len(score_list) > 0:
+            first_user, first_score = score_list[0]
+            message = f"\n🥇🏆 1st place: {first_user} with {first_score} answers!"
+    
+        if len(score_list) > 1:
+            second_user, second_score = score_list[1]
+            message += f"\n🥈🎊 2nd place: {second_user} with {second_score} answers!"
+       
+        if len(score_list) > 2:
+            third_user, third_score = score_list[2]
+            message += f"\n🥉🎉 3rd place: {third_user} with {third_score} answers!\n"
+    
+        send_message(target_room_id, message)
+        
+        if winner = first_user or winner = second_user or winner = third_user:
+            return True
+        else:
+            return False
+    
+    if mode == "cooperative":
+        message = f"\n😢👎 Sorry. Okrans only collected {len(current_answers)}. Target was {target_num_answers.}"
+        return False
+    
+    if mode == "solo:
+        message = f"\n😢👎 Sorry. {winner} only collected {len(current_answers)}. Target was {target_num_answers}."
+        return False
+
 
 
 
@@ -1741,7 +1935,7 @@ def create_factors_question():
     }
         
 def select_wof_questions(winner):
-    global fixed_letters
+    global fixed_letters, list_winner
     
     try:
         time.sleep(2)
@@ -1777,7 +1971,10 @@ def select_wof_questions(winner):
         message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
+        counter = counter + 1
+        message += f"{counter}. 📝📚 List Battle [All Play] ☕\n"
         send_message(target_room_id, message)  
+        
 
         selected_wof_category = ask_wof_number(winner)
         
@@ -1789,6 +1986,15 @@ def select_wof_questions(winner):
             wof_question_id = wof_question["_id"]  # Get the ID of the selected question
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
+        
+        elif selected_wof_category == "8":
+            list_success = ask_list_question(winner)
+            time.sleep(3)
+            if list_success:
+                list_winner = True
+            else:
+                list_winner = False
+            return None
         
         elif selected_wof_category == "6":
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
@@ -2138,7 +2344,13 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"1", "2", "3", "4", "5", "6", "7"}:
+                    if str(message_content) in {"8"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"1", "2", "3", "4", "5", "6", "7", "8"}:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"

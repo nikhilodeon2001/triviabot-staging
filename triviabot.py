@@ -242,8 +242,8 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
         print(list_question)
         list_question_clue = list_question["question"]
         list_question_answers = list_question["answers"]   
-        list_question_category = list_quesiton["category"]
-        list_question_url = list_quesiton["url"]
+        list_question_category = list_question["category"]
+        list_question_url = list_question["url"]
         list_question_id = list_question["_id"]  # Get the ID of the selected question
         if list_question_id:
             store_question_ids_in_mongo([list_question_id], "list")  # Store it as a list containing a single ID

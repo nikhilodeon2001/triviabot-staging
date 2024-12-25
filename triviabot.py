@@ -238,8 +238,8 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
         ]
 
         list_questions = list(list_collection.aggregate(pipeline_list))
-        print(list_question)
         list_question = list_questions[0]
+        print(list_question)
         list_question_clue = list_question["question"]
         list_question_answers = list_question["answers"]   
         list_question_category = list_quesiton["category"]

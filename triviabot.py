@@ -266,7 +266,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     num_of_answers = len(list_question_answers)
     target_num_answers = int(target_percentage * num_of_answers)
     
-    message = f"\📝📚 Everyone's in for this. List as many as you can:\n\n{list_category_emojis}: {list_question_clue}\n"
+    message = f"\n⚠️🚨 Everyone's in for this. List as many as you can:\n\n🧭🗺️ {list_question_clue}\n\n🟢🚀 GO!"
     send_message(target_room_id, message)
 
     processed_events = set()  # Track processed event IDs to avoid duplicates

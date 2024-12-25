@@ -361,7 +361,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                                 message = f"\n🏆🎉 Okrans did it with {len(current_answers)} answers!"
                                 return True
 
-                            if len(total_progress) >= target_num_answers and mode == "solo:
+                            if len(total_progress) >= target_num_answers and mode == "solo":
                                 message = f"\n🏆🎉 {winner} did it with {len(current_answers)} answers!"
                                 return True
                                 

@@ -399,10 +399,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     
         send_message(target_room_id, message)
         
-        if winner == first_user or winner == second_user or winner == third_user:
-            return True
-        else:
-            return False
+        return
     
     if mode == "cooperative":
         message = f"\n😢👎 Sorry. Okrans only got {len(current_answers)}/{num_of_answers}."

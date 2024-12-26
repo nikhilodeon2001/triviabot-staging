@@ -269,7 +269,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     message = f"\n⚠️🚨 Everyone's in for this. List as many as you can of...\n"
     send_message(target_room_id, message)
 
-    time.sleep(2)
+    time.sleep(3)
 
     message = f"\n🧭🗺️ {list_question_clue}\n\n🟢🚀 GO!"
     send_message(target_room_id, message)

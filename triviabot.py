@@ -282,7 +282,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     start_time = time.time()  # Track when the question starts
 
     
-    while time.time() - start_time < 20:
+    while time.time() - start_time < 30:
         try:
                 
             if since_token:

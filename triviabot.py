@@ -337,8 +337,8 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                             total_progress.add(answer)
                 
                             # Check if they have enough correct answers total
-                            if len(current_answers) >= target_num_answers and mode == "competition":
-                                message = f"\n🏆🎉 @{sender_display_name} got them all with {len(current_answers)}!"
+                            if len(current_answers) >= num_of_answers and mode == "competition":
+                                message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
                             
                                 # Now figure out 2nd and 3rd places.
                                 # 1) Build a list of (user, score) for *all* users
@@ -351,20 +351,20 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                                 # But only if they exist
                                 if len(score_list) > 1:
                                     second_user, second_score = score_list[1]
-                                    message += f"\n2nd place: @{second_user} with {second_score} answers!"
+                                    message += f"\n2nd place: @{second_user} with {second_score}/{num_of_answers}."
                                 if len(score_list) > 2:
                                     third_user, third_score = score_list[2]
-                                    message += f"\n3rd place: @{third_user} with {third_score} answers!\n"
+                                    message += f"\n3rd place: @{third_user} with {third_score}/{num_of_answers}."
                 
                                 send_message(target_room_id, message)
                                 return True
 
-                            if len(total_progress) >= target_num_answers and mode == "cooperative":
-                                message = f"\n🏆🎉 Okrans got them all with {len(current_answers)} answers!"
+                            if len(total_progress) >= num_of_answers and mode == "cooperative":
+                                message = f"\n🏆🎉 Okrans got all {num_of_answers}!"
                                 return True
 
-                            if len(total_progress) >= target_num_answers and mode == "solo":
-                                message = f"\n🏆🎉 @{winner} got them all with {len(current_answers)} answers!"
+                            if len(total_progress) >= num_of_answers and mode == "solo":
+                                message = f"\n🏆🎉 @{winner} got all {num_of_answers}!"
                                 return True
                                 
                             break
@@ -387,15 +387,15 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
         
         if len(score_list) > 0:
             first_user, first_score = score_list[0]
-            message = f"\n🥇🏆 1st place: @{first_user} with {first_score} answers!"
+            message = f"\n🥇🏆 1st place: @{first_user} with {first_score}/{num_of_answers}!"
     
         if len(score_list) > 1:
             second_user, second_score = score_list[1]
-            message += f"\n🥈🎊 2nd place: @{second_user} with {second_score} answers!"
+            message += f"\n🥈🎊 2nd place: @{second_user} with {second_score}/{num_of_answers}."
        
         if len(score_list) > 2:
             third_user, third_score = score_list[2]
-            message += f"\n🥉🎉 3rd place: @{third_user} with {third_score} answers!\n"
+            message += f"\n🥉🎉 3rd place: @{third_user} with {third_score}/{num_of_answers}."
     
         send_message(target_room_id, message)
         
@@ -405,11 +405,11 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
             return False
     
     if mode == "cooperative":
-        message = f"\n😢👎 Sorry. Okrans only collected {len(current_answers)}. Target was {target_num_answers}."
+        message = f"\n😢👎 Sorry. Okrans only got {len(current_answers)}/{num_of_answers}."
         return False
     
     if mode == "solo":
-        message = f"\n😢👎 Sorry. @{winner} only collected {len(current_answers)}. Target was {target_num_answers}."
+        message = f"\n😢👎 Sorry. @{winner} only got {len(current_answers)}/{num_of_answers}."
         return False
 
 

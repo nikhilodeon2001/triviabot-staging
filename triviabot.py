@@ -5714,7 +5714,7 @@ def start_trivia_round():
 
             send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
             round_start_messages()
-            time.sleep(3)
+            time.sleep(5)
                 
             # Randomly select n questions
             print_selected_questions(selected_questions)

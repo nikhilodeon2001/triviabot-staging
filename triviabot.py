@@ -662,7 +662,7 @@ def ask_survey_question():
 
 def generate_themed_country_image(country, city):
 
-    prompt = f"Generate a stereotypical setting in {country} without any text in the image."
+    prompt = f"A piece of okra in a stereotypical kitchen in {country} without any text in the image. There should be various elements in the image that hint at it being located in {country}."
     
     # Generate the image using DALL-E
     try:

@@ -263,7 +263,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     target_num_answers = int(target_percentage * num_of_answers)
     
     message = f"\n⚠️🚨 ALERT: Everyone's in for this...\n" 
-    message += f"\n{list_category_emojis}\n"
+    #message += f"\n{list_category_emojis}\n"
     message += f"\n📝1️⃣ With 1 message per item, list...\n"
     send_message(target_room_id, message)
 

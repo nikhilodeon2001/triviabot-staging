@@ -373,8 +373,6 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
         except Exception as e:
             print(f"Error processing events: {e}")
 
-
-    
     if mode == "competition":
       
         # Now figure out 2nd and 3rd places.
@@ -386,6 +384,10 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     
         # The top user is score_list[0], second place = score_list[1], etc.
         # But only if they exist
+        
+        if len(score_list) == 0:
+            message = f"\n😬🤦 Wow. No one got a single one right. Embarassing."
+            return None
         
         if len(score_list) > 0:
             first_user, first_score = score_list[0]
@@ -412,6 +414,8 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     if mode == "solo":
         message = f"\n😢👎 Sorry. @{winner} only got {len(current_answers)}/{num_of_answers}."
         return False
+
+    return None
 
 
 
@@ -1362,7 +1366,7 @@ def nice_creep_okra_option(winner):
     message += f"🥒😊 Say 'okra' and I'll be nice.\n"
     message += f"👀🔭 Say 'creep' and I'll snoop your Reddit profile.\n"
     message += f"💋👠 Say 'love me' and I'll seduce you.\n"
-    message += f"🤡🤣 Say 'joke' and I'll write you a custom joke.\n"
+    message += f"🤡🤣 Say 'joke' and I'll write you a dad joke.\n"
     message += f"🔥🍗 Say nothing and I'll roast you.\n\n"
     send_message(target_room_id, message)
     
@@ -3148,7 +3152,7 @@ def generate_okra_joke(winner_name):
     """
     # Construct the prompt for ChatGPT
     prompt = (
-        f"Create a sarcastic, dirty joke involving okra, and make sure to involve the winner's username {winner_name} in your joke. "
+        f"Create a funny and creative dad joke and involve the winner's username '{winner_name}' in your joke. "
         "It should include an exaggerated pun or ridiculous statement about okra."
     )
 
@@ -3157,7 +3161,7 @@ def generate_okra_joke(winner_name):
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a sarcastic, dirty comedian who makes jokes about okra."},
+                {"role": "system", "content": "You are a funny comedian who makes dad jokes about okra."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=100,

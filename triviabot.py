@@ -1980,7 +1980,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
-        message += f"{counter}. 📝📚 List Battle [All Play] ☕\n"
+        message += f"{counter}. 📝📚 List Battle ✨ALL PLAY✨ ☕\n"
         send_message(target_room_id, message)  
         
 
@@ -2957,7 +2957,7 @@ def process_round_options(round_winner, winner_points):
         "⏱️⏳ <3 - 15>: Time (s) between questions\n"
         "🔥🤘 Yolo: No scores shown until the end\n"
         "🙈🚫 Blind: No question answers shown\n"
-        "🚩🔨 Marx: Silence! No celebrating. No fun.\n"
+        "🚩🔨 Marx: No recognition of right answers.\n"
         "❌📷 Blank: No images. None. Nada. Zilch."
     )
 

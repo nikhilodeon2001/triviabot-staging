@@ -362,11 +362,11 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                                 
                             if len(total_progress) >= num_of_answers and mode == "cooperative":
                                 message = f"\n🏆🎉 Okrans got all {num_of_answers}!"
-                                return True
+                                return None
 
                             if len(total_progress) >= num_of_answers and mode == "solo":
                                 message = f"\n🏆🎉 @{winner} got all {num_of_answers}!"
-                                return True
+                                return None
                                 
                             break
         
@@ -387,6 +387,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
         
         if len(score_list) == 0:
             message = f"\n😬🤦 Wow. No one got a single one right. Embarassing."
+            send_message(target_room_id, message)
             return None
         
         if len(score_list) > 0:
@@ -409,11 +410,11 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     
     if mode == "cooperative":
         message = f"\n😢👎 Sorry. Okrans only got {len(current_answers)}/{num_of_answers}."
-        return False
+        return None
     
     if mode == "solo":
         message = f"\n😢👎 Sorry. @{winner} only got {len(current_answers)}/{num_of_answers}."
-        return False
+        return None
 
     return None
 

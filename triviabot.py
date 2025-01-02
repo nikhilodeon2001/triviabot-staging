@@ -1250,6 +1250,7 @@ def upload_okraverse_to_s3(buffer):
 
 def load_parameters():
     global image_wins
+    global num_list_players
     global num_mysterybox_clues_default
     global num_crossword_clues_default
     global num_jeopardy_clues_default
@@ -1271,6 +1272,7 @@ def load_parameters():
     # Default values
     default_values = {
         "image_wins": 5,
+        "num_list_players": 5,
         "num_mysterybox_clues_default": 3,
         "num_crossword_clues_default": 0,
         "num_jeopardy_clues_default": 3,
@@ -1300,6 +1302,7 @@ def load_parameters():
 
             # Assign global variables
             image_wins = parameters["image_wins"]
+            num_list_players = parameters["num_list_players"]
             num_mysterybox_clues_default = parameters["num_mysterybox_clues_default"]
             num_crossword_clues_default = parameters["num_crossword_clues_default"]
             num_jeopardy_clues_default = parameters["num_jeopardy_clues_default"]
@@ -1330,6 +1333,7 @@ def load_parameters():
                 print("Max retries reached. Data loading failed.")
                 # Set all variables to defaults if loading fails
                 image_wins = default_values["image_wins"]
+                num_list_players = default_values["num_list_players"]
                 num_mysterybox_clues_default = default_values["num_mysterybox_clues_default"]
                 num_crossword_clues_default = default_values["num_crossword_clues_default"]
                 num_jeopardy_clues_default = default_values["num_jeopardy_clues_default"]
@@ -1980,7 +1984,8 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
-        message += f"{counter}. 📝📚 List Battle ✨ALL PLAY✨ ☕\n"
+        message += f"{counter}. 📝📚 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+            
         send_message(target_room_id, message)  
         
 
@@ -2343,6 +2348,12 @@ def ask_wof_number(winner):
                     if str(message_content) in {"7"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'Where's Okra?' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"8"} and len(scoreboard) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 

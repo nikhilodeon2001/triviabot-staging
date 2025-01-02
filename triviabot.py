@@ -1,3 +1,4 @@
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -263,13 +264,13 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     target_num_answers = int(target_percentage * num_of_answers)
     
     message = f"\n⚠️🚨 ALERT: Everyone's in for this...\n" 
-    #message += f"\n{list_category_emojis}\n"
-    message += f"\n📝1️⃣ With 1 message per item, list...\n"
+    message += f"\n📂📋 {list_category_emojis}\n"
+    message += f"\n📝1️⃣ List ONE message per item of...\n"
     send_message(target_room_id, message)
 
     time.sleep(3)
 
-    message = f"\n🧭🗺️ {list_question_clue}\n\n🟢🚀 GO!"
+    message = f"\n👉👉 {list_question_clue}\n\n🟢🚀 GO!"
     send_message(target_room_id, message)
 
     processed_events = set()  # Track processed event IDs to avoid duplicates
@@ -358,7 +359,8 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
 
                                 if winner == sender_display_name:
                                     wf_winner = True
-                                    return None
+                                    
+                                return None
                                 
                             if len(total_progress) >= num_of_answers and mode == "cooperative":
                                 message = f"\n🏆🎉 Okrans got all {num_of_answers}!"
@@ -406,7 +408,8 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
         
         if winner == first_user:
             wf_winner = True
-            return None
+        
+        return None
     
     if mode == "cooperative":
         message = f"\n😢👎 Sorry. Okrans only got {len(current_answers)}/{num_of_answers}."
@@ -3102,7 +3105,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                             
                             if "jeopardy" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'jeopardy'.\n"
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Jeopardy'.\n"
                                 else:
                                     num_jeopardy_clues = 5
                                     message = f"\n🟦✋ Daily Double! @{round_winner} wants {num_jeopardy_clues} Jeopardy questions.\n"
@@ -3110,7 +3113,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                 
                             if "trebek" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'trebek'.\n"
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Trebek'.\n"
                                 else:
                                     num_jeopardy_clues = 0
                                     message = f"\n🟦❌ @{round_winner} says no to Jeopardy. Sorry Alex.\n"
@@ -3118,7 +3121,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
         
                             if "word" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'word'.\n"
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Word'.\n"
                                 else:
                                     num_crossword_clues = 5
                                     message = f"\n📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n"
@@ -3126,7 +3129,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                 
                             if "cross" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'cross'.\n"
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Cross'.\n"
                                 else:
                                     num_crossword_clues = 0
                                     message = f"\n📰❌ @{round_winner} has crossed off all Crossword questions.\n"
@@ -3134,7 +3137,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
         
                             if "dicktator" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'dicktator'.\n"
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Dicktator'.\n"
                                 else:
                                     god_mode = True
                                     message = f"\n🎖🍆 @{round_winner} is a dick.\n"
@@ -3142,7 +3145,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                 
                             if "ghost" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'cross'.\n"
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Ghost'.\n"
                                 else:
                                     ghost_mode = 1
                                     message = f"\n👻🎃 @{round_winner} says Boo! Your responses will disappear.\n"
@@ -5494,7 +5497,297 @@ def get_category_title(trivia_category, trivia_url):
         "Sports & Leisure": "⚽🌴",
         "World Culture": "🎭🗿",
         "General Knowledge": "📚💡",
-        "Crossword": "📰✏️"
+        "Crossword": "📰✏️",
+        "English": "🇬🇧🗣️",
+        "Philippines": "🇵🇭🏝️",
+        "Renaissance": "🏰🎨",
+        "Fashion Japan": "👘🇯🇵",
+        "Spring": "🌸🌱",
+        "Game Of Thrones": "🐉⚔️",
+        "Earth Day": "🌍🌱",
+        "Human Body": "🫀🦴",
+        "Film": "🎥🎞️",
+        "South Park": "📺🤣",
+        "Beer": "🍺🍻",
+        "Animation": "🎨📽️",
+        "Casino": "🎰♠️",
+        "1970s": "🕺📻",
+        "Baking": "🧁🥣",
+        "Australia": "🇦🇺🦘",
+        "Shopping": "🛍️🛒",
+        "Chicago": "🌆🍕",
+        "World War 1": "🌍⚔️",
+        "For Seniors": "👴👵",
+        "Ice Cream": "🍦🍨",
+        "Military History": "⚔️🎖️",
+        "British History": "🏰🇬🇧",
+        "Wimbledon": "🎾🏆",
+        "1960s": "✌️🎶",
+        "Celebrity Weddings": "💒💍",
+        "Movie Villains": "😈🎥",
+        "Leap Year": "📅🐸",
+        "Back To The Future": "⌛🚗",
+        "Olympics": "🏅🏟️",
+        "Car Parts": "🚗🔧",
+        "August": "☀️📆",
+        "Fashion": "👗👠",
+        "Italian Cuisine": "🍝🍕",
+        "Toy Story": "🤠🧸",
+        "The Simpsons": "🟨👨‍👩‍👧‍👦",
+        "Taylor Swift": "🎤💖",
+        "Fruit Vegetables": "🍏🥕",
+        "Avengers": "🛡️⚡",
+        "Nintendo": "🕹️🍄",
+        "Playstation Games": "🎮⚙️",
+        "Swedish Cuisine": "🥔🐟",
+        "Disney Princess": "👑🏰",
+        "Extreme Sports": "🏂🚵",
+        "Halloween": "🎃👻",
+        "Summer": "☀️🏖️",
+        "Home Alone": "🏠🧒",
+        "Pokemon": "⚡🐭",
+        "Cartoons": "📺🐱",
+        "Minecraft": "⛏️🐷",
+        "Eminem": "🎤🍬",
+        "Marvel": "🦸‍♂️🦹‍♂️",
+        "Sherlock Holmes": "🕵️‍♂️🔎",
+        "Board Games": "♟️🎲",
+        "Architecture": "🏛️🏗️",
+        "Weather": "☀️🌧️",
+        "Albert Einstein": "🧠💡",
+        "Serial Killer": "🔪😈",
+        "Civil War": "⚔️🛡️",
+        "New Year Halloween": "🎉🎃",
+        "Horse Racing": "🐎🏁",
+        "Breaking Bad": "🧪👨‍🔬",
+        "1990s": "📟💾",
+        "Premier League": "⚽🏆",
+        "Classic Rock": "🎸🎶",
+        "Alcohol": "🍺🥃",
+        "Outer Space": "🚀🌌",
+        "Family Guy": "👨‍👩‍👧‍👦😂",
+        "Reality Stars": "🌟📺",
+        "Fast Food": "🍔🍟",
+        "Comics": "💥🦸",
+        "Weird": "🤪🌀",
+        "Sci Fi": "👽🚀",
+        "Graphic Design": "💻🎨",
+        "Decades": "⏳📅",
+        "Animals": "🐾🐼",
+        "Boxing": "🥊💥",
+        "Oldies Music": "🎶🕰️",
+        "Fourth Of July": "🇺🇸🎆",
+        "Shrek": "🟢👑",
+        "September": "🍂📅",
+        "Quran": "📖🕋",
+        "Queen": "👑👸",
+        "Disney": "🏰🐭",
+        "Indian Cuisine": "🍛🥘",
+        "Book": "📖📚",
+        "Modern History": "📜🌐",
+        "Festivals": "🎉🎆",
+        "Winter Olympics": "🏅🏂",
+        "Horse": "🐎🌿",
+        "Quentin Tarantino": "🎬🩸",
+        "Inventions": "💡⚙️",
+        "Baby Shower": "👶🎉",
+        "New Girl": "🏠👱‍♀️",
+        "Kings Queens": "🤴👸",
+        "Sexuality": "🏳️‍🌈💖",
+        "Canada": "🇨🇦🍁",
+        "Agriculture": "🌱🚜",
+        "1940s": "💣📻",
+        "Questions For Kids": "❓👧",
+        "Travel": "✈️🌍",
+        "Rainforest": "🌧️🌳",
+        "Presidents Day": "🇺🇸🏛️",
+        "Star Wars": "🌌⚔️",
+        "Power": "⚡💪",
+        "Supernatural": "👻🌙",
+        "X Files": "👽🕵️",
+        "Technology": "💻🤖",
+        "Google": "🔍🌐",
+        "The Beatles": "🎸🇬🇧",
+        "Car": "🚗🛣️",
+        "India": "🇮🇳🪔",
+        "Greek Mythology": "🏛️⚡",
+        "World Cup": "🌍🏆",
+        "Scandal": "📰😱",
+        "Easter": "🐰🥚",
+        "Brands": "🏷️💼",
+        "Poetry": "📜🖋️",
+        "Ncis": "🕵️‍♂️⚓",
+        "Shakespeare": "📝🎭",
+        "Country Music": "🤠🎶",
+        "Europe": "🇪🇺🏰",
+        "Musicals": "🎶🎭",
+        "Entertainment": "🎉🎭",
+        "Coffee": "☕🍪",
+        "Apple": "🍎💻",
+        "Airlines Airports": "✈️🛫",
+        "Sea Life And Oceans": "🌊🐠",
+        "Science Fiction": "👽🤖",
+        "Soundtracks": "🎶🎞️",
+        "Canada Day": "🇨🇦🎉",
+        "Survivor": "🌴🏆",
+        "War History": "💣📜",
+        "Labor Day": "🛠️🇺🇸",
+        "Mlb Baseball": "⚾🏟️",
+        "Bar": "🍸🪑",
+        "Valentines Day": "❤️💌",
+        "One Piece": "🏴‍☠️🍖",
+        "Mental Health": "🧠💚",
+        "Friends": "👫💞",
+        "Russian Cuisine": "🥟🍲",
+        "Hannukkah": "🕎✨",
+        "Hispanic Heritage Month": "🪗🎉",
+        "The Office": "🏢😂",
+        "China": "🇨🇳🐉",
+        "Silly": "🤪🎉",
+        "Stranger Things": "🚲🔦",
+        "Pop Music": "🎤🎶",
+        "Elvis": "🕺🎤",
+        "Lord Of The Rings": "💍🔥",
+        "Tennis": "🎾🏅",
+        "Plants Trees": "🌱🌳",
+        "Us Presidents": "🇺🇸👔",
+        "Sharks": "🦈🌊",
+        "Childrens Literature": "🧒📚",
+        "Africa": "🌍🦁",
+        "Comedy": "😂🎭",
+        "Medical": "🩺💊",
+        "Sesame Street": "🐤📺",
+        "Easy": "😌✅",
+        "Soap Opera": "📺💔",
+        "Romance": "❤️🌹",
+        "Pixar": "🤠🦖",
+        "Wwe": "🤼‍♂️💥",
+        "Poker": "♠️💰",
+        "Beach": "🏖️🌅",
+        "Holiday": "🎉🌴",
+        "Teens": "🧑‍🎓🤸",
+        "Twilight": "🧛‍♂️🌆",
+        "Parks And Recreation": "🏞️😆",
+        "Pregnancy": "🤰👶",
+        "Oktoberfest": "🍺🇩🇪",
+        "Roald Dahl": "📚🍫",
+        "Wonders Of The World": "🏰🌍",
+        "Canadian Cuisine": "🥞🍁",
+        "Current Royals": "🤴👸",
+        "Blockbusters": "💥🍿",
+        "Cooking": "🍳🧑‍🍳",
+        "Dinosaurs": "🦕🦖",
+        "60s70s80s90s": "🎶📻",
+        "4th grade  questions": "4️⃣❓",
+        "Modern Family": "👨‍👩‍👧‍👦🏠",
+        "Star Trek": "🖖🚀",
+        "Winter": "❄️☃️",
+        "Politics News": "🗞️⚖️",
+        "Early Art": "🖼️🏺",
+        "Stephen King": "🕯️😱",
+        "Classical Music": "🎼🎻",
+        "British Music": "🇬🇧🎶",
+        "Seinfeld": "🏙️🤣",
+        "Film Timings": "🎬⏰",
+        "Candy": "🍬🍭",
+        "European Championships": "🇪🇺🏆",
+        "Cycling": "🚴‍♂️🚴‍♀️",
+        "Asia": "🌏🏯",
+        "Bob Marley": "🎶🇯🇲",
+        "American Cuisine": "🍔🥧",
+        "Us States": "🇺🇸📍",
+        "Titanic": "🚢💔",
+        "War": "⚔️💣",
+        "Education": "🏫📚",
+        "Fall": "🍂🍁",
+        "Novels": "📚✒️",
+        "5th grade": "5️⃣❓",
+        "Nickelodeon": "📺🧒",
+        "Authors": "🖋️📚",
+        "2010s": "📱💻",
+        "Horror Movie": "🔪😱",
+        "Christmas  For Kids": "🎄🧸",
+        "Riddle": "❓🧩",
+        "Christmas": "🎄🎅",
+        "Sitcom": "😂📺",
+        "Nhl Hockey": "🏒🥅",
+        "Solar System": "☀️🪐",
+        "Michael Jackson": "🕺🪄",
+        "Hobbies": "⚽🎨",
+        "United States": "🇺🇸🗽",
+        "Golf": "⛳🏌️‍♂️",
+        "Continents Countries": "🌍🌎",
+        "Nutrition Month": "🥦🍏",
+        "Transport": "🚗🚇",
+        "Hard": "💪🔨",
+        "Beneath The Sea": "🌊🐙",
+        "Bollywood": "💃🎥",
+        "Thanksgiving": "🦃🍁",
+        "Super Bowl": "🏈🏆",
+        "New Year": "🎆🍾",
+        "1950s": "🎩🎶",
+        "Mammals": "🐒🐘",
+        "Nba Teams": "🏀🏅",
+        "Crime": "🚓🕵️",
+        "Oscars Awards": "🏆🎞️",
+        "St Patrick S Day": "🍀🇮🇪",
+        "Medicine": "💊🩺",
+        "Famous Authors": "🖋️📚",
+        "Nfl": "🏈🏟️",
+        "Funny": "🤣😜",
+        "New York": "🗽🌃",
+        "Fashion Design": "👗✂️",
+        "Australian History": "🇦🇺📜",
+        "Internet": "🌐💻",
+        "Brands Worldwide": "🌐🏷️",
+        "Gen Z": "📱😎",
+        "Capital Cities": "🌆🗺️",
+        "Mario": "👨‍🔧🍄",
+        "2000s": "💻📱",
+        "Back To School": "🎒🏫",
+        "Philosophers": "🤔📜",
+        "Spelling": "🔤📝",
+        "Bible": "📖✝️",
+        "Nascar": "🏁🏎️",
+        "Current Affairs": "📰🌍",
+        "London": "🇬🇧🎡",
+        "Monday": "📅😴",
+        "Us Tv": "🇺🇸📺",
+        "Electricity": "⚡💡",
+        "Classic Tv": "📺🕰️",
+        "North America": "🌎🏒",
+        "Top Gun": "✈️🕶️",
+        "Harry Potter": "⚡🧙‍♂️",
+        "Memorial Day": "🇺🇸🪖",
+        "Actors Actresses": "🎭🎬",
+        "Royal Family": "👑👨‍👩‍👧‍👦",
+        "Uk Football": "🇬🇧⚽",
+        "Batman": "🦇🦸‍♂️",
+        "Black History": "✊🏿📜",
+        "Encanto": "🏠💃",
+        "Middle School": "🏫👩‍🎓",
+        "Reality Tv": "📺😜",
+        "Jurassic Park": "🦕🎢",
+        "Classic Movies": "🎞️🏆",
+        "Rock Roll": "🎸🤘",
+        "1980s": "💾📼",
+        "Design": "🎨🖌️",
+        "James Bond": "🤵🔫",
+        "Monopoly": "💰🏠",
+        "Sunset": "🌇🌅",
+        "Hip Hop Rap": "🎤🔥",
+        "Dogs": "🐶🦴",
+        "Ancient Medieval History": "🏰⚔️",
+        "Musicals Theatre": "🎭🎵",
+        "Non Fiction": "📚📖",
+        "Texas": "🤠🌵",
+        "Hamilton": "🎩🎼",
+        "World War 2": "💣🌍",
+        "Ufc Martial Arts": "🥋🥊",
+        "Humanities": "📖🎨",
+        "Brain-Teasers": "🧠❓",
+        "Rated": "⭐🔞",
+        "Newest": "🆕✨"
     }
 
     # Check if the question URL is "jeopardy"

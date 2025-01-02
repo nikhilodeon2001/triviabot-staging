@@ -1,7 +1,3 @@
-
-
-
-
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -220,7 +216,7 @@ cities = [
 
 
 def ask_list_question(winner, mode="competition", target_percentage = 1.00):    
-    global since_token, params, headers, max_retries, delay_between_retries
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
     
     try:
         time.sleep(2)
@@ -236,7 +232,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                 "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
             }},
             {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
-            {"$sample": {"size": 1}}  # Sample 3 unique questions
+            {"$sample": {"size": 1}}  # Sample 1 unique question
         ]
 
         list_questions = list(list_collection.aggregate(pipeline_list))
@@ -266,7 +262,9 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     num_of_answers = len(list_question_answers)
     target_num_answers = int(target_percentage * num_of_answers)
     
-    message = f"\n⚠️🚨 Everyone's in for this. List as many as you can of...\n"
+    message = f"\n⚠️🚨 ALERT: Everyone's in for this...\n" 
+    message += f"\n{list_category_emojis} {list_question_category}\n"
+    message += f"\n📝1️⃣ With 1 message per item, list...\n"
     send_message(target_room_id, message)
 
     time.sleep(3)
@@ -357,8 +355,11 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
                                     message += f"\n3rd place: @{third_user} with {third_score}/{num_of_answers}."
                 
                                 send_message(target_room_id, message)
-                                return True
 
+                                if winner == sender_display_name:
+                                    wf_winner = True
+                                    return None
+                                
                             if len(total_progress) >= num_of_answers and mode == "cooperative":
                                 message = f"\n🏆🎉 Okrans got all {num_of_answers}!"
                                 return True
@@ -373,6 +374,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
             print(f"Error processing events: {e}")
 
 
+    
     if mode == "competition":
       
         # Now figure out 2nd and 3rd places.
@@ -399,7 +401,9 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     
         send_message(target_room_id, message)
         
-        return
+        if winner == first_user:
+            wf_winner = True
+            return None
     
     if mode == "cooperative":
         message = f"\n😢👎 Sorry. Okrans only got {len(current_answers)}/{num_of_answers}."
@@ -1934,7 +1938,7 @@ def create_factors_question():
     }
         
 def select_wof_questions(winner):
-    global fixed_letters, list_winner
+    global fixed_letters
     
     try:
         time.sleep(2)
@@ -1987,12 +1991,8 @@ def select_wof_questions(winner):
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
         elif selected_wof_category == "8":
-            list_success = ask_list_question(winner)
+            ask_list_question(winner)
             time.sleep(3)
-            if list_success:
-                list_winner = True
-            else:
-                list_winner = False
             return None
         
         elif selected_wof_category == "6":
@@ -2033,7 +2033,6 @@ def select_wof_questions(winner):
                 
             time.sleep(2)
 
-
             message = "\n📸🥒 We found this on OkraStrut's Insta...\n"
             send_message(target_room_id, message)
             themed_response = send_image(target_room_id, themed_country_mxc, themed_country_width, themed_country_height, image_size)
@@ -2057,7 +2056,6 @@ def select_wof_questions(winner):
             message = f"{display_string}\n{wof_clue}\n{fixed_letters_str}\n"
             send_message(target_room_id, message)    
 
-            
         wof_letters = ask_wof_letters(winner, wof_answer, 5)
         
         if wf_winner == False:

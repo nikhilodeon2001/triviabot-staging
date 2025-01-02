@@ -1,4 +1,4 @@
-import sentry_sdk
+dimport sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Setup Sentry
@@ -2351,15 +2351,15 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"8"} and len(scoreboard) < num_list_players:
-                        react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires {num_list_players}+ players.\n"
-                        send_message(target_room_id, message)
-                        continue
-
                     if str(message_content) in {"8"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"8"} and len(scoreboard) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 

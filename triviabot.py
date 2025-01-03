@@ -2971,27 +2971,21 @@ def process_round_options(round_winner, winner_points):
         "🔥🤘 Yolo: No scores shown until the end\n"
         "🙈🚫 Blind: No question answers shown\n"
         "🚩🔨 Marx: No recognition of right answers.\n"
-        "❌📷 Blank: No images. None. Nada. Zilch."
+        "❌📷 Blank: No image questions.\n"
+        "👻🎃 Ghost: Responses will vanish"
     )
 
     send_message(target_room_id, message)
 
     message = (
+        "🇺🇸🗽 Freedom: No multiple choice. ☕\n"
         "🟦❌ Trebek: No Jeopardy questions ☕\n"
         "📰❌ Cross: No Crossword clues ☕\n"
         "🟦✋ Jeopardy: 5 Jeopardy questions ☕\n"
         "📰✏️ Word: 5 Crossword clues ☕\n"
-        "👻🎃 Ghost: Boo! Vanishing responses ☕\n"
         "🎖🥒 Dicktator: Choose the categories ☕\n\n"
     )
 
-    #standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
-    #num_of_players = len(standings)
-    
-    #if winner_points >= god_mode_points and num_of_players >= god_mode_players:
-    #    message += "🎖🥒 Dicktator: Bring order to the game\n\n"
-    #else:
-    #    message += "\n"
     send_message(target_room_id, message)
 
     #if winner_coffees > 0:
@@ -3081,6 +3075,10 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                             if "blank" in message_content.lower():
                                 image_questions = False
                                 send_message(target_room_id, f"❌📷 @{round_winner} thinks a word is worth 1000 images.\n")
+
+                            if "ghost" in message_content.lower():
+                                ghost_mode = 1
+                                send_message(target_room_id, f"\n👻🎃 @{round_winner} says Boo! Your responses will disappear.\n")
         
                             #matched_category = cross_reference_category(message_content)
                 
@@ -3101,6 +3099,14 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                             #    message = f"\n🙏😔 Sorry {round_winner}. Choice {message_content} requires ☕️.\n"
                             #    send_message(target_room_id, message)
                             #    continue
+                            
+                            if "freedom" in message_content.lower():
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Freedom'.\n"
+                                else:
+                                    num_mysterybox_clues = 0
+                                    message = f"\n🇺🇸🗽 FREEEEEEEEDOM! @{round_winner} has broken the chains. No multiple choice.\n"
+                                send_message(target_room_id, message)
                             
                             if "jeopardy" in message_content.lower():
                                 if winner_coffees <= 0:
@@ -3141,17 +3147,10 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                                     god_mode = True
                                     message = f"\n🎖🍆 @{round_winner} is a dick.\n"
                                 send_message(target_room_id, message)
-                
-                            if "ghost" in message_content.lower():
-                                if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Ghost'.\n"
-                                else:
-                                    ghost_mode = 1
-                                    message = f"\n👻🎃 @{round_winner} says Boo! Your responses will disappear.\n"
-                                send_message(target_room_id, message)
-        
+            
         except requests.exceptions.RequestException as e:
             print(f"Error fetching responses: {e}")
+
 
 def cross_reference_category(message_content):
     for category in question_categories:

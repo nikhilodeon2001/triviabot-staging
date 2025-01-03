@@ -2979,13 +2979,13 @@ def process_round_options(round_winner, winner_points):
     send_message(target_room_id, message)
 
     message = (
-        "🇺🇸🗽 Freedom: No multiple choice. Be free. ☕\n"
+        "🇺🇸🗽 Freedom: No multiple choice. ☕\n"
         "🟦❌ Trebek: No Jeopardy questions. ☕\n"
         "📰❌ Cross: No Crossword clues. ☕\n"
         "🟦✋ Jeopardy: 5 Jeopardy questions. ☕\n"
         "📰✏️ Word: 5 Crossword clues. ☕\n"
-        "👻🎃 Ghost: Boo! Vanishing responses. ☕\n"
-        "🎖🥒 Dicktator: Choose the categories. ☕\n\n"
+        "👻🎃 Ghost: Responses will vanish. ☕\n"
+        "🎖🥒 Dicktator: Control question order. ☕\n\n"
     )
 
     #standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)

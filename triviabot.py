@@ -3102,15 +3102,15 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                             
                             if "freedom" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Freedom'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Freedom'.\n"
                                 else:
                                     num_mysterybox_clues = 0
-                                    message = f"\n🇺🇸🗽 FREEEEEEEEDOM! @{round_winner} has broken the chains. No multiple choice.\n"
+                                    message = f"\n🇺🇸🗽 @{round_winner} has broken the chains. No multiple choice.\n"
                                 send_message(target_room_id, message)
                             
                             if "jeopardy" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Jeopardy'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Jeopardy'.\n"
                                 else:
                                     num_jeopardy_clues = 5
                                     message = f"\n🟦✋ Daily Double! @{round_winner} wants {num_jeopardy_clues} Jeopardy questions.\n"
@@ -3118,7 +3118,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                 
                             if "trebek" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Trebek'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Trebek'.\n"
                                 else:
                                     num_jeopardy_clues = 0
                                     message = f"\n🟦❌ @{round_winner} says no to Jeopardy. Sorry Alex.\n"
@@ -3126,7 +3126,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
         
                             if "word" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Word'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Word'.\n"
                                 else:
                                     num_crossword_clues = 5
                                     message = f"\n📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n"
@@ -3134,7 +3134,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                 
                             if "cross" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Cross'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Cross'.\n"
                                 else:
                                     num_crossword_clues = 0
                                     message = f"\n📰❌ @{round_winner} has crossed off all Crossword questions.\n"
@@ -3142,7 +3142,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
         
                             if "dicktator" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Dicktator'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Dicktator'.\n"
                                 else:
                                     god_mode = True
                                     message = f"\n🎖🍆 @{round_winner} is a dick.\n"

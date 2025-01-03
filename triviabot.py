@@ -5164,9 +5164,10 @@ def select_trivia_questions(questions_per_round):
                             "category": {"$nin": categories_to_exclude},
                             "$and": [
                                 {"url": {"$not": {"$regex": excluded_url_substring}}},  # Exclude based on excluded_url_substring
-                                {"$and": [  # Exclude based on urls_to_exclude
-                                    {"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude
-                                ]}
+                                *(
+                                    [{"$and": [{"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude]}]
+                                    if urls_to_exclude else []
+                                )  # Dynamically include this condition only if urls_to_exclude is not empty
                             ]
                         }
                     },
@@ -5187,9 +5188,10 @@ def select_trivia_questions(questions_per_round):
                         "$match": {
                             "_id": {"$nin": list(recent_general_ids)},
                             "category": {"$nin": categories_to_exclude},
-                            "$and": [  # Combine all exclusion conditions
-                                {"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude
-                            ]
+                            **(
+                                {"$and": [{"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude]}
+                                if urls_to_exclude else {}
+                            )
                         }
                     },
                     {
@@ -5927,11 +5929,12 @@ def get_random_trivia_question():
                         "_id": {"$nin": list(recent_general_ids)},
                         "category": {"$nin": categories_to_exclude},
                         "$and": [
-                            {"url": {"$not": {"$regex": excluded_url_substring}}},  # Exclude based on excluded_url_substring
-                            {"$and": [  # Exclude based on urls_to_exclude
-                                {"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude
-                            ]}
+                            {"url": {"$not": {"$regex": excluded_url_substring}}}  # Exclude based on excluded_url_substring
                         ]
+                        + (
+                            [{"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude]
+                            if urls_to_exclude else []
+                        )  # Dynamically include this condition only if urls_to_exclude is not empty
                     }
                 },
                 {
@@ -5951,9 +5954,10 @@ def get_random_trivia_question():
                     "$match": {
                         "_id": {"$nin": list(recent_general_ids)},
                         "category": {"$nin": categories_to_exclude},
-                        "$and": [
-                            {"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude
-                        ]
+                        **(
+                            {"$and": [{"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude]}
+                            if urls_to_exclude else {}
+                        )
                     }
                 },
                 {

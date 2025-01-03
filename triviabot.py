@@ -5464,6 +5464,8 @@ def get_category_title(trivia_category, trivia_url):
     emoji_lookup = {
         "Mystery Box or Boat": "🎁🛳️",
         "Famous People": "👑🧑‍🎤",
+        "People": "🙋‍♂️🙋‍♀️",
+        "Celebrities": "💃🕺",
         "Anatomy": "🧠🫀",
         "Characters": "🧙‍♂️🧛",
         "Music": "🎶🎸",

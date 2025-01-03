@@ -138,6 +138,7 @@ question_categories = [
 fixed_letters = ['O', 'K', 'R', 'A']
 
 categories_to_exclude = []  
+urls_to_exclude = []
 
 
 
@@ -2932,10 +2933,11 @@ def generate_crossword_image(answer):
 
 
 def process_round_options(round_winner, winner_points):
-    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra, marx_mode, blind_mode, seductive_okra, joke_okra
+    global since_token, time_between_questions, time_between_questions_default, ghost_mode, since_token, categories_to_exclude, urls_to_exclude, num_crossword_clues, num_jeopardy_clues, num_mysterybox_clues, num_wof_clues, god_mode, yolo_mode, magic_number, wf_winner, num_math_questions, num_stats_questions, image_questions, nice_okra, creep_okra, marx_mode, blind_mode, seductive_okra, joke_okra
     time_between_questions = time_between_questions_default
     ghost_mode = ghost_mode_default
     categories_to_exclude.clear()
+    urls_to_exclude.clear()
     num_crossword_clues = num_crossword_clues_default
     num_jeopardy_clues = num_jeopardy_clues_default
     num_mysterybox_clues = num_mysterybox_clues_default
@@ -2967,9 +2969,9 @@ def process_round_options(round_winner, winner_points):
     send_message(target_room_id, message)
 
     message = (
-        "⏱️⏳ <3 - 15>: Time (s) between questions\n"
-        "🔥🤘 Yolo: No scores shown until the end\n"
-        "🙈🚫 Blind: No question answers shown\n"
+        "⏱️⏳ <3 - 15>: Time (s) between questions.\n"
+        "🔥🤘 Yolo: No scores shown until the end.\n"
+        "🙈🚫 Blind: No question answers shown.\n"
         "🚩🔨 Marx: No recognition of right answers.\n"
         "❌📷 Blank: No images. None. Nada. Zilch."
     )
@@ -2977,12 +2979,13 @@ def process_round_options(round_winner, winner_points):
     send_message(target_room_id, message)
 
     message = (
-        "🟦❌ Trebek: No Jeopardy questions ☕\n"
-        "📰❌ Cross: No Crossword clues ☕\n"
-        "🟦✋ Jeopardy: 5 Jeopardy questions ☕\n"
-        "📰✏️ Word: 5 Crossword clues ☕\n"
-        "👻🎃 Ghost: Boo! Vanishing responses ☕\n"
-        "🎖🥒 Dicktator: Choose the categories ☕\n\n"
+        "🇺🇸🗽 Freedom: No multiple choice. Be free. ☕\n"
+        "🟦❌ Trebek: No Jeopardy questions. ☕\n"
+        "📰❌ Cross: No Crossword clues. ☕\n"
+        "🟦✋ Jeopardy: 5 Jeopardy questions. ☕\n"
+        "📰✏️ Word: 5 Crossword clues. ☕\n"
+        "👻🎃 Ghost: Boo! Vanishing responses. ☕\n"
+        "🎖🥒 Dicktator: Choose the categories. ☕\n\n"
     )
 
     #standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
@@ -3101,6 +3104,15 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                             #    message = f"\n🙏😔 Sorry {round_winner}. Choice {message_content} requires ☕️.\n"
                             #    send_message(target_room_id, message)
                             #    continue
+                            
+                            
+                            if "freedom" in message_content.lower():
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry {round_winner}. Buy some ☕️ to unlock 'Freedom'.\n"
+                                else:
+                                    urls_to_exclude = ["multiple choice", "multiple choice opentrivia"]
+                                    message = f"\n🇺🇸🗽 FREEEEEEEEDOM! @{round_winner} has broken the chains. No multiple choice.\n"
+                                send_message(target_room_id, message)
                             
                             if "jeopardy" in message_content.lower():
                                 if winner_coffees <= 0:
@@ -5057,7 +5069,7 @@ def get_recent_question_ids_from_mongo(question_type):
 
 
 def select_trivia_questions(questions_per_round):
-    global categories_to_exclude
+    global categories_to_exclude, urls_to_exclude
     try:
         db = connect_to_mongodb()
         
@@ -5150,8 +5162,11 @@ def select_trivia_questions(questions_per_round):
                         "$match": {
                             "_id": {"$nin": list(recent_general_ids)},
                             "category": {"$nin": categories_to_exclude},
-                            "$or": [
-                                {"url": {"$not": {"$regex": excluded_url_substring}}} 
+                            "$and": [
+                                {"url": {"$not": {"$regex": excluded_url_substring}}},  # Exclude based on excluded_url_substring
+                                {"$and": [  # Exclude based on urls_to_exclude
+                                    {"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude
+                                ]}
                             ]
                         }
                     },
@@ -5168,7 +5183,15 @@ def select_trivia_questions(questions_per_round):
                 
             else:
                 pipeline_trivia = [
-                    {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
+                    {
+                        "$match": {
+                            "_id": {"$nin": list(recent_general_ids)},
+                            "category": {"$nin": categories_to_exclude},
+                            "$and": [  # Combine all exclusion conditions
+                                {"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude
+                            ]
+                        }
+                    },
                     {
                         "$group": {
                             "_id": "$category",
@@ -5179,7 +5202,7 @@ def select_trivia_questions(questions_per_round):
                     {"$replaceRoot": {"newRoot": "$questions"}},  # Flatten to original document structure
                     {"$sample": {"size": sample_size}}  # Sample from the resulting limited set
                 ]
-
+                
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
 
@@ -5888,7 +5911,7 @@ def refill_question_slot(questions, old_question):
 
 
 def get_random_trivia_question():
-    global categories_to_exclude
+    global categories_to_exclude, urls_to_exclude
     """Fetch a random question from the trivia_questions collection."""
     try:
         db = connect_to_mongodb()
@@ -5903,8 +5926,11 @@ def get_random_trivia_question():
                     "$match": {
                         "_id": {"$nin": list(recent_general_ids)},
                         "category": {"$nin": categories_to_exclude},
-                        "$or": [
-                            {"url": {"$not": {"$regex": excluded_url_substring}}} 
+                        "$and": [
+                            {"url": {"$not": {"$regex": excluded_url_substring}}},  # Exclude based on excluded_url_substring
+                            {"$and": [  # Exclude based on urls_to_exclude
+                                {"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude
+                            ]}
                         ]
                     }
                 },
@@ -5921,7 +5947,15 @@ def get_random_trivia_question():
             
         else:
             pipeline = [
-                {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
+                {
+                    "$match": {
+                        "_id": {"$nin": list(recent_general_ids)},
+                        "category": {"$nin": categories_to_exclude},
+                        "$and": [
+                            {"url": {"$not": {"$regex": f".*{url}.*"}}} for url in urls_to_exclude
+                        ]
+                    }
+                },
                 {
                     "$group": {
                         "_id": "$category",

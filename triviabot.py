@@ -2970,8 +2970,8 @@ def process_round_options(round_winner, winner_points):
         "⏱️⏳ <3 - 15>: Time (s) between questions.\n"
         "🔥🤘 Yolo: No scores shown until the end.\n"
         "🙈🚫 Blind: No question answers shown.\n"
-        "🚩🔨 Marx: No recognition of right answers.\n"
-        "❌📷 Blank: No image questions.\n"
+        "🚩🔨 Marx: No recognizing right answers.\n"
+        "📷❌ Blank: No image questions.\n"
         "👻🎃 Ghost: Responses will vanish."
     )
 
@@ -2982,7 +2982,7 @@ def process_round_options(round_winner, winner_points):
         "🟦❌ Trebek: No Jeopardy questions. ☕\n"
         "📰❌ Cross: No Crossword clues. ☕\n"
         "🟦✋ Jeopardy: 5 Jeopardy questions. ☕\n"
-        "📰✏️ Word: 5 Crossword clues. ☕\n"
+        "📰✋ Word: 5 Crossword clues. ☕\n"
         "🎖🥒 Dicktator: Choose the categories. ☕\n\n"
     )
 

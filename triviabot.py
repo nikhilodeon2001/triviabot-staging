@@ -215,6 +215,48 @@ cities = [
 ]
 
 
+
+def insert_audit_question(collection_name, question):
+    """
+    Insert a structured question into a MongoDB collection with a frequency field.
+    If the question already exists, increment its frequency.
+
+    :param collection_name: The name of the MongoDB collection.
+    :param question: The question to be inserted or updated, expected as a dictionary.
+    """
+
+    if not isinstance(question, dict):
+        raise TypeError("The question parameter must be a dictionary")
+
+    now = time.time()
+
+    for attempt in range(max_retries):
+        try:
+            db = connect_to_mongodb()
+
+            # Use the entire question dictionary as the filter
+            filter_query = question
+            update_data = {
+                "$setOnInsert": {"timestamp": now},  # Add timestamp only if the document is new
+                "$inc": {"frequency": 1}  # Increment frequency field
+            }
+
+            # Use upsert to add a new document or update the existing one
+            db[collection_name].update_one(filter_query, update_data, upsert=True)
+
+            print(f"Question '{question}' added/updated successfully in {collection_name}.")
+            break  # Exit the loop if the operation is successful
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Attempt {attempt + 1} failed: {e}")
+
+            if attempt < max_retries - 1:
+                print(f"Retrying in {delay_between_retries} seconds...")
+                time.sleep(delay_between_retries)
+            else:
+                print(f"Failed to add/update question '{question}' in {collection_name}.")
+
 def load_previous_question():
     global previous_question
     
@@ -4773,6 +4815,14 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         if "okra" in message_content.lower() and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra1")
 
+        if message_content.lower()  == "previous" and emoji_mode == True:
+            react_to_message(event_id, target_room_id, "okra3")
+            insert_audit_question("audit_questions", previous_question)
+
+        if message_content.lower() == "current" and emoji_mode == True:
+            react_to_message(event_id, target_room_id, "okra3")
+            insert_audit_question("audit_questions", current_question)
+
         # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):
             continue  # Ignore this response since the user has already answered correctly
@@ -6039,7 +6089,7 @@ def start_trivia_round():
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
     global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
-    global previous_question
+    global previous_question, current_question
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
@@ -6049,10 +6099,6 @@ def start_trivia_round():
     # Load existing streak and previous question data from the file
     load_streak_data()
     load_previous_question()
-
-    print(f"Current longest round streak: {current_longest_round_streak}")
-    print(f"Current longest answer streak: {current_longest_answer_streak}")
-    print(f"Prefious question: {previous_question}")
     
     try:
         while True:  # Endless loop            
@@ -6107,6 +6153,14 @@ def start_trivia_round():
                     selected_question = selected_questions[0]
 
                 trivia_category, trivia_question, trivia_url, trivia_answer_list = selected_question
+
+                current_question = {
+                    "trivia_category": trivia_category,
+                    "trivia_question": trivia_question,
+                    "trivia_url": trivia_url,
+                    "trivia_answer_list": trivia_answer_list
+                }
+                
                 question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)         
                 collected_responses = collect_responses(question_time, question_number, question_time)
                 

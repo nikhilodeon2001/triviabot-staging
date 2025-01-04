@@ -253,7 +253,6 @@ def insert_audit_question(collection_name, question, message_content, display_na
             }
             db[collection_name].update_one(filter_query, update_data)
 
-            print(f"Question '{question}' added/updated successfully in {collection_name}.")
             break  # Exit the loop if successful
 
         except Exception as e:

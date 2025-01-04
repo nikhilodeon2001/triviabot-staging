@@ -239,19 +239,22 @@ def insert_audit_question(collection_name, question, message_content, display_na
         try:
             db = connect_to_mongodb()
 
-            # Use the entire question dictionary as the filter
+            # Step 1: Ensure the document exists with upsert
             filter_query = question
-            update_data = {
-                "$setOnInsert": {"timestamp": now, "comments": []},  # Add timestamp and initialize comments only if new
-                "$inc": {"frequency": 1},  # Increment frequency field
-                "$push": {"comments": comment}  # Append the new comment to the comments list
+            initial_update = {
+                "$setOnInsert": {"timestamp": now, "comments": [], "frequency": 0}  # Initialize fields if new
             }
+            db[collection_name].update_one(filter_query, initial_update, upsert=True)
 
-            # Use upsert to add a new document or update the existing one
-            db[collection_name].update_one(filter_query, update_data, upsert=True)
+            # Step 2: Increment frequency and append comment
+            update_data = {
+                "$inc": {"frequency": 1},  # Increment frequency
+                "$push": {"comments": comment}  # Append the new comment
+            }
+            db[collection_name].update_one(filter_query, update_data)
 
             print(f"Question '{question}' added/updated successfully in {collection_name}.")
-            break  # Exit the loop if the operation is successful
+            break  # Exit the loop if successful
 
         except Exception as e:
             sentry_sdk.capture_exception(e)
@@ -262,7 +265,6 @@ def insert_audit_question(collection_name, question, message_content, display_na
                 time.sleep(delay_between_retries)
             else:
                 print(f"Failed to add/update question '{question}' in {collection_name}.")
-
 
 
 def load_previous_question():
@@ -4828,7 +4830,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 react_to_message(event_id, target_room_id, "okra3")
             insert_audit_question("audit_questions", previous_question, message_content, display_name)
 
-        if "current" in message_content.lower() and collect_feecback_mode == True:
+        if "current" in message_content.lower() and collect_feedback_mode == True:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
             insert_audit_question("audit_questions", current_question, message_content, display_name)

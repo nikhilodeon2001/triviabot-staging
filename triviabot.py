@@ -110,6 +110,8 @@ yolo_mode_default = False
 yolo_mode = yolo_mode_default
 emoji_mode_default = True
 emoji_mode = emoji_mode_default
+collect_feedback_mode_default = True
+collect_feedback_mode = collect_feedback_mode_default
 magic_number_correct = False
 wf_winner = False
 nice_okra = False
@@ -4821,12 +4823,14 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         if "okra" in message_content.lower() and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra1")
 
-        if message_content.lower()  == "previous" and emoji_mode == True:
-            react_to_message(event_id, target_room_id, "okra3")
+        if "previous" in message_content.lower() and collect_feedback_mode == True:
+            if emoji_mode == True:
+                react_to_message(event_id, target_room_id, "okra3")
             insert_audit_question("audit_questions", previous_question, message_content, display_name)
 
-        if message_content.lower() == "current" and emoji_mode == True:
-            react_to_message(event_id, target_room_id, "okra3")
+        if "current" in message_content.lower() and collect_feecback_mode == True:
+            if emoji_mode == True:
+                react_to_message(event_id, target_room_id, "okra3")
             insert_audit_question("audit_questions", current_question, message_content, display_name)
 
         # Check if the user has already answered correctly, ignore if they have

@@ -2085,13 +2085,13 @@ def select_wof_questions(winner):
 
             process_wof_guesses(winner, wof_answer, 5)
 
-        if selected_wof_category == "4":
+        if selected_wof_category == "6":
             time.sleep(1.5)
             wikipedia_message = f"\n🌐📄 Wikipedia Link: {wiki_url}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(1.5)
 
-        if selected_wof_category == "5":
+        if selected_wof_category == "7":
             time.sleep(1.5)
             maps_message = f"\n🌍❔ Okra's Location: {satellite_view_live_url}\n"
             send_message(target_room_id, maps_message)
@@ -2967,23 +2967,23 @@ def process_round_options(round_winner, winner_points):
     send_message(target_room_id, message)
 
     message = (
-        "⏱️⏳ <3 - 15>: Time (s) between questions\n"
-        "🔥🤘 Yolo: No scores shown until the end\n"
-        "🙈🚫 Blind: No question answers shown\n"
+        "⏱️⏳ <3 - 15>: Time (s) between questions.\n"
+        "🔥🤘 Yolo: No scores shown until the end.\n"
+        "🙈🚫 Blind: No question answers shown.\n"
         "🚩🔨 Marx: No recognition of right answers.\n"
         "❌📷 Blank: No image questions.\n"
-        "👻🎃 Ghost: Responses will vanish"
+        "👻🎃 Ghost: Responses will vanish."
     )
 
     send_message(target_room_id, message)
 
     message = (
         "🇺🇸🗽 Freedom: No multiple choice. ☕\n"
-        "🟦❌ Trebek: No Jeopardy questions ☕\n"
-        "📰❌ Cross: No Crossword clues ☕\n"
-        "🟦✋ Jeopardy: 5 Jeopardy questions ☕\n"
-        "📰✏️ Word: 5 Crossword clues ☕\n"
-        "🎖🥒 Dicktator: Choose the categories ☕\n\n"
+        "🟦❌ Trebek: No Jeopardy questions. ☕\n"
+        "📰❌ Cross: No Crossword clues. ☕\n"
+        "🟦✋ Jeopardy: 5 Jeopardy questions. ☕\n"
+        "📰✏️ Word: 5 Crossword clues. ☕\n"
+        "🎖🥒 Dicktator: Choose the categories. ☕\n\n"
     )
 
     send_message(target_room_id, message)

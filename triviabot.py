@@ -6119,7 +6119,13 @@ def start_trivia_round():
                 time.sleep(time_between_questions)  # Small delay before the next question
                 
                 question_number = question_number + 1
-                previous_question = selected_question
+                previous_question = {
+                    "trivia_category": trivia_category,
+                    "trivia_question": trivia_question,
+                    "trivia_url": trivia_url,
+                    "trivia_answer_list": trivia_answer_list
+                }
+
                 save_data_to_mongo("previous_question", "previous_question", previous_question)
                 
             #Determine the round winner

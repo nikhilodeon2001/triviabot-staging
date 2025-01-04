@@ -6046,6 +6046,14 @@ def start_trivia_round():
     round_winner = None
     selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     
+    # Load existing streak and previous question data from the file
+    load_streak_data()
+    load_previous_question()
+
+    print(f"Current longest round streak: {current_longest_round_streak}")
+    print(f"Current longest answer streak: {current_longest_answer_streak}")
+    print(f"Prefious question: {previous_question}")
+    
     try:
         while True:  # Endless loop            
             # Check if it's been more than an hour since the last login
@@ -6060,9 +6068,6 @@ def start_trivia_round():
             # Load global varaiables at the start of round
             load_global_variables()
             load_parameters()
-            
-            # Load existing streak data from the file
-            load_streak_data()
 
             # Fetch new coffee donations
             fetch_donations()

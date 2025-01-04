@@ -216,19 +216,22 @@ cities = [
 
 
 
-def insert_audit_question(collection_name, question):
+def insert_audit_question(collection_name, question, message_content, display_name):
     """
-    Insert a structured question into a MongoDB collection with a frequency field.
-    If the question already exists, increment its frequency.
+    Insert a structured question into a MongoDB collection with a frequency field and comments.
+    If the question already exists, increment its frequency and append a new comment.
 
     :param collection_name: The name of the MongoDB collection.
     :param question: The question to be inserted or updated, expected as a dictionary.
+    :param message_content: The message content to add to the comments.
+    :param display_name: The display name to pair with the message content in the comments.
     """
 
     if not isinstance(question, dict):
         raise TypeError("The question parameter must be a dictionary")
 
     now = time.time()
+    comment = f"{display_name}: {message_content}"  # Concatenate display name and message content
 
     for attempt in range(max_retries):
         try:
@@ -237,8 +240,9 @@ def insert_audit_question(collection_name, question):
             # Use the entire question dictionary as the filter
             filter_query = question
             update_data = {
-                "$setOnInsert": {"timestamp": now},  # Add timestamp only if the document is new
-                "$inc": {"frequency": 1}  # Increment frequency field
+                "$setOnInsert": {"timestamp": now, "comments": []},  # Add timestamp and initialize comments only if new
+                "$inc": {"frequency": 1},  # Increment frequency field
+                "$push": {"comments": comment}  # Append the new comment to the comments list
             }
 
             # Use upsert to add a new document or update the existing one
@@ -256,6 +260,8 @@ def insert_audit_question(collection_name, question):
                 time.sleep(delay_between_retries)
             else:
                 print(f"Failed to add/update question '{question}' in {collection_name}.")
+
+
 
 def load_previous_question():
     global previous_question
@@ -4817,11 +4823,11 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
 
         if message_content.lower()  == "previous" and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra3")
-            insert_audit_question("audit_questions", previous_question)
+            insert_audit_question("audit_questions", previous_question, message_content, display_name)
 
         if message_content.lower() == "current" and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra3")
-            insert_audit_question("audit_questions", current_question)
+            insert_audit_question("audit_questions", current_question, message_content, display_name)
 
         # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):

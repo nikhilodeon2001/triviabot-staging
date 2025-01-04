@@ -4821,19 +4821,22 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         
         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         message_content = message_content.replace("\uFFFC", "")  # Remove U+FFFC
+        message_first_word = message_content.lower().split()[0]
 
         if "okra" in message_content.lower() and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra1")
 
-        if message_content and message_content.strip() and message_content.lower().split()[0] == "previous" and collect_feedback_mode == True:
+        if message_content and message_content.strip() and message_first_word == "previous" and collect_feedback_mode == True:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
-            insert_audit_question("audit_questions", previous_question, message_content, display_name)
+            stripped_message_content = " ".join(message_content.split()[1:])
+            insert_audit_question("audit_questions", previous_question, stripped_message_content, display_name)
 
-        if message_content and message_content.strip() and message_content.lower().split()[0] == "current" and collect_feedback_mode == True:
+        if message_content and message_content.strip() and message_first_word == "current" and collect_feedback_mode == True:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
-            insert_audit_question("audit_questions", current_question, message_content, display_name)
+            stripped_message_content = " ".join(message_content.split()[1:])
+            insert_audit_question("audit_questions", current_question, stripped_message_content, display_name)
 
         # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):

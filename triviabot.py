@@ -215,6 +215,42 @@ cities = [
 ]
 
 
+def load_previous_question():
+    global previous_question
+    
+    for attempt in range(max_retries):
+        try:
+            db = connect_to_mongodb()
+            
+            # Retrieve the current longest answer streak from MongoDB
+            previous_question_retrieved = db.previous_question.find_one({"_id": "previous_question"})
+
+            if previous_question_retrieved is not None:
+                previous_question = {
+                    "trivia_catetgory": previous_question_retrieved.get("trivia_category"),
+                    "trivia_question": previous_question_retrieved.get("trivia_question"),
+                    "trivia_url": previous_question_retrieved.get("trivia_url"),
+                    "trivia_answer_list": previous_question_retrieved.get("trivia_answer_list")
+                }
+            else:
+                # If the document is not found, set default values
+                previous_question = {"trivia_category": None, "trivia_question": None, "trivia_url": None, "trivia_answer_list": None}            
+                
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Attempt {attempt + 1} failed: {e}")
+            if attempt < max_retries - 1:
+                print(f"Retrying in {delay_between_retries} seconds...")
+                time.sleep(delay_between_retries)
+            else:
+                print("Max retries reached. Data loading failed.")
+                # Set to default values if loading fails
+                previous_question = {"trivia_category": None, "trivia_question": None, "trivia_url": None, "trivia_answer_list": None}
+
+
+
+
+
 
 def ask_list_question(winner, mode="competition", target_percentage = 1.00):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
@@ -6003,6 +6039,7 @@ def start_trivia_round():
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
     global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
+    global previous_question
 
     # Track the initial time for hourly re-login
     last_login_time = time.time()  # Store the current time when the script starts
@@ -6082,6 +6119,8 @@ def start_trivia_round():
                 time.sleep(time_between_questions)  # Small delay before the next question
                 
                 question_number = question_number + 1
+                previous_question = selected_question
+                save_data_to_mongo("previous_question", "previous_question", previous_question)
                 
             #Determine the round winner
             round_winner, winner_points = determine_round_winner()

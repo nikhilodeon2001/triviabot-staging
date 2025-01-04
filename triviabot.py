@@ -4828,14 +4828,14 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         if message_content and message_content.strip() and message_first_word == "previous" and collect_feedback_mode == True:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
-            stripped_message_content = " ".join(message_content.split()[1:])
-            insert_audit_question("audit_questions", previous_question, stripped_message_content, display_name)
+            #stripped_message_content = " ".join(message_content.split()[1:])
+            insert_audit_question("audit_questions", previous_question, message_content, display_name)
 
         if message_content and message_content.strip() and message_first_word == "current" and collect_feedback_mode == True:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
-            stripped_message_content = " ".join(message_content.split()[1:])
-            insert_audit_question("audit_questions", current_question, stripped_message_content, display_name)
+            #stripped_message_content = " ".join(message_content.split()[1:])
+            insert_audit_question("audit_questions", current_question, message_content, display_name)
 
         # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):
@@ -6150,8 +6150,17 @@ def start_trivia_round():
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
                 #time.sleep(2)
 
-            send_message(target_room_id, f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n\n🏁 Get ready 🏁\n\n")
+            start_message = f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n"
+            start_message += f"\n🚩 Flag bad questions during rounds"
+            start_message += f"\n↔️ <current> / <previous> to tag question\n"
+            send_message(target_room_id, start_message)
+        
+            time.sleep(3)
+
+            start_message = "\n🏁 Get ready 🏁\n"
+            send_message(target_room_id, start_message)
             round_start_messages()
+        
             time.sleep(5)
                 
             # Randomly select n questions

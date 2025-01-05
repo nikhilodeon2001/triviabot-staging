@@ -6234,7 +6234,7 @@ def start_trivia_round():
             else:
                 message = f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Use your Reddit name to unlock in-game perks.\n"
                 message += f"\n👕 [NEW] https://livetrivia-shop.fourthwall.com\n🛒 Show off with some Live Trivia merch!\n"
-                send_message(target_room_id, message))
+                send_message(target_room_id, message)
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds

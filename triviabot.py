@@ -6113,7 +6113,7 @@ def start_trivia_round():
     selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
     
     # Load existing streak and previous question data from the file
-    load_streak_data()
+    
     load_previous_question()
     
     try:
@@ -6130,6 +6130,7 @@ def start_trivia_round():
             # Load global varaiables at the start of round
             load_global_variables()
             load_parameters()
+            load_streak_data()
 
             # Fetch new coffee donations
             fetch_donations()
@@ -6153,7 +6154,7 @@ def start_trivia_round():
                 #time.sleep(2)
 
             start_message = f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n"
-            start_message += f"\n🚩 Flag bad questions during rounds"
+            start_message += f"\n🚩 Flag errors during response time"
             start_message += f"\n↔️ #curr, #prev to tag question\n"
             send_message(target_room_id, start_message)
         
@@ -6231,7 +6232,9 @@ def start_trivia_round():
                 round_preview(selected_questions)
                 time.sleep(10)
             else:
-                send_message(target_room_id, f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Use your Reddit name to unlock in-game perks.\n")
+                message = f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Use your Reddit name to unlock in-game perks.\n"
+                message += f"\n👕 [NEW] https://livetrivia-shop.fourthwall.com\n🛒 Show off with some Live Trivia merch!\n"
+                send_message(target_room_id, message))
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds

@@ -757,7 +757,7 @@ def ask_survey_question():
 
 def generate_themed_country_image(country, city):
 
-    prompt = f"A piece of okra in a stereotypical kitchen in {country} without any text in the image. There should be various elements in the image that hint at it being located in {country}."
+    prompt = f"Draw a picture that describes the country: {country}. Use stereotypical elements from {country}'s culture, geography, and history to create the picture."
     
     # Generate the image using DALL-E
     try:

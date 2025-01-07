@@ -2210,7 +2210,7 @@ def select_wof_questions(winner):
         selected_wof_category = ask_wof_number(winner)
         
         if int(selected_wof_category) < premium_counts:
-            wof_question = wof_questions[int(selected_wof_category) - 1]
+            wof_question = wof_questions[int(selected_wof_category)]
             wof_answer = wof_question["answers"][0]
             wof_clue = wof_question["question"]
                     
@@ -2591,32 +2591,43 @@ def ask_wof_number(winner):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if str(message_content) in {"6"} and winner_coffees <= 0:
+                    if str(message_content) in {"5"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'Wikipedia Roulette' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    
+                    if str(message_content) in {"6"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Dictionary Roulette' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"7"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Where's Okra?' requires ☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Thesaurus Roulette' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
                     if str(message_content) in {"8"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Where's Okra?' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"9"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"8"} and len(scoreboard) < num_list_players:
+                    if str(message_content) in {"9"} and len(scoreboard) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"1", "2", "3", "4", "5", "6", "7", "8"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}:
                         selected_question = str(message_content)
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"

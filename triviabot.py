@@ -2224,7 +2224,7 @@ def select_wof_questions(winner):
         elif selected_wof_category == "6":
             wof_answer, wof_clue, word_definition, word_url = fetch_random_word()
             dictionary_message = f"\n📖🔍 Definition:\n"
-            for i, definition in enumerate(word_definitions, start=1):
+            for i, definition in enumerate(word_definition, start=1):
                 dictionary_message += f"\n {i}. {definition}"
             dictionary_message += "\n"
             send_message(target_room_id, dictionary_message)

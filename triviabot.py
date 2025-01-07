@@ -2338,7 +2338,7 @@ def select_wof_questions(winner):
 
         if selected_wof_category == "7":
             time.sleep(1.5)
-            webster_message = f"\n📚📄 Webster Link: {word_url}\n"
+            webster_message = f"\n📖📄 Webster Link: {word_url}\n"
             send_message(target_room_id, webster_message)
             time.sleep(1.5)
 

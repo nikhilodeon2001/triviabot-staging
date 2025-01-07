@@ -2186,11 +2186,11 @@ def select_wof_questions(winner):
             counter = counter + 1
         send_message(target_room_id, message)  
         premium_counts = counter
-        message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
+        message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
-        message = f"{counter}. 📚🎲 Dictionary Roulette ☕\n"
+        message += f"{counter}. 📚🎲 Dictionary Roulette ☕\n"
         counter = counter + 1
-        message = f"{counter}. 📖🎲 Thesaurus Roulette ☕\n"
+        message += f"{counter}. 📖🎲 Thesaurus Roulette ☕\n"
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
@@ -2237,9 +2237,9 @@ def select_wof_questions(winner):
                 thesaurus_message += f"\n {i}. {synonym}"
             thesaurus_message += "\n"
             if word_ant:
-                thesaurus_message += "📖❌ Antonyms:"
+                thesaurus_message += "\n📖❌ Antonyms:"
                 for i, antonym in enumerate(word_ant, start=1):
-                    thesaurus_message += f"  {i}. {antonym}"
+                    thesaurus_message += f"\n  {i}. {antonym}"
                 thesaurus_message += "\n"
             send_message(target_room_id, thesaurus_message)
             time.sleep(3)

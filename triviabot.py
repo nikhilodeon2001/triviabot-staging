@@ -2194,7 +2194,7 @@ def select_wof_questions(winner):
             counter = counter + 1
         send_message(target_room_id, message)  
         premium_counts = counter
-        message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
+        message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
         message += f"{counter}. 📚🎲 Dictionary Roulette ☕\n"
         counter = counter + 1

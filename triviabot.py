@@ -2556,7 +2556,7 @@ def ask_wof_number(winner):
     initialize_sync()
     start_time = time.time()  # Track when the question starts
     
-    selected_question = 1
+    selected_question = 0
     while time.time() - start_time < magic_time:
         try:
             if since_token:
@@ -2640,7 +2640,7 @@ def ask_wof_number(winner):
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")                    
 
-    send_message(target_room_id, "\n🐢⏳Too slow. Let's go with 1.\n")
+    send_message(target_room_id, "\n🐢⏳Too slow. Let's go with 0.\n")
     return selected_question
 
   
@@ -6282,16 +6282,16 @@ def start_trivia_round():
     global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
     global previous_question, current_question
 
-    # Track the initial time for hourly re-login
-    last_login_time = time.time()  # Store the current time when the script starts
-    round_winner = None
-    selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
-    
-    # Load existing streak and previous question data from the file
-    
-    load_previous_question()
-    
     try:
+        reddit_login()
+        login_to_chat()
+        last_login_time = time.time()  # Store the current time when the script starts
+        round_winner = None
+        selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
+        
+        # Load existing streak and previous question data from the file
+        load_previous_question()
+        initialize_sync()    
         while True:  # Endless loop            
             # Check if it's been more than an hour since the last login
             current_time = time.time()
@@ -6426,29 +6426,28 @@ def start_trivia_round():
         print("Restarting the trivia bot in 10 seconds...")
         time.sleep(10)  
 
-try:
-    sentry_sdk.capture_message("Sentry initiatlized...", level="info")
-    reddit_login()
-    login_to_chat()
-    
-    # Load needed variables for sync
-    load_global_variables()
-    load_parameters()
+
+def main():
 
     
+    # Load needed variables for sync
+    #load_global_variables()
+    #load_parameters()
+    
     # Call this function at the start of the script to initialize the sync
-    initialize_sync()    
+    #initialize_sync()    
     
     # Start the trivia round
     start_trivia_round()
 
+
+try:
+    sentry_sdk.capture_message("Sentry initiatlized...", level="info")
+    main()
+    
 except Exception as e:
     sentry_sdk.capture_exception(e)
     print(f"Unhandled exception: {e}. Restarting in 5 seconds...")
     traceback.print_exc()  # Print the stack trace for debugging
     time.sleep(5)
-    reddit_login()
-    login_to_chat()
-    load_global_variables()
-    initialize_sync()
-    start_trivia_round()  # Restart the bot
+    main()

@@ -6264,7 +6264,12 @@ def get_random_trivia_question():
         return None  # Return an empty list in case of failure
 
 
-def start_trivia_round():
+def start_trivia():
+    global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, filler_words
+    global scoreboard, current_longest_round_streak, current_longest_answer_streak
+    global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
+    global previous_question, current_question
+    
     okra_gif_urls = [
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif",
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra2.gif",
@@ -6276,22 +6281,20 @@ def start_trivia_round():
         #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/merry.gif"
     ]
     
-# Function to start the trivia round
-    global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, filler_words
-    global scoreboard, current_longest_round_streak, current_longest_answer_streak
-    global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
-    global previous_question, current_question
-
     try:
         reddit_login()
         login_to_chat()
         last_login_time = time.time()  # Store the current time when the script starts
+        
+        load_parameters()
+        load_global_variables()
+        load_streak_data()
+        load_previous_question()
+        initialize_sync()  
+        
         round_winner = None
         selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
         
-        # Load existing streak and previous question data from the file
-        load_previous_question()
-        initialize_sync()    
         while True:  # Endless loop            
             # Check if it's been more than an hour since the last login
             current_time = time.time()
@@ -6301,13 +6304,9 @@ def start_trivia_round():
                 reddit_login()
                 login_to_chat()
                 last_login_time = current_time  # Reset the login time
+                load_global_variables()
 
-            # Load global varaiables at the start of round
-            load_global_variables()
             load_parameters()
-            load_streak_data()
-
-            # Fetch new coffee donations
             fetch_donations()
 
             # Reset the scoreboard and fastest answers at the start of each round
@@ -6316,7 +6315,6 @@ def start_trivia_round():
             
             # Reset round data for the next round
             round_data["questions"] = []
-
 
             if random.random() < 0:  # random.random() generates a float between 0 and 1
                 magic_number = random_number = random.randint(1000, 9999)
@@ -6427,27 +6425,16 @@ def start_trivia_round():
         time.sleep(10)  
 
 
-def main():
-
-    
-    # Load needed variables for sync
-    #load_global_variables()
-    #load_parameters()
-    
-    # Call this function at the start of the script to initialize the sync
-    #initialize_sync()    
-    
-    # Start the trivia round
-    start_trivia_round()
+start_trivia()
 
 
 try:
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
-    main()
+    start_trivia()
     
 except Exception as e:
     sentry_sdk.capture_exception(e)
     print(f"Unhandled exception: {e}. Restarting in 5 seconds...")
     traceback.print_exc()  # Print the stack trace for debugging
     time.sleep(5)
-    main()
+    start_trivia()

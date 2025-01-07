@@ -4278,26 +4278,32 @@ def login_to_chat():
     print("All retry attempts failed.")
     return None
 
+client = None
+db = None
 
 def connect_to_mongodb(max_retries=3, delay_between_retries=5):
     """Connect to MongoDB with retry logic."""
-    for attempt in range(max_retries):
-        try:
-            # Attempt to connect to MongoDB
-            client = MongoClient(mongo_db_string)
-            db = client["triviabot"]
-            return db  # Return the database connection if successful
+    global client, db
+    if not client:
         
-        except Exception as e:
-            sentry_sdk.capture_exception(e)
-            print(f"Attempt {attempt + 1} failed: {e}")
+        for attempt in range(max_retries):
+            try:
+                # Attempt to connect to MongoDB
+                client = MongoClient(mongo_db_string)
+                db = client["triviabot"]
+                return db  # Return the database connection if successful
             
-            # If the maximum number of retries is reached, raise the exception
-            if attempt == max_retries - 1:
-                raise
-            
-            # Wait before trying again
-            time.sleep(delay_between_retries)
+            except Exception as e:
+                sentry_sdk.capture_exception(e)
+                print(f"Attempt {attempt + 1} failed: {e}")
+                
+                # If the maximum number of retries is reached, raise the exception
+                if attempt == max_retries - 1:
+                    raise
+                
+                # Wait before trying again
+                time.sleep(delay_between_retries)
+    return db
 
 def load_global_variables():
     global headers, headers_media, filter_json, params

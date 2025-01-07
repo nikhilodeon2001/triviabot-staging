@@ -1,4 +1,5 @@
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -87,8 +88,6 @@ reddit_client_id = os.getenv("reddit_client_id")
 reddit_secret_id = os.getenv("reddit_secret_id")
 openweather_api_key = os.getenv("openweather_api_key")
 googlemaps_api_key = os.getenv("googlemaps_api_key")
-webster_api_key = os.getenv("webster_api_key")
-webster_thes_api_key = os.getenv("webster_thes_api_key")
 target_room_id = os.getenv("target_room_id")
 question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
@@ -164,8 +163,8 @@ cities = [
 {"city": "Beijing", "country": "China", "lat": 39.9042, "lon": 116.4074, "capital": True},
 {"city": "Belmopan", "country": "Belize", "lat": 17.2510, "lon": -88.7590, "capital": True},
 {"city": "Berlin", "country": "Germany", "lat": 52.5200, "lon": 13.4050, "capital": True},
-{"city": "Bogotá", "country": "Colombia", "lat": 4.7110, "lon": -74.0721, "capital": True},
-{"city": "Brasília", "country": "Brazil", "lat": -15.8267, "lon": -47.9218, "capital": True},
+{"city": "Bogota", "country": "Colombia", "lat": 4.7110, "lon": -74.0721, "capital": True},
+{"city": "Brasilia", "country": "Brazil", "lat": -15.8267, "lon": -47.9218, "capital": True},
 {"city": "Brazzaville", "country": "Congo", "lat": 4.2634, "lon": 15.2429, "capital": True},
 {"city": "Brussels", "country": "Belgium", "lat": 50.8503, "lon": 4.3517, "capital": True},
 {"city": "Budapest", "country": "Hungary", "lat": 47.4979, "lon": 19.0402, "capital": True},
@@ -199,7 +198,7 @@ cities = [
 {"city": "Quito", "country": "Ecuador", "lat": -0.1807, "lon": -78.4678, "capital": True},
 {"city": "Reykjavik", "country": "Iceland", "lat": 64.1355, "lon": -21.8954, "capital": True},
 {"city": "Rome", "country": "Italy", "lat": 41.9028, "lon": 12.4964, "capital": True},
-{"city": "San José", "country": "Costa Rica", "lat": 9.9281, "lon": -84.0907, "capital": True},
+{"city": "San Jose", "country": "Costa Rica", "lat": 9.9281, "lon": -84.0907, "capital": True},
 {"city": "San Salvador", "country": "El Salvador", "lat": 13.6929, "lon": -89.2182, "capital": True},
 {"city": "Santiago", "country": "Chile", "lat": -33.4489, "lon": -70.6693, "capital": True},
 {"city": "Sarajevo", "country": "Bosnia and Herzegovina", "lat": 43.8563, "lon": 18.4131, "capital": True},
@@ -213,121 +212,10 @@ cities = [
 {"city": "Thimphu", "country": "Bhutan", "lat": 27.4728, "lon": 89.6390, "capital": True},
 {"city": "Tirana", "country": "Albania", "lat": 41.3275, "lon": 19.8189, "capital": True},
 {"city": "Vienna", "country": "Austria", "lat": 48.2082, "lon": 16.3738, "capital": True},
-{"city": "Yaoundé", "country": "Cameroon", "lat": 3.8480, "lon": 11.5021, "capital": True},
+{"city": "Yaounde", "country": "Cameroon", "lat": 3.8480, "lon": 11.5021, "capital": True},
 {"city": "Yerevan", "country": "Armenia", "lat": 40.1792, "lon": 44.4991, "capital": True},
 {"city": "Zagreb", "country": "Croatia", "lat": 45.8150, "lon": 15.9819, "capital": True}
 ]
-
-
-def fetch_random_word_thes(min_length=5, max_length=12, max_retries=5, max_related=5):
-    for attempt in range(1, max_retries + 1):
-        print(f"[Attempt {attempt}/{max_retries}] Fetching a random word...")
-        try:
-            # Fetch a random word
-            response = requests.get("https://random-word-api.herokuapp.com/word?number=1", timeout=5)
-            response.raise_for_status()
-            word_list = response.json()
-            if not word_list:
-                print("No words returned by Random Word API.")
-                continue
-            word = word_list[0]
-
-            # Check if word meets length constraints
-            if not (min_length <= len(word) <= max_length):
-                print(f"Word '{word}' does not meet length constraints ({min_length}-{max_length}).")
-                continue
-
-            # Look up the word in Merriam-Webster Thesaurus
-            url = f"https://www.dictionaryapi.com/api/v3/references/thesaurus/json/{word}?key={webster_thes_api_key}"
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-            data = response.json()
-
-            if not data or isinstance(data[0], str):
-                # Nothing returned or suggestions instead of definitions
-                print(f"Merriam-Webster Thesaurus did not recognize the word '{word}'. Suggestions: {data}")
-                continue
-
-            # Extract part of speech, synonyms, and antonyms
-            for sense in data:
-                if isinstance(sense, dict):
-                    pos = sense.get("fl", "").lower()  # Functional label (part of speech)
-                    synonyms = sense.get("meta", {}).get("syns", [])
-                    antonyms = sense.get("meta", {}).get("ants", [])
-
-                    # Flatten synonyms and antonyms lists
-                    synonyms = [syn for group in synonyms for syn in group][:max_related]
-                    antonyms = [ant for group in antonyms for ant in group][:max_related]
-
-                    if pos and synonyms:
-                        mw_url = f"https://www.merriam-webster.com/thesaurus/{word}"
-                        return word, pos, synonyms, antonyms, mw_url
-
-            # If no valid synonyms are found
-            print(f"No valid synonyms found for '{word}'.")
-            continue
-
-        except Exception as e:
-            print(f"Error processing word details: {e}")
-            continue
-
-    # Return None after exhausting retries
-    print("Exceeded maximum retries. No valid word found.")
-    return None, None, None, None, None
-
-
-
-
-
-def fetch_random_word(min_length=5, max_length=12, max_retries=5):
-    for attempt in range(1, max_retries + 1):
-        print(f"[Attempt {attempt}/{max_retries}] Fetching a random word...")
-        try:
-            # Fetch a random word
-            response = requests.get("https://random-word-api.herokuapp.com/word?number=1", timeout=5)
-            response.raise_for_status()
-            word_list = response.json()
-            if not word_list:
-                print("No words returned by Random Word API.")
-                continue
-            word = word_list[0]
-
-            # Check if word meets length constraints
-            if not (min_length <= len(word) <= max_length):
-                print(f"Word '{word}' does not meet length constraints ({min_length}-{max_length}).")
-                continue
-
-            # Look up the word in Merriam-Webster
-            url = f"https://www.dictionaryapi.com/api/v3/references/collegiate/json/{word}?key={MW_API_KEY}"
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-            data = response.json()
-
-            if not data or isinstance(data[0], str):
-                # Nothing returned or suggestions instead of definitions
-                print(f"Merriam-Webster did not recognize the word '{word}'. Suggestions: {data}")
-                continue
-
-            # Extract part of speech and definitions
-            for sense in data:
-                if isinstance(sense, dict):
-                    pos = sense.get("fl", "").lower()  # Functional label (part of speech)
-                    definitions = sense.get("shortdef", [])
-                    if pos and definitions:
-                        mw_url = f"https://www.merriam-webster.com/dictionary/{word}"
-                        return word, pos, definitions, mw_url
-
-            # If no valid definitions are found
-            print(f"No valid definitions found for '{word}'.")
-            continue
-
-        except Exception as e:
-            print(f"Error processing word details: {e}")
-            continue
-
-    # Return None after exhausting retries
-    print("Exceeded maximum retries. No valid word found.")
-    return None, None, None, None
 
 
 
@@ -660,7 +548,7 @@ def ask_survey_question():
         },
         "multiple-choice": {
             "emojis": "🔠📝",
-            "intro_text": "Choose a letter below:"
+            "intro_text": "Choose a letter:"
         },
         "rating-10": {
             "emojis": "⭐️🔟",
@@ -676,8 +564,15 @@ def ask_survey_question():
     emojis = question_info.get("emojis", "🤔❓")
     intro_text = question_info.get("intro_text", "What do you think?")
        
-    message = f"\n{emojis} {intro_text}\n"
-    message += f"\n❓ {question_text}\n"
+    #message = f"\n{emojis} {intro_text}\n"
+    #message += f"\n❓ {question_text}\n"
+
+    message = "\n🤔❓Should I rename LiveTrivia?\n"
+    message += "\nA. No."
+    message += "\nB. Yes. Trivia Okra."
+    message += "\nC. Yes. Okra Trivia."
+    message += "\nD. Yes. Something else.\n"
+    
     send_message(target_room_id, message)
         
     while time.time() - start_time < 15:
@@ -871,9 +766,9 @@ def ask_survey_question():
 def generate_themed_country_image(country, city):
 
     prompt = (
-        f"Create an image that represents the country {country} using visual elements inspired by its culture, geography, and history. "
+        f"Create an image that represents the country {country} using elements inspired by {country}'s culture. "
         "Include a piece of okra subtly in the image as a small detail. "
-        "Do not include any text, letters, numbers, symbols, or designs resembling the country's flag, its colors, or its patterns."
+        "Do not include any text, letters, or numbers in the image."
     )
     
     # Generate the image using DALL-E
@@ -1778,7 +1673,7 @@ def generate_round_summary_image(round_data, winner):
 
         message = f"🔥💖 {winner_at} nice streak. I drew this of you.\n"
         message += f"\nI call this masterpiece '{image_description}'\n"
-        message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
+        message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
         send_message(target_room_id, message)
 
          # Download and resize the image to 256x256
@@ -1816,7 +1711,7 @@ def generate_round_summary_image(round_data, winner):
                 message = f"😈😉 {winner_at} Naughty naughty, I'll have to pick another.\n\n"
                 message += f"🔥💖 Nice streak. I drew this of you.\n"
                 message += f"\nI call this masterpiece '{image_description}'\n"
-                message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
+                message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
                 send_message(target_room_id, message)
         
                  # Download and resize the image to 256x256
@@ -2179,18 +2074,14 @@ def select_wof_questions(winner):
 
         message = f"\n🍷⚔️ @{winner}: Choose wisely.  Some require ☕.\n\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
-        counter = 0
+        counter = 1
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
             counter = counter + 1
         send_message(target_room_id, message)  
         premium_counts = counter
-        message += f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
-        counter = counter + 1
-        message += f"{counter}. 📚🎲 Dictionary Roulette ☕\n"
-        counter = counter + 1
-        message += f"{counter}. 📖🎲 Thesaurus Roulette ☕\n"
+        message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
@@ -2210,41 +2101,18 @@ def select_wof_questions(winner):
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
-        elif selected_wof_category == "9":
+        elif selected_wof_category == "8":
             ask_list_question(winner)
             time.sleep(3)
             return None
         
-        elif selected_wof_category == "5":
+        elif selected_wof_category == "6":
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(3)
 
-        elif selected_wof_category == "6":
-            wof_answer, wof_clue, word_definition, word_url = fetch_random_word()
-            dictionary_message = f"\n📖🔍 Definition:\n"
-            for i, definition in enumerate(word_definition, start=1):
-                dictionary_message += f"\n {i}. {definition}"
-            dictionary_message += "\n"
-            send_message(target_room_id, dictionary_message)
-            time.sleep(3)
-
         elif selected_wof_category == "7":
-            wof_answer, wof_clue, word_syn, word_ant, word_url = fetch_random_word_thes()
-            thesaurus_message = f"\n📖✅ Synonyms\n"
-            for i, synonym in enumerate(word_syn, start=1):
-                thesaurus_message += f"\n {i}. {synonym}"
-            thesaurus_message += "\n"
-            if word_ant:
-                thesaurus_message += "\n📖❌ Antonyms:"
-                for i, antonym in enumerate(word_ant, start=1):
-                    thesaurus_message += f"\n  {i}. {antonym}"
-                thesaurus_message += "\n"
-            send_message(target_room_id, thesaurus_message)
-            time.sleep(3)
-
-        elif selected_wof_category == "8":
             wof_answer, country_name, wof_clue, location_clue, street_view_url, satellite_view_url, satellite_view_live_url, themed_country_url = get_random_city(winner)
             location_clue = f"\n🌦️📊 We intercepted this message...\n\n{location_clue}\n"
             send_message(target_room_id, location_clue)
@@ -2316,25 +2184,13 @@ def select_wof_questions(winner):
 
             process_wof_guesses(winner, wof_answer, 5)
 
-        if selected_wof_category == "5":
+        if selected_wof_category == "6":
             time.sleep(1.5)
             wikipedia_message = f"\n🌐📄 Wikipedia Link: {wiki_url}\n"
             send_message(target_room_id, wikipedia_message)
             time.sleep(1.5)
 
-        if selected_wof_category == "6":
-            time.sleep(1.5)
-            webster_message = f"\n📚📄 Webster Link: {word_url}\n"
-            send_message(target_room_id, webster_message)
-            time.sleep(1.5)
-
         if selected_wof_category == "7":
-            time.sleep(1.5)
-            webster_message = f"\n📚📄 Webster Link: {word_url}\n"
-            send_message(target_room_id, webster_message)
-            time.sleep(1.5)
-
-        if selected_wof_category == "8":
             time.sleep(1.5)
             maps_message = f"\n🌍❔ Okra's Location: {satellite_view_live_url}\n"
             send_message(target_room_id, maps_message)
@@ -3222,9 +3078,9 @@ def process_round_options(round_winner, winner_points):
 
     message = (
         "🇺🇸🗽 Freedom: No multiple choice. ☕\n"
-        "🟦❌ Trebek: No Jeopardy questions. ☕\n"
+        "🟦❌ Xela: No Jeopardy-style questions. ☕\n"
         "📰❌ Cross: No Crossword clues. ☕\n"
-        "🟦✋ Jeopardy: 5 Jeopardy questions. ☕\n"
+        "🟦✋ Alex: 5 Jeopardy-style questions. ☕\n"
         "📰✋ Word: 5 Crossword clues. ☕\n"
         "🎖🥒 Dicktator: Choose the categories. ☕\n\n"
     )
@@ -3345,31 +3201,31 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                             
                             if "freedom" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Freedom'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. 'Freedom' requires ☕️.\n"
                                 else:
                                     num_mysterybox_clues = 0
                                     message = f"\n🇺🇸🗽 @{round_winner} has broken the chains. No multiple choice.\n"
                                 send_message(target_room_id, message)
                             
-                            if "jeopardy" in message_content.lower():
+                            if "alex" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Jeopardy'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. 'Alex' requires ☕️.\n"
                                 else:
                                     num_jeopardy_clues = 5
-                                    message = f"\n🟦✋ Daily Double! @{round_winner} wants {num_jeopardy_clues} Jeopardy questions.\n"
+                                    message = f"\n🟦✋ @{round_winner} wants {num_jeopardy_clues} Jeopardy-style questions.\n"
                                 send_message(target_room_id, message)
                 
-                            if "trebek" in message_content.lower():
+                            if "xela" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Trebek'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. 'Xela' requires ☕️.\n"
                                 else:
                                     num_jeopardy_clues = 0
-                                    message = f"\n🟦❌ @{round_winner} says no to Jeopardy. Sorry Alex.\n"
+                                    message = f"\n🟦❌ @{round_winner} doesn't like Jeopardy-style. Sorry Alex.\n"
                                 send_message(target_room_id, message)
         
                             if "word" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Word'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. 'Word' requires ☕️.\n"
                                 else:
                                     num_crossword_clues = 5
                                     message = f"\n📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n"
@@ -3377,7 +3233,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                 
                             if "cross" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Cross'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. 'Cross' requires ☕️.\n"
                                 else:
                                     num_crossword_clues = 0
                                     message = f"\n📰❌ @{round_winner} has crossed off all Crossword questions.\n"
@@ -3385,7 +3241,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
         
                             if "dicktator" in message_content.lower():
                                 if winner_coffees <= 0:
-                                    message = f"\n🙏😔 Sorry @{round_winner}. Buy some ☕️ to unlock 'Dicktator'.\n"
+                                    message = f"\n🙏😔 Sorry @{round_winner}. 'Dicktator' requires ☕️.\n"
                                 else:
                                     god_mode = True
                                     message = f"\n🎖🍆 @{round_winner} is a dick.\n"
@@ -5179,9 +5035,9 @@ def update_round_streaks(user):
     if user is not None:
         
         if current_longest_round_streak["streak"] > 1:
-            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n"
+            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n▶️ Live trivia stats available: https://livetriviastats.com\n"
         else:
-            message = f"\n🏆 Winner: @{user}!\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n"
+            message = f"\n🏆 Winner: @{user}!\n\n▶️ Live trivia stats available: https://livetriviastats.com\n"
 
         send_message(target_room_id, message)
         time.sleep(2)
@@ -5222,7 +5078,7 @@ def update_round_streaks(user):
             else:
                 image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
             
-            image_message += "\n🥒🏛️ https://redditlivetrivia.com/okra-museum\n"
+            image_message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
                 
             send_message(target_room_id, image_message)
             time.sleep(1)
@@ -5527,15 +5383,15 @@ def round_start_messages():
         # If the user is in the Hall of Sovereigns, only show the message if top_count == 6
         if username in sovereigns:
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
+                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
         else:
             # For users not in the Hall of Sovereigns, show all applicable messages
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
+                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
             elif top_count == 5:
-                send_message(target_room_id, f"🔥​  {username} is on fire! Only 1 leaderboard left.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
+                send_message(target_room_id, f"🔥​  {username} is on fire! Only 1 leaderboard left.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
             elif top_count == 4:
-                send_message(target_room_id, f"🌡️  {username} is heating up! Only 2 leaderboards left.\n\n▶️ Live trivia stats available: https://stats.redditlivetrivia.com\n")
+                send_message(target_room_id, f"🌡️  {username} is heating up! Only 2 leaderboards left.\n\n▶️ Live trivia stats available: hhttps://livetriviastats.com\n")
     return None
 
 
@@ -6389,7 +6245,7 @@ def start_trivia_round():
                 time.sleep(10)
             else:
                 message = f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Use your Reddit name to unlock in-game perks.\n"
-                message += f"\n👕 [NEW] https://livetrivia-shop.fourthwall.com\n🛒 Score Live Trivia merch featuring Okra!\n"
+                message += f"\n👕 https://livetrivia-shop.fourthwall.com\n🛒 Score Live Trivia merch featuring Okra.\n"
                 send_message(target_room_id, message)
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)

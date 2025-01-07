@@ -6436,13 +6436,13 @@ def start_trivia():
                     
                 time.sleep(5)
 
-        finally:
-            loop_profiler.disable()  # Stop profiling the loop iteration
+            finally:
+                loop_profiler.disable()  # Stop profiling the loop iteration
 
-            # Print profiling results for this loop iteration
-            print(f"Profiling results for loop iteration {round_count}:")
-            stats = pstats.Stats(loop_profiler)
-            stats.sort_stats("cumulative").print_stats(10)  # Print top 10 results
+                # Print profiling results for this loop iteration
+                print(f"Profiling results for loop iteration {round_count}:")
+                stats = pstats.Stats(loop_profiler)
+                stats.sort_stats("cumulative").print_stats(10)  # Print top 10 results
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

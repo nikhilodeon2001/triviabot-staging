@@ -6301,8 +6301,7 @@ def start_trivia():
     global previous_question, current_question
     global db
     
-    pre_loop_profiler = cProfile.Profile()
-    loop_profiler = cProfile.Profile()
+
     
     okra_gif_urls = [
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif",

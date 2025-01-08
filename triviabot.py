@@ -6462,10 +6462,14 @@ def start_trivia():
 try:
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
     # Decorate all functions in a module
+    # Decorate all functions in a module
     current_module = sys.modules[__name__]
     
-    for name, obj in vars(current_module).items():
-        if callable(obj):  # Check if the object is callable (a function)
+    # Make a static copy of the module's items to prevent modification during iteration
+    module_items = list(vars(current_module).items())
+    
+    for name, obj in module_items:
+        if callable(obj) and obj.__module__ == __name__:  # Ensure it's a user-defined function
             vars(current_module)[name] = log_execution_time(obj)
     start_trivia()
     

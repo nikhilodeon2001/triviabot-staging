@@ -41,7 +41,7 @@ from collections import Counter, defaultdict
 import math
 import cProfile
 import pstats
-
+import sys
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
@@ -221,6 +221,22 @@ cities = [
 {"city": "Yerevan", "country": "Armenia", "lat": 40.1792, "lon": 44.4991, "capital": True},
 {"city": "Zagreb", "country": "Croatia", "lat": 45.8150, "lon": 15.9819, "capital": True}
 ]
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+def log_execution_time(func):
+    """Decorator to log the execution time of a function."""
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        logger.info(f"Function '{func.__name__}' executed in {elapsed_time:.4f} seconds")
+        return result
+    return wrapper
 
 
 def fetch_random_word_thes(min_length=5, max_length=12, max_retries=5, max_related=5):
@@ -6438,11 +6454,19 @@ def start_trivia():
         time.sleep(10)  
 
 
+
+
 start_trivia()
 
 
 try:
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
+    # Decorate all functions in a module
+    current_module = sys.modules[__name__]
+    
+    for name, obj in vars(current_module).items():
+        if callable(obj):  # Check if the object is callable (a function)
+            vars(current_module)[name] = log_execution_time(obj)
     start_trivia()
     
 except Exception as e:

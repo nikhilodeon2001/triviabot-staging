@@ -39,9 +39,7 @@ import tempfile
 import base64
 from collections import Counter, defaultdict
 import math
-import cProfile
-import pstats
-import sys
+#import sys
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"

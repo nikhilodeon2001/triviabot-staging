@@ -6435,15 +6435,16 @@ def start_trivia():
             
             if round_count % 5 == 0:
                 send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
-                time.sleep(10)
+                time.sleep(30)
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)
                 time.sleep(10)
             else:
                 message = f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Use your Reddit name to unlock in-game perks.\n"
-                message += f"\n👕 https://livetrivia-shop.fourthwall.com\n🛒 Score Live Trivia merch featuring Okra.\n"
+                message += f"\n👕 https://livetriviamerch.com\n🛒 Score Live Trivia merch featuring Okra.\n"
                 send_message(target_room_id, message)
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+                time.sleep(10)
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
             

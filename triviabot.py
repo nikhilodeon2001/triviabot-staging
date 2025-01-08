@@ -5313,74 +5313,81 @@ def show_standings():
         send_message(target_room_id, standing_message)
 
 
-def store_question_ids_in_mongo(question_ids, question_type):
-    collection_name = f"asked_{question_type}_questions"
-    questions_collection = db[collection_name]
+def get_all_recent_question_ids():
+    """
+    Fetch recent question IDs for all question types in a single call.
+    Returns a dictionary with question type as the key and recent IDs as the value.
+    """
+    recent_ids = {}
+    for question_type in ["general", "crossword", "jeopardy", "mysterybox", "wof"]:
+        collection_name = f"asked_{question_type}_questions"
+        questions_collection = db[collection_name]
+        recent_ids[question_type] = {
+            doc["_id"]
+            for doc in questions_collection.find().sort("timestamp", -1).limit(id_limits[question_type])
+        }
+    return recent_ids
 
-    # Insert the new IDs directly into the collection
-    questions_collection.insert_many([{"_id": _id} for _id in question_ids])
 
-    # Check if the collection exceeds its limit and delete old entries if necessary
-    limit = id_limits[question_type]
-    total_ids = questions_collection.count_documents({})
-    if total_ids > limit:
-        excess = total_ids - limit
-        oldest_entries = questions_collection.find().sort("timestamp", 1).limit(excess)
-        for entry in oldest_entries:
-            questions_collection.delete_one({"_id": entry["_id"]})
+def store_all_question_ids(question_ids_by_type):
+    """
+    Store question IDs for all question types in a single call.
+    Expects a dictionary with question type as the key and list of IDs as the value.
+    """
+    for question_type, question_ids in question_ids_by_type.items():
+        if not question_ids:
+            continue
+        collection_name = f"asked_{question_type}_questions"
+        questions_collection = db[collection_name]
 
+        # Insert new IDs
+        questions_collection.insert_many([{"_id": _id} for _id in question_ids])
 
-def get_recent_question_ids_from_mongo(question_type):
-    collection_name = f"asked_{question_type}_questions"
-    questions_collection = db[collection_name]
-
-    recent_ids = questions_collection.find().sort("timestamp", -1).limit(id_limits[question_type])
-    return {doc["_id"] for doc in recent_ids}
-
+        # Check if the collection exceeds its limit and delete old entries if necessary
+        limit = id_limits[question_type]
+        total_ids = questions_collection.count_documents({})
+        if total_ids > limit:
+            excess = total_ids - limit
+            oldest_entries = questions_collection.find().sort("timestamp", 1).limit(excess)
+            for entry in oldest_entries:
+                questions_collection.delete_one({"_id": entry["_id"]})
 
 
 def select_trivia_questions(questions_per_round):
     global categories_to_exclude
     try:
-        
-        # Fetch recent IDs separately for each type
-        recent_general_ids = get_recent_question_ids_from_mongo("general")
-        recent_crossword_ids = get_recent_question_ids_from_mongo("crossword")
-        recent_jeopardy_ids = get_recent_question_ids_from_mongo("jeopardy")
-        recent_mysterybox_ids = get_recent_question_ids_from_mongo("mysterybox")
-        recent_wof_ids = get_recent_question_ids_from_mongo("wof")
 
+        recent_question_ids = get_all_recent_question_ids()
         selected_questions = []
-
-        # Fetch crossword questions using the random subset method
-
+        question_ids_to_store = {  # Initialize a dictionary to batch store question IDs
+            "general": [],
+            "crossword": [],
+            "jeopardy": [],
+            "mysterybox": [],
+            "wof": []
+        }
+        
         sample_size = min(num_crossword_clues, questions_per_round - len(selected_questions))
         if sample_size > 0:
             crossword_collection = db["crossword_questions"]
             pipeline_crossword = [
-                {"$match": {"_id": {"$nin": list(recent_crossword_ids)}}},
+                {"$match": {"_id": {"$nin": list(recent_question_ids["crossword"])}}},
                 {"$sample": {"size":sample_size}}  # Apply sampling on the filtered subset
             ]
             crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
             selected_questions.extend(crossword_questions)
-
-            crossword_question_ids = [doc["_id"] for doc in crossword_questions]
-            if crossword_question_ids:
-                store_question_ids_in_mongo(crossword_question_ids, "crossword")
+            question_ids_to_store["crossword"].extend(doc["_id"] for doc in crossword_questions)
 
         sample_size = min(num_jeopardy_clues, questions_per_round - len(selected_questions))
         if sample_size > 0:
             jeopardy_collection = db["jeopardy_questions"]
             pipeline_jeopardy = [
-                {"$match": {"_id": {"$nin": list(recent_jeopardy_ids)}}},
+                {"$match": {"_id": {"$nin": list(recent_question_ids["jeopardy"])}}},
                 {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
             ]
             jeopardy_questions = list(jeopardy_collection.aggregate(pipeline_jeopardy))
             selected_questions.extend(jeopardy_questions)
-
-            jeopardy_question_ids = [doc["_id"] for doc in jeopardy_questions]
-            if jeopardy_question_ids:
-                store_question_ids_in_mongo(jeopardy_question_ids, "jeopardy")
+            question_ids_to_store["jeopardy"].extend(doc["_id"] for doc in jeopardy_questions)
 
         sample_size = min(num_math_questions, questions_per_round - len(selected_questions))
         if sample_size > 0:
@@ -5396,29 +5403,23 @@ def select_trivia_questions(questions_per_round):
         if sample_size > 0:
             wof_collection = db["wof_questions"]
             pipeline_wof = [
-                {"$match": {"_id": {"$nin": list(recent_wof_ids)}}},
+                {"$match": {"_id": {"$nin": list(recent_question_ids["wof"])}}},
                 {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
             ]
             wof_questions = list(wof_collection.aggregate(pipeline_wof))
             selected_questions.extend(wof_questions)
-            
-            wof_question_ids = [doc["_id"] for doc in wof_questions]
-            if wof_question_ids:
-                store_question_ids_in_mongo(wof_question_ids, "wof")
+            question_ids_to_store["wof"].extend(doc["_id"] for doc in wof_questions)
  
         sample_size = min(num_mysterybox_clues, questions_per_round - len(selected_questions))
         if sample_size > 0:
             mysterybox_collection = db["mysterybox_questions"]
             pipeline_mysterybox = [
-                {"$match": {"_id": {"$nin": list(recent_mysterybox_ids)}}},
+                {"$match": {"_id": {"$nin": list(recent_question_ids["mysterybox"])}}},
                 {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
             ]
             mysterybox_questions = list(mysterybox_collection.aggregate(pipeline_mysterybox))
             selected_questions.extend(mysterybox_questions)
-
-            mysterybox_question_ids = [doc["_id"] for doc in mysterybox_questions]
-            if mysterybox_question_ids:
-                store_question_ids_in_mongo(mysterybox_question_ids, "mysterybox")
+            question_ids_to_store["mysterybox"].extend(doc["_id"] for doc in mysterybox_questions)
         
         sample_size = max(questions_per_round - len(selected_questions), 0)
         if sample_size > 0:
@@ -5430,7 +5431,7 @@ def select_trivia_questions(questions_per_round):
                 pipeline_trivia = [
                     {
                         "$match": {
-                            "_id": {"$nin": list(recent_general_ids)},
+                            "_id": {"$nin": list(recent_question_ids["general"])},
                             "category": {"$nin": categories_to_exclude},
                             "$or": [
                                 {"url": {"$not": {"$regex": excluded_url_substring}}} 
@@ -5450,7 +5451,7 @@ def select_trivia_questions(questions_per_round):
                 
             else:
                 pipeline_trivia = [
-                    {"$match": {"_id": {"$nin": list(recent_general_ids)}, "category": {"$nin": categories_to_exclude}}},
+                    {"$match": {"_id": {"$nin": list(recent_question_ids["general"])}, "category": {"$nin": categories_to_exclude}}},
                     {
                         "$group": {
                             "_id": "$category",
@@ -5464,13 +5465,14 @@ def select_trivia_questions(questions_per_round):
 
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
             selected_questions.extend(trivia_questions)
+            question_ids_to_store["general"].extend(doc["_id"] for doc in trivia_questions)
 
-            general_question_ids = [doc["_id"] for doc in trivia_questions]
-            if general_question_ids:
-                store_question_ids_in_mongo(general_question_ids, "general")
         
         # Shuffle the combined list of selected questions
         random.shuffle(selected_questions)
+
+        # Store question IDs in MongoDB (batch operation)
+        store_all_question_ids(question_ids_to_store)
 
         final_selected_questions = [
             (doc["category"], doc["question"], doc["url"], doc["answers"])

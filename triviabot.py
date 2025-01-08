@@ -6456,7 +6456,7 @@ def start_trivia():
 
 
 
-start_trivia()
+#start_trivia()
 
 
 try:

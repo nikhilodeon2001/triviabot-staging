@@ -5313,6 +5313,34 @@ def show_standings():
         send_message(target_room_id, standing_message)
 
 
+def store_question_ids_in_mongo(question_ids, question_type):
+    db = connect_to_mongodb()
+    collection_name = f"asked_{question_type}_questions"
+    questions_collection = db[collection_name]
+
+    # Insert the new IDs directly into the collection
+    questions_collection.insert_many([{"_id": _id} for _id in question_ids])
+
+    # Check if the collection exceeds its limit and delete old entries if necessary
+    limit = id_limits[question_type]
+    total_ids = questions_collection.count_documents({})
+    if total_ids > limit:
+        excess = total_ids - limit
+        oldest_entries = questions_collection.find().sort("timestamp", 1).limit(excess)
+        for entry in oldest_entries:
+            questions_collection.delete_one({"_id": entry["_id"]})
+
+
+def get_recent_question_ids_from_mongo(question_type):
+    db = connect_to_mongodb()
+    collection_name = f"asked_{question_type}_questions"
+    questions_collection = db[collection_name]
+
+    recent_ids = questions_collection.find().sort("timestamp", -1).limit(id_limits[question_type])
+    return {doc["_id"] for doc in recent_ids}
+
+
+
 def get_all_recent_question_ids():
     """
     Fetch recent question IDs for all question types in a single call.

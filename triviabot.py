@@ -354,8 +354,6 @@ def insert_audit_question(collection_name, question, message_content, display_na
 
     for attempt in range(max_retries):
         try:
-            db = connect_to_mongodb()
-
             # Step 1: Ensure the document exists with upsert
             filter_query = question
             initial_update = {
@@ -388,7 +386,6 @@ def load_previous_question():
     
     for attempt in range(max_retries):
         try:
-            db = connect_to_mongodb()
             
             # Retrieve the current longest answer streak from MongoDB
             previous_question_retrieved = db.previous_question.find_one({"_id": "previous_question"})
@@ -424,8 +421,7 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
     
     try:
-        time.sleep(2)
-        db = connect_to_mongodb()
+        time.sleep(2) 
         recent_list_ids = get_recent_question_ids_from_mongo("list")
         
         # Fetch wheel of fortune questions using the random subset method
@@ -630,7 +626,6 @@ def ask_list_question(winner, mode="competition", target_percentage = 1.00):
 def ask_survey_question():
     global since_token, params, headers, max_retries, delay_between_retries
     # Connect to the database and collection
-    db = connect_to_mongodb()
     collection = db["survey_questions"]
 
     # Fetch the document by question_id
@@ -1418,7 +1413,6 @@ def get_user_data(username, num_of_subreddits):
 
 
 def sovereign_check(user):
-    db = connect_to_mongodb()
     sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
     if user in sovereigns:
         return True
@@ -1504,7 +1498,6 @@ def load_parameters():
     
     for attempt in range(max_retries):
         try:
-            db = connect_to_mongodb()
 
             # Retrieve all parameter documents
             documents = db.parameters.find()
@@ -2010,7 +2003,6 @@ def request_prompt(winner, done_events):
 
 def get_coffees(username):
     username = username.lower()
-    db = connect_to_mongodb()
     donors_collection = db["donors"]  # Ensure this matches the name of your collection
 
     pipeline = [
@@ -2031,7 +2023,6 @@ def fetch_donations():
     headers = {"Authorization": f"Bearer {buymeacoffee_api_key}"}
 
     try:
-        db = connect_to_mongodb()  # Connect to the MongoDB database
         donors_collection = db["donors"]  # Use the 'donors' collection
 
         new_donors = []
@@ -2168,7 +2159,6 @@ def select_wof_questions(winner):
     
     try:
         time.sleep(2)
-        db = connect_to_mongodb()
         recent_wof_ids = get_recent_question_ids_from_mongo("wof")
         selected_questions = []
         fixed_letters = ['O', 'K', 'R', 'A']
@@ -3457,7 +3447,6 @@ def generate_okra_joke(winner_name):
 
 def insert_trivia_questions_into_mongo(trivia_questions):
     try:
-        db = connect_to_mongodb()  # Connect to the MongoDB database
         collection = db["trivia_questions"]  # Use the 'trivia_questions' collection
         
         # Prepare the documents to insert
@@ -4076,7 +4065,6 @@ def flush_submission_queue():
         return  # No submissions to flush
 
     try:
-        db = connect_to_mongodb()
         # Use insert_many to insert all submissions at once
         db.user_submissions.insert_many(submission_queue)
         submission_queue = []  # Clear the queue after flushing
@@ -4278,31 +4266,30 @@ def login_to_chat():
     print("All retry attempts failed.")
     return None
 
-client = None
-db = None
+
 
 def connect_to_mongodb(max_retries=3, delay_between_retries=5):
-    """Connect to MongoDB with retry logic."""
     global client, db
-    if not client:
+    client = None
+    db = None
+    
+    for attempt in range(max_retries):
+        try:
+            # Attempt to connect to MongoDB
+            client = MongoClient(mongo_db_string)
+            db = client["triviabot"]
+            return db  # Return the database connection if successful
         
-        for attempt in range(max_retries):
-            try:
-                # Attempt to connect to MongoDB
-                client = MongoClient(mongo_db_string)
-                db = client["triviabot"]
-                return db  # Return the database connection if successful
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Attempt {attempt + 1} failed: {e}")
             
-            except Exception as e:
-                sentry_sdk.capture_exception(e)
-                print(f"Attempt {attempt + 1} failed: {e}")
-                
-                # If the maximum number of retries is reached, raise the exception
-                if attempt == max_retries - 1:
-                    raise
-                
-                # Wait before trying again
-                time.sleep(delay_between_retries)
+            # If the maximum number of retries is reached, raise the exception
+            if attempt == max_retries - 1:
+                raise
+            
+            # Wait before trying again
+            time.sleep(delay_between_retries)
     return db
 
 def load_global_variables():
@@ -4360,8 +4347,6 @@ def save_data_to_mongo(collection_name, document_id, data):
 
     for attempt in range(max_retries):
         try:
-            db = connect_to_mongodb()
-
             # Add the current timestamp to the data
             data_with_timestamp = {"timestamp": now, **data}
 
@@ -4407,7 +4392,6 @@ def insert_data_to_mongo(collection_name, data):
 
     for attempt in range(max_retries):
         try:
-            db = connect_to_mongodb()
             # Add the current timestamp to the data
             data_with_timestamp = {"timestamp": now, **data}
 
@@ -5314,7 +5298,6 @@ def show_standings():
 
 
 def store_question_ids_in_mongo(question_ids, question_type):
-    db = connect_to_mongodb()
     collection_name = f"asked_{question_type}_questions"
     questions_collection = db[collection_name]
 
@@ -5332,7 +5315,6 @@ def store_question_ids_in_mongo(question_ids, question_type):
 
 
 def get_recent_question_ids_from_mongo(question_type):
-    db = connect_to_mongodb()
     collection_name = f"asked_{question_type}_questions"
     questions_collection = db[collection_name]
 
@@ -5344,7 +5326,6 @@ def get_recent_question_ids_from_mongo(question_type):
 def select_trivia_questions(questions_per_round):
     global categories_to_exclude
     try:
-        db = connect_to_mongodb()
         
         # Fetch recent IDs separately for each type
         recent_general_ids = get_recent_question_ids_from_mongo("general")
@@ -5492,8 +5473,6 @@ def load_streak_data():
     
     for attempt in range(max_retries):
         try:
-            db = connect_to_mongodb()
-            
             # Retrieve the current longest answer streak from MongoDB
             document_answer = db.current_streaks.find_one({"_id": "current_longest_answer_streak"})
 
@@ -5543,7 +5522,6 @@ def print_selected_questions(selected_questions):
 
 
 def round_start_messages():
-    db = connect_to_mongodb()
     top_users = list(db.top_users.find())
     sovereigns = {sovereign['user'] for sovereign in db.hall_of_sovereigns.find()}
 
@@ -6204,7 +6182,6 @@ def get_random_trivia_question():
     global categories_to_exclude
     """Fetch a random question from the trivia_questions collection."""
     try:
-        db = connect_to_mongodb()
         trivia_collection = db["trivia_questions"]
         recent_general_ids = get_recent_question_ids_from_mongo("general")
 
@@ -6278,7 +6255,8 @@ def start_trivia():
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
     global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
     global previous_question, current_question
-
+    global db
+    
     pre_loop_profiler = cProfile.Profile()
     loop_profiler = cProfile.Profile()
     
@@ -6299,7 +6277,9 @@ def start_trivia():
         reddit_login()
         login_to_chat()
         last_login_time = time.time()  # Store the current time when the script starts
+
         
+        db =  connect_to_mongodb()
         load_parameters()
         load_global_variables()
         load_streak_data()

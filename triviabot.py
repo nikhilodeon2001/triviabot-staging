@@ -6400,7 +6400,7 @@ def start_trivia():
                         selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner) - 1]
                         
                     else:
-                        selected_question = selected_questions[0]
+                        selected_question = selected_questions[question_number]
     
                     trivia_category, trivia_question, trivia_url, trivia_answer_list = selected_question
     

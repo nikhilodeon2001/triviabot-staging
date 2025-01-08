@@ -6396,7 +6396,7 @@ def start_trivia():
                 question_number = 1
                 while question_number <= questions_per_round:
                     
-                    if god_mode and round_winner and len(selected_questions)>1:
+                    if god_mode and round_winner:
                         selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner) - 1]
                         
                     else:
@@ -6423,7 +6423,8 @@ def start_trivia():
                         show_standings()
     
                     #Refill the question slot with a new random question from trivia_questions
-                    refill_question_slot(selected_questions, selected_question)
+                    if god_mode and round_winner:
+                        refill_question_slot(selected_questions, selected_question)
     
                     time.sleep(time_between_questions)  # Small delay before the next question
                     

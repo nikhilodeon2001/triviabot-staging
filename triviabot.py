@@ -6318,8 +6318,6 @@ def start_trivia():
     ]
     
     try:
-        pre_loop_profiler.enable()
-        
         reddit_login()
         login_to_chat()
         last_login_time = time.time()  # Store the current time when the script starts
@@ -6334,147 +6332,135 @@ def start_trivia():
         
         round_winner = None
         selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
-
-        pre_loop_profiler.disable()
-
-        # Print profiling results for pre-loop steps
-        print("Profiling results for pre-loop steps:")
-        stats = pstats.Stats(pre_loop_profiler)
-        stats.sort_stats("cumulative").print_stats(10)  # Print top 10 results
         
         while True:  # Endless loop       
-            loop_profiler.enable()  # Start profiling the loop iteration
+            # Check if it's been more than an hour since the last login
+            current_time = time.time()
+            
+            if current_time - last_login_time >= 3600:  # 3600 seconds = 1 hour
+                print("Re-logging into Reddit and chat as one hour has passed...")
+                reddit_login()
+                login_to_chat()
+                last_login_time = current_time  # Reset the login time
+                load_global_variables()
 
-            try:
+            load_parameters()
+            fetch_donations()
+
+            # Reset the scoreboard and fastest answers at the start of each round
+            scoreboard.clear()
+            fastest_answers_count.clear()
             
-                # Check if it's been more than an hour since the last login
-                current_time = time.time()
+            # Reset round data for the next round
+            round_data["questions"] = []
+
+            if random.random() < 0:  # random.random() generates a float between 0 and 1
+                magic_number = random_number = random.randint(1000, 9999)
+                print(f"Magic number is {magic_number}")
+                send_magic_image(magic_number)
+            elif image_questions == True:
+                selected_gif_url = random.choice(okra_gif_urls)           
+                image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
+                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+                #time.sleep(2)
+
+            start_message = f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n"
+            start_message += f"\n🚩 Flag errors during response time"
+            start_message += f"\n↔️ #curr, #prev to tag question\n"
+            send_message(target_room_id, start_message)
+        
+            time.sleep(3)
+
+            start_message = "\n🏁 Get ready 🏁\n"
+            send_message(target_room_id, start_message)
+            round_start_messages()
+        
+            time.sleep(5)
                 
-                if current_time - last_login_time >= 3600:  # 3600 seconds = 1 hour
-                    print("Re-logging into Reddit and chat as one hour has passed...")
-                    reddit_login()
-                    login_to_chat()
-                    last_login_time = current_time  # Reset the login time
-                    load_global_variables()
-    
-                load_parameters()
-                fetch_donations()
-    
-                # Reset the scoreboard and fastest answers at the start of each round
-                scoreboard.clear()
-                fastest_answers_count.clear()
-                
-                # Reset round data for the next round
-                round_data["questions"] = []
-    
-                if random.random() < 0:  # random.random() generates a float between 0 and 1
-                    magic_number = random_number = random.randint(1000, 9999)
-                    print(f"Magic number is {magic_number}")
-                    send_magic_image(magic_number)
-                elif image_questions == True:
-                    selected_gif_url = random.choice(okra_gif_urls)           
-                    image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
-                    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-                    #time.sleep(2)
-    
-                start_message = f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n"
-                start_message += f"\n🚩 Flag errors during response time"
-                start_message += f"\n↔️ #curr, #prev to tag question\n"
-                send_message(target_room_id, start_message)
+            # Randomly select n questions
+            print_selected_questions(selected_questions)
             
-                time.sleep(3)
-    
-                start_message = "\n🏁 Get ready 🏁\n"
-                send_message(target_room_id, start_message)
-                round_start_messages()
-            
-                time.sleep(5)
-                    
-                # Randomly select n questions
-                print_selected_questions(selected_questions)
+            question_number = 1
+            while question_number <= questions_per_round:
                 
-                question_number = 1
-                while question_number <= questions_per_round:
+                if god_mode and round_winner:
+                    selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner) - 1]
                     
-                    if god_mode and round_winner:
-                        selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner) - 1]
-                        
-                    else:
-                        selected_question = selected_questions[0]
-    
-                    trivia_category, trivia_question, trivia_url, trivia_answer_list = selected_question
-    
-                    current_question = {
-                        "trivia_category": trivia_category,
-                        "trivia_question": trivia_question,
-                        "trivia_url": trivia_url,
-                        "trivia_answer_list": trivia_answer_list
-                    }
-                    
-                    question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)         
-                    collected_responses = collect_responses(question_time, question_number, question_time)
-                    
-                    #send_message(target_room_id, f"\n🛑 TIME 🛑\n")
-                    
-                    solution_list = trivia_answer_list if new_solution is None else [new_solution]            
-                    check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses, trivia_category, trivia_url)
-                    
-                    if not yolo_mode or question_number == questions_per_round:
-                        show_standings()
-    
-                    #Refill the question slot with a new random question from trivia_questions
-                    refill_question_slot(selected_questions, selected_question)
-    
-                    time.sleep(time_between_questions)  # Small delay before the next question
-                    
-                    question_number = question_number + 1
-                    previous_question = {
-                        "trivia_category": trivia_category,
-                        "trivia_question": trivia_question,
-                        "trivia_url": trivia_url,
-                        "trivia_answer_list": trivia_answer_list
-                    }
-    
-                    save_data_to_mongo("previous_question", "previous_question", previous_question)
-                    
-                #Determine the round winner
-                round_winner, winner_points = determine_round_winner()
-    
-                #Update round streaks
-                update_round_streaks(round_winner)
-                # Increment the round count
-    
-                round_count += 1
-            
-                time.sleep(10)
-                process_round_options(round_winner, winner_points)
-                
-                if round_count % 5 == 0:
-                    send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
-                    time.sleep(10)
-                    selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                    round_preview(selected_questions)
-                    time.sleep(10)
                 else:
-                    message = f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Use your Reddit name to unlock in-game perks.\n"
-                    message += f"\n👕 https://livetrivia-shop.fourthwall.com\n🛒 Score Live Trivia merch featuring Okra.\n"
-                    send_message(target_room_id, message)
-                    selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
-                    round_preview(selected_questions)
-                    time.sleep(10)  # Adjust this time to whatever delay you need between rounds
+                    selected_question = selected_questions[0]
+
+                trivia_category, trivia_question, trivia_url, trivia_answer_list = selected_question
+
+                current_question = {
+                    "trivia_category": trivia_category,
+                    "trivia_question": trivia_question,
+                    "trivia_url": trivia_url,
+                    "trivia_answer_list": trivia_answer_list
+                }
                 
-                if len(scoreboard) > 400:
-                    ask_survey_question()
-                    
-                time.sleep(5)
+                question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)         
+                collected_responses = collect_responses(question_time, question_number, question_time)
+                
+                #send_message(target_room_id, f"\n🛑 TIME 🛑\n")
+                
+                solution_list = trivia_answer_list if new_solution is None else [new_solution]            
+                check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses, trivia_category, trivia_url)
+                
+                if not yolo_mode or question_number == questions_per_round:
+                    show_standings()
 
-            finally:
-                loop_profiler.disable()  # Stop profiling the loop iteration
+                #Refill the question slot with a new random question from trivia_questions
+                refill_question_slot(selected_questions, selected_question)
 
-                # Print profiling results for this loop iteration
-                print(f"Profiling results for loop iteration {round_count}:")
-                stats = pstats.Stats(loop_profiler)
-                stats.sort_stats("cumulative").print_stats(10)  # Print top 10 results
+                time.sleep(time_between_questions)  # Small delay before the next question
+                
+                question_number = question_number + 1
+                previous_question = {
+                    "trivia_category": trivia_category,
+                    "trivia_question": trivia_question,
+                    "trivia_url": trivia_url,
+                    "trivia_answer_list": trivia_answer_list
+                }
+
+                save_data_to_mongo("previous_question", "previous_question", previous_question)
+                
+            #Determine the round winner
+            round_winner, winner_points = determine_round_winner()
+
+            #Update round streaks
+            update_round_streaks(round_winner)
+            # Increment the round count
+
+            round_count += 1
+        
+            time.sleep(10)
+            process_round_options(round_winner, winner_points)
+            
+            if round_count % 5 == 0:
+                send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
+                time.sleep(10)
+                selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+                round_preview(selected_questions)
+                time.sleep(10)
+            else:
+                message = f"\n☕️ https://buymeacoffee.com/livetrivia\n💚 Use your Reddit name to unlock in-game perks.\n"
+                message += f"\n👕 https://livetrivia-shop.fourthwall.com\n🛒 Score Live Trivia merch featuring Okra.\n"
+                send_message(target_room_id, message)
+                selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
+                round_preview(selected_questions)
+                time.sleep(10)  # Adjust this time to whatever delay you need between rounds
+            
+            if len(scoreboard) > 400:
+                ask_survey_question()
+                
+            time.sleep(5)
+
+
+
+            # Print profiling results for this loop iteration
+            print(f"Profiling results for loop iteration {round_count}:")
+            stats = pstats.Stats(loop_profiler)
+            stats.sort_stats("cumulative").print_stats(10)  # Print top 10 results
 
     except Exception as e:
         sentry_sdk.capture_exception(e)
@@ -6484,23 +6470,19 @@ def start_trivia():
         time.sleep(10)  
 
 
-
-
-#start_trivia()
-
-
 try:
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
+
     # Decorate all functions in a module
-    # Decorate all functions in a module
-    current_module = sys.modules[__name__]
+    #current_module = sys.modules[__name__]
     
     # Make a static copy of the module's items to prevent modification during iteration
-    module_items = list(vars(current_module).items())
+    #module_items = list(vars(current_module).items())
     
-    for name, obj in module_items:
-        if callable(obj) and obj.__module__ == __name__:  # Ensure it's a user-defined function
-            vars(current_module)[name] = log_execution_time(obj)
+    #for name, obj in module_items:
+    #    if callable(obj) and obj.__module__ == __name__:  # Ensure it's a user-defined function
+    #        vars(current_module)[name] = log_execution_time(obj)
+    
     start_trivia()
     
 except Exception as e:

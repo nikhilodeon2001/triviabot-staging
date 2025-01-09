@@ -236,9 +236,9 @@ def create_family_feud_board_image(total_answers, user_answers):
     n = len(total_answers)
 
     # Base layout (slightly larger to accommodate huge font)
-    width = 1800  # doubled from 900
+    width = 3600  # doubled from 900
     # Height logic: we do 1200 base instead of 600, and add for extra answers
-    height = 7200 + max(0, (n - 6) * 240)  
+    height = 1200 + max(0, (n - 6) * 240)  
     bg_color = (10, 10, 10)
     gold_color = (255, 215, 0)
     box_color = (0, 60, 220)

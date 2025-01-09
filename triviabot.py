@@ -229,52 +229,47 @@ def create_family_feud_board_image(total_answers, user_answers):
       - Blue boxes for each answer, arranged in columns
       - Circles on the left for numbering
       - Revealed or hidden answers
-      - Returns (image_mxc, width, height)
+      - Larger font & UI elements (4x bigger).
+    Returns (image_mxc, width, height).
     """
-    # Convert user_answers to a case-insensitive set
     lower_user_answers = {ua.lower() for ua in user_answers}
-
-    # Number of answers
     n = len(total_answers)
 
-    # Basic constants
-    width = 900
-    height = 600 + max(0, (n - 6) * 60)  # Make taller for more than 6 answers
-    bg_color = (10, 10, 10)   # Dark stage background
+    # Base layout (slightly larger to accommodate huge font)
+    width = 1800  # doubled from 900
+    # Height logic: we do 1200 base instead of 600, and add for extra answers
+    height = 1200 + max(0, (n - 6) * 240)  
+    bg_color = (10, 10, 10)
     gold_color = (255, 215, 0)
     box_color = (0, 60, 220)
     box_outline = (255, 255, 255)
     txt_color = (255, 255, 255)
     circle_color = (0, 0, 150)
     
-    # Create image & draw
     img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
 
-    # Attempt to load custom font
+    # 4x bigger font size
     try:
-        font = ImageFont.truetype("arial.ttf", 72)
+        font = ImageFont.truetype("arial.ttf", 288)  # was 72
     except:
         font = ImageFont.load_default()
 
-    # 1) Golden Arc or Title Bar
-    # Draw a large arc at the top to mimic the Feud shape
+    # 1) Golden Arc
     arc_x1, arc_y1 = 0, 0
-    arc_x2, arc_y2 = width, height * 2  # a big ellipse
+    arc_x2, arc_y2 = width, height * 2
     draw.pieslice([arc_x1, arc_y1, arc_x2, arc_y2], start=180, end=360, fill=gold_color)
 
-    # 2) Scoreboard Rectangle (top center)
-    # Let's do a scoreboard box near the top center
-    scoreboard_w = 150
-    scoreboard_h = 60
+    # 2) Scoreboard rectangle
+    scoreboard_w = 600  # 4x bigger than 150
+    scoreboard_h = 240  # 4x bigger than 60
     scoreboard_x = (width - scoreboard_w) // 2
-    scoreboard_y = 20
+    scoreboard_y = 80
     scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
     draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
 
-    # Scoreboard text: "0" or "FAMILY FEUD" as you prefer
     scoreboard_text = "FAMILY FEUD"
-    # Measure text
+    # measure scoreboard text
     try:
         left, top, right, bottom = draw.textbbox((0,0), scoreboard_text, font=font)
         txt_w, txt_h = right - left, bottom - top
@@ -287,50 +282,38 @@ def create_family_feud_board_image(total_answers, user_answers):
     draw.text((sb_text_x, sb_text_y), scoreboard_text, fill=(255,255,255), font=font)
 
     # 3) Draw Answer Boxes
-    # We'll arrange them in up to 2 columns if n>4, etc.
-    # Or do a single column if you prefer. Here's a simple 2-col approach for up to 8 answers.
-    
-    # If you want strictly 2 columns for up to 8 answers:
-    # Or adapt to # of answers.
-    
-    # box_size:
-    box_height = 60
-    box_width = 300
-    box_spacing = 10
-    
-    # Start placing them below the scoreboard
-    top_offset = scoreboard_y + scoreboard_h + 40
-    left_margin = 80
+    # 4 times bigger dimensions
+    box_height = 240   # was 60
+    box_width = 1200   # 4x from 300
+    box_spacing = 40   # 4x from 10
+
+    top_offset = scoreboard_y + scoreboard_h + 160  # some extra space
+    left_margin = 320  # was 80
     col_spacing = width//2
-    
-    # We'll do up to 2 columns. If more than 6 or 8, you can adapt further.
+
     answers_per_col = math.ceil(n / 2) if n>2 else n
-    # For each answer, compute which col & row
+
     for i, ans in enumerate(total_answers):
-        # i => 0-based
         col = 0 if i < answers_per_col else 1
         row = i if col==0 else i - answers_per_col
         
-        # The top-left corner of this box
         box_x = left_margin + col * (box_width + col_spacing//2)
         box_y = top_offset + row * (box_height + box_spacing)
         
-        # Draw the rectangle
         draw.rectangle(
             [box_x, box_y, box_x+box_width, box_y+box_height],
-            fill=box_color, outline=box_outline, width=2
+            fill=box_color, outline=box_outline, width=8
         )
         
-        # Draw a small circle on the left for the number
-        circle_diam = 40
+        # circle 4x bigger
+        circle_diam = 160  
         circle_x1 = box_x - circle_diam//2
         circle_y1 = box_y + (box_height - circle_diam)//2
         circle_x2 = circle_x1 + circle_diam
         circle_y2 = circle_y1 + circle_diam
         
-        draw.ellipse([circle_x1, circle_y1, circle_x2, circle_y2], fill=circle_color, outline=box_outline, width=2)
+        draw.ellipse([circle_x1, circle_y1, circle_x2, circle_y2], fill=circle_color, outline=box_outline, width=8)
         
-        # Put the answer number in the circle
         answer_num = i+1
         number_str = str(answer_num)
         try:
@@ -344,10 +327,7 @@ def create_family_feud_board_image(total_answers, user_answers):
         num_y = circle_y1 + (circle_diam - num_h)//2
         draw.text((num_x, num_y), number_str, fill=(255,255,255), font=font)
 
-        # Check if user guessed it
         revealed = ans if ans.lower() in lower_user_answers else "???"
-        
-        # measure text for revealed
         try:
             left, top, right, bottom = draw.textbbox((0, 0), revealed, font=font)
             r_w, r_h = right - left, bottom - top
@@ -355,18 +335,15 @@ def create_family_feud_board_image(total_answers, user_answers):
             mask = font.getmask(revealed)
             r_w, r_h = mask.size
         
-        # center the text in the rectangle
         text_x = box_x + (box_width - r_w)//2
         text_y = box_y + (box_height - r_h)//2
         draw.text((text_x, text_y), revealed, fill=txt_color, font=font)
     
-    # Convert image to bytes
     import io
     img_buffer = io.BytesIO()
     img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
     
-    # Upload to Matrix
     image_mxc = upload_image_to_matrix(img_buffer.read())
     return image_mxc, width, height
 

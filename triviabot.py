@@ -238,10 +238,10 @@ def create_family_feud_board_image(total_answers, user_answers):
     n = len(total_answers)
 
     # Dimensions
-    width = 5600
+    width = 3600
     # Make height dynamic based on how many answers
     # Each answer box can be 240 high + spacing. Base is 1600 for ~6 answers
-    height = 1600 + max(0, (n - 6) * 340)
+    height = 800 + (n * 240)
 
     bg_color = (10, 10, 10)
     gold_color = (255, 215, 0)

@@ -238,7 +238,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     # Base layout (slightly larger to accommodate huge font)
     width = 3600  # doubled from 900
     # Height logic: we do 1200 base instead of 600, and add for extra answers
-    height = 1200 + max(0, (n - 6) * 240)  
+    height = 1600 + max(0, (n - 6) * 240)  
     bg_color = (10, 10, 10)
     gold_color = (255, 215, 0)
     box_color = (0, 60, 220)
@@ -268,7 +268,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
     draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
 
-    scoreboard_text = "FAMILY FEUD"
+    scoreboard_text = "OKRAN OPPOSITION"
     # measure scoreboard text
     try:
         left, top, right, bottom = draw.textbbox((0,0), scoreboard_text, font=font)

@@ -261,7 +261,7 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
 
     # Fonts
     try:
-        scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 60)
+        scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 80)
     except:
         scoreboard_font = ImageFont.load_default()
 

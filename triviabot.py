@@ -254,12 +254,12 @@ def create_family_feud_board_image(total_answers, user_answers):
     #    - a super-large scoreboard_font for "OKRA OPPOSITION"
     #    - a large answer_font for the boxes
     try:
-        scoreboard_font = ImageFont.truetype("arial.ttf", 600)  # very large for the scoreboard
+        scoreboard_font = ImageFont.truetype("arial.ttf", 1600)  # very large for the scoreboard
     except:
         scoreboard_font = ImageFont.load_default()
 
     try:
-        answer_font = ImageFont.truetype("arial.ttf", 400)  # large for answers
+        answer_font = ImageFont.truetype("arial.ttf", 1400)  # large for answers
     except:
         answer_font = ImageFont.load_default()
 
@@ -269,10 +269,10 @@ def create_family_feud_board_image(total_answers, user_answers):
     draw.pieslice([arc_x1, arc_y1, arc_x2, arc_y2], start=180, end=360, fill=gold_color)
 
     # 3) Scoreboard rectangle in the center near top
-    scoreboard_w = 1600
-    scoreboard_h = 600
+    scoreboard_w = 800
+    scoreboard_h = 150
     scoreboard_x = (width - scoreboard_w) // 2
-    scoreboard_y = 80
+    scoreboard_y = 60
     scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
     draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
 
@@ -380,6 +380,7 @@ def ask_feud_question(winner):
 
         feud_questions = list(feud_collection.aggregate(pipeline_feud))
         feud_question = feud_questions[0]
+        print(feud_question)
         feud_question_prompt = feud_question["question"]
         feud_question_answers = feud_question["answers"]   
         feud_question_category = ""

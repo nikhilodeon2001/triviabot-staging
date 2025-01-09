@@ -223,14 +223,16 @@ cities = [
 
 def create_family_feud_board_image(total_answers, user_answers):
     """
-    Creates and uploads a Family Feud–style image, where:
+    Creates and uploads a more Family Feud–style image, where:
       - user_answers are revealed,
       - other answers are displayed as ???,
       - width is fixed at 800,
       - height is dynamically computed based on the number of lines,
-    then returns (image_mxc, width, height).
+      - a scoreboard area at the top with "FAMILY FEUD",
+      - each answer displayed in a "blue box".
+    Then returns (image_mxc, width, height).
     """
-    # 1) Prepare the text lines for display.
+    # Prepare the revealed/covered lines
     displayed_lines = []
     for i, ans in enumerate(total_answers, start=1):
         if ans.lower() in [u.lower() for u in user_answers]:
@@ -238,50 +240,100 @@ def create_family_feud_board_image(total_answers, user_answers):
         else:
             displayed_lines.append(f"{i}. ???")
 
-    # 2) Basic layout constants
+    # Basic layout
     width = 800
-    line_height = 40
+    line_height = 60
     margin_top = 60
     margin_bottom = 60
     margin_left = 50
+    margin_right = 50
 
-    # 3) Calculate total lines:
-    #    1 line for the title "FAMILY FEUD" + number of answers
+    # 1 extra line for the scoreboard
     total_lines = 1 + len(displayed_lines)
 
-    # 4) Compute dynamic height
+    # Height for scoreboard + answer boxes
     height = margin_top + margin_bottom + line_height * total_lines
 
-    # 5) Create the image
-    bg_color = (40, 40, 40)       # Dark background
-    txt_color = (255, 215, 0)    # "Family Feud" gold-ish color
-    img = Image.new("RGB", (width, height), bg_color)
+    # Create the base image
+    img = Image.new("RGB", (width, height), (40, 40, 40))  # dark stage background
     draw = ImageDraw.Draw(img)
 
-    # 6) Load font (try custom, fallback to default)
+    # Attempt loading a custom font, fallback to default
     try:
-        font = ImageFont.truetype("arial.ttf", 32)
+        font = ImageFont.truetype("arial.ttf", 28)
     except:
         font = ImageFont.load_default()
 
-    # 7) Draw title
-    y_offset = margin_top
+    # -------------- Outer Gold Border --------------
+    # We'll draw a thick rectangle around the image
+    gold = (255, 215, 0)
+    border_thickness = 10
+    # (x1, y1, x2, y2) => from top-left to bottom-right
+    draw.rectangle(
+        [0, 0, width, height],
+        outline=gold,
+        width=border_thickness
+    )
+
+    # -------------- Scoreboard Rectangle --------------
+    # Reserve a rectangle at the top for "FAMILY FEUD"
+    scoreboard_height = line_height
+    scoreboard_y1 = margin_top - 10  # slightly above text
+    scoreboard_y2 = scoreboard_y1 + scoreboard_height + 20  # extra padding
+    scoreboard_x1 = margin_left
+    scoreboard_x2 = width - margin_right
+
+    scoreboard_rect = [scoreboard_x1, scoreboard_y1, scoreboard_x2, scoreboard_y2]
+    scoreboard_color = (0, 0, 180)  # some bright blue for scoreboard
+    draw.rectangle(scoreboard_rect, fill=scoreboard_color)
+
+    # Title text
     title = "FAMILY FEUD"
-    draw.text((margin_left, y_offset), title, fill=txt_color, font=font)
-    y_offset += line_height
+    title_font = font
+    tw, th = draw.textsize(title, font=title_font)
+    # center the title horizontally within scoreboard
+    title_x = scoreboard_x1 + (scoreboard_x2 - scoreboard_x1 - tw) / 2
+    title_y = scoreboard_y1 + (scoreboard_y2 - scoreboard_y1 - th) / 2
+    draw.text((title_x, title_y), title, fill=(255, 255, 255), font=title_font)
 
-    # 8) Draw each answer line
+    # -------------- Answer Boxes --------------
+    # We'll draw each answer in a "blue box" below the scoreboard
+    box_margin = 10
+    box_x1 = margin_left
+    box_x2 = width - margin_right
+    current_y = scoreboard_y2 + box_margin  # start below scoreboard
+
+    # Color for the boxes
+    box_color = (0, 50, 200)  # a family-feud-like blue
+    text_color = (255, 255, 255)
+    box_outline = (255, 255, 255)
+
     for line in displayed_lines:
-        draw.text((margin_left, y_offset), line, fill=txt_color, font=font)
-        y_offset += line_height
+        # Each box is about line_height tall
+        box_y1 = current_y
+        box_y2 = box_y1 + (line_height - box_margin)
+        # Draw the box rectangle
+        draw.rectangle(
+            [box_x1, box_y1, box_x2, box_y2],
+            fill=box_color,
+            outline=box_outline,
+            width=2
+        )
 
-    # 9) Convert the image to bytes
+        # Now draw the line text centered within that box
+        lw, lh = draw.textsize(line, font=font)
+        text_x = box_x1 + (box_x2 - box_x1 - lw) / 2
+        text_y = box_y1 + (box_y2 - box_y1 - lh) / 2
+        draw.text((text_x, text_y), line, fill=text_color, font=font)
+
+        current_y = box_y2 + box_margin  # move down to next box
+
+    # Convert the image to bytes
     img_buffer = io.BytesIO()
     img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
 
-    # 10) Upload to Matrix: assume this function is defined
-    #     and returns an mxc URI
+    # Upload to Matrix
     image_mxc = upload_image_to_matrix(img_buffer.read())
 
     return image_mxc, width, height
@@ -420,10 +472,10 @@ def ask_feud_question(winner):
         except Exception as e:
             print(f"Error processing events: {e}")
 
-    send_image(target_room_id, loss_img_mxc, loss_image_width, loss_image_height, loss_image_size)
+    send_image(target_room_id, loss_image_mxc, loss_image_width, loss_image_height, loss_image_size)
     message = f"\n👎😢 Shame on @{sender_display_name}.\n"
-    feud_img_mxc, feud_img_width, feud_img_height = create_family_feud_board_image(feud_question_answers, user_progress)
-    send_image(target_room_id, feud_img_mxc, feud_image_width, feud_image_height, feud_image_size)
+    feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
+    send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     send_message(target_room_id, message)
     wf_winner = False
     return None

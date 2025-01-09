@@ -441,7 +441,7 @@ def ask_feud_question(winner):
     win_image_size = 100
     loss_image_size = 100
     
-    message = f"\n⚠{numbered_blocks[num_of_answers] - 1} @{winner}. Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
+    message = f"\n⚠{numbered_blocks[num_of_answers - 1]} @{winner}. Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
     feud_image_size = 100
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)

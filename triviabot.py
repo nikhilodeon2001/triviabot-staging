@@ -226,20 +226,23 @@ def create_family_feud_board_image(total_answers, user_answers):
     """
     Creates a Family Feud–style board with:
       - A golden arc / scoreboard at the top
-      - Blue boxes for each answer, arranged in columns (or 2 columns)
+      - Wide boxes for each answer, in a single column
       - Circles on the left for numbering
-      - TWO separate fonts: a bigger one for scoreboard text, 
-        a slightly smaller (but still large) one for answers
+      - Large fonts for both scoreboard and answers
       - Answers are revealed if guessed, else ???
       - Returns (image_mxc, width, height).
     """
 
+    # Convert user_answers to a case-insensitive set
     lower_user_answers = {ua.lower() for ua in user_answers}
     n = len(total_answers)
 
     # Dimensions
     width = 3600
+    # Make height dynamic based on how many answers
+    # Each answer box can be 240 high + spacing. Base is 1600 for ~6 answers
     height = 1600 + max(0, (n - 6) * 240)
+
     bg_color = (10, 10, 10)
     gold_color = (255, 215, 0)
     box_color = (0, 60, 220)
@@ -250,21 +253,23 @@ def create_family_feud_board_image(total_answers, user_answers):
     img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
 
-    # 1) Load fonts: 
-    #    - a super-large scoreboard_font for "OKRA OPPOSITION"
-    #    - a large answer_font for the boxes
+    # Fonts: scoreboard vs. answers
+    try:
+        scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 160)  
+    except:
+        scoreboard_font = ImageFont.load_default()
 
-    scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 160)
-    answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 160)
+    try:
+        answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 160)  
+    except:
+        answer_font = ImageFont.load_default()
 
-
-
-    # 2) Golden Arc (like a big semi-circle on top)
+    # 1) Golden Arc on top
     arc_x1, arc_y1 = 0, 0
     arc_x2, arc_y2 = width, height * 2
     draw.pieslice([arc_x1, arc_y1, arc_x2, arc_y2], start=180, end=360, fill=gold_color)
 
-    # 3) Scoreboard rectangle in the center near top
+    # 2) Scoreboard rectangle
     scoreboard_w = 800
     scoreboard_h = 150
     scoreboard_x = (width - scoreboard_w) // 2
@@ -273,7 +278,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
 
     scoreboard_text = "OKRA OPPOSITION"
-    # measure scoreboard text with scoreboard_font
+    # measure scoreboard text
     try:
         left, top, right, bottom = draw.textbbox((0, 0), scoreboard_text, font=scoreboard_font)
         txt_w, txt_h = right - left, bottom - top
@@ -285,25 +290,20 @@ def create_family_feud_board_image(total_answers, user_answers):
     sb_text_y = scoreboard_y + (scoreboard_h - txt_h) // 2
     draw.text((sb_text_x, sb_text_y), scoreboard_text, fill=(255, 255, 255), font=scoreboard_font)
 
-    # 4) Answer Boxes
+    # 3) Single-column answer boxes
     box_height = 240
-    box_width = 1200
+    box_width = 2500   # wide boxes
     box_spacing = 40
 
+    # Starting point below scoreboard
     top_offset = scoreboard_y + scoreboard_h + 160
-    left_margin = 320
-    col_spacing = 600  # If you want 2 columns, reduce or increase as needed
-
-    answers_per_col = math.ceil(n / 2) if n > 2 else n
+    left_margin = (width - box_width) // 2  # center the column horizontally
 
     for i, ans in enumerate(total_answers):
-        col = 0 if i < answers_per_col else 1
-        row = i if col == 0 else i - answers_per_col
+        box_x = left_margin
+        box_y = top_offset + i*(box_height + box_spacing)
 
-        box_x = left_margin + col * (box_width + col_spacing)
-        box_y = top_offset + row * (box_height + box_spacing)
-
-        # Draw the rectangle for the answer
+        # Draw the rectangle
         draw.rectangle(
             [box_x, box_y, box_x + box_width, box_y + box_height],
             fill=box_color,
@@ -312,14 +312,15 @@ def create_family_feud_board_image(total_answers, user_answers):
         )
 
         # Circle for the answer number
-        circle_diam = 160  
-        circle_x1 = box_x - circle_diam // 2
-        circle_y1 = box_y + (box_height - circle_diam) // 2
+        circle_diam = 160
+        circle_x1 = box_x - circle_diam//2
+        circle_y1 = box_y + (box_height - circle_diam)//2
         circle_x2 = circle_x1 + circle_diam
         circle_y2 = circle_y1 + circle_diam
 
-        draw.ellipse([circle_x1, circle_y1, circle_x2, circle_y2], fill=circle_color, outline=box_outline, width=8)
-        
+        draw.ellipse([circle_x1, circle_y1, circle_x2, circle_y2],
+                     fill=circle_color, outline=box_outline, width=8)
+
         number_str = str(i + 1)
         try:
             left, top, right, bottom = draw.textbbox((0, 0), number_str, font=answer_font)
@@ -327,12 +328,12 @@ def create_family_feud_board_image(total_answers, user_answers):
         except:
             mask = answer_font.getmask(number_str)
             num_w, num_h = mask.size
-        
-        num_x = circle_x1 + (circle_diam - num_w) // 2
-        num_y = circle_y1 + (circle_diam - num_h) // 2
+
+        num_x = circle_x1 + (circle_diam - num_w)//2
+        num_y = circle_y1 + (circle_diam - num_h)//2
         draw.text((num_x, num_y), number_str, fill=(255, 255, 255), font=answer_font)
 
-        # Reveal or ??? 
+        # Reveal or ???
         revealed = ans if ans.lower() in lower_user_answers else "???"
         try:
             left, top, right, bottom = draw.textbbox((0, 0), revealed, font=answer_font)
@@ -340,17 +341,17 @@ def create_family_feud_board_image(total_answers, user_answers):
         except:
             mask = answer_font.getmask(revealed)
             r_w, r_h = mask.size
-        
-        text_x = box_x + (box_width - r_w) // 2
-        text_y = box_y + (box_height - r_h) // 2
+
+        text_x = box_x + (box_width - r_w)//2
+        text_y = box_y + (box_height - r_h)//2
         draw.text((text_x, text_y), revealed, fill=txt_color, font=answer_font)
 
-    # Convert image to bytes and upload
     import io
     img_buffer = io.BytesIO()
     img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
 
+    # Upload
     image_mxc = upload_image_to_matrix(img_buffer.read())
     return image_mxc, width, height
 

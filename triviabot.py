@@ -2848,7 +2848,7 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content).lower() in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9" "fu"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9" "fu", "FU", "fU", "Fu"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"

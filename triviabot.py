@@ -410,7 +410,6 @@ def ask_feud_question(winner):
     num_of_xs = 0
 
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-    number_block = numbered_blocks[i] if i < len(numbered_blocks) else f"{i + 1}️⃣" 
     
     message = f"\n⚠{numbered_blocks[num_of_answers]} @{winner}. Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)

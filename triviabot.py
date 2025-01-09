@@ -2538,7 +2538,6 @@ def select_wof_questions(winner):
         message = f"\n🍷⚔️ @{winner}: Choose wisely.  Some require ☕.\n\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 0
-        message += f"FU. 👨‍👩‍👧‍👦⚔️ FeUd (Solo)\n"
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
@@ -2554,10 +2553,10 @@ def select_wof_questions(winner):
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
         message += f"{counter}. 📝📚 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"FU. 👨‍👩‍👧‍👦⚔️ FeUd ☕\n"
             
         send_message(target_room_id, message)  
         
-
         selected_wof_category = ask_wof_number(winner)
 
         if selected_wof_category == "fu" or selected_wof_category == "FU" or selected_wof_category == "fU" or selected_wof_category == "Fu":
@@ -2973,6 +2972,12 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    if str(message_content) in {"fu", "FU", "fU", "Fu"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'FeUd' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"9"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -2984,6 +2989,7 @@ def ask_wof_number(winner):
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
+                        
 
                     if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9" "fu", "FU", "fU", "Fu"}:
                         selected_question = str(message_content).lower()

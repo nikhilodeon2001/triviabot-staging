@@ -435,8 +435,13 @@ def ask_feud_question(winner):
     num_of_xs = 0
 
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+
+    win_image_mxc, win_image_width, win_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+win.gif")
+    loss_image_mxc, loss_image_width, loss_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+loss.gif")
+    win_image_size = 100
+    loss_image_size = 100
     
-    message = f"\n⚠{numbered_blocks[num_of_answers]} @{winner}. Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
+    message = f"\n⚠{numbered_blocks[num_of_answers] - 1} @{winner}. Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
     feud_image_size = 100
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
@@ -444,17 +449,11 @@ def ask_feud_question(winner):
    
     time.sleep(3)
 
-    message = f"\n👉👉 {feud_question_prompt}\n\n🟢🚀 GO!"
+    message = f"\n👉👉 {feud_question_prompt}\n"
     send_message(target_room_id, message)
 
     initialize_sync()
     start_time = time.time()  # Track when the question starts
-
-    win_image_mxc, win_image_width, win_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+win.gif")
-    loss_image_mxc, loss_image_width, loss_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+loss.gif")
-    win_image_size = 100
-    loss_image_size = 100
-
 
     while num_of_xs < 3:
         if num_of_xs == 0:
@@ -465,14 +464,16 @@ def ask_feud_question(winner):
             message = f"\n📝🤔 @{winner}, next strike and you're out. Think carefully.\n"
         send_message(target_room_id, message)
         
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
         message_received = False
+        
         while time.time() - start_time < 10 and message_received == False:
             try:
                                                                        
                 if since_token:
                     params["since"] = since_token
     
-                time.sleep(1)
                 response = requests.get(sync_url, headers=headers, params=params)
     
                 if response.status_code != 200:
@@ -507,8 +508,9 @@ def ask_feud_question(winner):
                             continue
     
                         message_content = event.get("content", {}).get("body", "")
+                        message_content_upper = message_content.upper()
 
-                        message = f"\n @{winner} says {message_content}.\n\n🎤📊 Survey says..\n"
+                        message = f"\n @{winner} says {message_content_upper}.\n\n🎤📊 Survey says..\n"
                         send_message(target_room_id, message)
                         message_received = True
                         break

@@ -222,14 +222,14 @@ cities = [
 
 
 
-def create_family_feud_board_image(total_answers, user_answers):
+def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     """
     Creates a Family Feud–style board with:
       - A golden arc / scoreboard at the top
       - Wide boxes for each answer, in a single column
       - Circles on the left for numbering
       - Large fonts for both scoreboard and answers
-      - Answers are revealed if guessed, else ???
+      - Overlays up to 3 big red 'X's if num_of_xs > 0 (Family Feud strikes)
       - Returns (image_mxc, width, height).
     """
 
@@ -239,8 +239,6 @@ def create_family_feud_board_image(total_answers, user_answers):
 
     # Dimensions
     width = 3600
-    # Make height dynamic based on how many answers
-    # Each answer box can be 240 high + spacing. Base is 1600 for ~6 answers
     height = 800 + (n * 240)
 
     bg_color = (10, 10, 10)
@@ -255,12 +253,12 @@ def create_family_feud_board_image(total_answers, user_answers):
 
     # Fonts: scoreboard vs. answers
     try:
-        scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 60)  
+        scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 60)
     except:
         scoreboard_font = ImageFont.load_default()
 
     try:
-        answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 140)  
+        answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 140)
     except:
         answer_font = ImageFont.load_default()
 
@@ -298,13 +296,11 @@ def create_family_feud_board_image(total_answers, user_answers):
 
     # 3) Single-column answer boxes
     box_height = 240
-    box_width = 2500   # wide boxes
+    box_width = 2500
     box_spacing = 40
-    
 
-    # Starting point below scoreboard
     top_offset = scoreboard_y + scoreboard_h + 160
-    left_margin = (width - box_width) // 2  # center the column horizontally
+    left_margin = (width - box_width) // 2
 
     for i, ans in enumerate(total_answers):
         box_x = left_margin
@@ -318,13 +314,12 @@ def create_family_feud_board_image(total_answers, user_answers):
             width=8
         )
 
-        # Circle for the answer number
+        # Circle for numbering
         circle_diam = 160
         circle_x1 = box_x - circle_diam//2
         circle_y1 = box_y + (box_height - circle_diam)//2
         circle_x2 = circle_x1 + circle_diam
         circle_y2 = circle_y1 + circle_diam
-
         draw.ellipse([circle_x1, circle_y1, circle_x2, circle_y2],
                      fill=circle_color, outline=box_outline, width=8)
 
@@ -333,9 +328,9 @@ def create_family_feud_board_image(total_answers, user_answers):
             left, top, right, bottom = draw.textbbox((0, 0), number_str, font=circle_font)
             num_w, num_h = right - left, bottom - top
         except:
-            mask = answer_font.getmask(number_str)
+            mask = circle_font.getmask(number_str)
             num_w, num_h = mask.size
-
+        
         num_x = circle_x1 + (circle_diam - num_w)//2
         num_y = circle_y1 + (circle_diam - num_h)//2
         draw.text((num_x, num_y), number_str, fill=(255, 255, 255), font=circle_font)
@@ -353,7 +348,36 @@ def create_family_feud_board_image(total_answers, user_answers):
         text_y = box_y + (box_height - r_h)//2
         draw.text((text_x, text_y), revealed, fill=txt_color, font=answer_font)
 
-    import io
+    # 4) Overlay red X's if num_of_xs > 0
+    # We'll draw them near the scoreboard, spaced horizontally
+    if num_of_xs > 0:
+        # Create a big red "X" with text, or load an actual "X" image:
+        # For simplicity, let's do big red text "X" with a certain font.
+        try:
+            x_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 300)
+        except:
+            x_font = ImageFont.load_default()
+
+        x_text = "X"
+        # measure that text once
+        try:
+            lx, ty, rx, by = draw.textbbox((0, 0), x_text, font=x_font)
+            x_w, x_h = rx - lx, by - ty
+        except:
+            mask = x_font.getmask(x_text)
+            x_w, x_h = mask.size
+
+        # We want them near the scoreboard. Let's center them horizontally, spaced out.
+        # e.g., each X is 1.2 * x_w apart. We'll center them horizontally near scoreboard.
+        total_strikes_width = (num_of_xs - 1) * int(1.2 * x_w) + x_w
+        start_x = (width - total_strikes_width)//2
+        x_y = scoreboard_y + scoreboard_h + 40  # below the scoreboard
+
+        for i in range(num_of_xs):
+            # For each X, compute x offset
+            x_x = start_x + i * int(1.2 * x_w)
+            draw.text((x_x, x_y), x_text, font=x_font, fill=(255, 0, 0))
+            
     img_buffer = io.BytesIO()
     img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
@@ -361,6 +385,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     # Upload
     image_mxc = upload_image_to_matrix(img_buffer.read())
     return image_mxc, width, height
+
 
 
 def ask_feud_question(winner):    

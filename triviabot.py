@@ -594,7 +594,9 @@ def ask_feud_question(winner):
     message = f"\n👎😢 Shame on @{sender_display_name}.\n"
     send_message(target_room_id, message)
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
+    answer_message = f"\n{feud_question_prompt}\n"
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
+    send_message(target_room_id, answer_message)
     wf_winner = False
     time.sleep(3)
     return None

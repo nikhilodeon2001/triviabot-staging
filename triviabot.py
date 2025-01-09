@@ -2424,8 +2424,13 @@ def select_wof_questions(winner):
         
 
         selected_wof_category = ask_wof_number(winner)
+
+        if selected_wof_category == "fu" or selected_wof_category == "FU" or selected_wof_category == "fU" or selected_wof_category == "Fu":
+            ask_feud_question(winner)
+            time.sleep(3)
+            return None
         
-        if int(selected_wof_category) < premium_counts:
+        elif int(selected_wof_category) < premium_counts:
             wof_question = wof_questions[int(selected_wof_category)]
             wof_answer = wof_question["answers"][0]
             wof_clue = wof_question["question"]
@@ -2434,10 +2439,7 @@ def select_wof_questions(winner):
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
-        elif selected_wof_category == "fu":
-            ask_feud_question(winner)
-            time.sleep(3)
-            return None
+
         
         elif selected_wof_category == "9":
             ask_list_question(winner)

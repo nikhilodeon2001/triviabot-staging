@@ -226,140 +226,135 @@ def create_family_feud_board_image(total_answers, user_answers):
     """
     Creates a Family Feud–style board with:
       - A golden arc / scoreboard at the top
-      - Blue boxes for each answer, arranged in columns
+      - Blue boxes for each answer, arranged in columns (or 2 columns)
       - Circles on the left for numbering
-      - Revealed or hidden answers
-      - Larger font & UI elements (4x bigger).
-    Returns (image_mxc, width, height).
+      - TWO separate fonts: a bigger one for scoreboard text, 
+        a slightly smaller (but still large) one for answers
+      - Answers are revealed if guessed, else ???
+      - Returns (image_mxc, width, height).
     """
+
     lower_user_answers = {ua.lower() for ua in user_answers}
     n = len(total_answers)
 
-    # Base layout (slightly larger to accommodate huge font)
-    width = 3600  # doubled from 900
-    # Height logic: we do 1200 base instead of 600, and add for extra answers
-    height = 1600 + max(0, (n - 6) * 240)  
+    # Dimensions
+    width = 3600
+    height = 1600 + max(0, (n - 6) * 240)
     bg_color = (10, 10, 10)
     gold_color = (255, 215, 0)
     box_color = (0, 60, 220)
     box_outline = (255, 255, 255)
     txt_color = (255, 255, 255)
     circle_color = (0, 0, 150)
-    
+
     img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
 
-    # 4x bigger font size
+    # 1) Load fonts: 
+    #    - a super-large scoreboard_font for "OKRA OPPOSITION"
+    #    - a large answer_font for the boxes
     try:
-        font = ImageFont.truetype("arial.ttf", 288)  # was 72
+        scoreboard_font = ImageFont.truetype("arial.ttf", 600)  # very large for the scoreboard
     except:
-        font = ImageFont.load_default()
+        scoreboard_font = ImageFont.load_default()
 
-    # 1) Golden Arc
+    try:
+        answer_font = ImageFont.truetype("arial.ttf", 400)  # large for answers
+    except:
+        answer_font = ImageFont.load_default()
+
+    # 2) Golden Arc (like a big semi-circle on top)
     arc_x1, arc_y1 = 0, 0
     arc_x2, arc_y2 = width, height * 2
     draw.pieslice([arc_x1, arc_y1, arc_x2, arc_y2], start=180, end=360, fill=gold_color)
 
-    # 2) Scoreboard rectangle
-    scoreboard_w = 600  # 4x bigger than 150
-    scoreboard_h = 240  # 4x bigger than 60
+    # 3) Scoreboard rectangle in the center near top
+    scoreboard_w = 1600
+    scoreboard_h = 600
     scoreboard_x = (width - scoreboard_w) // 2
     scoreboard_y = 80
     scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
     draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
 
     scoreboard_text = "OKRA OPPOSITION"
-    
-    # Increase the font size just for the scoreboard text
+    # measure scoreboard text with scoreboard_font
     try:
-        scoreboard_font = ImageFont.truetype("arial.ttf", 400)  # Very large
-    except:
-        scoreboard_font = ImageFont.load_default()
-    
-    # Make the scoreboard rectangle larger
-    scoreboard_w = 1200  # bigger width
-    scoreboard_h = 400   # bigger height
-    
-    scoreboard_x = (width - scoreboard_w) // 2
-    scoreboard_y = 80
-    scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
-    draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
-    
-    # measure scoreboard text
-    try:
-        left, top, right, bottom = draw.textbbox((0,0), scoreboard_text, font=font)
+        left, top, right, bottom = draw.textbbox((0, 0), scoreboard_text, font=scoreboard_font)
         txt_w, txt_h = right - left, bottom - top
     except:
-        mask = font.getmask(scoreboard_text)
+        mask = scoreboard_font.getmask(scoreboard_text)
         txt_w, txt_h = mask.size
 
-    sb_text_x = scoreboard_x + (scoreboard_w - txt_w)//2
-    sb_text_y = scoreboard_y + (scoreboard_h - txt_h)//2
-    draw.text((sb_text_x, sb_text_y), scoreboard_text, fill=(255,255,255), font=font)
+    sb_text_x = scoreboard_x + (scoreboard_w - txt_w) // 2
+    sb_text_y = scoreboard_y + (scoreboard_h - txt_h) // 2
+    draw.text((sb_text_x, sb_text_y), scoreboard_text, fill=(255, 255, 255), font=scoreboard_font)
 
-    # 3) Draw Answer Boxes
-    # 4 times bigger dimensions
-    box_height = 240   # was 60
-    box_width = 1200   # 4x from 300
-    box_spacing = 40   # 4x from 10
+    # 4) Answer Boxes
+    box_height = 240
+    box_width = 1200
+    box_spacing = 40
 
-    top_offset = scoreboard_y + scoreboard_h + 160  # some extra space
-    left_margin = 320  # was 80
-    col_spacing = 600
+    top_offset = scoreboard_y + scoreboard_h + 160
+    left_margin = 320
+    col_spacing = 600  # If you want 2 columns, reduce or increase as needed
 
-    answers_per_col = math.ceil(n / 2) if n>2 else n
+    answers_per_col = math.ceil(n / 2) if n > 2 else n
 
     for i, ans in enumerate(total_answers):
         col = 0 if i < answers_per_col else 1
-        row = i if col==0 else i - answers_per_col
-        
+        row = i if col == 0 else i - answers_per_col
+
         box_x = left_margin + col * (box_width + col_spacing)
         box_y = top_offset + row * (box_height + box_spacing)
-        
+
+        # Draw the rectangle for the answer
         draw.rectangle(
-            [box_x, box_y, box_x+box_width, box_y+box_height],
-            fill=box_color, outline=box_outline, width=8
+            [box_x, box_y, box_x + box_width, box_y + box_height],
+            fill=box_color,
+            outline=box_outline,
+            width=8
         )
-        
-        # circle 4x bigger
+
+        # Circle for the answer number
         circle_diam = 160  
-        circle_x1 = box_x - circle_diam//2
-        circle_y1 = box_y + (box_height - circle_diam)//2
+        circle_x1 = box_x - circle_diam // 2
+        circle_y1 = box_y + (box_height - circle_diam) // 2
         circle_x2 = circle_x1 + circle_diam
         circle_y2 = circle_y1 + circle_diam
-        
+
         draw.ellipse([circle_x1, circle_y1, circle_x2, circle_y2], fill=circle_color, outline=box_outline, width=8)
         
-        answer_num = i+1
-        number_str = str(answer_num)
+        number_str = str(i + 1)
         try:
-            left, top, right, bottom = draw.textbbox((0,0), number_str, font=font)
+            left, top, right, bottom = draw.textbbox((0, 0), number_str, font=answer_font)
             num_w, num_h = right - left, bottom - top
         except:
-            mask = font.getmask(number_str)
+            mask = answer_font.getmask(number_str)
             num_w, num_h = mask.size
         
-        num_x = circle_x1 + (circle_diam - num_w)//2
-        num_y = circle_y1 + (circle_diam - num_h)//2
-        draw.text((num_x, num_y), number_str, fill=(255,255,255), font=font)
+        num_x = circle_x1 + (circle_diam - num_w) // 2
+        num_y = circle_y1 + (circle_diam - num_h) // 2
+        draw.text((num_x, num_y), number_str, fill=(255, 255, 255), font=answer_font)
 
+        # Reveal or ??? 
         revealed = ans if ans.lower() in lower_user_answers else "???"
         try:
-            left, top, right, bottom = draw.textbbox((0, 0), revealed, font=font)
+            left, top, right, bottom = draw.textbbox((0, 0), revealed, font=answer_font)
             r_w, r_h = right - left, bottom - top
         except:
-            mask = font.getmask(revealed)
+            mask = answer_font.getmask(revealed)
             r_w, r_h = mask.size
         
-        text_x = box_x + (box_width - r_w)//2
-        text_y = box_y + (box_height - r_h)//2
-        draw.text((text_x, text_y), revealed, fill=txt_color, font=font)
-    
+        text_x = box_x + (box_width - r_w) // 2
+        text_y = box_y + (box_height - r_h) // 2
+        draw.text((text_x, text_y), revealed, fill=txt_color, font=answer_font)
+
+    # Convert image to bytes and upload
     import io
     img_buffer = io.BytesIO()
     img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
-    
+
     image_mxc = upload_image_to_matrix(img_buffer.read())
     return image_mxc, width, height
 

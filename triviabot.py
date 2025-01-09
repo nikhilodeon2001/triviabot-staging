@@ -371,7 +371,7 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
         # e.g., each X is 1.2 * x_w apart. We'll center them horizontally near scoreboard.
         total_strikes_width = (num_of_xs - 1) * int(1.2 * x_w) + x_w
         start_x = (width - total_strikes_width)//2
-         x_y = (height - x_h) // 2
+        x_y = (height - x_h) // 2
 
         for i in range(num_of_xs):
             # For each X, compute x offset

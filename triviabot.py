@@ -289,7 +289,7 @@ def create_family_feud_board_image(total_answers, user_answers):
 
     top_offset = scoreboard_y + scoreboard_h + 160  # some extra space
     left_margin = 320  # was 80
-    col_spacing = width//2
+    col_spacing = 600
 
     answers_per_col = math.ceil(n / 2) if n>2 else n
 
@@ -297,7 +297,7 @@ def create_family_feud_board_image(total_answers, user_answers):
         col = 0 if i < answers_per_col else 1
         row = i if col==0 else i - answers_per_col
         
-        box_x = left_margin + col * (box_width + col_spacing//2)
+        box_x = left_margin + col * (box_width + col_spacing)
         box_y = top_offset + row * (box_height + box_spacing)
         
         draw.rectangle(

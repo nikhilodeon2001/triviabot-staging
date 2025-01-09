@@ -445,12 +445,14 @@ def ask_feud_question(winner):
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
     feud_image_size = 100
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
+    time.sleep(2)
     send_message(target_room_id, message)
    
-    time.sleep(3)
+    time.sleep(5)
 
     message = f"\n👉👉 {feud_question_prompt}\n"
     send_message(target_room_id, message)
+    time.sleep(3)
 
     initialize_sync()
     start_time = time.time()  # Track when the question starts
@@ -467,6 +469,7 @@ def ask_feud_question(winner):
         initialize_sync()
         start_time = time.time()  # Track when the question starts
         message_received = False
+        message_content = ""
         
         while time.time() - start_time < 10 and message_received == False:
             try:

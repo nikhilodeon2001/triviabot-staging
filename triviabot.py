@@ -399,7 +399,7 @@ def ask_feud_question(winner):
                     # Iterate over all validAnswers
                     for answer in feud_question_answers:
                         # Skip if user already has this answer
-                        if answer in user_progress
+                        if answer in user_progress:
                             continue
                 
                         # Compare user's guess to this official answer

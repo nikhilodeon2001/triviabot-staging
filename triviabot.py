@@ -253,7 +253,7 @@ def create_family_feud_board_image(total_answers, user_answers):
 
     # Attempt to load custom font
     try:
-        font = ImageFont.truetype("arial.ttf", 32)
+        font = ImageFont.truetype("arial.ttf", 72)
     except:
         font = ImageFont.load_default()
 

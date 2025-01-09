@@ -255,14 +255,20 @@ def create_family_feud_board_image(total_answers, user_answers):
 
     # Fonts: scoreboard vs. answers
     try:
-        scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 160)  
+        scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 60)  
     except:
         scoreboard_font = ImageFont.load_default()
 
     try:
-        answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 160)  
+        answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 140)  
     except:
         answer_font = ImageFont.load_default()
+
+    # Smaller font for numbers in the circle:
+    try:
+        circle_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 80)
+    except:
+        circle_font = ImageFont.load_default()
 
     # 1) Golden Arc on top
     arc_x1, arc_y1 = 0, 0
@@ -277,7 +283,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
     draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
 
-    scoreboard_text = "100"
+    scoreboard_text = "Okra"
     # measure scoreboard text
     try:
         left, top, right, bottom = draw.textbbox((0, 0), scoreboard_text, font=scoreboard_font)
@@ -294,6 +300,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     box_height = 240
     box_width = 2500   # wide boxes
     box_spacing = 40
+    
 
     # Starting point below scoreboard
     top_offset = scoreboard_y + scoreboard_h + 160
@@ -323,7 +330,7 @@ def create_family_feud_board_image(total_answers, user_answers):
 
         number_str = str(i + 1)
         try:
-            left, top, right, bottom = draw.textbbox((0, 0), number_str, font=answer_font)
+            left, top, right, bottom = draw.textbbox((0, 0), number_str, font=circle_font)
             num_w, num_h = right - left, bottom - top
         except:
             mask = answer_font.getmask(number_str)
@@ -331,7 +338,7 @@ def create_family_feud_board_image(total_answers, user_answers):
 
         num_x = circle_x1 + (circle_diam - num_w)//2
         num_y = circle_y1 + (circle_diam - num_h)//2
-        draw.text((num_x, num_y), number_str, fill=(255, 255, 255), font=answer_font)
+        draw.text((num_x, num_y), number_str, fill=(255, 255, 255), font=circle_font)
 
         # Reveal or ???
         revealed = ans if ans.lower() in lower_user_answers else "???"

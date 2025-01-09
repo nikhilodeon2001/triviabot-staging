@@ -334,9 +334,9 @@ def ask_feud_question(winner):
     
     message = f"\n⚡⏱️ {winner}. We asked 100 Okrans.\n"
     message += f"\n⚠ Top {num_of_answers} on the board.\n" 
-    feud_img_mxc, feud_img_width, feud_img_height = create_family_feud_board_image(feud_question_answers, user_progress)
+    feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
     feud_image_size = 100
-    send_image(target_room_id, feud_img_mxc, feud_image_width, feud_image_height, feud_image_size)
+    send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     send_message(target_room_id, message)
    
     time.sleep(3)

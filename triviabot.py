@@ -249,11 +249,11 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     #gold_color = (255, 215, 0)
     gold_color = (62, 145, 45)
     #box_color = (0, 60, 220)
-    box_color = (255, 87, 51)
+    box_color = (97, 51, 47)
     box_outline = (255, 255, 255)
     txt_color = (255, 255, 255)
     #circle_color = (0, 0, 150)
-    circle_color = (0, 255, 0)
+    circle_color = (34, 49, 29)
 
     # Create the blank image
     img = Image.new("RGB", (width, height), bg_color)
@@ -286,7 +286,7 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     scoreboard_x = (width - scoreboard_w) // 2
     scoreboard_y = 60
     scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
-    draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
+    draw.rectangle(scoreboard_rect, fill=(34, 49, 29))
 
     scoreboard_text = "Okra"
     # measure scoreboard text
@@ -574,14 +574,17 @@ def ask_feud_question(winner):
                 # It's a match => store the *official answer* in the user's set
                 user_progress.append(answer)
                 right_answer = True
-                feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
-                send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
-                
-                # Check if they have enough correct answers total
                 if len(user_progress) >= num_of_answers:
                     send_image(target_room_id, win_image_mxc, win_image_width, win_image_height, win_image_size)
                     message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
                     send_message(target_room_id, message)
+                    
+                feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
+                send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
+                
+                if len(user_progress) >= num_of_answers:
+                    answer_message = f"\n🔑❓ {feud_question_prompt}\n"
+                    send_message(target_room_id, answer_message)
                     wf_winner = True        
                     return None
                 break

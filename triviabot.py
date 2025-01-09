@@ -290,8 +290,8 @@ def create_family_feud_board_image(total_answers, user_answers):
     # Title text
     title = "FAMILY FEUD"
     title_font = font
-    left, top, right, bottom = draw.textbbox((0, 0), title, font=font)
-    tw, th = right - left, bottom - top
+    mask = font.getmask(title)
+    tw, th = mask.size
     # center the title horizontally within scoreboard
     title_x = scoreboard_x1 + (scoreboard_x2 - scoreboard_x1 - tw) / 2
     title_y = scoreboard_y1 + (scoreboard_y2 - scoreboard_y1 - th) / 2

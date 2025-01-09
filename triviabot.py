@@ -277,7 +277,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
     draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
 
-    scoreboard_text = "100
+    scoreboard_text = "100"
     # measure scoreboard text
     try:
         left, top, right, bottom = draw.textbbox((0, 0), scoreboard_text, font=scoreboard_font)

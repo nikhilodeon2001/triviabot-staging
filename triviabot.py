@@ -424,7 +424,7 @@ def ask_feud_question(winner):
                             # Check if they have enough correct answers total
                             if len(user_progress) >= num_of_answers:
 
-                                send_image(target_room_id, win_img_mxc, win_image_width, win_image_height, win_image_size)
+                                send_image(target_room_id, win_image_mxc, win_image_width, win_image_height, win_image_size)
                                 message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
                                 send_message(target_room_id, message)
                                 wf_winner = True        
@@ -6556,6 +6556,7 @@ def start_trivia():
         load_streak_data()
         load_previous_question()
         initialize_sync()  
+        ask_feud_question("nsharma2")
         
         round_winner = None
         selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set

@@ -416,14 +416,14 @@ def ask_feud_question(winner):
     initialize_sync()
     start_time = time.time()  # Track when the question starts
 
+    win_image_mxc, win_image_width, win_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+win.gif")
+    loss_image_mxc, loss_image_width, loss_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+loss.gif")
+    win_image_size = 100
+    loss_image_size = 100
+
     while time.time() - start_time < 30:
         try:
-
-            win_image_mxc, win_image_width, win_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+win.gif")
-            loss_image_mxc, loss_image_width, loss_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+loss.gif")
-            win_image_size = 100
-            loss_image_size = 100
-                                                                                          
+                                                                   
             if since_token:
                 params["since"] = since_token
 
@@ -453,7 +453,6 @@ def ask_feud_question(winner):
                     processed_events.add(event_id)
                     sender = event["sender"]
 
-                   
                     if sender == bot_user_id:
                         continue
 
@@ -463,7 +462,6 @@ def ask_feud_question(winner):
                         continue
 
                     message_content = event.get("content", {}).get("body", "")
-
 
                     # Iterate over all validAnswers
                     for answer in feud_question_answers:
@@ -478,7 +476,6 @@ def ask_feud_question(winner):
                             feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
                             send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
                             
-                
                             # Check if they have enough correct answers total
                             if len(user_progress) >= num_of_answers:
 

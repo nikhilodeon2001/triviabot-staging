@@ -491,7 +491,7 @@ def ask_feud_question(winner):
                 
                         
             except Exception as e:
-            print(f"Error processing events: {e}")
+                print(f"Error processing events: {e}")
             
         # Iterate over all validAnswers
         right_answer = False

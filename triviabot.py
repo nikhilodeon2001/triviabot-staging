@@ -287,15 +287,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     scoreboard_color = (0, 0, 180)  # some bright blue for scoreboard
     draw.rectangle(scoreboard_rect, fill=scoreboard_color)
 
-    # Title text
-    title = "Okra! Okra! Okra!"
-    title_font = font
-    left, top, right, bottom = draw.textbbox((0, 0), line, font=font)
-    tw, th = right - left, bottom - top
-    # center the title horizontally within scoreboard
-    title_x = scoreboard_x1 + (scoreboard_x2 - scoreboard_x1 - tw) / 2
-    title_y = scoreboard_y1 + (scoreboard_y2 - scoreboard_y1 - th) / 2
-    draw.text((title_x, title_y), title, fill=(255, 255, 255), font=title_font)
+
 
     # -------------- Answer Boxes --------------
     # We'll draw each answer in a "blue box" below the scoreboard

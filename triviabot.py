@@ -26,7 +26,7 @@ import string
 from urllib.parse import urlparse 
 from urllib.parse import quote
 import io            
-from PIL import Image, ImageDraw, ImageFont 
+from PIL import Image, ImageDraw, ImageFont, ImageResampling
 import openai
 import main
 import subprocess
@@ -314,7 +314,7 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
         response.raise_for_status()
         okra_icon = Image.open(io.BytesIO(response.content)).convert("RGBA")
         # optional: resize if it's too large
-        okra_icon = okra_icon.resize((120, 120), Image.ANTIALIAS)
+        okra_icon = okra_icon.resize((120, 120), ImageResampling.LANCZOS)
     except Exception as e:
         print(f"Could not load Okra image from URL: {e}")
         okra_icon = None

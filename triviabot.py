@@ -316,7 +316,7 @@ def ask_feud_question(winner):
         
         feud_question_id = feud_question["_id"]  # Get the ID of the selected question
         if feud_question_id:
-            store_question_ids_in_mongo(feud_question_id], "feud")  # Store it as a list containing a single ID
+            store_question_ids_in_mongo(feud_question_id, "feud")  # Store it as a list containing a single ID
 
     except Exception as e:
         # Capture the exception in Sentry and print detailed error information

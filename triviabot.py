@@ -254,10 +254,9 @@ def create_family_feud_board_image(total_answers, user_answers):
     #    - a super-large scoreboard_font for "OKRA OPPOSITION"
     #    - a large answer_font for the boxes
 
-    scoreboard_font = ImageFont.truetype("arial.ttf", 1600)  # very large for the scoreboard
+    scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 600)
+    answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 400)
 
-
-    answer_font = ImageFont.truetype("arial.ttf", 1400)  # large for answers
 
 
     # 2) Golden Arc (like a big semi-circle on top)

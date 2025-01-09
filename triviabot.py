@@ -223,16 +223,15 @@ cities = [
 
 def create_family_feud_board_image(total_answers, user_answers):
     """
-    Creates and uploads a more Family Feud–style image, where:
+    Creates and uploads a Family Feud–style image, where:
       - user_answers are revealed,
       - other answers are displayed as ???,
       - width is fixed at 800,
       - height is dynamically computed based on the number of lines,
-      - a scoreboard area at the top with "FAMILY FEUD",
-      - each answer displayed in a "blue box".
-    Then returns (image_mxc, width, height).
+      - uses textbbox (Pillow 8+) with a fallback for older builds.
+    then returns (image_mxc, width, height).
     """
-    # Prepare the revealed/covered lines
+
     displayed_lines = []
     for i, ans in enumerate(total_answers, start=1):
         if ans.lower() in [u.lower() for u in user_answers]:
@@ -240,86 +239,58 @@ def create_family_feud_board_image(total_answers, user_answers):
         else:
             displayed_lines.append(f"{i}. ???")
 
-    # Basic layout
     width = 800
-    line_height = 60
+    line_height = 40
     margin_top = 60
     margin_bottom = 60
     margin_left = 50
-    margin_right = 50
 
-    # 1 extra line for the scoreboard
+    # 1 extra line for the "FAMILY FEUD" title
     total_lines = 1 + len(displayed_lines)
-
-    # Height for scoreboard + answer boxes
     height = margin_top + margin_bottom + line_height * total_lines
 
-    # Create the base image
-    img = Image.new("RGB", (width, height), (40, 40, 40))  # dark stage background
+    bg_color = (40, 40, 40)
+    txt_color = (255, 215, 0)
+
+    img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
 
-    # Attempt loading a custom font, fallback to default
+    # Attempt loading a custom font; fallback if not available
     try:
-        font = ImageFont.truetype("arial.ttf", 28)
+        font = ImageFont.truetype("arial.ttf", 32)
     except:
         font = ImageFont.load_default()
 
-    # -------------- Outer Gold Border --------------
-    # We'll draw a thick rectangle around the image
-    gold = (255, 215, 0)
-    border_thickness = 10
-    # (x1, y1, x2, y2) => from top-left to bottom-right
-    draw.rectangle(
-        [0, 0, width, height],
-        outline=gold,
-        width=border_thickness
-    )
+    # -- Title --
+    y_offset = margin_top
+    title = "FAMILY FEUD"
+    # Measure the title
+    try:
+        # Preferred: Pillow ≥ 8.0
+        left, top, right, bottom = draw.textbbox((0, 0), title, font=font)
+        tw, th = right - left, bottom - top
+    except (AttributeError, TypeError):
+        # Fallback: older builds
+        mask = font.getmask(title)
+        tw, th = mask.size
 
-    # -------------- Scoreboard Rectangle --------------
-    # Reserve a rectangle at the top for "FAMILY FEUD"
-    scoreboard_height = line_height
-    scoreboard_y1 = margin_top - 10  # slightly above text
-    scoreboard_y2 = scoreboard_y1 + scoreboard_height + 20  # extra padding
-    scoreboard_x1 = margin_left
-    scoreboard_x2 = width - margin_right
+    draw.text((margin_left, y_offset), title, fill=txt_color, font=font)
+    y_offset += line_height
 
-    scoreboard_rect = [scoreboard_x1, scoreboard_y1, scoreboard_x2, scoreboard_y2]
-    scoreboard_color = (0, 0, 180)  # some bright blue for scoreboard
-    draw.rectangle(scoreboard_rect, fill=scoreboard_color)
-
-
-
-    # -------------- Answer Boxes --------------
-    # We'll draw each answer in a "blue box" below the scoreboard
-    box_margin = 10
-    box_x1 = margin_left
-    box_x2 = width - margin_right
-    current_y = scoreboard_y2 + box_margin  # start below scoreboard
-
-    # Color for the boxes
-    box_color = (0, 50, 200)  # a family-feud-like blue
-    text_color = (255, 255, 255)
-    box_outline = (255, 255, 255)
-
+    # -- Each Answer Line --
     for line in displayed_lines:
-        # Each box is about line_height tall
-        box_y1 = current_y
-        box_y2 = box_y1 + (line_height - box_margin)
-        # Draw the box rectangle
-        draw.rectangle(
-            [box_x1, box_y1, box_x2, box_y2],
-            fill=box_color,
-            outline=box_outline,
-            width=2
-        )
+        # We measure each line’s size only if we truly need it for spacing
+        # If you just want to display them equally spaced, you can skip measuring
+        try:
+            left, top, right, bottom = draw.textbbox((0, 0), line, font=font)
+            lw, lh = right - left, bottom - top
+        except (AttributeError, TypeError):
+            mask = font.getmask(line)
+            lw, lh = mask.size
 
-        # Now draw the line text centered within that box
-        lw, lh = draw.textsize(line, font=font)
-        text_x = box_x1 + (box_x2 - box_x1 - lw) / 2
-        text_y = box_y1 + (box_y2 - box_y1 - lh) / 2
-        draw.text((text_x, text_y), line, fill=text_color, font=font)
-
-        current_y = box_y2 + box_margin  # move down to next box
+        # Actually draw the line
+        draw.text((margin_left, y_offset), line, fill=txt_color, font=font)
+        y_offset += line_height
 
     # Convert the image to bytes
     img_buffer = io.BytesIO()
@@ -328,9 +299,7 @@ def create_family_feud_board_image(total_answers, user_answers):
 
     # Upload to Matrix
     image_mxc = upload_image_to_matrix(img_buffer.read())
-
     return image_mxc, width, height
-
 
 
 def ask_feud_question(winner):    

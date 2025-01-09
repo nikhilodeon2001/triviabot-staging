@@ -490,11 +490,11 @@ def ask_feud_question(winner):
 
     while num_of_xs < 3:
         if num_of_xs == 0:
-            message = f"\n📝🤔 @{winner}, no strikes. What is your answer?\n"
+            message = f"\n🟩🤔 @{winner}, no strikes. What is your answer?\n"
         elif num_of_xs == 1:
-            message = f"\n📝🤔 @{winner}, you have 1 strike. What is your answer?\n"
+            message = f"\n🟨🤔 @{winner}, you have 1 strike. What is your answer?\n"
         elif num_of_xs == 2:
-            message = f"\n📝🤔 @{winner}, next strike and you're out. Think carefully.\n"
+            message = f"\n🟥🤔 @{winner}, next strike and you're out. What is your answer?.\n"
         send_message(target_room_id, message)
         
         initialize_sync()
@@ -594,7 +594,7 @@ def ask_feud_question(winner):
     message = f"\n👎😢 Shame on @{sender_display_name}.\n"
     send_message(target_room_id, message)
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
-    answer_message = f"\n{feud_question_prompt}\n"
+    answer_message = f"\n🔑❓ {feud_question_prompt}\n"
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     send_message(target_room_id, answer_message)
     wf_winner = False

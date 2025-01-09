@@ -288,7 +288,7 @@ def create_family_feud_board_image(total_answers, user_answers):
     draw.rectangle(scoreboard_rect, fill=scoreboard_color)
 
     # Title text
-    title = "Survey Says!"
+    title = "Okra! Okra! Okra!"
     title_font = font
     left, top, right, bottom = draw.textbbox((0, 0), line, font=font)
     tw, th = right - left, bottom - top

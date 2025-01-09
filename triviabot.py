@@ -254,8 +254,8 @@ def create_family_feud_board_image(total_answers, user_answers):
     #    - a super-large scoreboard_font for "OKRA OPPOSITION"
     #    - a large answer_font for the boxes
 
-    scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 600)
-    answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 400)
+    scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 160)
+    answer_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 160)
 
 
 

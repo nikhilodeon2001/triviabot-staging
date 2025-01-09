@@ -268,7 +268,23 @@ def create_family_feud_board_image(total_answers, user_answers):
     scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
     draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
 
-    scoreboard_text = "OKRAN OPPOSITION"
+    scoreboard_text = "OKRA OPPOSITION"
+    
+    # Increase the font size just for the scoreboard text
+    try:
+        scoreboard_font = ImageFont.truetype("arial.ttf", 400)  # Very large
+    except:
+        scoreboard_font = ImageFont.load_default()
+    
+    # Make the scoreboard rectangle larger
+    scoreboard_w = 1200  # bigger width
+    scoreboard_h = 400   # bigger height
+    
+    scoreboard_x = (width - scoreboard_w) // 2
+    scoreboard_y = 80
+    scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
+    draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
+    
     # measure scoreboard text
     try:
         left, top, right, bottom = draw.textbbox((0,0), scoreboard_text, font=font)
@@ -466,6 +482,9 @@ def ask_feud_question(winner):
                         if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
                             # It's a match => store the *official answer* in the user's set
                             user_progress.append(answer)
+                            feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
+                            send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
+                            
                 
                             # Check if they have enough correct answers total
                             if len(user_progress) >= num_of_answers:
@@ -485,6 +504,8 @@ def ask_feud_question(winner):
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     send_message(target_room_id, message)
+    feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers)
+    send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     wf_winner = False
     return None
 

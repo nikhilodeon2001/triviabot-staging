@@ -246,11 +246,14 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     width = 3600
     height = 800 + (n * 240)
     bg_color = (10, 10, 10)
-    gold_color = (255, 215, 0)
-    box_color = (0, 60, 220)
+    #gold_color = (255, 215, 0)
+    gold_color = (62, 145, 45)
+    #box_color = (0, 60, 220)
+    box_color = (255, 87, 51)
     box_outline = (255, 255, 255)
     txt_color = (255, 255, 255)
-    circle_color = (0, 0, 150)
+    #circle_color = (0, 0, 150)
+    circle_color = (0, 255, 0)
 
     # Create the blank image
     img = Image.new("RGB", (width, height), bg_color)
@@ -588,7 +591,7 @@ def ask_feud_question(winner):
             feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, num_of_xs)
             send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
 
-        time.sleep(3)
+        time.sleep(1)
                 
     send_image(target_room_id, loss_image_mxc, loss_image_width, loss_image_height, loss_image_size)
     message = f"\n👎😢 Shame on @{sender_display_name}.\n"

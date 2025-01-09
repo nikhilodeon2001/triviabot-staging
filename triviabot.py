@@ -221,82 +221,151 @@ cities = [
 ]
 
 
+
 def create_family_feud_board_image(total_answers, user_answers):
     """
-    Creates and uploads a Family Feud–style image, where:
-      - user_answers are revealed,
-      - other answers are displayed as ???,
-      - width is fixed at 800,
-      - height is dynamically computed based on the number of lines,
-      - uses textbbox (Pillow 8+) with a fallback for older builds.
-    then returns (image_mxc, width, height).
+    Creates a Family Feud–style board with:
+      - A golden arc / scoreboard at the top
+      - Blue boxes for each answer, arranged in columns
+      - Circles on the left for numbering
+      - Revealed or hidden answers
+      - Returns (image_mxc, width, height)
     """
+    # Convert user_answers to a case-insensitive set
+    lower_user_answers = {ua.lower() for ua in user_answers}
 
-    displayed_lines = []
-    for i, ans in enumerate(total_answers, start=1):
-        if ans.lower() in [u.lower() for u in user_answers]:
-            displayed_lines.append(f"{i}. {ans}")
-        else:
-            displayed_lines.append(f"{i}. ???")
+    # Number of answers
+    n = len(total_answers)
 
-    width = 800
-    line_height = 40
-    margin_top = 60
-    margin_bottom = 60
-    margin_left = 50
-
-    # 1 extra line for the "FAMILY FEUD" title
-    total_lines = 1 + len(displayed_lines)
-    height = margin_top + margin_bottom + line_height * total_lines
-
-    bg_color = (40, 40, 40)
-    txt_color = (255, 215, 0)
-
+    # Basic constants
+    width = 900
+    height = 600 + max(0, (n - 6) * 60)  # Make taller for more than 6 answers
+    bg_color = (10, 10, 10)   # Dark stage background
+    gold_color = (255, 215, 0)
+    box_color = (0, 60, 220)
+    box_outline = (255, 255, 255)
+    txt_color = (255, 255, 255)
+    circle_color = (0, 0, 150)
+    
+    # Create image & draw
     img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
 
-    # Attempt loading a custom font; fallback if not available
+    # Attempt to load custom font
     try:
         font = ImageFont.truetype("arial.ttf", 32)
     except:
         font = ImageFont.load_default()
 
-    # -- Title --
-    y_offset = margin_top
-    title = "FAMILY FEUD"
-    # Measure the title
+    # 1) Golden Arc or Title Bar
+    # Draw a large arc at the top to mimic the Feud shape
+    arc_x1, arc_y1 = 0, 0
+    arc_x2, arc_y2 = width, height * 2  # a big ellipse
+    draw.pieslice([arc_x1, arc_y1, arc_x2, arc_y2], start=180, end=360, fill=gold_color)
+
+    # 2) Scoreboard Rectangle (top center)
+    # Let's do a scoreboard box near the top center
+    scoreboard_w = 150
+    scoreboard_h = 60
+    scoreboard_x = (width - scoreboard_w) // 2
+    scoreboard_y = 20
+    scoreboard_rect = [scoreboard_x, scoreboard_y, scoreboard_x + scoreboard_w, scoreboard_y + scoreboard_h]
+    draw.rectangle(scoreboard_rect, fill=(0, 0, 130))
+
+    # Scoreboard text: "0" or "FAMILY FEUD" as you prefer
+    scoreboard_text = "FAMILY FEUD"
+    # Measure text
     try:
-        # Preferred: Pillow ≥ 8.0
-        left, top, right, bottom = draw.textbbox((0, 0), title, font=font)
-        tw, th = right - left, bottom - top
-    except (AttributeError, TypeError):
-        # Fallback: older builds
-        mask = font.getmask(title)
-        tw, th = mask.size
+        left, top, right, bottom = draw.textbbox((0,0), scoreboard_text, font=font)
+        txt_w, txt_h = right - left, bottom - top
+    except:
+        mask = font.getmask(scoreboard_text)
+        txt_w, txt_h = mask.size
 
-    draw.text((margin_left, y_offset), title, fill=txt_color, font=font)
-    y_offset += line_height
+    sb_text_x = scoreboard_x + (scoreboard_w - txt_w)//2
+    sb_text_y = scoreboard_y + (scoreboard_h - txt_h)//2
+    draw.text((sb_text_x, sb_text_y), scoreboard_text, fill=(255,255,255), font=font)
 
-    # -- Each Answer Line --
-    for line in displayed_lines:
-        # We measure each line’s size only if we truly need it for spacing
-        # If you just want to display them equally spaced, you can skip measuring
+    # 3) Draw Answer Boxes
+    # We'll arrange them in up to 2 columns if n>4, etc.
+    # Or do a single column if you prefer. Here's a simple 2-col approach for up to 8 answers.
+    
+    # If you want strictly 2 columns for up to 8 answers:
+    # Or adapt to # of answers.
+    
+    # box_size:
+    box_height = 60
+    box_width = 300
+    box_spacing = 10
+    
+    # Start placing them below the scoreboard
+    top_offset = scoreboard_y + scoreboard_h + 40
+    left_margin = 80
+    col_spacing = width//2
+    
+    # We'll do up to 2 columns. If more than 6 or 8, you can adapt further.
+    answers_per_col = math.ceil(n / 2) if n>2 else n
+    # For each answer, compute which col & row
+    for i, ans in enumerate(total_answers):
+        # i => 0-based
+        col = 0 if i < answers_per_col else 1
+        row = i if col==0 else i - answers_per_col
+        
+        # The top-left corner of this box
+        box_x = left_margin + col * (box_width + col_spacing//2)
+        box_y = top_offset + row * (box_height + box_spacing)
+        
+        # Draw the rectangle
+        draw.rectangle(
+            [box_x, box_y, box_x+box_width, box_y+box_height],
+            fill=box_color, outline=box_outline, width=2
+        )
+        
+        # Draw a small circle on the left for the number
+        circle_diam = 40
+        circle_x1 = box_x - circle_diam//2
+        circle_y1 = box_y + (box_height - circle_diam)//2
+        circle_x2 = circle_x1 + circle_diam
+        circle_y2 = circle_y1 + circle_diam
+        
+        draw.ellipse([circle_x1, circle_y1, circle_x2, circle_y2], fill=circle_color, outline=box_outline, width=2)
+        
+        # Put the answer number in the circle
+        answer_num = i+1
+        number_str = str(answer_num)
         try:
-            left, top, right, bottom = draw.textbbox((0, 0), line, font=font)
-            lw, lh = right - left, bottom - top
-        except (AttributeError, TypeError):
-            mask = font.getmask(line)
-            lw, lh = mask.size
+            left, top, right, bottom = draw.textbbox((0,0), number_str, font=font)
+            num_w, num_h = right - left, bottom - top
+        except:
+            mask = font.getmask(number_str)
+            num_w, num_h = mask.size
+        
+        num_x = circle_x1 + (circle_diam - num_w)//2
+        num_y = circle_y1 + (circle_diam - num_h)//2
+        draw.text((num_x, num_y), number_str, fill=(255,255,255), font=font)
 
-        # Actually draw the line
-        draw.text((margin_left, y_offset), line, fill=txt_color, font=font)
-        y_offset += line_height
-
-    # Convert the image to bytes
+        # Check if user guessed it
+        revealed = ans if ans.lower() in lower_user_answers else "???"
+        
+        # measure text for revealed
+        try:
+            left, top, right, bottom = draw.textbbox((0, 0), revealed, font=font)
+            r_w, r_h = right - left, bottom - top
+        except:
+            mask = font.getmask(revealed)
+            r_w, r_h = mask.size
+        
+        # center the text in the rectangle
+        text_x = box_x + (box_width - r_w)//2
+        text_y = box_y + (box_height - r_h)//2
+        draw.text((text_x, text_y), revealed, fill=txt_color, font=font)
+    
+    # Convert image to bytes
+    import io
     img_buffer = io.BytesIO()
     img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
-
+    
     # Upload to Matrix
     image_mxc = upload_image_to_matrix(img_buffer.read())
     return image_mxc, width, height

@@ -242,7 +242,7 @@ def fetch_random_word_thes(min_length=5, max_length=12, max_retries=5, max_relat
         print(f"[Attempt {attempt}/{max_retries}] Fetching a random word...")
         try:
             # Fetch a random word
-            response = requests.get("https://random-word-api.herokuapp.com/word?number=1", timeout=5)
+            response = requests.get("https://random-word-form.herokuapp.com/random/noun", timeout=5)
             response.raise_for_status()
             word_list = response.json()
             if not word_list:
@@ -6452,13 +6452,6 @@ def start_trivia():
                 ask_survey_question()
                 
             time.sleep(5)
-
-
-
-            # Print profiling results for this loop iteration
-            print(f"Profiling results for loop iteration {round_count}:")
-            stats = pstats.Stats(loop_profiler)
-            stats.sort_stats("cumulative").print_stats(10)  # Print top 10 results
 
     except Exception as e:
         sentry_sdk.capture_exception(e)

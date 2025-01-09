@@ -222,6 +222,11 @@ cities = [
 
 
 
+import io
+import math
+import requests
+from PIL import Image, ImageDraw, ImageFont
+
 def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     """
     Creates a Family Feud–style board with:
@@ -229,6 +234,7 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
       - Wide boxes for each answer, in a single column
       - Circles on the left for numbering
       - Large fonts for both scoreboard and answers
+      - Unrevealed answers display a small Okra image from a URL
       - Overlays up to 3 big red 'X's if num_of_xs > 0 (Family Feud strikes)
       - Returns (image_mxc, width, height).
     """
@@ -237,10 +243,8 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     lower_user_answers = {ua.lower() for ua in user_answers}
     n = len(total_answers)
 
-    # Dimensions
     width = 3600
     height = 800 + (n * 240)
-
     bg_color = (10, 10, 10)
     gold_color = (255, 215, 0)
     box_color = (0, 60, 220)
@@ -248,10 +252,11 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     txt_color = (255, 255, 255)
     circle_color = (0, 0, 150)
 
+    # Create the blank image
     img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
 
-    # Fonts: scoreboard vs. answers
+    # Fonts
     try:
         scoreboard_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 60)
     except:
@@ -262,13 +267,12 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     except:
         answer_font = ImageFont.load_default()
 
-    # Smaller font for numbers in the circle:
     try:
         circle_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 80)
     except:
         circle_font = ImageFont.load_default()
 
-    # 1) Golden Arc on top
+    # 1) Golden Arc
     arc_x1, arc_y1 = 0, 0
     arc_x2, arc_y2 = width, height * 2
     draw.pieslice([arc_x1, arc_y1, arc_x2, arc_y2], start=180, end=360, fill=gold_color)
@@ -298,15 +302,27 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     box_height = 240
     box_width = 2500
     box_spacing = 40
-
     top_offset = scoreboard_y + scoreboard_h + 160
     left_margin = (width - box_width) // 2
+
+    # -- Download Okra image from URL for unrevealed answers --
+    #    We'll fetch it and convert to RGBA for transparency if needed.
+    okra_url = "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_ff.png"
+    okra_icon = None
+    try:
+        response = requests.get(okra_url, timeout=5)
+        response.raise_for_status()
+        okra_icon = Image.open(io.BytesIO(response.content)).convert("RGBA")
+        # optional: resize if it's too large
+        okra_icon = okra_icon.resize((120, 120), Image.ANTIALIAS)
+    except Exception as e:
+        print(f"Could not load Okra image from URL: {e}")
+        okra_icon = None
 
     for i, ans in enumerate(total_answers):
         box_x = left_margin
         box_y = top_offset + i*(box_height + box_spacing)
 
-        # Draw the rectangle
         draw.rectangle(
             [box_x, box_y, box_x + box_width, box_y + box_height],
             fill=box_color,
@@ -335,31 +351,48 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
         num_y = circle_y1 + (circle_diam - num_h)//2
         draw.text((num_x, num_y), number_str, fill=(255, 255, 255), font=circle_font)
 
-        # Reveal or ???
-        revealed = ans if ans.lower() in lower_user_answers else "???"
-        try:
-            left, top, right, bottom = draw.textbbox((0, 0), revealed, font=answer_font)
-            r_w, r_h = right - left, bottom - top
-        except:
-            mask = answer_font.getmask(revealed)
-            r_w, r_h = mask.size
+        # Check if user guessed it
+        is_revealed = (ans.lower() in lower_user_answers)
+        if is_revealed:
+            # measure text
+            try:
+                left, top, right, bottom = draw.textbbox((0, 0), ans, font=answer_font)
+                r_w, r_h = right - left, bottom - top
+            except:
+                mask = answer_font.getmask(ans)
+                r_w, r_h = mask.size
 
-        text_x = box_x + (box_width - r_w)//2
-        text_y = box_y + (box_height - r_h)//2
-        draw.text((text_x, text_y), revealed, fill=txt_color, font=answer_font)
+            text_x = box_x + (box_width - r_w)//2
+            text_y = box_y + (box_height - r_h)//2
+            draw.text((text_x, text_y), ans, fill=txt_color, font=answer_font)
+        else:
+            # If not revealed, paste the okra image (if loaded)
+            if okra_icon:
+                okra_w, okra_h = okra_icon.size
+                okra_x = box_x + (box_width - okra_w)//2
+                okra_y = box_y + (box_height - okra_h)//2
+                img.paste(okra_icon, (okra_x, okra_y), okra_icon)
+            else:
+                # fallback: show ??? if no image loaded
+                hidden_text = "???"
+                try:
+                    left, top, right, bottom = draw.textbbox((0, 0), hidden_text, font=answer_font)
+                    h_w, h_h = right - left, bottom - top
+                except:
+                    mask = answer_font.getmask(hidden_text)
+                    h_w, h_h = mask.size
+                h_text_x = box_x + (box_width - h_w)//2
+                h_text_y = box_y + (box_height - h_h)//2
+                draw.text((h_text_x, h_text_y), hidden_text, fill=txt_color, font=answer_font)
 
     # 4) Overlay red X's if num_of_xs > 0
-    # We'll draw them near the scoreboard, spaced horizontally
     if num_of_xs > 0:
-        # Create a big red "X" with text, or load an actual "X" image:
-        # For simplicity, let's do big red text "X" with a certain font.
         try:
             x_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 800)
         except:
             x_font = ImageFont.load_default()
 
         x_text = "X"
-        # measure that text once
         try:
             lx, ty, rx, by = draw.textbbox((0, 0), x_text, font=x_font)
             x_w, x_h = rx - lx, by - ty
@@ -367,24 +400,22 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
             mask = x_font.getmask(x_text)
             x_w, x_h = mask.size
 
-        # We want them near the scoreboard. Let's center them horizontally, spaced out.
-        # e.g., each X is 1.2 * x_w apart. We'll center them horizontally near scoreboard.
         total_strikes_width = (num_of_xs - 1) * int(1.2 * x_w) + x_w
         start_x = (width - total_strikes_width)//2
         x_y = (height - x_h) // 2
 
         for i in range(num_of_xs):
-            # For each X, compute x offset
             x_x = start_x + i * int(1.2 * x_w)
             draw.text((x_x, x_y), x_text, font=x_font, fill=(255, 0, 0))
-            
+
+    # Convert to bytes
     img_buffer = io.BytesIO()
     img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
 
-    # Upload
     image_mxc = upload_image_to_matrix(img_buffer.read())
     return image_mxc, width, height
+
 
 
 
@@ -513,7 +544,12 @@ def ask_feud_question(winner):
                         message_content = event.get("content", {}).get("body", "")
                         message_content_upper = message_content.upper()
 
-                        message = f"\n @{winner} says {message_content_upper}.\n\n🎤📊 Survey says..\n"
+                        message = f"\n @{winner} says {message_content_upper}.\n"
+                        send_message(target_room_id, message)
+                        
+                        time.sleep(2)
+                        
+                        message = f"\n🎤📊 Survey says...\n"
                         send_message(target_room_id, message)
                         message_received = True
                         break

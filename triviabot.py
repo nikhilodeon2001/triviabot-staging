@@ -99,7 +99,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 5}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -221,9 +221,217 @@ cities = [
 ]
 
 
+def create_family_feud_board_image(total_answers, user_answers):
+    """
+    Creates and uploads a Family Feud–style image, where:
+      - user_answers are revealed,
+      - other answers are displayed as ???,
+      - width is fixed at 800,
+      - height is dynamically computed based on the number of lines,
+    then returns (image_mxc, width, height).
+    """
+    # 1) Prepare the text lines for display.
+    displayed_lines = []
+    for i, ans in enumerate(total_answers, start=1):
+        if ans.lower() in [u.lower() for u in user_answers]:
+            displayed_lines.append(f"{i}. {ans}")
+        else:
+            displayed_lines.append(f"{i}. ???")
+
+    # 2) Basic layout constants
+    width = 800
+    line_height = 40
+    margin_top = 60
+    margin_bottom = 60
+    margin_left = 50
+
+    # 3) Calculate total lines:
+    #    1 line for the title "FAMILY FEUD" + number of answers
+    total_lines = 1 + len(displayed_lines)
+
+    # 4) Compute dynamic height
+    height = margin_top + margin_bottom + line_height * total_lines
+
+    # 5) Create the image
+    bg_color = (40, 40, 40)       # Dark background
+    txt_color = (255, 215, 0)    # "Family Feud" gold-ish color
+    img = Image.new("RGB", (width, height), bg_color)
+    draw = ImageDraw.Draw(img)
+
+    # 6) Load font (try custom, fallback to default)
+    try:
+        font = ImageFont.truetype("arial.ttf", 32)
+    except:
+        font = ImageFont.load_default()
+
+    # 7) Draw title
+    y_offset = margin_top
+    title = "FAMILY FEUD"
+    draw.text((margin_left, y_offset), title, fill=txt_color, font=font)
+    y_offset += line_height
+
+    # 8) Draw each answer line
+    for line in displayed_lines:
+        draw.text((margin_left, y_offset), line, fill=txt_color, font=font)
+        y_offset += line_height
+
+    # 9) Convert the image to bytes
+    img_buffer = io.BytesIO()
+    img.save(img_buffer, format="PNG")
+    img_buffer.seek(0)
+
+    # 10) Upload to Matrix: assume this function is defined
+    #     and returns an mxc URI
+    image_mxc = upload_image_to_matrix(img_buffer.read())
+
+    return image_mxc, width, height
+
+
+
+def ask_feud_question(winner):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+    
+    try:
+        time.sleep(2) 
+        recent_feud_ids = get_recent_question_ids_from_mongo("feud")
+        
+        # Fetch wheel of fortune questions using the random subset method
+        feud_collection = db["feud_questions"]
+        pipeline_feud = [
+            {"$match": {"_id": {"$nin": list(recent_feud_ids)}}},  # Exclude recent IDs
+            {"$group": {  # Group by question text to ensure uniqueness
+                "_id": "$question",  # Group by the question text field
+                "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
+            }},
+            {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
+            {"$sample": {"size": 1}}  # Sample 1 unique question
+        ]
+
+        feud_questions = list(feud_collection.aggregate(pipeline_feud))
+        feud_question = feud_questions[0]
+        feud_question_prompt = feud_question["question"]
+        feud_question_answers = feud_question["answers"]   
+        feud_question_category = ""
+        feud_question_url = ""
+        
+        feud_question_id = feud_question["_id"]  # Get the ID of the selected question
+        if feud_question_id:
+            store_question_ids_in_mongo(feud_question_id], "feud")  # Store it as a list containing a single ID
+
+    except Exception as e:
+        # Capture the exception in Sentry and print detailed error information
+        sentry_sdk.capture_exception(e)
+        
+        # Print a detailed error message with traceback
+        error_details = traceback.format_exc()
+        print(f"Error selecting feud questions: {e}\nDetailed traceback:\n{error_details}")
+        
+        return None  # Return an empty list in case of failure
+
+    num_of_answers = len(feud_question_answers)
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+    user_progress = []
+    
+    message = f"\n⚡⏱️ {winner}. We asked 100 Okrans.\n"
+    message += f"\n⚠ Top {num_of_answers} on the board.\n" 
+    feud_img_mxc, feud_img_width, feud_img_height = create_family_feud_board_image(feud_question_answers, user_progress)
+    feud_image_size = 100
+    send_image(target_room_id, feud_img_mxc, feud_image_width, feud_image_height, feud_image_size)
+    send_message(target_room_id, message)
+   
+    time.sleep(3)
+
+    message = f"\n👉👉 {feud_question_prompt}\n\n🟢🚀 GO!"
+    send_message(target_room_id, message)
+
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+
+    while time.time() - start_time < 30:
+        try:
+
+            win_image_mxc, win_image_width, win_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+win.gif")
+            loss_image_mxc, loss_image_width, loss_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+loss.gif")
+            win_image_size = 100
+            loss_image_size = 100
+                                                                                          
+            if since_token:
+                params["since"] = since_token
+
+            time.sleep(1)
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:                
+                event_id = event["event_id"]
+                event_type = event.get("type")
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+
+                   
+                    if sender == bot_user_id:
+                        continue
+
+                    sender_display_name = get_display_name(sender)
+                    
+                    if sender_display_name != winner:
+                        continue
+
+                    message_content = event.get("content", {}).get("body", "")
+
+
+                    # Iterate over all validAnswers
+                    for answer in feud_question_answers:
+                        # Skip if user already has this answer
+                        if answer in user_progress
+                            continue
+                
+                        # Compare user's guess to this official answer
+                        if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
+                            # It's a match => store the *official answer* in the user's set
+                            user_progress.append(answer)
+                
+                            # Check if they have enough correct answers total
+                            if len(user_progress) >= num_of_answers:
+
+                                send_image(target_room_id, win_img_mxc, win_image_width, win_image_height, win_image_size)
+                                message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
+                                send_message(target_room_id, message)
+                                wf_winner = True        
+                                return None
+                            break
+        
+        except Exception as e:
+            print(f"Error processing events: {e}")
+
+    send_image(target_room_id, loss_img_mxc, loss_image_width, loss_image_height, loss_image_size)
+    message = f"\n👎😢 Shame on @{sender_display_name}.\n"
+    feud_img_mxc, feud_img_width, feud_img_height = create_family_feud_board_image(feud_question_answers, user_progress)
+    send_image(target_room_id, feud_img_mxc, feud_image_width, feud_image_height, feud_image_size)
+    send_message(target_room_id, message)
+    wf_winner = False
+    return None
+
+
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
-logger = logging.getLogger(__name__)
+#logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+#logger = logging.getLogger(__name__)
 
 def log_execution_time(func):
     """Decorator to log the execution time of a function."""
@@ -2195,6 +2403,7 @@ def select_wof_questions(winner):
         message = f"\n🍷⚔️ @{winner}: Choose wisely.  Some require ☕.\n\n"
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 0
+        message += f"FU. 👨‍👩‍👧‍👦⚔️ FeUd (Solo)\n"
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
             message += f"{counter}. {category}\n"
@@ -2224,6 +2433,11 @@ def select_wof_questions(winner):
             wof_question_id = wof_question["_id"]  # Get the ID of the selected question
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
+        
+        elif selected_wof_category == "fu":
+            ask_feud_question(winner)
+            time.sleep(3)
+            return None
         
         elif selected_wof_category == "9":
             ask_list_question(winner)
@@ -2634,8 +2848,8 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}:
-                        selected_question = str(message_content)
+                    if str(message_content).lower() in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9" "fu"}:
+                        selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
                         send_message(target_room_id, message)

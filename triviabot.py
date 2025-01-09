@@ -407,9 +407,12 @@ def ask_feud_question(winner):
     num_of_answers = len(feud_question_answers)
     processed_events = set()  # Track processed event IDs to avoid duplicates
     user_progress = []
+    num_of_xs = 0
+
+    numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    number_block = numbered_blocks[i] if i < len(numbered_blocks) else f"{i + 1}️⃣" 
     
-    message = f"\n⚡⏱️ {winner}. We asked 100 Okrans.\n"
-    message += f"\n⚠ Top {num_of_answers} on the board.\n" 
+    message = f"\n⚠{numbered_blocks[num_of_answers]} @{winner}. Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
     feud_image_size = 100
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
@@ -428,82 +431,107 @@ def ask_feud_question(winner):
     win_image_size = 100
     loss_image_size = 100
 
-    while time.time() - start_time < 30:
-        try:
-                                                                   
-            if since_token:
-                params["since"] = since_token
 
-            time.sleep(1)
-            response = requests.get(sync_url, headers=headers, params=params)
-
-            if response.status_code != 200:
-                print(f"Unexpected status code: {response.status_code}")
-                continue
-
-            sync_data = response.json()
-            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
-            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
-
-            for event in room_events:                
-                event_id = event["event_id"]
-                event_type = event.get("type")
-
-                # Only process and redact if the event type is "m.room.message"
-                if event_type == "m.room.message":
-                    
-                    # Skip processing if this event_id was already processed
-                    if event_id in processed_events:
-                        continue
-    
-                    # Add event_id to the set of processed events
-                    processed_events.add(event_id)
-                    sender = event["sender"]
-
-                    if sender == bot_user_id:
-                        continue
-
-                    sender_display_name = get_display_name(sender)
-                    
-                    if sender_display_name != winner:
-                        continue
-
-                    message_content = event.get("content", {}).get("body", "")
-
-                    # Iterate over all validAnswers
-                    for answer in feud_question_answers:
-                        # Skip if user already has this answer
-                        if answer in user_progress:
-                            continue
-                
-                        # Compare user's guess to this official answer
-                        if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
-                            # It's a match => store the *official answer* in the user's set
-                            user_progress.append(answer)
-                            feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
-                            send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
-                            
-                            # Check if they have enough correct answers total
-                            if len(user_progress) >= num_of_answers:
-
-                                send_image(target_room_id, win_image_mxc, win_image_width, win_image_height, win_image_size)
-                                message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
-                                send_message(target_room_id, message)
-                                wf_winner = True        
-                                return None
-                            break
+    while num_of_xs < 3:
+        if num_of_xs == 0:
+            message = f"\n📝🤔 @{winner}, no strikes. What is your answer?\n"
+        elif num_of_xs == 1:
+            message = f"\n📝🤔 @{winner}, you have 1 strike. What is your answer?\n"
+        elif num_of_xs == 2:
+            message = f"\n📝🤔 @{winner}, next strike and you're out. Think carefully.\n"
+        send_message(target_room_id, message)
         
-        except Exception as e:
-            print(f"Error processing events: {e}")
+        message_received = False
+        while time.time() - start_time < 10 and message_received == False:
+            try:
+                                                                       
+                if since_token:
+                    params["since"] = since_token
+    
+                time.sleep(1)
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        
+                        if sender_display_name != winner:
+                            continue
+    
+                        message_content = event.get("content", {}).get("body", "")
 
+                        message = f"\n @{winner} says {message_content}.\n\n🎤📊 Survey says..\n"
+                        send_message(target_room_id, message)
+                        message_received = True
+                        break
+                
+                        
+            except Exception as e:
+            print(f"Error processing events: {e}")
+            
+        # Iterate over all validAnswers
+        right_answer = False
+        
+        for answer in feud_question_answers:
+            # Skip if user already has this answer
+            if answer in user_progress:
+                continue
+    
+            # Compare user's guess to this official answer
+            if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
+                # It's a match => store the *official answer* in the user's set
+                user_progress.append(answer)
+                right_answer = True
+                feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
+                send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
+                
+                # Check if they have enough correct answers total
+                if len(user_progress) >= num_of_answers:
+                    send_image(target_room_id, win_image_mxc, win_image_width, win_image_height, win_image_size)
+                    message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
+                    send_message(target_room_id, message)
+                    wf_winner = True        
+                    return None
+                break
+                
+        if right_answer == False:
+            num_of_xs = num_of_xs + 1
+            feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, num_of_xs)
+            send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
+
+        time.sleep(3)
+                
     send_image(target_room_id, loss_image_mxc, loss_image_width, loss_image_height, loss_image_size)
     message = f"\n👎😢 Shame on @{sender_display_name}.\n"
-    feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
-    send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     send_message(target_room_id, message)
-    feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers)
+    feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     wf_winner = False
+    time.sleep(3)
     return None
 
 

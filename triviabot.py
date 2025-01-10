@@ -485,7 +485,7 @@ def ask_feud_question(winner):
 
     while num_of_xs < 3:
         
-        start_message = f"\n👉👉 {feud_question_prompt}\n"
+        start_message = f"\n👉👉 {feud_question_prompt.upper()}\n"
         if num_of_xs == 0:
             start_message += f"\n🟩🤔 @{winner}, no strikes. Start answer with '#':\n"
         elif num_of_xs == 1:
@@ -589,7 +589,7 @@ def ask_feud_question(winner):
                     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
                     
                     if len(user_progress) >= num_of_answers:
-                        answer_message = f"\n🔑❓ {feud_question_prompt}\n"
+                        answer_message = f"\n🔑❓ REVEALED: {feud_question_prompt.upper()}\n"
                         send_message(target_room_id, answer_message)
                         wf_winner = True        
                         return None
@@ -606,7 +606,7 @@ def ask_feud_question(winner):
     message = f"\n👎😢 Shame on @{sender_display_name}.\n"
     send_message(target_room_id, message)
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
-    answer_message = f"\n🔑❓ REVEALED: {feud_question_prompt}\n"
+    answer_message = f"\n🔑❓ REVEALED: {feud_question_prompt.upper()}\n"
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     send_message(target_room_id, answer_message)
     wf_winner = False

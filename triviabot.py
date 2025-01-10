@@ -6739,6 +6739,7 @@ def start_trivia():
         selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set
         
         while True:  # Endless loop       
+            ask_feud_question("nsharma2")
             # Check if it's been more than an hour since the last login
             current_time = time.time()
             

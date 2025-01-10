@@ -481,24 +481,18 @@ def ask_feud_question(winner):
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
     time.sleep(2)
     send_message(target_room_id, message)
-   
-    time.sleep(5)
-
-    message = f"\n👉👉 {feud_question_prompt}\n"
-    send_message(target_room_id, message)
-    time.sleep(3)
-
-    initialize_sync()
-    start_time = time.time()  # Track when the question starts
 
     while num_of_xs < 3:
+        
+        start_message = f"\n👉👉 {feud_question_prompt}\n"
         if num_of_xs == 0:
-            message = f"\n🟩🤔 @{winner}, no strikes. What is your answer?\n"
+            start_message += f"\n🟩🤔 @{winner}, no strikes. What is your answer?\n"
         elif num_of_xs == 1:
-            message = f"\n🟨🤔 @{winner}, you have 1 strike. What is your answer?\n"
+            start_message += f"\n🟨🤔 @{winner}, you have 1 strike. What is your answer?\n"
         elif num_of_xs == 2:
-            message = f"\n🟥🤔 @{winner}, next strike and you're out. What is your answer?.\n"
-        send_message(target_room_id, message)
+            start_message += f"\n🟥🤔 @{winner}, next strike and you're out. What is your answer?.\n"
+
+        send_message(target_room_id, start_message)
         
         initialize_sync()
         start_time = time.time()  # Track when the question starts

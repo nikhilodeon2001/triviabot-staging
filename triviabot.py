@@ -3002,7 +3002,7 @@ def ask_wof_number(winner):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if str(message_content_lower} in {"okra"}:
+                    if str(message_content_lower) in {"okra"}:
                          set_a = ["0", "1", "2", "3", "4"]
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)

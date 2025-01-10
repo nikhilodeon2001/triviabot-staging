@@ -542,7 +542,7 @@ def ask_feud_question(winner):
                         message_content = event.get("content", {}).get("body", "")
                         message_content_upper = message_content.upper()
 
-                        message = f"\n @{winner} says {message_content_upper}.\n"
+                        message = f"\n @{winner} says *crickets*.\n"
                         send_message(target_room_id, message)
                         
                         time.sleep(2)
@@ -558,6 +558,11 @@ def ask_feud_question(winner):
             
         # Iterate over all validAnswers
         right_answer = False
+
+        if message_content == "":
+            message = f"\n @{winner} says *crickets*.\n"
+            send_message(target_room_id, message)
+            time.sleep(2)
         
         for answer in feud_question_answers:
             # Skip if user already has this answer

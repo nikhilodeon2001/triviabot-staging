@@ -2603,9 +2603,12 @@ def select_wof_questions(winner):
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
         message += f"{counter}. 📝📚 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
-        message += f"FU. 👨‍👩‍👧‍👦⚔️ FeUd ☕\n"
+        message += f"FU. 👨‍👩‍👧‍👦⚔️ FeUd ☕"
             
         send_message(target_room_id, message)  
+        
+        message = f"Okra. 🥗🌟 Okra's Choice 🌟🥗\n"
+        send_message(target_room_id, message) 
         
         selected_wof_category = ask_wof_number(winner)
 
@@ -2994,9 +2997,33 @@ def ask_wof_number(winner):
                     sender = event["sender"]
                     sender_display_name = get_display_name(sender)
                     message_content = event.get("content", {}).get("body", "")
+                    message_content_lower =  message_content.lower()
 
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
+
+                    if str(message_content_lower} in {"okra"}:
+                         set_a = ["0", "1", "2", "3", "4"]
+    
+                        # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
+                        if len(scoreboard) > 4:
+                            set_b = ["5", "6", "7", "8", "9", "FU"]
+                        else:
+                            set_b = ["5", "6", "7", "8", "FU"]
+                    
+                        # Choose from set_a 90% of the time, set_b 10% of the time
+                        if random.random() < 0.9:
+                            selected_question = random.choice(set_a)
+                            message = f"\n💪🛡️ I got you @{winner}. {selected_question} it is.\n"
+                        else:
+                            selected_question = random.choice(set_b)
+                            message = f"\n🌿🎁 @{winner}, let's do something special. {selected_question} it is.\n"
+
+                        react_to_message(event_id, target_room_id, "okra21")
+                        send_message(target_room_id, message)
+                        selected_question = selected_question.lower()
+                    
+                        return selected_question 
 
                     if str(message_content) in {"5"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")

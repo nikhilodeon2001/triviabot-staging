@@ -563,39 +563,39 @@ def ask_feud_question(winner):
             message = f"\n @{winner} says *crickets*.\n"
             send_message(target_room_id, message)
             time.sleep(2)
+        else:
+            for answer in feud_question_answers:
+                # Skip if user already has this answer
+                if answer in user_progress:
+                    continue
         
-        for answer in feud_question_answers:
-            # Skip if user already has this answer
-            if answer in user_progress:
-                continue
-    
-            # Compare user's guess to this official answer
-            if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
-                # It's a match => store the *official answer* in the user's set
-                user_progress.append(answer)
-                right_answer = True
-                if len(user_progress) >= num_of_answers:
-                    send_image(target_room_id, win_image_mxc, win_image_width, win_image_height, win_image_size)
-                    message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
-                    send_message(target_room_id, message)
+                # Compare user's guess to this official answer
+                if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
+                    # It's a match => store the *official answer* in the user's set
+                    user_progress.append(answer)
+                    right_answer = True
+                    if len(user_progress) >= num_of_answers:
+                        send_image(target_room_id, win_image_mxc, win_image_width, win_image_height, win_image_size)
+                        message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
+                        send_message(target_room_id, message)
+                        
+                    feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
+                    send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
                     
-                feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
-                send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
-                
-                if len(user_progress) >= num_of_answers:
-                    answer_message = f"\n🔑❓ {feud_question_prompt}\n"
-                    send_message(target_room_id, answer_message)
-                    wf_winner = True        
-                    return None
-                break
-                
+                    if len(user_progress) >= num_of_answers:
+                        answer_message = f"\n🔑❓ {feud_question_prompt}\n"
+                        send_message(target_room_id, answer_message)
+                        wf_winner = True        
+                        return None
+                    break
+                    
         if right_answer == False:
             num_of_xs = num_of_xs + 1
             feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, num_of_xs)
             send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
 
         time.sleep(1)
-                
+                    
     send_image(target_room_id, loss_image_mxc, loss_image_width, loss_image_height, loss_image_size)
     message = f"\n👎😢 Shame on @{sender_display_name}.\n"
     send_message(target_room_id, message)

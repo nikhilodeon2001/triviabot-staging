@@ -479,8 +479,9 @@ def ask_feud_question(winner):
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
     feud_image_size = 100
     send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
-    time.sleep(2)
+    time.sleep(3)
     send_message(target_room_id, message)
+    time.sleep(2)
 
     while num_of_xs < 3:
         
@@ -6721,7 +6722,6 @@ def start_trivia():
         load_streak_data()
         load_previous_question()
         initialize_sync()  
-        ask_feud_question("nsharma2")
         
         round_winner = None
         selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set

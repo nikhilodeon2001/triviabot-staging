@@ -3003,7 +3003,7 @@ def ask_wof_number(winner):
                         continue
 
                     if str(message_content_lower) in {"okra"}:
-                         set_a = ["0", "1", "2", "3", "4"]
+                        set_a = ["0", "1", "2", "3", "4"]
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(scoreboard) > 4:

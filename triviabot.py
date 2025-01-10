@@ -487,11 +487,11 @@ def ask_feud_question(winner):
         
         start_message = f"\n👉👉 {feud_question_prompt}\n"
         if num_of_xs == 0:
-            start_message += f"\n🟩🤔 @{winner}, no strikes. What is your answer?\n"
+            start_message += f"\n🟩🤔 @{winner}, no strikes. Start answer with '#':\n"
         elif num_of_xs == 1:
-            start_message += f"\n🟨🤔 @{winner}, you have 1 strike. What is your answer?\n"
+            start_message += f"\n🟨🤔 @{winner}, you have 1 strike. Start answer with '#':\n"
         elif num_of_xs == 2:
-            start_message += f"\n🟥🤔 @{winner}, next strike and you're out. What is your answer?.\n"
+            start_message += f"\n🟥🤔 @{winner}, you have 2 strikes. Start answer with '#':\n"
 
         send_message(target_room_id, start_message)
         
@@ -540,9 +540,16 @@ def ask_feud_question(winner):
                             continue
     
                         message_content = event.get("content", {}).get("body", "")
+                         # Only process messages starting with '#'
+                        if not message_content.startswith('#'):
+                            continue
+
+                        # Remove the '#' from the beginning
+                        message_content = message_content[1:]
+
                         message_content_upper = message_content.upper()
 
-                        message = f"\n @{winner} says *crickets*.\n"
+                        message = f"\n @{winner} says {message_content_upper}\n"
                         send_message(target_room_id, message)
                         
                         time.sleep(2)

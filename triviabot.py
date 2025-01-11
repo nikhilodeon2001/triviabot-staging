@@ -3004,7 +3004,7 @@ def ask_wof_number(winner):
                         set_a = ["0", "1", "2", "3", "4"]
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
-                        if len(scoreboard) > 4:
+                        if len(round_responders) > 4:
                             set_b = ["5", "6", "7", "8", "9", "10"]
                         else:
                             set_b = ["5", "6", "7", "8", "10"]
@@ -3058,7 +3058,7 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"9"} and len(scoreboard) < num_list_players:
+                    if str(message_content) in {"9"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
@@ -5409,6 +5409,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
 def check_correct_responses_delete(question_ask_time, trivia_answer_list, question_number, collected_responses, trivia_category, trivia_url):
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
+    global question_responders, round_responders
     
     # Define the first item in the list as trivia_answer
     trivia_answer = trivia_answer_list[0]  # The first item is the main answer
@@ -5434,6 +5435,14 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         message_content = message_content.replace("\uFFFC", "")  # Remove U+FFFC
         message_first_word = message_content.lower().split()[0]
+
+        # Track users who responded to the current question and round
+        if display_name not in question_responders:
+            question_responders.append(display_name)  # Add to question responders
+        
+            # Only add to round responders if not already present
+            if display_name not in round_responders:
+                round_responders.append(display_name)
 
         if "okra" in message_content.lower() and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra1")
@@ -5533,7 +5542,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     # Construct a single message for all the responses
     message = ""
     if blind_mode == False:
-        message = f"\n✅ Answer ✅\n{trivia_answer}\n"
+        message = f"\n✅ Answer ({len(question_responders) ✅\n{trivia_answer}\n"
             
     # Notify the chat
     if correct_responses and marx_mode == False:    
@@ -5714,7 +5723,7 @@ def show_standings():
     """Show the current standings after each question."""
     if scoreboard:
         standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
-        standing_message = "\n📈 Scoreboard 📈"
+        standing_message = f"\n📈 Scoreboard ({len(round_responders}) 📈"
         
         # Define the medals for the top 3 positions
         medals = ["🥇", "🥈", "🥉"]
@@ -6724,6 +6733,8 @@ def get_random_trivia_question():
         print(f"Error selecting trivia and crossword questions: {e}")
         return None  # Return an empty list in case of failure
 
+question_responders = []  # Tracks users who responded during the current question
+ound_responders = []
 
 def start_trivia():
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, filler_words
@@ -6731,8 +6742,9 @@ def start_trivia():
     global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
     global previous_question, current_question
     global db
-    
+    global question_responders, round_responders
 
+    # You can now use and reset them in the function
     
     okra_gif_urls = [
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif",
@@ -6780,6 +6792,8 @@ def start_trivia():
             fastest_answers_count.clear()
             
             # Reset round data for the next round
+            print(f"Round Responders: {round_responders}")
+            round_responders.clear()  # Reset round responders
             round_data["questions"] = []
 
             if random.random() < 0:  # random.random() generates a float between 0 and 1
@@ -6810,6 +6824,8 @@ def start_trivia():
             
             question_number = 1
             while question_number <= questions_per_round:
+                print(f"Question Responders: {question_responders}")
+                question_responders.clear()  # Reset question responders for the new question
                 
                 if god_mode and round_winner:
                     selected_question = selected_questions[get_player_selected_question(selected_questions, round_winner) - 1]

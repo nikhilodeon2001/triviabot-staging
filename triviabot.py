@@ -582,7 +582,7 @@ def ask_feud_question(winner):
                     right_answer = True
                     if len(user_progress) >= num_of_answers:
                         send_image(target_room_id, win_image_mxc, win_image_width, win_image_height, win_image_size)
-                        message = f"\n🏆🎉 @{sender_display_name} got all {num_of_answers}!"
+                        message = f"\n🏆🎉 @{winner} got all {num_of_answers}!"
                         send_message(target_room_id, message)
                         
                     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
@@ -603,7 +603,7 @@ def ask_feud_question(winner):
         time.sleep(1)
                     
     send_image(target_room_id, loss_image_mxc, loss_image_width, loss_image_height, loss_image_size)
-    message = f"\n👎😢 Shame on @{sender_display_name}.\n"
+    message = f"\n👎😢 Shame on @{winner}.\n"
     send_message(target_room_id, message)
     feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
     answer_message = f"\n🔑❓ REVEALED: {feud_question_prompt.upper()}\n"
@@ -2603,21 +2603,17 @@ def select_wof_questions(winner):
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
         message += f"{counter}. 📝📚 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
-        message += f"FU. 👨‍👩‍👧‍👦⚔️ FeUd ☕"
+        counter = counter + 1
+        message += f"{counter} 👨‍👩‍👧‍👦⚔️ FeUd ☕"
             
         send_message(target_room_id, message)  
         
-        message = f"Okra. 🥗🌟 Okra's Choice 🌟🥗\n"
+        message = f"00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
         
         selected_wof_category = ask_wof_number(winner)
 
-        if selected_wof_category == "fu" or selected_wof_category == "FU" or selected_wof_category == "fU" or selected_wof_category == "Fu":
-            ask_feud_question(winner)
-            time.sleep(3)
-            return None
-        
-        elif int(selected_wof_category) < premium_counts:
+        if int(selected_wof_category) < premium_counts:
             wof_question = wof_questions[int(selected_wof_category)]
             wof_answer = wof_question["answers"][0]
             wof_clue = wof_question["question"]
@@ -2626,10 +2622,13 @@ def select_wof_questions(winner):
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
-
-        
         elif selected_wof_category == "9":
             ask_list_question(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "10":
+            ask_feud_question(winner)
             time.sleep(3)
             return None
         
@@ -2997,19 +2996,18 @@ def ask_wof_number(winner):
                     sender = event["sender"]
                     sender_display_name = get_display_name(sender)
                     message_content = event.get("content", {}).get("body", "")
-                    message_content_lower =  message_content.lower()
 
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if str(message_content_lower) in {"okra"}:
+                    if str(message_content) in {"00"}:
                         set_a = ["0", "1", "2", "3", "4"]
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(scoreboard) > 4:
-                            set_b = ["5", "6", "7", "8", "9", "FU"]
+                            set_b = ["5", "6", "7", "8", "9", "10"]
                         else:
-                            set_b = ["5", "6", "7", "8", "FU"]
+                            set_b = ["5", "6", "7", "8", "10"]
                     
                         # Choose from set_a 90% of the time, set_b 10% of the time
                         if random.random() < 0.9:
@@ -3017,12 +3015,11 @@ def ask_wof_number(winner):
                             message = f"\n💪🛡️ I got you @{winner}. {selected_question} it is.\n"
                         else:
                             selected_question = random.choice(set_b)
-                            message = f"\n🌿🎁 @{winner}, let's do something special. {selected_question} it is.\n"
+                            message = f"\n💫🎁 @{winner}, let's do something special. {selected_question} it is.\n"
 
                         react_to_message(event_id, target_room_id, "okra21")
                         send_message(target_room_id, message)
                         selected_question = selected_question.lower()
-                    
                         return selected_question 
 
                     if str(message_content) in {"5"} and winner_coffees <= 0:
@@ -3049,7 +3046,7 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"fu", "FU", "fU", "Fu"} and winner_coffees <= 0:
+                    if str(message_content) in {"10"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'FeUd' requires ☕️.\n"
                         send_message(target_room_id, message)
@@ -3068,7 +3065,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "fu", "FU", "fU", "Fu"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"

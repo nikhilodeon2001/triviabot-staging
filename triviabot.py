@@ -5299,7 +5299,12 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
             return False
         
         # Check if the two sets of numbers match (order does not matter)
-        return set(user_numbers) == set(correct_numbers)
+        if set(user_numbers) == set(correct_numbers):
+            return True
+
+        # Step 3: Jaccard similarity (Character level)
+        if jaccard_similarity(user_answer, correct_answer) >= threshold or jaccard_similarity(no_spaces_user, no_spaces_correct) >= threshold:
+            return True
         
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
@@ -5313,7 +5318,7 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
-    if len(user_answer) < 4:
+    if len(user_answer) < 5:
         return user_answer == correct_answer  # Only accept an exact match for short answers
     
     if user_answer == correct_answer:
@@ -5343,11 +5348,11 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     no_filler_answer_words = no_filler_correct.split()
     
     # Ensure correct_answer_words is not empty
-    if correct_answer_words and len(correct_answer_words[0]) > 3:
+    if correct_answer_words and len(correct_answer_words[0]) >= 3:
         if user_answer == correct_answer_words[0] or no_filler_user == correct_answer_words[0]:
             return True
 
-    if no_filler_answer_words and len(no_filler_answer_words[0]) > 3:
+    if no_filler_answer_words and len(no_filler_answer_words[0]) >= 3:
         if user_answer == no_filler_answer_words[0] or no_filler_user == no_filler_answer_words[0]:
             return True
 
@@ -5360,9 +5365,10 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
         return True
     
     # Step 2: Levenshtein similarity
-    if levenshtein_similarity(user_answer, correct_answer) >= threshold:
+    if levenshtein_similarity(user_answer, correct_answer) >= threshold or levenshtein_similarity(no_spaces_user, no_spaces_correct) >= threshold or levenshtein_similarity(no_filler_user, no_filler_correct) >= threshold or levenshtein_similarity(no_filler_spaces_user, no_filler_spaces_correct) >= threshold:
         return True
 
+    
     # Step 3: Jaccard similarity (Character level)
     if jaccard_similarity(user_answer, correct_answer) >= threshold and url != "scramble":
         return True

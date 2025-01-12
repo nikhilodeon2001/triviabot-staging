@@ -2504,7 +2504,7 @@ def fetch_donations():
 
 
 def get_math_question():
-    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question]
+    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question, create_base_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
@@ -2531,6 +2531,16 @@ def create_median_question():
         "url": "median",
         "answers": [""]
     }
+
+def create_base_question():
+    input_base = random.choice([2, 3, 4])
+    return {
+        "category": "Mathematics",
+        "question": f"What is the DECIMAL equivalent of the following BASE {input_base} number:",
+        "url": f"{input_base}_base",
+        "answers": [""]
+    }
+
 
 # Function to create a derivative question in dictionary format
 def create_derivative_question():
@@ -5047,14 +5057,24 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     send_image_flag = False
 
     message_body = ""
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "factors"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "factors", "base"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) 
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         send_image_flag = True
-        
+
+    elif "_base" in trivia_url:
+        if trivia_url and trivia_url[0].isdigit():  # Check if the first character is a digit
+            input_base = int(trivia_url[0])
+        image_mxc, image_width, image_height, new_solution, base_string = generate_base_question(input_base)
+        if image_questions == True:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{base_string}\n"
+    
     elif trivia_url == "zeroes sum":
         image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial(trivia_url)
         if image_questions == True:
@@ -5463,7 +5483,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer  
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "factors"]
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "factors", "base"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}

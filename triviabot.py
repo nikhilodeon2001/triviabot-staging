@@ -6248,7 +6248,7 @@ def generate_and_render_polynomial(type):
     if sum_term == 0:
         polynomial = f"x² {'+' if product_zeroes >= 0 else '-'} {abs(product_zeroes)}"
     else:
-        polynomial = f"x² {'+' if sum_zeroes >= 0 else '-'} {sum_term}x {'+' if product_zeroes >= 0 else '-'} {abs(product_zeres)}"
+        polynomial = f"x² {'+' if sum_zeroes >= 0 else '-'} {sum_term}x {'+' if product_zeroes >= 0 else '-'} {abs(product_zereos)}"
     
     print(f"Polynomial: {polynomial}")
 

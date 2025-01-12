@@ -64,6 +64,9 @@ since_token = None
 responses = []
 question_start_time = None  # This will store the time the question is asked
 
+question_responders = []  # Tracks users who responded during the current question
+round_responders = []
+
 # Set up headers, including the authorization token
 headers = []
 headers_media = [] 
@@ -1703,7 +1706,8 @@ def describe_image_with_vision(image_url, mode, prompt):
                         "content": [
                             {
                                 "type": "text",
-                                "text": f"Based on what you see in the image, give the image a name with 5 words maximum. The prompt used to create this image was {prompt}."
+                                #"text": f"Based on what you see in the image, give the image a name with 5 words maximum. The prompt used to create this image was {prompt}."
+                                "text": f"Based on what you see in the image, give the image an okra themed title with 5 words maximum."
                             },
                             {
                                 "type": "image_url",
@@ -2137,7 +2141,7 @@ def generate_round_summary_image(round_data, winner):
                     
         prompts_by_category = {
             "0": [
-                f"A horror image of what you think {winner} looks like being pursued by something okra themed."
+                f"A scary scene from a horror movie with what you think {winner} looks running from an okra."
             ],
             "1": [
                 f"A Renaissance painting of what you think {winner} looks like holding an okra. Make the painting elegant and refined."
@@ -3078,7 +3082,22 @@ def ask_wof_number(winner):
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")                    
 
-    send_message(target_room_id, "\n🐢⏳Too slow. Let's go with 0.\n")
+    
+    set_a = ["0", "1", "2", "3", "4"]
+    
+    # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
+    if len(round_responders) > 4:
+        set_b = ["5", "6", "7", "8", "9", "10"]
+    else:
+        set_b = ["5", "6", "7", "8", "10"]
+
+    # Choose from set_a 90% of the time, set_b 10% of the time
+    if random.random() < 0.9:
+        selected_question = random.choice(set_a)
+    else:
+        selected_question = random.choice(set_b)
+
+    send_message(target_room_id, f"\n🐢⏳ Too slow. I choose {selected_question}.\n")
     return selected_question
 
   
@@ -5434,7 +5453,6 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         
         message_content = response.get("message_content", "")  # Use 'response' instead of 'event'
         message_content = message_content.replace("\uFFFC", "")  # Remove U+FFFC
-        message_first_word = message_content.lower().split()[0]
 
         # Track users who responded to the current question and round
         if display_name not in question_responders:
@@ -5447,14 +5465,12 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         if "okra" in message_content.lower() and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra1")
 
-        #if message_content and message_content.strip() and message_first_word == "previous" and collect_feedback_mode == True:
         if "#prev" in message_content.lower() and collect_feedback_mode == True:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
             #stripped_message_content = " ".join(message_content.split()[1:])
             insert_audit_question("audit_questions", previous_question, message_content, display_name)
 
-        #if message_content and message_content.strip() and message_first_word == "current" and collect_feedback_mode == True:
         if "#curr" in message_content.lower() and collect_feedback_mode == True:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
@@ -5542,7 +5558,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     # Construct a single message for all the responses
     message = ""
     if blind_mode == False:
-        message = f"\n✅ Answer ({len(question_responders) ✅\n{trivia_answer}\n"
+        message = f"\n✅ Answer ({len(question_responders)}) ✅\n{trivia_answer}\n"
             
     # Notify the chat
     if correct_responses and marx_mode == False:    
@@ -5723,7 +5739,7 @@ def show_standings():
     """Show the current standings after each question."""
     if scoreboard:
         standings = sorted(scoreboard.items(), key=lambda x: x[1], reverse=True)
-        standing_message = f"\n📈 Scoreboard ({len(round_responders}) 📈"
+        standing_message = f"\n📈 Scoreboard ({len(round_responders)}) 📈"
         
         # Define the medals for the top 3 positions
         medals = ["🥇", "🥈", "🥉"]
@@ -6733,8 +6749,7 @@ def get_random_trivia_question():
         print(f"Error selecting trivia and crossword questions: {e}")
         return None  # Return an empty list in case of failure
 
-question_responders = []  # Tracks users who responded during the current question
-ound_responders = []
+
 
 def start_trivia():
     global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, filler_words
@@ -6792,7 +6807,6 @@ def start_trivia():
             fastest_answers_count.clear()
             
             # Reset round data for the next round
-            print(f"Round Responders: {round_responders}")
             round_responders.clear()  # Reset round responders
             round_data["questions"] = []
 
@@ -6824,7 +6838,6 @@ def start_trivia():
             
             question_number = 1
             while question_number <= questions_per_round:
-                print(f"Question Responders: {question_responders}")
                 question_responders.clear()  # Reset question responders for the new question
                 
                 if god_mode and round_winner:

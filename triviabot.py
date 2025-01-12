@@ -2517,7 +2517,7 @@ def get_stats_question():
 # Function to create a mean question in dictionary format
 def create_mean_question():
     return {
-        "category": "Mathematics",
+        "category": "Mathematics: Mean",
         "question": "What is the MEAN of the following set?",
         "url": "mean",
         "answers": [""]
@@ -2526,7 +2526,7 @@ def create_mean_question():
 # Function to create a median question in dictionary format
 def create_median_question():
     return {
-        "category": "Mathematics",
+        "category": "Mathematics: Median",
         "question": "What is the MEDIAN of the following set?",
         "url": "median",
         "answers": [""]
@@ -2534,7 +2534,7 @@ def create_median_question():
 
 def create_base_question():
     return {
-        "category": "Mathematics",
+        "category": "Mathematics: Bases",
         "question": f"What is the DECIMAL equivalent of the following BASE number:",
         "url": "base",
         "answers": [""]
@@ -2544,7 +2544,7 @@ def create_base_question():
 # Function to create a derivative question in dictionary format
 def create_derivative_question():
     return {
-        "category": "Mathematics",
+        "category": "Mathematics: Derivatives",
         "question": "What is the DERIVATIVE with respect to x?",
         "url": "derivative",
         "answers": [""]
@@ -2552,7 +2552,7 @@ def create_derivative_question():
 
 def create_sum_zeroes_question():
     return {
-        "category": "Mathematics",
+        "category": "Mathematics: Polynomials",
         "question": "What is the SUM of the zeroes (or roots) of the function defined:",
         "url": "zeroes sum",
         "answers": [""]
@@ -2560,7 +2560,7 @@ def create_sum_zeroes_question():
 
 def create_product_zeroes_question():
     return {
-        "category": "Mathematics",
+        "category": "Mathematics: Polynomials",
         "question": "What is the PRODUCT of the zeroes (or roots) of the function defined:",
         "url": "zeroes product",
         "answers": [""]
@@ -2568,7 +2568,7 @@ def create_product_zeroes_question():
 
 def create_zeroes_question():
     return {
-        "category": "Mathematics",
+        "category": "Mathematics: Polynomials",
         "question": "What are the 2 ZEROES (or roots) of the function defined:",
         "url": "zeroes",
         "answers": [""]
@@ -2577,7 +2577,7 @@ def create_zeroes_question():
 
 def create_factors_question():
     return {
-        "category": "Mathematics",
+        "category": "Mathematics: Polynomials",
         "question": "Factor the function defined:",
         "url": "factors",
         "answers": [""]

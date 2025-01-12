@@ -5366,9 +5366,6 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if category == "Crossword":
         return no_spaces_user.lower() ==no_spaces_correct.lower()
 
-    if "_base" in trivia_url:
-        
-
     if url == "zeroes":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
         correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]

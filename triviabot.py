@@ -6237,8 +6237,8 @@ def generate_and_render_polynomial(type):
     sum_zeroes = (zero1 + zero2) * -1
     product_zeroes = zero1 * zero2
     # Format the factors
-    factor1 = f"(x {'+' if zero1 < 0 else '-'} {zero1})"
-    factor2 = f"(x {'+' if zero2 < 0 else '-'} {zero2})"
+    factor1 = f"(x {'+' if zero1 < 0 else '-'} {abs(zero1)})"
+    factor2 = f"(x {'+' if zero2 < 0 else '-'} {abs(zero2)})"
 
     # Construct the sum term for the polynomial
     if abs(sum_zeroes) == 1:

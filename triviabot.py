@@ -6297,9 +6297,9 @@ def generate_and_render_polynomial(type):
         content_uri = upload_image_to_matrix(image_buffer.read())
         
     if content_uri:
-        if type == "sum":
+        if type == "zeroes sum":
             return content_uri, img_width, img_height, str(int(sum_zeroes)), polynomial
-        elif type == "product":
+        elif type == "zeroes product":
             return content_uri, img_width, img_height, str(int(product_zeroes)), polynomial
         elif type == "zeroes":
             zeroes_str = [

@@ -6233,7 +6233,7 @@ def generate_and_render_polynomial(type):
     zeroes = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
     zero1 = zeroes[0]
     zero2 = zeroes[1]
-    sum_zeroes = sum(zero1, zero2) * -1
+    sum_zeroes = (zero1 + zero2) * -1
     product_zeroes = zero1 * zero2
     # Format the factors
     factor1 = f"(x {'+' if zero1 < 0 else '-'} {zero1})"

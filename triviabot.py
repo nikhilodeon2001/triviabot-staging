@@ -2504,7 +2504,7 @@ def fetch_donations():
 
 
 def get_math_question():
-    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_factors_question, create_product_factors_question, create_factors_question]
+    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
@@ -2541,27 +2541,36 @@ def create_derivative_question():
         "answers": [""]
     }
 
-def create_sum_factors_question():
+def create_sum_zeroes_question():
     return {
         "category": "Mathematics",
-        "question": "What is the SUM of the below polynomial's factors?",
-        "url": "polynomial sum",
+        "question": "What is the SUM of the zeroes (or roots) of the function defined:",
+        "url": "zeroes sum",
         "answers": [""]
     }
 
-def create_product_factors_question():
+def create_product_zeroes_question():
     return {
         "category": "Mathematics",
-        "question": "What is the PRODUCT of the below polynomial's factors?",
-        "url": "polynomial product",
+        "question": "What is the PRODUCT of the zeroes (or roots) of the function defined:",
+        "url": "zeroes product",
         "answers": [""]
     }
+
+def create_zeroes_question():
+    return {
+        "category": "Mathematics",
+        "question": "What are the 2 ZEROES (or roots) of the function defined:",
+        "url": "zeroes",
+        "answers": [""]
+    }
+
 
 def create_factors_question():
     return {
         "category": "Mathematics",
-        "question": "What are the 2 FACTORS of the polynomial below?",
-        "url": "polynomial factors",
+        "question": "Factor the function defined:",
+        "url": "factors",
         "answers": [""]
     }
         
@@ -5038,7 +5047,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     send_image_flag = False
 
     message_body = ""
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "polynomial sum", "polynomial product", "polynomial factors"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "factors"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
@@ -5046,8 +5055,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         send_image_flag = True
         
-    elif trivia_url == "polynomial sum":
-        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("sum")
+    elif trivia_url == "zeroes sum":
+        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial(trivia_url)
         if image_questions == True:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
             send_image_flag = True
@@ -5057,16 +5066,24 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     elif trivia_url == "characters":
         message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\nName the movie, book, or show:\n\n{trivia_question}\n"
 
-    elif trivia_url == "polynomial product":
-        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("product")
+    elif trivia_url == "zeroes product":
+        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial(trivia_url)
         if image_questions == True:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
             send_image_flag = True
         else:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{polynomial}\n"
 
-    elif trivia_url == "polynomial factors":
-        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial("factors")
+    elif trivia_url == "zeroes":
+        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial(trivia_url)
+        if image_questions == True:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{polynomial}\n"
+
+    elif trivia_url == "factors":
+        image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial(trivia_url)
         if image_questions == True:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
             send_image_flag = True
@@ -5273,7 +5290,7 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
     if category == "Crossword":
         return no_spaces_user.lower() ==no_spaces_correct.lower()
 
-    if url == "polynomial factors":
+    if url == "zeroes":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
         correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]
         
@@ -5440,7 +5457,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer  
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "polynomial sum", "polynomial product", "polynomial factors"]
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "factors"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}
@@ -6131,29 +6148,36 @@ def generate_and_render_derivative_image():
 def generate_and_render_polynomial(type):
     # Randomly select two unique integers from -9 to 9, excluding 0
     content_uri = True
-    factors = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
-    sum_factors = sum(factors)
-    product_factors = factors[0] * factors[1]
+    zeroes = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
+    zero1 = zeroes[0]
+    zero2 = zeroes[1]
+    sum_zeroes = sum(zero1, zero2) * -1
+    product_zeroes = zero1 * zero2
+    # Format the factors
+    factor1 = f"(x {'+' if zero1 < 0 else '-'} {zero1})"
+    factor2 = f"(x {'+' if zero2 < 0 else '-'} {zero2})"
 
     # Construct the sum term for the polynomial
-    if abs(sum_factors) == 1:
+    if abs(sum_zeroes) == 1:
         sum_term = ""
     else:
-        sum_term = abs(sum_factors)
+        sum_term = abs(sum_zeroes)
 
     if sum_term == 0:
-        polynomial = f"x² {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
+        polynomial = f"x² {'+' if product_zeroes >= 0 else '-'} {abs(product_zeroes)}"
     else:
-        polynomial = f"x² {'+' if sum_factors >= 0 else '-'} {sum_term}x {'+' if product_factors >= 0 else '-'} {abs(product_factors)}"
+        polynomial = f"x² {'+' if sum_zeroes >= 0 else '-'} {sum_term}x {'+' if product_zeroes >= 0 else '-'} {abs(product_zeres)}"
     
     print(f"Polynomial: {polynomial}")
 
-    if type == "sum":
-         print(f"Sum of zeroes: {sum_factors}")
-    elif type == "product":
-         print(f"Product of zeroes: {product_factors}")
+    if type == "zeroes sum":
+         print(f"Sum of zeroes: {sum_zeroes}")
+    elif type == "zeroes product":
+         print(f"Product of zeroes: {product_zeroes}")
+    elif type == "zeroes":
+         print(f"Zeroes: {zeroes}")
     elif type == "factors":
-         print(f"Zeroes: {factors}")
+         print(f"Factored: {factor1}{factor2}, {factor2}{factor1}")
     else:
         print("Wrong type passed in to polynomial function")
 
@@ -6192,14 +6216,23 @@ def generate_and_render_polynomial(type):
         
     if content_uri:
         if type == "sum":
-            return content_uri, img_width, img_height, str(int(sum_factors)), polynomial
+            return content_uri, img_width, img_height, str(int(sum_zeroes)), polynomial
         elif type == "product":
-            return content_uri, img_width, img_height, str(int(product_factors)), polynomial
+            return content_uri, img_width, img_height, str(int(product_zeroes)), polynomial
+        elif type == "zeroes":
+            zeroes_str = [
+                f"{zero1} and {zero2}",
+                f"{zero2} and {zero1}",
+                f"{zero1}, {zero2}",
+                f"{zero2}, {zero1}"
+            ]
+            return content_uri, img_width, img_height, zeroes_str, polynomial
         elif type == "factors":
-            factors_str = f"{factors[0]} and {factors[1]}"
-            return content_uri, img_width, img_height, factors_str, polynomial
-        else:
-            return content_uri, img_width, img_height, str(int(sum_factors)), polynomial
+            factored_str = [
+                f"{factor1}{factor2}",
+                f"{factor2}{factor1}"
+            ]
+            return content_uri, img_width, img_height, factored_str, polynomial
     else:
         print("Failed to upload the image to Matrix.")
 
@@ -6860,7 +6893,18 @@ def start_trivia():
                 
                 #send_message(target_room_id, f"\n🛑 TIME 🛑\n")
                 
-                solution_list = trivia_answer_list if new_solution is None else [new_solution]            
+                solution_list = []
+
+                if new_solution is None:
+                    # Use the original trivia answer list if no new solution is provided
+                    solution_list = trivia_answer_list
+                elif isinstance(new_solution, list):
+                    # If new_solution is already a list, use it as-is
+                    solution_list = new_solution
+                else:
+                    # If new_solution is a single value, wrap it in a list
+                    solution_list = [new_solution]        
+                    
                 check_correct_responses_delete(question_ask_time, solution_list, question_number, collected_responses, trivia_category, trivia_url)
                 
                 if not yolo_mode or question_number == questions_per_round:

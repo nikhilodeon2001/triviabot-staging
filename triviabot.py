@@ -4072,6 +4072,7 @@ def generate_base_question():
     
     # Convert the number from the input base to decimal
     decimal_equivalent = int(base_number, input_base)
+    print(f"Decimal equivalent: {decimal_equivalent}")
     
     # Create the question text
     question_text = f"What is the DECIMAL EQUIVALENT of the following BASE {input_base} number?"

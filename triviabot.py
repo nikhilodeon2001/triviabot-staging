@@ -6234,7 +6234,7 @@ def generate_and_render_polynomial(type):
     zeroes = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
     zero1 = zeroes[0]
     zero2 = zeroes[1]
-    sum_zeroes = (zero1 + zero2) * -1
+    sum_zeroes = zero1 + zero2
     product_zeroes = zero1 * zero2
     # Format the factors
     factor1 = f"(x {'+' if zero1 < 0 else '-'} {abs(zero1)})"
@@ -6254,7 +6254,7 @@ def generate_and_render_polynomial(type):
     print(f"Polynomial: {polynomial}")
 
     if type == "zeroes sum":
-         print(f"Sum of zeroes: {sum_zeroes}")
+         print(f"Sum of zeroes: {sum_zeroes * -1}")
     elif type == "zeroes product":
          print(f"Product of zeroes: {product_zeroes}")
     elif type == "zeroes":
@@ -6299,7 +6299,8 @@ def generate_and_render_polynomial(type):
         
     if content_uri:
         if type == "zeroes sum":
-            return content_uri, img_width, img_height, str(int(sum_zeroes)), polynomial
+            sum_zeroes_invert = sum_zeroes * -1
+            return content_uri, img_width, img_height, str(int(sum_zeroes_invert)), polynomial
         elif type == "zeroes product":
             return content_uri, img_width, img_height, str(int(product_zeroes)), polynomial
         elif type == "zeroes":

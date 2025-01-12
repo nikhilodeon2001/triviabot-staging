@@ -2533,11 +2533,10 @@ def create_median_question():
     }
 
 def create_base_question():
-    input_base = random.choice([2, 3, 4])
     return {
         "category": "Mathematics",
-        "question": f"What is the DECIMAL equivalent of the following BASE {input_base} number:",
-        "url": f"{input_base}_base",
+        "question": f"What is the DECIMAL equivalent of the following BASE number:",
+        "url": "base",
         "answers": [""]
     }
 
@@ -4061,6 +4060,65 @@ def react_to_message(event_id, room_id, emoji_type):
         print(f"Error reacting to message {event_id}: {e}")
 
 
+def generate_base_question():
+    """
+    Generate a question asking for the decimal equivalent of a number in a specific base.
+    The number will be 3 or 4 digits in the given base, and an image of the number will be sent with the question.
+    """
+    # Generate a random number of 3 or 4 digits in the given base
+    input_base = random.choice([2, 3, 4])
+    num_digits = random.randint(3, 4)
+    base_number = ''.join(random.choices([str(i) for i in range(input_base)], k=num_digits))
+    
+    # Convert the number from the input base to decimal
+    decimal_equivalent = int(base_number, input_base)
+    
+    # Create the question text
+    question_text = f"What is the DECIMAL EQUIVALENT of the following BASE {input_base} number?"
+    
+    # Create an image with the number
+    img_width, img_height = 400, 150
+    img = Image.new('RGB', (img_width, img_height), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Load the font
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    
+    # Adjust the font size based on the length of the base_number
+    if len(base_number) > 3:
+        font_size = 48  # Reduce font size for longer numbers
+    else:
+        font_size = 64  # Use larger font for shorter numbers
+
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return None, None, None, None, None
+
+    # Draw the base number on the image
+    text_bbox = draw.textbbox((0, 0), base_number, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2
+    draw.text((text_x, text_y), base_number, fill=(255, 255, 0), font=font)
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+
+    # Upload the image to Matrix (assuming the upload function exists)
+    content_uri = upload_image_to_matrix(image_buffer.read()) if image_questions else None
+
+    # Return the content_uri, image dimensions, decimal equivalent, and base number
+    return content_uri, img_width, img_height, question_text, str(decimal_equivalent), base_number
+
+
+
+
+
 def generate_median_question():
     """
     Generate a question asking for the median of a set of random numbers.
@@ -5065,15 +5123,13 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         send_image_flag = True
 
-    elif "_base" in trivia_url:
-        if trivia_url and trivia_url[0].isdigit():  # Check if the first character is a digit
-            input_base = int(trivia_url[0])
-        image_mxc, image_width, image_height, new_solution, base_string = generate_base_question(input_base)
+    elif trivia_url == "base":
+        image_mxc, image_width, image_height, new_question, new_solution, base_string = generate_base_question()
         if image_questions == True:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n" 
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{new_question}\n" 
             send_image_flag = True
         else:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n{base_string}\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{new_question}\n{base_string}\n"
     
     elif trivia_url == "zeroes sum":
         image_mxc, image_width, image_height, new_solution, polynomial = generate_and_render_polynomial(trivia_url)
@@ -5298,7 +5354,7 @@ def derivative_checker(response, answer):
         return False
 
 
-def fuzzy_match(user_answer, correct_answer, category, url): #POLY
+def fuzzy_match(user_answer, correct_answer, category, url):
     threshold = 0.90    
 
     if user_answer == correct_answer:
@@ -5309,6 +5365,9 @@ def fuzzy_match(user_answer, correct_answer, category, url): #POLY
 
     if category == "Crossword":
         return no_spaces_user.lower() ==no_spaces_correct.lower()
+
+    if "_base" in trivia_url:
+        
 
     if url == "zeroes":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]

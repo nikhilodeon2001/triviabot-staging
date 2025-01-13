@@ -5391,8 +5391,8 @@ def fuzzy_match(user_answer, correct_answer, category, url):
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
         correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]
 
-        print(user_numbers)
-        print(correct_numbers)
+        print(f"Detected: {user_numbers}")
+        print(f"Correct ones: {correct_numbers}")
         
         # Ensure user answer has exactly two numbers
         if len(user_numbers) != 2:

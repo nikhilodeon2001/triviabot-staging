@@ -2502,8 +2502,8 @@ def fetch_donations():
 
 
 def get_math_question():
-    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question, create_base_question]
-    #question_functions = [create_zeroes_question]
+    #question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question, create_base_question]
+    question_functions = [create_trig_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
@@ -2512,6 +2512,17 @@ def get_stats_question():
     question_functions = [create_mean_question, create_median_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
+
+
+
+def create_trig_question():
+    return {
+        "category": "Mathematics: Trigonometry",
+        "question": "",
+        "url": "trig",
+        "answers": [""]
+    }
+
 
 # Function to create a mean question in dictionary format
 def create_mean_question():
@@ -5131,6 +5142,14 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) 
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         send_image_flag = True
+
+    elif trivia_url == "trig":
+        image_mxc, image_width, image_height, new_question, new_solution, img_description = generate_trig_question()
+        if image_questions == True:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{new_question}\n" 
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{new_question}\n{img_description}\n"
 
     elif trivia_url == "base":
         image_mxc, image_width, image_height, new_question, new_solution, base_string = generate_base_question()

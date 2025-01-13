@@ -6258,7 +6258,7 @@ def generate_and_render_polynomial(type):
     elif type == "zeroes product":
          print(f"Product of zeroes: {product_zeroes}")
     elif type == "zeroes":
-         print(f"Zeroes: {zeroes}")
+         print(f"Zeroes: {zero1 * -1}, {zero2 * -1}")
     elif type == "factors":
          print(f"Factored: {factor1}{factor2}, {factor2}{factor1}")
     else:
@@ -6305,10 +6305,10 @@ def generate_and_render_polynomial(type):
             return content_uri, img_width, img_height, str(int(product_zeroes)), polynomial
         elif type == "zeroes":
             zeroes_str = [
-                f"{zero1} and {zero2}",
-                f"{zero2} and {zero1}",
-                f"{zero1}, {zero2}",
-                f"{zero2}, {zero1}"
+                f"{zero1 * -1} and {zero2 * -1}",
+                f"{zero2 * -1} and {zero1 * -1}",
+                f"{zero1 * -1}, {zero2 * -1}",
+                f"{zero2 * -1}, {zero1 * -1}"
             ]
             return content_uri, img_width, img_height, zeroes_str, polynomial
         elif type == "factors":

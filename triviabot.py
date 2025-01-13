@@ -5397,7 +5397,7 @@ def fuzzy_match(user_answer, correct_answer, category, url):
         # Check if the two sets of numbers match (order does not matter)
         if set(user_numbers) == set(correct_numbers):
             return True
-        else
+        else:
             return False
 
     if url == "derivative":

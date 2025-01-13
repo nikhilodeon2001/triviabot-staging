@@ -6260,9 +6260,9 @@ def generate_and_render_derivative_image():
 def generate_and_render_polynomial(type):
     # Randomly select two unique integers from -9 to 9, excluding 0
     content_uri = True
-    zeroes = [random.choice([i for i in range(-9, 10) if i != 0]) for _ in range(2)]
-    zero1 = zeroes[0]
-    zero2 = zeroes[1]
+    zero1 = random.choice([i for i in range(-9, 10) if i != 0])
+    zero2 = random.choice([i for i in range(-9, 10) if i != 0 and i != zero1])
+
     sum_zeroes = zero1 + zero2
     product_zeroes = zero1 * zero2
     # Format the factors

@@ -1287,9 +1287,7 @@ def ask_survey_question():
 def generate_themed_country_image(country, city):
 
     prompt = (
-        f"Create an image that represents the country {country} using elements inspired by {country}'s culture. "
-        "Include a piece of okra subtly in the image as a small detail. "
-        "Do not include any text, letters, or numbers in the image."
+        f"Create an okra themed image of a kitchen in the country: {country}. "
     )
     
     # Generate the image using DALL-E
@@ -5116,7 +5114,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     send_image_flag = False
 
     message_body = ""
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "factors", "base"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "base"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
@@ -5546,7 +5544,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer  
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "factors", "base"]
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}

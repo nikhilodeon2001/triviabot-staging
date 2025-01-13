@@ -3874,7 +3874,7 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                                     message = f"\n🙏😔 Sorry @{round_winner}. 'Chad' requires ☕️.\n"
                                 else:
                                     num_math_questions = 0
-                                    message = f"\n📰✏️ Really...no math? @{round_winner} is such a 'Greg'."\n"
+                                    message = f"\n📰✏️ @{round_winner} hates math. What a 'Greg'.\n"
                                 send_message(target_room_id, message)
                 
                             if "cross" in message_content.lower():

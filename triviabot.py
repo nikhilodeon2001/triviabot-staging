@@ -6004,7 +6004,7 @@ def select_trivia_questions(questions_per_round):
         if num_math_questions == 0:
             sample_size = 0
         else:
-            sample_size = random.choice([0, num_math_questions])
+            sample_size = num_math_questions
         if sample_size > 0:
             math_questions = [get_math_question() for _ in range(sample_size)]
             selected_questions.extend(math_questions)

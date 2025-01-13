@@ -6174,7 +6174,7 @@ def round_start_messages():
             elif top_count == 5:
                 send_message(target_room_id, f"🔥​  {username} is on fire! Only 1 leaderboard left.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
             elif top_count == 4:
-                send_message(target_room_id, f"🌡️  {username} is heating up! Only 2 leaderboards left.\n\n▶️ Live trivia stats available: hhttps://livetriviastats.com\n")
+                send_message(target_room_id, f"🌡️  {username} is heating up! Only 2 leaderboards left.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
     return None
 
 

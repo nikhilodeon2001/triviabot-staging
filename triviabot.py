@@ -5344,9 +5344,15 @@ def is_number(s):
 def derivative_checker(response, answer):
     response = response.replace(" ", "")      
     answer = answer.replace(" ", "")
+    response = response.replace("^", "")      
+    answer = answer.replace("^", "")
+    response = response.replace("*", "")      
+    answer = answer.replace("*", "")
+    response = normalize_superscripts(response)
+    answer = normalize_superscripts(answer)
 
-    response = response.translate(str.maketrans('', '', string.punctuation))
-    answer = answer.translate(str.maketrans('', '', string.punctuation))
+    #response = response.translate(str.maketrans('', '', string.punctuation))
+    #answer = answer.translate(str.maketrans('', '', string.punctuation))
 
     print(response)
     print(answer)

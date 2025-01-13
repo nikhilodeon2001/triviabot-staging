@@ -1899,7 +1899,7 @@ def load_parameters():
         "num_wof_clues_default": 0,
         "num_wof_clues_final_default": 3,
         "num_wf_letters": 3,
-        "num_math_questions_default": 0,
+        "num_math_questions_default": 1,
         "num_stats_questions_default": 0,
         "skip_summary": False
     }
@@ -2502,8 +2502,8 @@ def fetch_donations():
 
 
 def get_math_question():
-    #question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question, create_base_question]
-    question_functions = [create_zeroes_question]
+    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question, create_base_question]
+    #question_functions = [create_zeroes_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
@@ -3715,6 +3715,7 @@ def process_round_options(round_winner, winner_points):
 
     message = (
         "🇺🇸🗽 Freedom: No multiple choice. ☕\n"
+        "🔢❌ Greg: No math questions. ☕\n"
         "🟦❌ Xela: No Jeopardy-style questions. ☕\n"
         "📰❌ Cross: No Crossword clues. ☕\n"
         "🟦✋ Alex: 5 Jeopardy-style questions. ☕\n"
@@ -3866,6 +3867,14 @@ def prompt_user_for_response(round_winner, winner_points, winner_coffees):
                                 else:
                                     num_crossword_clues = 5
                                     message = f"\n📰✏️ Word. @{round_winner} wants {num_crossword_clues} Crossword questions.\n"
+                                send_message(target_room_id, message)
+
+                            if "greg" in message_content.lower():
+                                if winner_coffees <= 0:
+                                    message = f"\n🙏😔 Sorry @{round_winner}. 'Chad' requires ☕️.\n"
+                                else:
+                                    num_math_questions = 0
+                                    message = f"\n📰✏️ Really...no math? @{round_winner} is such a 'Greg'."\n"
                                 send_message(target_room_id, message)
                 
                             if "cross" in message_content.lower():
@@ -5390,9 +5399,6 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if url == "zeroes":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
         correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]
-
-        print(f"Detected: {user_answer}")
-        print(f"Answer: {correct_answer}")
         
         # Check if the two sets of numbers match (order does not matter)
         if set(user_numbers) == set(correct_numbers):
@@ -5994,7 +6000,11 @@ def select_trivia_questions(questions_per_round):
             selected_questions.extend(jeopardy_questions)
             question_ids_to_store["jeopardy"].extend(doc["_id"] for doc in jeopardy_questions)
 
-        sample_size = min(num_math_questions, questions_per_round - len(selected_questions))
+        #sample_size = min(num_math_questions, questions_per_round - len(selected_questions))
+        if num_math_questions == 0:
+            sample_size = 0
+        else:
+            sample_size = random.choice([0, num_math_questions])
         if sample_size > 0:
             math_questions = [get_math_question() for _ in range(sample_size)]
             selected_questions.extend(math_questions)

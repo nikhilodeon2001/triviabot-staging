@@ -5250,8 +5250,6 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         "correct_answers": correct_answers,  
         "user_responses": [] 
     })
-
-    print(round_data)
     
     # Extracting the 'Date' field
     response_time = response.headers.get('Date')
@@ -5348,6 +5346,9 @@ def derivative_checker(response, answer):
 
     response = response.translate(str.maketrans('', '', string.punctuation))
     answer = answer.translate(str.maketrans('', '', string.punctuation))
+
+    print(response)
+    print(answer)
 
     if (response == answer or jaccard_similarity(response, answer) == 1) and len(response) == len(answer):
         return True

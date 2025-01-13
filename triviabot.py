@@ -5390,10 +5390,15 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if url == "zeroes":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
         correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]
+
+        print(f"Detected: {user_answer}")
+        print(f"Answer: {correct_answer}")
         
         # Check if the two sets of numbers match (order does not matter)
         if set(user_numbers) == set(correct_numbers):
             return True
+        else
+            return False
 
     if url == "derivative":
         return derivative_checker(user_answer, correct_answer)

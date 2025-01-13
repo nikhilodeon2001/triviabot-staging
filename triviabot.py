@@ -5115,7 +5115,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     send_image_flag = False
 
     message_body = ""
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "base"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "base", "derivative", "factors"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
@@ -5342,6 +5342,8 @@ def is_number(s):
 
 
 def derivative_checker(response, answer):
+    response = response.lower()
+    answer = answer.lower()
     response = response.replace(" ", "")      
     answer = answer.replace(" ", "")
     response = response.replace("^", "")      
@@ -5353,6 +5355,19 @@ def derivative_checker(response, answer):
 
     #response = response.translate(str.maketrans('', '', string.punctuation))
     #answer = answer.translate(str.maketrans('', '', string.punctuation))
+
+    if (response == answer or jaccard_similarity(response, answer) == 1) and len(response) == len(answer):
+        return True
+    else:
+        return False
+
+def factors_checker(response, answer):
+    response = response.lower()
+    answer = answer.lower()
+    response = response.replace(" ", "")      
+    answer = answer.replace(" ", "")
+    response = response.replace("*", "")      
+    answer = answer.replace("*", "")
 
     if (response == answer or jaccard_similarity(response, answer) == 1) and len(response) == len(answer):
         return True
@@ -5393,6 +5408,11 @@ def fuzzy_match(user_answer, correct_answer, category, url):
 
     if url == "derivative":
         return derivative_checker(user_answer, correct_answer)
+
+    if url == "factors":
+        return factors_checker(user_answer, correct_answer)
+
+    
         
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
@@ -5549,7 +5569,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer  
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base"]
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors", "derivative"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}
@@ -5595,7 +5615,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
             if display_name in user_first_response:
                 continue  # Skip if we've already recorded a numeric response for this user
         
-            if is_number(message_content) or message_content.lower() in {"a", "b", "c", "d", "t", "f", "true", "false"}:
+            if is_number(message_content) or message_content[0].isdigit(): or message_content[0].lower() in {"a", "b", "c", "d", "t", "f", "(", "true", "false"}:
                 user_first_response[display_name] = message_content
             else:
                 continue  # Skip non-numeric responses for single numeric questions

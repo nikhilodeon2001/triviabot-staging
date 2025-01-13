@@ -5390,20 +5390,9 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if url == "zeroes":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
         correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]
-
-        print(f"Detected: {user_numbers}")
-        print(f"Correct ones: {correct_numbers}")
-        
-        # Ensure user answer has exactly two numbers
-        if len(user_numbers) != 2:
-            return False
         
         # Check if the two sets of numbers match (order does not matter)
         if set(user_numbers) == set(correct_numbers):
-            return True
-
-        # Step 3: Jaccard similarity (Character level)
-        if jaccard_similarity(user_answer, correct_answer) >= threshold or jaccard_similarity(no_spaces_user, no_spaces_correct) >= threshold:
             return True
 
     if url == "derivative":

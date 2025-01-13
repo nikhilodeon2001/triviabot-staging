@@ -5252,6 +5252,8 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         "correct_answers": correct_answers,  
         "user_responses": [] 
     })
+
+    print(round_data)
     
     # Extracting the 'Date' field
     response_time = response.headers.get('Date')
@@ -5370,6 +5372,9 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if url == "zeroes":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
         correct_numbers = [int(num) for num in re.findall(r'-?\d+', correct_answer)]
+
+        print(user_numbers)
+        print(correct_numbers)
         
         # Ensure user answer has exactly two numbers
         if len(user_numbers) != 2:
@@ -5382,6 +5387,9 @@ def fuzzy_match(user_answer, correct_answer, category, url):
         # Step 3: Jaccard similarity (Character level)
         if jaccard_similarity(user_answer, correct_answer) >= threshold or jaccard_similarity(no_spaces_user, no_spaces_correct) >= threshold:
             return True
+
+    if url == "derivative":
+        return derivative_checker(user_answer, correct_answer)
         
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
@@ -5401,8 +5409,6 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if user_answer == correct_answer:
         return True
     
-    if url == "derivative":
-        return derivative_checker(user_answer, correct_answer)
 
     no_spaces_user = user_answer.replace(" ", "")      
     no_spaces_correct = correct_answer.replace(" ", "") 

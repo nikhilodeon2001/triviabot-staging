@@ -2503,7 +2503,7 @@ def fetch_donations():
 
 def get_math_question():
     #question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question, create_base_question]
-    question_functions = [create_derivative_question]
+    question_functions = [create_factors_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
@@ -5353,9 +5353,6 @@ def derivative_checker(response, answer):
 
     #response = response.translate(str.maketrans('', '', string.punctuation))
     #answer = answer.translate(str.maketrans('', '', string.punctuation))
-
-    print(response)
-    print(answer)
 
     if (response == answer or jaccard_similarity(response, answer) == 1) and len(response) == len(answer):
         return True

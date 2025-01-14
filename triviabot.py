@@ -2502,8 +2502,8 @@ def fetch_donations():
 
 
 def get_math_question():
-    #question_functions = [create_mean_question, create_median_question, create_derivative_question, create_zeroes_question, create_factors_question, create_base_question, create_trig_question]
-    question_functions = [create_zeroes_question]
+    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_zeroes_question, create_factors_question, create_base_question, create_trig_question]
+    #question_functions = [create_zeroes_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 

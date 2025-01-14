@@ -6358,7 +6358,7 @@ def generate_and_render_polynomial(type):
     if sum_term == 0:
         polynomial = f"x² {'+' if product_zeroes >= 0 else '-'} {abs(product_zeroes)}"
     else:
-        polynomial = f"x² {'+' if sum_zeroes >= 0 else '-'} {sum_term}x {'+' if product_zeroes >= 0 else '-'} {abs(product_zeroes)}"
+        polynomial = f"x² {'-' if sum_zeroes >= 0 else '+'} {sum_term}x {'+' if product_zeroes >= 0 else '-'} {abs(product_zeroes)}"
     
     print(f"Polynomial: {polynomial}")
 
@@ -7026,7 +7026,6 @@ def start_trivia():
                 load_global_variables()
 
             load_parameters()
-            fetch_donations()
 
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
@@ -7122,6 +7121,7 @@ def start_trivia():
             round_winner, winner_points = determine_round_winner()
 
             #Update round streaks
+            fetch_donations()
             update_round_streaks(round_winner)
             # Increment the round count
 

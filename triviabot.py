@@ -2502,8 +2502,8 @@ def fetch_donations():
 
 
 def get_math_question():
-    #question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question, create_base_question]
-    question_functions = [create_trig_question]
+    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_sum_zeroes_question, create_product_zeroes_question, create_zeroes_question, create_factors_question, create_base_question, create_trig_question]
+    #question_functions = [create_trig_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
@@ -6078,11 +6078,7 @@ def select_trivia_questions(questions_per_round):
             selected_questions.extend(jeopardy_questions)
             question_ids_to_store["jeopardy"].extend(doc["_id"] for doc in jeopardy_questions)
 
-        #sample_size = min(num_math_questions, questions_per_round - len(selected_questions))
-        if num_math_questions == 0:
-            sample_size = 0
-        else:
-            sample_size = num_math_questions
+        sample_size = min(num_math_questions, questions_per_round - len(selected_questions))
         if sample_size > 0:
             math_questions = [get_math_question() for _ in range(sample_size)]
             selected_questions.extend(math_questions)

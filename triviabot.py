@@ -6079,8 +6079,8 @@ def select_trivia_questions(questions_per_round):
             question_ids_to_store["jeopardy"].extend(doc["_id"] for doc in jeopardy_questions)
 
         
-        num_math_questions = random.randint(0, num_math_questions)
-        sample_size = min(num_math_questions, questions_per_round - len(selected_questions))
+        num_math_questions_mod = random.randint(0, num_math_questions)
+        sample_size = min(num_math_questions_mod, questions_per_round - len(selected_questions))
         if sample_size > 0:
             math_questions = [get_math_question() for _ in range(sample_size)]
             selected_questions.extend(math_questions)

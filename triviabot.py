@@ -4106,7 +4106,7 @@ def generate_trig_question():
         new_solution = "z/y"
 
     print(f"Question: {question_text}")
-    print(f"Answer: {new_solition}")
+    print(f"Answer: {new_solution}")
 
     content_uri, image_width, image_height = download_image_from_url('https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/triangle.png')
 

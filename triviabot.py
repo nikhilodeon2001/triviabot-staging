@@ -4086,8 +4086,7 @@ def generate_trig_question():
     trig_operation = random.choice(["sin", "cos", "tan", "cot", "sec", "csc"])
     
     # Convert the number from the input base to decimal
-    decimal_equivalent = int(base_number, input_base)
-    print(f"Decimal equivalent: {decimal_equivalent}")
+
     
     # Create the question text
     question_text = f"What is {trig_operation}(θ) in the triangle below?"
@@ -4105,6 +4104,9 @@ def generate_trig_question():
         new_solution = "z/x"
     elif trig_operation == "csc":
         new_solution = "z/y"
+
+    print(f"Question: {question_text}")
+    print(f"Answer: {new_solition}")
 
     content_uri, image_width, image_height = download_image_from_url('https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/triangle.png')
 

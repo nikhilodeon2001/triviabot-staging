@@ -39,7 +39,9 @@ import tempfile
 import base64
 from collections import Counter, defaultdict
 import math
-#import sys
+import sys
+import signal
+
 
 # Define the base API URL for Matrix
 matrix_base_url = "https://matrix.redditspace.com/_matrix/client/v3"
@@ -224,11 +226,10 @@ cities = [
 ]
 
 
-
-import io
-import math
-import requests
-from PIL import Image, ImageDraw, ImageFont
+def handle_sigterm(signum, frame):
+    print(f"Received signal {signum}. Printing stack trace:")
+    traceback.print_stack(frame)
+    sys.exit(0)  # Exit gracefully after handling SIGTERM
 
 def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     """
@@ -5416,11 +5417,6 @@ def derivative_checker(response, answer):
     answer = answer.replace("*", "")
     response = normalize_superscripts(response)
     answer = normalize_superscripts(answer)
-    print(f"Response is: {response}")
-    print(f"Answer is: {answer}")
-
-    #response = response.translate(str.maketrans('', '', string.punctuation))
-    #answer = answer.translate(str.maketrans('', '', string.punctuation))
 
     if (response == answer or jaccard_similarity(response, answer) == 1) and len(response) == len(answer):
         return True
@@ -6999,6 +6995,9 @@ def start_trivia():
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra8.gif",
         #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/merry.gif"
     ]
+
+    signal.signal(signal.SIGTERM, handle_sigterm)
+    print(f"Script is running with PID: {os.getpid()}")
     
     try:
         reddit_login()
@@ -7172,7 +7171,6 @@ try:
     #for name, obj in module_items:
     #    if callable(obj) and obj.__module__ == __name__:  # Ensure it's a user-defined function
     #        vars(current_module)[name] = log_execution_time(obj)
-    
     start_trivia()
     
 except Exception as e:

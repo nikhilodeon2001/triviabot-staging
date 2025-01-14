@@ -4183,7 +4183,7 @@ def generate_median_question():
     """
     # Generate a random n between 3 and 7
     content_uri = True
-    n = random.randint(3, 7)
+    n = random.randint(3, 5)
     
     # Generate a random set of n numbers between 1 and 20
     random_numbers = [random.randint(1, 20) for _ in range(n)]

@@ -5688,7 +5688,12 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
             if display_name in user_first_response:
                 continue  # Skip if we've already recorded a numeric response for this user
         
-            if is_number(message_content) or message_content[0].isdigit() or message_content[0].lower() in {"a", "b", "c", "d", "t", "f", "(", "true", "false", "-"}:
+            if (
+                is_number(message_content) or  # Rule 1: message_content is a number
+                message_content[0].isdigit() or  # Rule 2: first character is a number
+                message_content.lower() in {"a", "b", "c", "d", "t", "f", "true", "false"} or  # Rule 3: exact match
+                message_content[0].lower() in {"-", "x", "y", "z"}  # Rule 4: first character match
+            ):
                 user_first_response[display_name] = message_content
             else:
                 continue  # Skip non-numeric responses for single numeric questions

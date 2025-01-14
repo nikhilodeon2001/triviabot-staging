@@ -4079,6 +4079,40 @@ def react_to_message(event_id, room_id, emoji_type):
         print(f"Error reacting to message {event_id}: {e}")
 
 
+
+def generate_trig_question():
+
+    # Generate a random number of 3 or 4 digits in the given base
+    trig_operation = random.choice(["sin", "cos", "tan", "cot", "sec", "csc"])
+    
+    # Convert the number from the input base to decimal
+    decimal_equivalent = int(base_number, input_base)
+    print(f"Decimal equivalent: {decimal_equivalent}")
+    
+    # Create the question text
+    question_text = f"What is {trig_operation}(θ) in the triangle below?"
+    image_description = f"A triangle with specified angle θ. Sides are opposite (x), adjacent (y), and hypotenuse (z)."
+
+    if trig_operation == "sin":
+        new_solution = "y/z"
+    elif trig_operation == "cos":
+        new_solution = "x/z"
+    elif trig_operation == "tan":
+        new_solution = "y/x"
+    elif trig_operation == "cot":
+        new_solution = "x/y"
+    elif trig_operation == "sec":
+        new_solution = "z/x"
+    elif trig_operation == "csc":
+        new_solution = "z/y"
+
+    content_uri, image_width, image_height = download_image_from_url('https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/triangle.png')
+
+    # Return the content_uri, image dimensions, decimal equivalent, and base number
+    return content_uri, image_width, image_height, question_text, new_solution, image_description
+
+
+
 def generate_base_question():
     """
     Generate a question asking for the decimal equivalent of a number in a specific base.
@@ -5135,7 +5169,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     send_image_flag = False
 
     message_body = ""
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "base", "derivative", "factors"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "base", "derivative", "factors", "trig"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
@@ -5403,6 +5437,22 @@ def factors_checker(response, answer):
         return False
 
 
+def trig_checker(response, answer):
+    response = response.lower()
+    answer = answer.lower()
+    response = response.replace(" ", "")      
+    answer = answer.replace(" ", "")
+    response = response.replace("(", "")      
+    answer = answer.replace("(", "")
+    response = response.replace(")", "")      
+    answer = answer.replace(")", "")
+
+    if (response == answer or jaccard_similarity(response, answer) == 1):
+        return True
+    else:
+        return False
+
+
 def fuzzy_match(user_answer, correct_answer, category, url):
     threshold = 0.90    
 
@@ -5413,7 +5463,7 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     no_spaces_correct = correct_answer.replace(" ", "") 
 
     if category == "Crossword":
-        return no_spaces_user.lower() ==no_spaces_correct.lower()
+        return no_spaces_user.lower() == no_spaces_correct.lower()
 
     if url == "zeroes":
         user_numbers = [int(num) for num in re.findall(r'-?\d+', user_answer)]
@@ -5431,6 +5481,8 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if url == "factors":
         return factors_checker(user_answer, correct_answer)
 
+    if url == "trig":
+        return trig_checker(user_answer, correct_answer)
     
         
     if is_number(correct_answer):
@@ -5588,7 +5640,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer  
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors", "derivative"]
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors", "derivative", "trig"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}

@@ -5416,6 +5416,8 @@ def derivative_checker(response, answer):
     answer = answer.replace("*", "")
     response = normalize_superscripts(response)
     answer = normalize_superscripts(answer)
+    print(f"Response is: {response}")
+    print(f"Answer is: {answer}")
 
     #response = response.translate(str.maketrans('', '', string.punctuation))
     #answer = answer.translate(str.maketrans('', '', string.punctuation))

@@ -5449,7 +5449,7 @@ def trig_checker(response, answer):
     response = response.replace(")", "")      
     answer = answer.replace(")", "")
 
-    if (response == answer or jaccard_similarity(response, answer) == 1):
+    if response == answer:
         return True
     else:
         return False

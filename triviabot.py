@@ -5307,7 +5307,17 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
             
     initialize_sync()
     
-    correct_answers = [new_solution] if new_solution else trivia_answer_list
+
+    if new_solution is None:
+    # Use the original trivia answer list if no new solution is provided
+        correct_answers = trivia_answer_list
+    elif isinstance(new_solution, list):
+        # If new_solution is already a list, use it as-is
+        correct_answers = new_solution
+    else:
+        # If new_solution is a single value, wrap it in a list
+        correct_answers = [new_solution]
+    
     round_data["questions"].append({
         "question_number": question_number,
         "question_category": trivia_category,

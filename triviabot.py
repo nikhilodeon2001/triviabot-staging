@@ -574,11 +574,13 @@ def ask_poster_challenge(winner):
     else:
         message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
-        counter = 1
-        for user, count in user_correct_answers.items():
-            message += f"{counter}. @{user}: {count}\n"
-            counter = counter + 1
+
+        # Sort the dictionary by the count (value) in descending order
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
     
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+        
     send_message(target_room_id, message)
     wf_winner = True
     time.sleep(3)

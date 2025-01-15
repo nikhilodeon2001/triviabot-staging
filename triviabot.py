@@ -483,7 +483,8 @@ def ask_poster_challenge(winner):
         time.sleep(2)
         send_message(target_room_id, message)
         time.sleep(2)
-    
+
+        right_answer = False
         while num_of_xs < 3 and right_answer == True:
 
             start_message = ""

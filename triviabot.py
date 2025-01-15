@@ -486,7 +486,8 @@ def ask_poster_challenge(winner):
     
         while num_of_xs < 3:
 
-        start_message = ""
+            start_message = ""
+            
             if num_of_xs == 0:
                 start_message += f"\n🟩🤔 @{winner}, no strikes. Start answer with '#':\n"
             elif num_of_xs == 1:

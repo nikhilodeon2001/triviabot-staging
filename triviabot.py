@@ -6524,6 +6524,9 @@ def generate_and_render_polynomial(type):
     # Format the factors
     factor1 = f"(x {'+' if zero1 < 0 else '-'} {abs(zero1)})"
     factor2 = f"(x {'+' if zero2 < 0 else '-'} {abs(zero2)})"
+    factor1_mod = f"x {'+' if zero1 < 0 else '-'} {abs(zero1)}"
+    factor2_mod = f"x {'+' if zero2 < 0 else '-'} {abs(zero2)}"
+    
 
     # Construct the sum term for the polynomial
     if abs(sum_zeroes) == 1:
@@ -6593,13 +6596,17 @@ def generate_and_render_polynomial(type):
                 f"{zero1} and {zero2}",
                 f"{zero2} and {zero1}",
                 f"{zero1}, {zero2}",
-                f"{zero2}, {zero1}"
+                f"{zero2}, {zero1}",
+                f"{zero1} {zero2}",
+                f"{zero2} {zero1}"
             ]
             return content_uri, img_width, img_height, zeroes_str, polynomial
         elif type == "factors":
             factored_str = [
                 f"{factor1}{factor2}",
-                f"{factor2}{factor1}"
+                f"{factor2}{factor1}",
+                f"{factor1_mod}{factor2_mod}",
+                f"{factor2_mod}{factor1_mod}"
             ]
             return content_uri, img_width, img_height, factored_str, polynomial
     else:

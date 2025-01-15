@@ -484,7 +484,7 @@ def ask_poster_challenge(winner):
         send_message(target_room_id, message)
         time.sleep(2)
     
-        while num_of_xs < 3:
+        while num_of_xs < 3 and right_answer == True:
 
             start_message = ""
             
@@ -583,10 +583,12 @@ def ask_poster_challenge(winner):
                         correct_guesses = correct_guesses + 1
                         break
                         
-            if right_answer == False:
-                num_of_xs = num_of_xs + 1
-                message = f"\n❌😢 Wrong @{winner}. Nice try...I guesss.\n"
-                send_message(target_room_id, message)
+            if right_answer == True:
+                break
+                
+            num_of_xs = num_of_xs + 1
+            message = f"\n❌😢 Wrong @{winner}. Nice try...I guesss.\n"
+            send_message(target_room_id, message)
     
             time.sleep(1)
                         

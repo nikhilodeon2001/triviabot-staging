@@ -587,7 +587,7 @@ def ask_poster_challenge(winner):
                 break
                 
             num_of_xs = num_of_xs + 1
-            message = f"\n❌😢 Wrong @{winner}. Answer: {posters_answer[0]}\n"
+            message = f"\n❌😢 Wrong @{winner}. Answer: {posters_answers[0]}\n"
             send_message(target_room_id, message)
     
             time.sleep(1)

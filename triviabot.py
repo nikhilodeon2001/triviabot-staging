@@ -488,11 +488,11 @@ def ask_poster_challenge(winner):
             start_message = ""
             
             if num_of_xs == 0:
-                start_message += f"\n🟩🤔 @{winner}, no strikes. Start answer with '#':\n"
+                start_message += f"\n🟩🤔 @{winner}, 0/3 strikes. Start answer with '#':\n"
             elif num_of_xs == 1:
-                start_message += f"\n🟨🤔 @{winner}, you have 1 strike. Start answer with '#':\n"
+                start_message += f"\n🟨🤔 @{winner}, 1/3 strikes. Start answer with '#':\n"
             elif num_of_xs == 2:
-                start_message += f"\n🟥🤔 @{winner}, you have 2 strikes. Start answer with '#':\n"
+                start_message += f"\n🟥🤔 @{winner}, 2/3 strikes! Start answer with '#':\n"
            
             if correct_guesses > 0:
                 start_message += f"\nCorrect guesses: {correct_guesses}\n"
@@ -561,6 +561,7 @@ def ask_poster_challenge(winner):
                             message = f"\n⚖️🤔 Judges?\n"
                             send_message(target_room_id, message)
                             message_received = True
+                            time.sleep(2)
                             break
                     
                             
@@ -586,7 +587,7 @@ def ask_poster_challenge(winner):
                 break
                 
             num_of_xs = num_of_xs + 1
-            message = f"\n❌😢 Wrong @{winner}. Nice try...I guesss.\n"
+            message = f"\n❌😢 Wrong @{winner}. Answer: {posters_answer[0]}\n"
             send_message(target_room_id, message)
     
             time.sleep(1)

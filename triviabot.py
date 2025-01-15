@@ -498,9 +498,6 @@ def ask_poster_challenge(winner):
         send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
         time.sleep(1)
         send_message(target_room_id, message)
-        time.sleep(2)
-        message = f"\n👉👉 {list_question_clue}\n\n🟢🚀 GO!"
-        send_message(target_room_id, message)
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts

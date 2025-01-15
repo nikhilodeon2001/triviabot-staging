@@ -2818,8 +2818,8 @@ def select_wof_questions(winner):
         message += f"{counter}. 📝📚 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         message += f"{counter} 👨‍👩‍👧‍👦⚔️ FeUd ☕\n"
-        counter = counter + 1
-        message += f"{counter} 🎥🌟 Poster Challenge ☕"
+        #counter = counter + 1
+        #message += f"{counter} 🎥🌟 Poster Challenge ☕"
             
         send_message(target_room_id, message)  
         
@@ -2847,10 +2847,10 @@ def select_wof_questions(winner):
             time.sleep(3)
             return None
 
-        elif selected_wof_category == "11":
-            ask_poster_challenge(winner)
-            time.sleep(3)
-            return None
+        #elif selected_wof_category == "11":
+            #ask_poster_challenge(winner)
+            #time.sleep(3)
+            #return None
         
         elif selected_wof_category == "5":
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
@@ -3225,9 +3225,9 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) > 4:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11"]
+                            set_b = ["5", "6", "7", "8", "9", "10"]
                         else:
-                            set_b = ["5", "6", "7", "8", "10", "11"]
+                            set_b = ["5", "6", "7", "8", "10"]
                     
                         # Choose from set_a 90% of the time, set_b 10% of the time
                         if random.random() < 0.9:
@@ -3273,11 +3273,11 @@ def ask_wof_number(winner):
                         continue
 
                     
-                    if str(message_content) in {"11"} and winner_coffees <= 0:
-                        react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Poster Challenge' requires ☕️.\n"
-                        send_message(target_room_id, message)
-                        continue
+                    #if str(message_content) in {"11"} and winner_coffees <= 0:
+                        #react_to_message(event_id, target_room_id, "okra5")
+                        #message = f"\n🙏😔 Sorry {winner}. 'Poster Challenge' requires ☕️.\n"
+                        #send_message(target_room_id, message)
+                        #continue
 
                     if str(message_content) in {"9"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
@@ -3292,7 +3292,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -3310,9 +3310,9 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) > 4:
-        set_b = ["5", "6", "7", "8", "9", "10", "11"]
+        set_b = ["5", "6", "7", "8", "9", "10"]
     else:
-        set_b = ["5", "6", "7", "8", "10", "11"]
+        set_b = ["5", "6", "7", "8", "10"]
 
     # Choose from set_a 90% of the time, set_b 10% of the time
     if random.random() < 0.9:

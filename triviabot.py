@@ -5689,13 +5689,6 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if is_number(correct_answer):
         return user_answer == correct_answer  # Only accept exact match if the correct answer is a number
 
-    if len(user_answer) < 5:
-        return user_answer == correct_answer  # Only accept an exact match for short answers
-    
-    if user_answer == correct_answer:
-        return True
-    
-
     no_spaces_user = user_answer.replace(" ", "")      
     no_spaces_correct = correct_answer.replace(" ", "") 
 
@@ -5707,6 +5700,13 @@ def fuzzy_match(user_answer, correct_answer, category, url):
 
     if no_spaces_user == no_spaces_correct or no_filler_user == no_filler_correct or no_filler_spaces_user == no_filler_spaces_correct:     
         return True
+
+    if len(user_answer) < 5:
+        return user_answer == correct_answer  # Only accept an exact match for short answers
+    
+    if user_answer == correct_answer:
+        return True
+    
          
     # New Step: First 5 characters match
     if user_answer[:5] == correct_answer[:5] or no_spaces_user[:5] == no_spaces_correct[:5] or no_filler_user[:5] == no_filler_correct[:5] or no_filler_spaces_user[:5] == no_filler_spaces_correct[:5]:

@@ -478,7 +478,7 @@ def ask_poster_challenge(winner):
     
         
         message = f"\n🖼️❓ @{winner}. What {posters_category.upper()} is depicted in the poster above? You get 3 chances.\n"
-        message += f"\n📅💡 Year: {year}\n"
+        message += f"\n📅💡 Year: {posters_year}\n"
         send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
         time.sleep(2)
         send_message(target_room_id, message)
@@ -2811,7 +2811,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 📝📚 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter} 👨‍👩‍👧‍👦⚔️ FeUd ☕"
+        message += f"{counter} 👨‍👩‍👧‍👦⚔️ FeUd ☕\n"
         counter = counter + 1
         message += f"{counter} 🎥🌟 Poster Challenge ☕"
             

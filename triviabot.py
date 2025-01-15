@@ -1,5 +1,6 @@
 
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -3798,11 +3799,38 @@ def generate_mc_image(answers):
 def draw_text_wrapper(text, font, max_width):
     lines = []
     words = text.split()
+    
     while words:
         line = ""
-        while words and font.getbbox(line + words[0])[2] <= max_width:
-            line += (words.pop(0) + " ")
-        lines.append(line)
+        
+        while words:
+            word = words[0]
+            
+            # If the word itself is too long, split it
+            while font.getsize(word)[0] > max_width:
+                # Calculate the maximum number of characters that fit
+                for i in range(1, len(word) + 1):
+                    if font.getsize(word[:i])[0] > max_width:
+                        break
+                # Add the chunk that fits to the line
+                if line:
+                    lines.append(line.strip())
+                    line = ""
+                lines.append(word[:i-1])  # Save the chunk as its own line
+                # Update the remaining part of the word
+                word = word[i-1:]
+            words[0] = word
+            
+            # Check if adding the next word fits
+            if font.getsize(line + word)[0] <= max_width:
+                line += words.pop(0) + " "
+            else:
+                break
+        
+        # Append the line to lines
+        if line.strip():
+            lines.append(line.strip())
+    
     return lines
 
 

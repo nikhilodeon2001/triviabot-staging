@@ -472,7 +472,7 @@ def ask_poster_challenge(winner):
             print(f"Error selecting posters questions: {e}\nDetailed traceback:\n{error_details}")
             return None  # Return an empty list in case of failure
 
-        poster_category_emojis = get_category_title(poster_category, "")
+        poster_category_emojis = get_category_title(posters_category, "")
         processed_events = set()  # Track processed event IDs to avoid duplicates        
         posters_mxc, posters_width, posters_height = download_image_from_url(posters_url)
         posters_size = 100

@@ -451,6 +451,7 @@ def ask_poster_challenge(winner):
 
     num_of_xs = 0
     correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
     
     while num_of_xs < 3:
         try:
@@ -545,6 +546,12 @@ def ask_poster_challenge(winner):
                                 send_message(target_room_id, message)
                                 right_answer = True
                                 correct_guesses = correct_guesses + 1
+
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                user_correct_answers[sender_display_name] += 1
+                                
                                 break   
                         
                         if right_answer == True:
@@ -566,6 +573,11 @@ def ask_poster_challenge(winner):
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
     else:
         message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        message += "\n 🏆 Commendable Okrans\n"
+        counter = 1
+        for user, count in user_correct_answers.items():
+            message += f"{counter}. @{user}: {count}\n"
+            counter = counter + 1
     
     send_message(target_room_id, message)
     wf_winner = True

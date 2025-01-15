@@ -424,6 +424,7 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     return image_mxc, width, height
 
 
+
 def ask_poster_challenge(winner):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
     
@@ -471,138 +472,103 @@ def ask_poster_challenge(winner):
             print(f"Error selecting posters questions: {e}\nDetailed traceback:\n{error_details}")
             return None  # Return an empty list in case of failure
 
+        poster_category_emojis = get_category_title(poster_category, "")
         processed_events = set()  # Track processed event IDs to avoid duplicates        
         posters_mxc, posters_width, posters_height = download_image_from_url(posters_url)
         posters_size = 100
+
+        start_message = ""
+        
+        if num_of_xs == 0:
+            start_message += f"\n🟩🤔 You have 0/3 strikes.\n"
+        elif num_of_xs == 1:
+            start_message += f"\n🟨🤔 You have 1/3 strikes...\n"
+        elif num_of_xs == 2:
+            start_message += f"\n🟥🤔 You have 2/3 strikes!\n"
+       
+        if correct_guesses > 0:
+            start_message += f"\nCorrect guesses: {correct_guesses}\n"
+
+        send_message(target_room_id, start_message)
+        time.sleep(2)
             
-        message = f"\n🖼️❓ @{winner}. What {posters_category.upper()} is depicted in the poster above?\n"
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        message += f"\n🎥🌟 What {posters_category.upper()} is depicted in the poster above?\n"
         message += f"\n📅💡 Year: {posters_year}\n"
         send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
         time.sleep(1)
         send_message(target_room_id, message)
-        time.sleep(1)
+        time.sleep(2)
+        message = f"\n👉👉 {list_question_clue}\n\n🟢🚀 GO!"
+        send_message(target_room_id, message)
 
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
         right_answer = False
-        while right_answer == False and num_of_xs < 3:
-
-            start_message = ""
-            
-            if num_of_xs == 0:
-                start_message += f"\n🟩🤔 @{winner}, 0/3 strikes. Start answer with '#':\n"
-            elif num_of_xs == 1:
-                start_message += f"\n🟨🤔 @{winner}, 1/3 strikes. Start answer with '#':\n"
-            elif num_of_xs == 2:
-                start_message += f"\n🟥🤔 @{winner}, 2/3 strikes! Start answer with '#':\n"
-           
-            if correct_guesses > 0:
-                start_message += f"\nCorrect guesses: {correct_guesses}\n"
+        
+        while time.time() - start_time < 20 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
     
-            send_message(target_room_id, start_message)
-            
-            initialize_sync()
-            start_time = time.time()  # Track when the question starts
-            message_received = False
-            message_content = ""
-            
-            while time.time() - start_time < 10 and message_received == False:
-                try:
-                                                                           
-                    if since_token:
-                        params["since"] = since_token
-        
-                    response = requests.get(sync_url, headers=headers, params=params)
-        
-                    if response.status_code != 200:
-                        print(f"Unexpected status code: {response.status_code}")
-                        continue
-        
-                    sync_data = response.json()
-                    since_token = sync_data.get("next_batch")  # Update since_token for the next batch
-                    room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
-        
-                    for event in room_events:                
-                        event_id = event["event_id"]
-                        event_type = event.get("type")
-        
-                        # Only process and redact if the event type is "m.room.message"
-                        if event_type == "m.room.message":
-                            
-                            # Skip processing if this event_id was already processed
-                            if event_id in processed_events:
-                                continue
-            
-                            # Add event_id to the set of processed events
-                            processed_events.add(event_id)
-                            sender = event["sender"]
-        
-                            if sender == bot_user_id:
-                                continue
-        
-                            sender_display_name = get_display_name(sender)
-                            
-                            if sender_display_name != winner:
-                                continue
-        
-                            message_content = event.get("content", {}).get("body", "")
-                             # Only process messages starting with '#'
-                            if not message_content.startswith('#'):
-                                continue
+                response = requests.get(sync_url, headers=headers, params=params)
     
-                            # Remove the '#' from the beginning
-                            message_content = message_content[1:]
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
     
-                            message_content_upper = message_content.upper()
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
     
-                            message = f"\n🏆🗣️ @{winner} says {message_content_upper}\n"
-                            send_message(target_room_id, message)
-                            
-                            time.sleep(2)
-                            
-                            message = f"\n⚖️🤔 Judges?\n"
-                            send_message(target_room_id, message)
-                            message_received = True
-                            time.sleep(2)
-                            break
-                    
-                            
-                except Exception as e:
-                    print(f"Error processing events: {e}")
-                
-            # Iterate over all validAnswers
-            right_answer = False
+                for event in room_events and right_answer == False:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
     
-            if message_content == "":
-                message = f"\n @{winner} says *crickets*\n"
-                send_message(target_room_id, message)
-            else:
-                for answer in posters_answers:
-                    if fuzzy_match(message_content, answer, posters_category, posters_url):
-                        message = f"\n🏆🎉 Correct @{winner}! Answer: {answer.upper()}"
-                        send_message(target_room_id, message)
-                        right_answer = True
-                        correct_guesses = correct_guesses + 1
-                        break
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
                         
-            if right_answer == True:
-                break
-                
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+                        
+                        for answer in posters_answers:
+                            if fuzzy_match(message_content, answer, posters_category, posters_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
+                                send_message(target_room_id, message)
+                                right_answer = True
+                                correct_guesses = correct_guesses + 1
+                                break                    
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
             num_of_xs = num_of_xs + 1
-            message = f"\n❌😢 Wrong @{winner}.\n\nAnswer: {posters_answers[0]}\n"
+            message = f"\n❌😢 No one got it.\n\nAnswer: {posters_answers[0].upper()}\n"
             send_message(target_room_id, message)
             time.sleep(1)
-            break
                         
     if correct_guesses == 0:
-        message = f"\n👎😢 Shame on @{winner} with a big fat 0.\n"
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
     else:
-        message = f"\n🎉✅ Congrats @{winner}, you got {correct_guesses} right!\n"
+        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+    
     send_message(target_room_id, message)
     wf_winner = True
     time.sleep(3)
     return None
-
-
-
 
 
 
@@ -2815,12 +2781,12 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
+        message += f"{counter}. 👨‍👩‍👧‍👦⚔️ FeUd ☕\n"
+        counter = counter + 1
         message += f"{counter}. 📝📚 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter} 👨‍👩‍👧‍👦⚔️ FeUd ☕\n"
-        #counter = counter + 1
-        #message += f"{counter} 🎥🌟 Poster Challenge ☕"
-            
+        message += f"{counter}. 🎥🌟 Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕"
+        
         send_message(target_room_id, message)  
         
         message = f"00. 🥗🌟 Okra's Choice\n"
@@ -2837,20 +2803,20 @@ def select_wof_questions(winner):
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
-        elif selected_wof_category == "9":
+        elif selected_wof_category == "10":
             ask_list_question(winner)
             time.sleep(3)
             return None
 
-        elif selected_wof_category == "10":
+        elif selected_wof_category == "9":
             ask_feud_question(winner)
             time.sleep(3)
             return None
 
-        #elif selected_wof_category == "11":
-            #ask_poster_challenge(winner)
-            #time.sleep(3)
-            #return None
+        elif selected_wof_category == "11":
+            ask_poster_challenge(winner)
+            time.sleep(3)
+            return None
         
         elif selected_wof_category == "5":
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
@@ -3225,9 +3191,9 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) > 4:
-                            set_b = ["5", "6", "7", "8", "9", "10"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11"]
                         else:
-                            set_b = ["5", "6", "7", "8", "10"]
+                            set_b = ["5", "6", "7", "8", "10", "11"]
                     
                         # Choose from set_a 90% of the time, set_b 10% of the time
                         if random.random() < 0.9:
@@ -3266,33 +3232,39 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"10"} and winner_coffees <= 0:
+                    if str(message_content) in {"9"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'FeUd' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
                     
-                    #if str(message_content) in {"11"} and winner_coffees <= 0:
-                        #react_to_message(event_id, target_room_id, "okra5")
-                        #message = f"\n🙏😔 Sorry {winner}. 'Poster Challenge' requires ☕️.\n"
-                        #send_message(target_room_id, message)
-                        #continue
+                    if str(message_content) in {"11"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Poster Blitz' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
 
-                    if str(message_content) in {"9"} and winner_coffees <= 0:
+                    if str(message_content) in {"11"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Poster Blitz' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"10"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"9"} and len(round_responders) < num_list_players:
+                    if str(message_content) in {"10"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -3310,9 +3282,9 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) > 4:
-        set_b = ["5", "6", "7", "8", "9", "10"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11"]
     else:
-        set_b = ["5", "6", "7", "8", "10"]
+        set_b = ["5", "6", "7", "8", "10", "11"]
 
     # Choose from set_a 90% of the time, set_b 10% of the time
     if random.random() < 0.9:

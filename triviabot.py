@@ -550,7 +550,7 @@ def ask_poster_challenge(winner):
                         if right_answer == True:
                             break
 
-                    if right_anwer == True:
+                    if right_answer == True:
                         break
                         
             except Exception as e:

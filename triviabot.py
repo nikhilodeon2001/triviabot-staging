@@ -3807,10 +3807,10 @@ def draw_text_wrapper(text, font, max_width):
             word = words[0]
             
             # If the word itself is too long, split it
-            while font.getsize(word)[0] > max_width:
+            while font.getbbox(word)[2] - font.getbbox(word)[0] > max_width:
                 # Calculate the maximum number of characters that fit
                 for i in range(1, len(word) + 1):
-                    if font.getsize(word[:i])[0] > max_width:
+                    if font.getbbox(word[:i])[2] - font.getbbox(word[:i])[0] > max_width:
                         break
                 # Add the chunk that fits to the line
                 if line:
@@ -3822,7 +3822,7 @@ def draw_text_wrapper(text, font, max_width):
             words[0] = word
             
             # Check if adding the next word fits
-            if font.getsize(line + word)[0] <= max_width:
+            if font.getbbox(line + word)[2] - font.getbbox(line + word)[0] <= max_width:
                 line += words.pop(0) + " "
             else:
                 break

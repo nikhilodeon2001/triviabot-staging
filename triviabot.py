@@ -480,11 +480,11 @@ def ask_poster_challenge(winner):
         start_message = ""
         
         if num_of_xs == 0:
-            start_message += f"\n🟩🤔 You have 0/3 strikes.\n"
+            start_message += f"\n🟩🤔 Okrans, you have 0/3 strikes.\n"
         elif num_of_xs == 1:
-            start_message += f"\n🟨🤔 You have 1/3 strikes...\n"
+            start_message += f"\n🟨🤔 Okrans, you have 1/3 strikes...\n"
         elif num_of_xs == 2:
-            start_message += f"\n🟥🤔 You have 2/3 strikes!\n"
+            start_message += f"\n🟥🤔 Okrans, you have 2/3 strikes!\n"
        
         if correct_guesses > 0:
             start_message += f"\nCorrect guesses: {correct_guesses}\n"

@@ -483,7 +483,7 @@ def ask_poster_challenge(winner):
         time.sleep(1)
 
         right_answer = False
-        while right_answer == False:
+        while right_answer == False and num_of_xs < 3:
 
             start_message = ""
             

@@ -454,7 +454,7 @@ def ask_poster_challenge(winner):
             posters_question = posters_questions[0]
             posters_category = posters_question["category"]
             posters_answers = posters_question["answers"]   
-            posters_year = posters_question["year"]
+            posters_year = posters_question["question"]
             posters_url = posters_question["url"]
             posters_question_id = posters_question["_id"]  # Get the ID of the selected question
             

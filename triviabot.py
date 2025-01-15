@@ -496,7 +496,6 @@ def ask_poster_challenge(winner):
         message += f"\n🎥🌟 What {posters_category.upper()} is depicted in the poster above?\n"
         message += f"\n📅💡 Year: {posters_year}\n"
         send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
-        time.sleep(1)
         send_message(target_room_id, message)
 
         initialize_sync()
@@ -519,7 +518,7 @@ def ask_poster_challenge(winner):
                 since_token = sync_data.get("next_batch")  # Update since_token for the next batch
                 room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
     
-                for event in room_events and right_answer == False:                
+                for event in room_events:                
                     event_id = event["event_id"]
                     event_type = event.get("type")
     
@@ -546,7 +545,13 @@ def ask_poster_challenge(winner):
                                 send_message(target_room_id, message)
                                 right_answer = True
                                 correct_guesses = correct_guesses + 1
-                                break                    
+                                break   
+                        
+                        if right_answer == True:
+                            break
+
+                    if right_anwer == True:
+                        break
                         
             except Exception as e:
                 print(f"Error processing events: {e}")

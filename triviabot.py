@@ -504,7 +504,7 @@ def ask_poster_challenge(winner):
         message_content = ""
         right_answer = False
         
-        while time.time() - start_time < 20 and right_answer == False:
+        while time.time() - start_time < 15 and right_answer == False:
             try:                                                      
                 if since_token:
                     params["since"] = since_token

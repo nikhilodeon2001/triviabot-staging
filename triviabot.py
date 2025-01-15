@@ -478,9 +478,9 @@ def ask_poster_challenge(winner):
         message = f"\n🖼️❓ @{winner}. What {posters_category.upper()} is depicted in the poster above?\n"
         message += f"\n📅💡 Year: {posters_year}\n"
         send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
-        time.sleep(2)
+        time.sleep(1)
         send_message(target_room_id, message)
-        time.sleep(2)
+        time.sleep(1)
 
         right_answer = False
         while right_answer == False:
@@ -591,14 +591,14 @@ def ask_poster_challenge(winner):
     
             time.sleep(1)
                         
-        if correct_guesses == 0:
-            message = f"\n👎😢 Shame on @{winner} with a big fat 0.\n"
-        else:
-            message = f"\n🎉✅ Congrats @{winner}, you got {correct_guesses} right!\n"
-        send_message(target_room_id, message)
-        wf_winner = True
-        time.sleep(3)
-        return None
+    if correct_guesses == 0:
+        message = f"\n👎😢 Shame on @{winner} with a big fat 0.\n"
+    else:
+        message = f"\n🎉✅ Congrats @{winner}, you got {correct_guesses} right!\n"
+    send_message(target_room_id, message)
+    wf_winner = True
+    time.sleep(3)
+    return None
 
 
 

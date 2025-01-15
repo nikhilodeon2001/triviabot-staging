@@ -448,7 +448,10 @@ def ask_poster_challenge(winner):
         print(f"Error selecting posters questions: {e}\nDetailed traceback:\n{error_details}")
         return None  # Return an empty list in case of failure
 
-    while True:
+    num_of_xs = 0
+    correct_guesses = 0
+    
+    while num_of_xs < 3:
         try:
             posters_questions = list(posters_collection.aggregate(pipeline_posters))
             posters_question = posters_questions[0]
@@ -468,15 +471,10 @@ def ask_poster_challenge(winner):
             print(f"Error selecting posters questions: {e}\nDetailed traceback:\n{error_details}")
             return None  # Return an empty list in case of failure
 
-        processed_events = set()  # Track processed event IDs to avoid duplicates
-        user_progress = []
-        num_of_xs = 0
-        correct_guesses = 0
-    
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
         posters_mxc, posters_width, posters_height = download_image_from_url(posters_url)
         posters_size = 100
-    
-        
+            
         message = f"\n🖼️❓ @{winner}. What {posters_category.upper()} is depicted in the poster above?\n"
         message += f"\n📅💡 Year: {posters_year}\n"
         send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
@@ -485,7 +483,7 @@ def ask_poster_challenge(winner):
         time.sleep(2)
 
         right_answer = False
-        while num_of_xs < 3 and right_answer == True:
+        while right_answer == False:
 
             start_message = ""
             

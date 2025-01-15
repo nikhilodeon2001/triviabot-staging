@@ -477,7 +477,7 @@ def ask_poster_challenge(winner):
         posters_size = 100
     
         
-        message = f"\n🖼️❓ @{winner}. What {posters_category.upper()} is depicted in the poster above? You get 3 chances.\n"
+        message = f"\n🖼️❓ @{winner}. What {posters_category.upper()} is depicted in the poster above?\n"
         message += f"\n📅💡 Year: {posters_year}\n"
         send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
         time.sleep(2)
@@ -486,13 +486,15 @@ def ask_poster_challenge(winner):
     
         while num_of_xs < 3:
             
-            start_message = f"\n👉👉 {feud_question_prompt.upper()}\n"
             if num_of_xs == 0:
                 start_message += f"\n🟩🤔 @{winner}, no strikes. Start answer with '#':\n"
             elif num_of_xs == 1:
                 start_message += f"\n🟨🤔 @{winner}, you have 1 strike. Start answer with '#':\n"
             elif num_of_xs == 2:
                 start_message += f"\n🟥🤔 @{winner}, you have 2 strikes. Start answer with '#':\n"
+           
+            if correct_guesses > 0:
+                start_message += f"\nCorrect guesses: {correct_guesses}\n"
     
             send_message(target_room_id, start_message)
             

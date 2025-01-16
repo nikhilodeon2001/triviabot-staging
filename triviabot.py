@@ -639,7 +639,7 @@ def ask_feud_question(winner, mode):
         print(f"Error selecting feud questions: {e}\nDetailed traceback:\n{error_details}")
         return None  # Return an empty list in case of failure
 
-    while num_of_xs < 3 and right_answer == False::
+    while num_of_xs < 3 and right_answer == False:
         
         processed_events = set()  # Track processed event IDs to avoid duplicates  
         num_of_answers = len(feud_question_answers)

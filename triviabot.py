@@ -649,6 +649,11 @@ def ask_feud_question(winner, mode):
     right_answer = False
 
     if mode == "solo":
+        guess_time = 10
+    elif mode == "cooperative"
+        guess_time = 6
+
+    if mode == "solo":
         prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
     elif mode == "cooperative":
         prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 of you...\n"
@@ -696,7 +701,7 @@ def ask_feud_question(winner, mode):
         start_time = time.time()  # Track when the question starts
         message_content = ""
         
-        while time.time() - start_time < 6 and right_answer == False:
+        while time.time() - start_time < guess_time and right_answer == False:
             try:                                                      
                 if since_token:
                     params["since"] = since_token

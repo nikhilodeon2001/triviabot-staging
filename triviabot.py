@@ -2795,11 +2795,13 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
-        message += f"{counter}. 👨‍👩‍👧‍👦⚔️ FeUd ☕\n"
+        message += f"{counter}. ⚔️🥊 FeUd ☕\n"
         counter = counter + 1
-        message += f"{counter}. 📝📚 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. ⚔️⚡ FeUd Blitz ✨CO-OP ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🎥🌟 Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕"
+        message += f"{counter}. 📝🥊 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        counter = counter + 1
+        message += f"{counter}. 🎥⚡ Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕"
         
         send_message(target_room_id, message)  
         
@@ -2817,17 +2819,22 @@ def select_wof_questions(winner):
             if wof_question_id:
                 store_question_ids_in_mongo([wof_question_id], "wof")  # Store it as a list containing a single ID
         
-        elif selected_wof_category == "10":
+        elif selected_wof_category == "11":
             ask_list_question(winner)
             time.sleep(3)
             return None
 
-        elif selected_wof_category == "9":
-            ask_feud_question(winner)
+        elif selected_wof_category == "10":
+            ask_feud_question(winner, "cooperative")
             time.sleep(3)
             return None
 
-        elif selected_wof_category == "11":
+        elif selected_wof_category == "9":
+            ask_feud_question(winner, "solo")
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "12":
             ask_poster_challenge(winner)
             time.sleep(3)
             return None
@@ -3205,7 +3212,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -3252,33 +3259,39 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    if str(message_content) in {"10"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'FeUd Blitz' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     
-                    if str(message_content) in {"11"} and winner_coffees <= 0:
+                    if str(message_content) in {"12"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'Poster Blitz' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"11"} and len(round_responders) < num_list_players:
+                    if str(message_content) in {"12"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'Poster Blitz' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"10"} and winner_coffees <= 0:
+                    if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"10"} and len(round_responders) < num_list_players:
+                    if str(message_content) in {"11"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -3296,7 +3309,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 

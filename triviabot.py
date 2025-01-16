@@ -741,7 +741,11 @@ def ask_feud_question(winner, mode):
                             
                         message_content = event.get("content", {}).get("body", "")
                         
+                        
                         for answer in feud_question_answers:
+                            if answer in user_progress:
+                                continue
+                                
                             if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
                                 user_progress.append(answer)
                                 print(answer)

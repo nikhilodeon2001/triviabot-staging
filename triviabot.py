@@ -639,6 +639,7 @@ def ask_feud_question(winner, mode):
         print(f"Error selecting feud questions: {e}\nDetailed traceback:\n{error_details}")
         return None  # Return an empty list in case of failure
 
+    right_answer = False
     while num_of_xs < 3 and right_answer == False:
         
         processed_events = set()  # Track processed event IDs to avoid duplicates  
@@ -694,7 +695,6 @@ def ask_feud_question(winner, mode):
         initialize_sync()
         start_time = time.time()  # Track when the question starts
         message_content = ""
-        right_answer = False
         
         while time.time() - start_time < 6 and right_answer == False:
             try:                                                      
@@ -777,6 +777,15 @@ def ask_feud_question(winner, mode):
             message = f"\n🙄😒 Wow...you got {correct_guesses}/{num_of_answers}.\n"
         else:
             message = f"\n🎉✅ Congrats Okrans! You got all {correct_guesses} right!\n"
+
+        if len(user_progress) > 0:
+            message += "\n 🏆 Commendable Okrans\n"
+
+            # Sort the dictionary by the count (value) in descending order
+            sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+        
+            for counter, (user, count) in enumerate(sorted_users, start=1):
+                message += f"{counter}. @{user}: {count}\n"
             
     elif mode == "solo":
         if len(user_progress) == 0:
@@ -785,12 +794,6 @@ def ask_feud_question(winner, mode):
             message = f"\n🙄😒 Wow @{winner}...you got {correct_guesses}/{num_of_answers}.\n"
         else:
             message = f"\n🎉✅ Congrats @{winner}! You got all {correct_guesses} right!\n"
-
-        # Sort the dictionary by the count (value) in descending order
-        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
-    
-        for counter, (user, count) in enumerate(sorted_users, start=1):
-            message += f"{counter}. @{user}: {count}\n"
 
     final_feud_image_mxc, finalfeud_image_width, final_feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
     answer_feud_image_mxc, answer_feud_image_width, answer_feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)

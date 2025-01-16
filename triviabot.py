@@ -689,7 +689,7 @@ def ask_feud_question(winner, mode):
                 start_message += f"\n🟨🤔 @{winner}, this is your 2nd round (out of 3)\n"
             elif num_of_xs == 2:
                 start_message += f"\n🟥🤔 @{winner}, this is your last round!\n"
-        send_message(target_room_id, message)
+        send_message(target_room_id, start_message)
 
         
         initialize_sync()

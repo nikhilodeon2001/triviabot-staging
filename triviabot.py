@@ -682,18 +682,18 @@ def ask_feud_question(winner, mode):
             
         if mode == "cooperative":
             if num_of_xs == 0:
-                start_message += f"\n🟩🤔 Okrans, this is your 1st round (out of 3).\n"
+                start_message += f"\n🟩🤔 Okrans, round 1/3...GO!\n"
             elif num_of_xs == 1:
-                start_message += f"\n🟨🤔 Okrans, this is your 2nd round (out of 3)\n"
+                start_message += f"\n🟨🤔 Okrans, round 2/3...GO!\n"
             elif num_of_xs == 2:
-                start_message += f"\n🟥🤔 Okrans, this is your last round!\n"
+                start_message += f"\n🟥🤔 Okrans, last round...GO!\n"
         if mode == "solo":
             if num_of_xs == 0:
-                start_message += f"\n🟩🤔 @{winner}, this is your 1st round (out of 3).\n"
+                start_message += f"\n🟩🤔 @{winner}, round 1/3...GO!\n"
             elif num_of_xs == 1:
-                start_message += f"\n🟨🤔 @{winner}, this is your 2nd round (out of 3)\n"
+                start_message += f"\n🟨🤔 @{winner}, round 2/3...GO!\n"
             elif num_of_xs == 2:
-                start_message += f"\n🟥🤔 @{winner}, this is your last round!\n"
+                start_message += f"\n🟥🤔 @{winner}, last round...GO!\n"
         send_message(target_room_id, start_message)
 
         

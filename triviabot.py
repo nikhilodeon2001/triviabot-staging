@@ -6254,14 +6254,20 @@ def store_all_question_ids(question_ids_by_type):
         collection_name = f"asked_{question_type}_questions"
         questions_collection = db[collection_name]
 
-        # Insert new IDs
-        questions_collection.insert_many([{"_id": _id} for _id in question_ids])
+        for _id in question_ids:
+            # Use upsert to insert or update the document if it doesn't exist
+            questions_collection.update_one(
+                {"_id": _id},  # Match the document by its _id
+                {"$setOnInsert": {"_id": _id, "timestamp": datetime.datetime.now(datetime.UTC)}},  # Insert only if not present
+                upsert=True  # Enable upsert behavior
+            )
 
         # Check if the collection exceeds its limit and delete old entries if necessary
         limit = id_limits[question_type]
         total_ids = questions_collection.count_documents({})
         if total_ids > limit:
             excess = total_ids - limit
+            # Find the oldest entries based on timestamp
             oldest_entries = questions_collection.find().sort("timestamp", 1).limit(excess)
             for entry in oldest_entries:
                 questions_collection.delete_one({"_id": entry["_id"]})

@@ -779,9 +779,9 @@ def ask_feud_question(winner, mode):
         if len(user_progress) == 0:
             message = f"\n👎😢 No right answers out of {num_of_answers}. I'm ashamed to call you Okrans.\n"
         elif len(user_progress) < num_of_answers:
-            message = f"\n🙄😒 Wow...you got {correct_guesses}/{num_of_answers}.\n"
+            message = f"\n🙄😒 Wow...you got {len(user_progress)}/{num_of_answers}.\n"
         else:
-            message = f"\n🎉✅ Congrats Okrans! You got all {correct_guesses} right!\n"
+            message = f"\n🎉✅ Congrats Okrans! You got all {num_of_answers} right!\n"
 
         if len(user_progress) > 0:
             message += "\n 🏆 Commendable Okrans\n"
@@ -796,16 +796,18 @@ def ask_feud_question(winner, mode):
         if len(user_progress) == 0:
             message = f"\n👎😢 No right answers out of {num_of_answers}. @{winner}, you're no Okran.\n"
         elif len(user_progress) < num_of_answers:
-            message = f"\n🙄😒 Wow @{winner}...you got {correct_guesses}/{num_of_answers}.\n"
+            message = f"\n🙄😒 Wow @{winner}...you got {len(user_progress)}/{num_of_answers}.\n"
         else:
-            message = f"\n🎉✅ Congrats @{winner}! You got all {correct_guesses} right!\n"
+            message = f"\n🎉✅ Congrats @{winner}! You got all {num_of_answers} right!\n"
 
     final_feud_image_mxc, final_feud_image_width, final_feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
-    answer_feud_image_mxc, answer_feud_image_width, answer_feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
 
     answer_message = f"\n🔑❓ REVEALED: {feud_question_prompt.upper()}\n"
     send_image(target_room_id, final_feud_image_mxc, final_feud_image_width, final_feud_image_height, feud_image_size)
-    send_image(target_room_id, answer_feud_image_mxc, answer_feud_image_width, answer_feud_image_height, feud_image_size)
+    
+    if len(user_progress) < num_of_answers:
+        answer_feud_image_mxc, answer_feud_image_width, answer_feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
+        send_image(target_room_id, answer_feud_image_mxc, answer_feud_image_width, answer_feud_image_height, feud_image_size)
     send_message(target_room_id, answer_message)
     
     send_message(target_room_id, message)

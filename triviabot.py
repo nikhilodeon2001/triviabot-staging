@@ -659,8 +659,22 @@ def ask_feud_question(winner, mode):
     while num_of_xs < 3 and right_answer == False:
 
         feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
-        
+      
+        if correct_guesses > 0:
+            correct_message += f"\nCorrect guesses: {correct_guesses}\n"
+            send_message(target_room_id, correct_message)
+            
+        time.sleep(1)
+
+        send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
+        time.sleep(3)
+        send_message(target_room_id, prompt_message)
+        time.sleep(2)
+
         start_message = ""
+        if mode == "cooperative":
+            start_message += f"\n⚠️🚨 Everyone's in!\n"
+            
         if mode == "cooperative":
             if num_of_xs == 0:
                 start_message += f"\n🟩🤔 Okrans, this is your 1st round (out of 3).\n"
@@ -675,23 +689,6 @@ def ask_feud_question(winner, mode):
                 start_message += f"\n🟨🤔 @{winner}, this is your 2nd round (out of 3)\n"
             elif num_of_xs == 2:
                 start_message += f"\n🟥🤔 @{winner}, this is your last round!\n"
-      
-        if correct_guesses > 0:
-            start_message += f"\nCorrect guesses: {correct_guesses}\n"
-
-        send_message(target_room_id, start_message)
-        time.sleep(1)
-
-        send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
-        time.sleep(3)
-        send_message(target_room_id, prompt_message)
-        time.sleep(2)
-
-        message = ""
-        if mode == "cooperative":
-            message += f"\n⚠️🚨 Everyone's in!\n"
-            
-        message += "\n🟢🏁 Go!\n"
         send_message(target_room_id, message)
 
         

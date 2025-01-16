@@ -740,6 +740,7 @@ def ask_feud_question(winner, mode):
                         for answer in feud_question_answers:
                             if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
                                 user_progress.append(answer)
+                                print(answer)
                                 
                                 if len(user_progress) >= num_of_answers:
                                     right_answer = True
@@ -767,9 +768,8 @@ def ask_feud_question(winner, mode):
         num_of_xs = num_of_xs + 1
         
         if right_answer == False and num_of_xs < 3:    
-            message = f"\n😌☁️ A quick breather before the next round...\n"
+            message = f"\n🎤📊 Survey says...\n"
             send_message(target_room_id, message)
-            time.sleep(1)
                         
     if mode == "cooperative":
         if len(user_progress) == 0:
@@ -796,7 +796,7 @@ def ask_feud_question(winner, mode):
         else:
             message = f"\n🎉✅ Congrats @{winner}! You got all {correct_guesses} right!\n"
 
-    final_feud_image_mxc, finalfeud_image_width, final_feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
+    final_feud_image_mxc, final_feud_image_width, final_feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
     answer_feud_image_mxc, answer_feud_image_width, answer_feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
 
     answer_message = f"\n🔑❓ REVEALED: {feud_question_prompt.upper()}\n"

@@ -586,7 +586,233 @@ def ask_poster_challenge(winner):
 
 
 
-def ask_feud_question(winner):    
+def ask_feud_question(winner, mode):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+    
+    try:
+        recent_feud_ids = get_recent_question_ids_from_mongo("feud")
+        
+        # Fetch wheel of fortune questions using the random subset method
+        feud_collection = db["feud_questions"]
+        pipeline_feud = [
+            {"$match": {"_id": {"$nin": list(recent_feud_ids)}}},  # Exclude recent IDs
+            {"$group": {  # Group by question text to ensure uniqueness
+                "_id": "$question",  # Group by the question text field
+                "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
+            }},
+            {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
+            {"$sample": {"size": 1}}  # Sample 1 unique question
+        ]
+
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        error_details = traceback.format_exc()
+        print(f"Error selecting feud questions: {e}\nDetailed traceback:\n{error_details}")
+        return None  # Return an empty list in case of failure
+
+    num_of_xs = 0
+    correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+    
+    try:
+        feud_questions = list(feud_collection.aggregate(pipeline_feud))
+        feud_question = feud_questions[0]
+        feud_question_prompt = feud_question["question"]
+        feud_question_answers = feud_question["answers"]   
+        feud_question_category = ""
+        feud_question_url = ""
+
+        print(feud_question)
+        
+        feud_question_id = feud_question["_id"]  # Get the ID of the selected question
+        if feud_question_id:
+            store_question_ids_in_mongo([feud_question_id], "feud")  # Store it as a list containing a single ID
+
+        win_image_mxc, win_image_width, win_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+win.gif")
+        loss_image_mxc, loss_image_width, loss_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+loss.gif")
+        win_image_size = 100
+        loss_image_size = 100
+
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        error_details = traceback.format_exc()
+        print(f"Error selecting feud questions: {e}\nDetailed traceback:\n{error_details}")
+        return None  # Return an empty list in case of failure
+
+    while num_of_xs < 3 and right_answer == False::
+        
+        processed_events = set()  # Track processed event IDs to avoid duplicates  
+        num_of_answers = len(feud_question_answers)
+        user_progress = []
+        num_of_xs = 0
+        numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    
+        if mode == "solo":
+            message = f"\n⚠{numbered_blocks[num_of_answers - 1]} @{winner}. Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
+        elif mode == "cooperative":
+            message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Okrans. Top {num_of_answers} answers on the board. We asked 100 of you...\n"
+            
+        feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
+        feud_image_size = 100
+       
+
+        start_message = f"\n👉👉 {feud_question_prompt.upper()}\n"
+        if mode == "cooperative":
+            if num_of_xs == 0:
+                start_message += f"\n🟩🤔 Okrans, this is your 1st round (out of 3).\n"
+            elif num_of_xs == 1:
+                start_message += f"\n🟨🤔 Okrans, this is your 2nd round (out of 3)\n"
+            elif num_of_xs == 2:
+                start_message += f"\n🟥🤔 Okrans, this is your last round!\n"
+        if mode == "solo":
+            if num_of_xs == 0:
+                start_message += f"\n🟩🤔 @{winner}, this is your 1st round (out of 3).\n"
+            elif num_of_xs == 1:
+                start_message += f"\n🟨🤔 @{winner}, this is your 2nd round (out of 3)\n"
+            elif num_of_xs == 2:
+                start_message += f"\n🟥🤔 @{winner}, this is your last round!\n"
+      
+        if correct_guesses > 0:
+            start_message += f"\nCorrect guesses: {correct_guesses}\n"
+
+        send_message(target_room_id, start_message)
+        time.sleep(1)
+
+        send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
+        time.sleep(3)
+        send_message(target_room_id, message)
+        time.sleep(2)
+
+        message = ""
+        if mode == "cooperative":
+            message += f"\n⚠️🚨 Everyone's in!\n"
+            
+        message += "\n🟢🏁 Go!\n"
+        send_message(target_room_id, message)
+
+        
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        
+        while time.time() - start_time < 6 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+
+                        if mode == "solo" and sender_display_name != winner:
+                            continue
+                            
+                        message_content = event.get("content", {}).get("body", "")
+                        
+                        for answer in feud_question_answers:
+                            if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
+                                user_progress.append(answer)
+                                
+                                if len(user_progress) >= num_of_answers:
+                                    right_answer = True
+
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                    
+                                user_correct_answers[sender_display_name] += 1
+                                
+                                break   
+                        
+                        if right_answer == True:
+                            break
+
+                    if right_answer == True:
+                        break
+
+                if right_answer == True:
+                        break
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        num_of_xs = num_of_xs + 1
+        
+        if right_answer == False and num_of_xs < 3:    
+            message = f"\n😌☁️ A quick breather before the next round...\n"
+            send_message(target_room_id, message)
+            time.sleep(1)
+                        
+    if mode == "cooperative":
+        if len(user_progress) == 0:
+            message = f"\n👎😢 No right answers out of {num_of_answers}. I'm ashamed to call you Okrans.\n"
+        elif len(user_progress) < num_of_answers:
+            message = f"\n🙄😒 Wow...you got {correct_guesses}/{num_of_answers}.\n"
+        else:
+            message = f"\n🎉✅ Congrats Okrans! You got all {correct_guesses} right!\n"
+            
+    elif mode == "solo":
+        if len(user_progress) == 0:
+            message = f"\n👎😢 No right answers out of {num_of_answers}. @{winner}, you're no Okran.\n"
+        elif len(user_progress) < num_of_answers:
+            message = f"\n🙄😒 Wow @{winner}...you got {correct_guesses}/{num_of_answers}.\n"
+        else:
+            message = f"\n🎉✅ Congrats @{winner}! You got all {correct_guesses} right!\n"
+
+        # Sort the dictionary by the count (value) in descending order
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+    
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+
+    final_feud_image_mxc, finalfeud_image_width, final_feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress, 0)
+    answer_feud_image_mxc, answer_feud_image_width, answer_feud_image_height = create_family_feud_board_image(feud_question_answers, feud_question_answers, 0)
+
+    answer_message = f"\n🔑❓ REVEALED: {feud_question_prompt.upper()}\n"
+    send_image(target_room_id, final_feud_image_mxc, final_feud_image_width, final_feud_image_height, feud_image_size)
+    send_image(target_room_id, answer_feud_image_mxc, answer_feud_image_width, answer_feud_image_height, feud_image_size)
+    send_message(target_room_id, answer_message)
+    
+    send_message(target_room_id, message)
+    wf_winner = True
+    time.sleep(3)
+    return None
+
+
+
+
+
+
+
+##OLD
+def ask_feud_question(winner, mode):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
     
     try:

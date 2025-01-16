@@ -6202,7 +6202,7 @@ def store_question_ids_in_mongo(question_ids, question_type):
         # Use upsert to insert or update the document if it doesn't exist
         questions_collection.update_one(
             {"_id": _id},                  # Match the document by its _id
-            {"$setOnInsert": {"_id": _id, "timestamp": datetime.datetime.utcnow()}},  # Insert only if not present
+            {"$setOnInsert": {"_id": _id, "timestamp": datetime.datetime.now(datetime.UTC)}},  # Insert only if not present
             upsert=True                    # Enable upsert behavior
         )
 

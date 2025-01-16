@@ -3438,7 +3438,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     

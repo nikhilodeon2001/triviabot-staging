@@ -1,6 +1,7 @@
 
 
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -3207,10 +3208,10 @@ def ask_wof_number(winner):
                         set_a = ["0", "1", "2", "3", "4"]
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
-                        if len(round_responders) > 4:
+                        if len(round_responders) >= num_list_players:
                             set_b = ["5", "6", "7", "8", "9", "10", "11"]
                         else:
-                            set_b = ["5", "6", "7", "8", "10", "11"]
+                            set_b = ["5", "6", "7", "8", "9"]
                     
                         # Choose from set_a 90% of the time, set_b 10% of the time
                         if random.random() < 0.9:
@@ -3298,10 +3299,10 @@ def ask_wof_number(winner):
     set_a = ["0", "1", "2", "3", "4"]
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
-    if len(round_responders) > 4:
+    if len(round_responders) >= num_list_players:
         set_b = ["5", "6", "7", "8", "9", "10", "11"]
     else:
-        set_b = ["5", "6", "7", "8", "10", "11"]
+        set_b = ["5", "6", "7", "8", "9"]
 
     # Choose from set_a 90% of the time, set_b 10% of the time
     if random.random() < 0.9:
@@ -5489,7 +5490,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         else:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n[{len(trivia_answer_list[0])} Letters] {trivia_question}\n\n{string_representation}\n"
         
-    elif trivia_url == "multiple choice" or trivia_url == "multiple choice opentrivia": 
+    elif trivia_url == "multiple choice" or trivia_url == "multiple choice opentrivia" or trivia_url == "multiple choice oracle": 
         if trivia_answer_list[0] in {"True", "False"}:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨TRUE or FALSE🚨 {trivia_question}\n\n"
         else:
@@ -5711,7 +5712,7 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     user_answer = normalize_text(str(user_answer))
     correct_answer = normalize_text(str(correct_answer))
 
-    if url == "multiple choice" or url == "multiple choice opentrivia":
+    if url == "multiple choice" or url == "multiple choice opentrivia" or  url == "multiple choice oracle":
         return user_answer[0] == correct_answer[0];
     
     if is_number(correct_answer):
@@ -5860,7 +5861,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer  
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors", "derivative", "trig"]
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice oracle", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors", "derivative", "trig"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}
@@ -6190,21 +6191,27 @@ def show_standings():
             standing_message += lightning_display
         
         send_message(target_room_id, standing_message)
-
+        
 
 def store_question_ids_in_mongo(question_ids, question_type):
     db = connect_to_mongodb()
     collection_name = f"asked_{question_type}_questions"
     questions_collection = db[collection_name]
 
-    # Insert the new IDs directly into the collection
-    questions_collection.insert_many([{"_id": _id} for _id in question_ids])
+    for _id in question_ids:
+        # Use upsert to insert or update the document if it doesn't exist
+        questions_collection.update_one(
+            {"_id": _id},                  # Match the document by its _id
+            {"$setOnInsert": {"_id": _id, "timestamp": datetime.datetime.utcnow()}},  # Insert only if not present
+            upsert=True                    # Enable upsert behavior
+        )
 
     # Check if the collection exceeds its limit and delete old entries if necessary
     limit = id_limits[question_type]
     total_ids = questions_collection.count_documents({})
     if total_ids > limit:
         excess = total_ids - limit
+        # Find the oldest entries based on timestamp
         oldest_entries = questions_collection.find().sort("timestamp", 1).limit(excess)
         for entry in oldest_entries:
             questions_collection.delete_one({"_id": entry["_id"]})

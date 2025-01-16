@@ -650,7 +650,7 @@ def ask_feud_question(winner, mode):
 
     if mode == "solo":
         guess_time = 10
-    elif mode == "cooperative"
+    elif mode == "cooperative":
         guess_time = 6
 
     if mode == "solo":

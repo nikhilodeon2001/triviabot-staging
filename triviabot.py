@@ -639,25 +639,27 @@ def ask_feud_question(winner, mode):
         print(f"Error selecting feud questions: {e}\nDetailed traceback:\n{error_details}")
         return None  # Return an empty list in case of failure
 
-    right_answer = False
-    while num_of_xs < 3 and right_answer == False:
-        
-        processed_events = set()  # Track processed event IDs to avoid duplicates  
-        num_of_answers = len(feud_question_answers)
-        user_progress = []
-        num_of_xs = 0
-        numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     
-        if mode == "solo":
-            prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
-        elif mode == "cooperative":
-            prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 of you...\n"
-        
-        prompt_message += f"\n👉👉 {feud_question_prompt.upper()}\n"
-        feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
-        feud_image_size = 100
-       
+    
+    processed_events = set()  # Track processed event IDs to avoid duplicates  
+    num_of_answers = len(feud_question_answers)
+    user_progress = []
+    num_of_xs = 0
+    numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    right_answer = False
 
+    if mode == "solo":
+        prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
+    elif mode == "cooperative":
+        prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 of you...\n"
+        
+    prompt_message += f"\n👉👉 {feud_question_prompt.upper()}\n"
+    feud_image_size = 100
+    
+    while num_of_xs < 3 and right_answer == False:
+
+        feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
+        
         start_message = ""
         if mode == "cooperative":
             if num_of_xs == 0:

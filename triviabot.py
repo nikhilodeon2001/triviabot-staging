@@ -5782,7 +5782,7 @@ def fuzzy_match(user_answer, correct_answer, category, url):
     if no_spaces_user == no_spaces_correct or no_filler_user == no_filler_correct or no_filler_spaces_user == no_filler_spaces_correct:     
         return True
 
-    if len(user_answer) < 5:
+    if len(user_answer) < 4:
         return user_answer == correct_answer  # Only accept an exact match for short answers
     
     if user_answer == correct_answer:

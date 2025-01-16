@@ -649,15 +649,16 @@ def ask_feud_question(winner, mode):
         numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     
         if mode == "solo":
-            message = f"\n⚠{numbered_blocks[num_of_answers - 1]} @{winner}. Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
+            prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
         elif mode == "cooperative":
-            message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Okrans. Top {num_of_answers} answers on the board. We asked 100 of you...\n"
-            
+            prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 of you...\n"
+        
+        prompt_message += f"\n👉👉 {feud_question_prompt.upper()}\n"
         feud_image_mxc, feud_image_width, feud_image_height = create_family_feud_board_image(feud_question_answers, user_progress)
         feud_image_size = 100
        
 
-        start_message = f"\n👉👉 {feud_question_prompt.upper()}\n"
+        start_message = ""
         if mode == "cooperative":
             if num_of_xs == 0:
                 start_message += f"\n🟩🤔 Okrans, this is your 1st round (out of 3).\n"
@@ -681,7 +682,7 @@ def ask_feud_question(winner, mode):
 
         send_image(target_room_id, feud_image_mxc, feud_image_width, feud_image_height, feud_image_size)
         time.sleep(3)
-        send_message(target_room_id, message)
+        send_message(target_room_id, prompt_message)
         time.sleep(2)
 
         message = ""

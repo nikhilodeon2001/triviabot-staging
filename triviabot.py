@@ -6689,8 +6689,9 @@ def generate_and_render_linear_problem():
     img.save(image_buffer, format='PNG')
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
-    # Mock Matrix image upload
-    content_uri = True  # Placeholder for upload functionality
+     # Upload the image to Matrix
+    if image_questions == True:
+        content_uri = upload_image_to_matrix(image_buffer.read())
 
     if content_uri:
         return content_uri, img_width, img_height, question_text, solution, problem

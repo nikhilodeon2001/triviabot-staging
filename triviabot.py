@@ -6643,18 +6643,29 @@ def generate_and_render_derivative_image():
 
 
 def generate_and_render_linear_problem():
-    # Generate coefficients ensuring x is an integer
-    a = random.randint(1, 9)  # Coefficient of x (non-zero)
-    x = random.randint(-20, 20)  # The integer solution for x
-    b = random.randint(-20, 20)  # Constant term
+    # Generate coefficients ensuring no value is zero
+    while True:
+        a = random.choice([i for i in range(-10, 11) if i != 0])  # Coefficient of x (-10 to 10, excluding 0)
+        x = random.choice([i for i in range(-20, 21) if i != 0])  # Integer solution (-20 to 20, excluding 0)
+        b = random.choice([i for i in range(-20, 21) if i != 0])  # Constant term (-20 to 20, excluding 0)
+        if a != 0 and x != 0 and b != 0:
+            break
 
     question_text = f"Solve for 'x' in the equation below."
 
     # Compute the constant on the other side of the equation
     c = a * x + b
 
+    # Format the coefficient of x
+    if a == 1:
+        a_str = ""  # Ignore 1
+    elif a == -1:
+        a_str = "-"  # Use only "-"
+    else:
+        a_str = str(a)
+
     # Formulate the problem as a linear equation
-    problem = f"{a}x {'+' if b >= 0 else '-'} {abs(b)} = {c}"
+    problem = f"{a_str}x {'+' if b >= 0 else '-'} {abs(b)} = {c}"
     solution = f"{x}"
 
     print(f"Problem: {problem}")
@@ -6689,9 +6700,11 @@ def generate_and_render_linear_problem():
     img.save(image_buffer, format='PNG')
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
-     # Upload the image to Matrix
+    # Upload the image to Matrix (if enabled)
     if image_questions == True:
         content_uri = upload_image_to_matrix(image_buffer.read())
+    else:
+        content_uri = True  # Mock successful upload
 
     if content_uri:
         return content_uri, img_width, img_height, question_text, solution, problem

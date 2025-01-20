@@ -5449,7 +5449,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     send_image_flag = False
 
     message_body = ""
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "base", "derivative", "factors", "trig"]:
+    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "base", "derivative", "factors", "trig", "algebra"]:
         message_body += "\n🚨 ONE GUESS 🚨"
     
     if is_valid_url(trivia_url): 
@@ -5935,7 +5935,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer  
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice oracle", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors", "derivative", "trig"]
+    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice oracle", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors", "derivative", "trig", "algebra"]
 
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}
@@ -6645,7 +6645,7 @@ def generate_and_render_derivative_image():
 def generate_and_render_linear_problem():
     # Generate coefficients ensuring x is an integer
     a = random.randint(1, 9)  # Coefficient of x (non-zero)
-    x = random.randint(-10, 10)  # The integer solution for x
+    x = random.randint(-20, 20)  # The integer solution for x
     b = random.randint(-20, 20)  # Constant term
 
     question_text = f"Solve for 'x' in the equation below."
@@ -6655,7 +6655,7 @@ def generate_and_render_linear_problem():
 
     # Formulate the problem as a linear equation
     problem = f"{a}x {'+' if b >= 0 else '-'} {abs(b)} = {c}"
-    solution = x
+    solution = f"{x}"
 
     print(f"Problem: {problem}")
     print(f"Solution: {solution}")

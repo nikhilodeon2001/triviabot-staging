@@ -2705,8 +2705,8 @@ def fetch_donations():
 
 
 def get_math_question():
-    question_functions = [create_mean_question, create_median_question, create_derivative_question, create_zeroes_question, create_factors_question, create_base_question, create_trig_question]
-    #question_functions = [create_zeroes_question]
+    #question_functions = [create_mean_question, create_median_question, create_derivative_question, create_zeroes_question, create_factors_question, create_base_question, create_trig_question, create_algebra_question]
+    question_functions = [create_algebra_question]
     selected_question_function = random.choice(question_functions)
     return selected_question_function()
 
@@ -2723,6 +2723,15 @@ def create_trig_question():
         "category": "Mathematics: Trigonometry",
         "question": "",
         "url": "trig",
+        "answers": [""]
+    }
+
+
+def create_algebra_question():
+    return {
+        "category": "Mathematics: Algebra",
+        "question": "",
+        "url": "algebra",
         "answers": [""]
     }
 
@@ -5448,6 +5457,16 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         send_image_flag = True
 
+    elif trivia_url == "algebra":
+        image_mxc, image_width, image_height, new_question, new_solution, text_problem = generate_and_render_linear_problem()
+        if image_questions == True:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{new_question}\n" 
+            send_image_flag = True
+        else:
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{new_question}\n{text_problem}\n"
+
+    return content_uri, img_width, img_height, solution, problem
+    
     elif trivia_url == "trig":
         image_mxc, image_width, image_height, new_question, new_solution, img_description = generate_trig_question()
         if image_questions == True:
@@ -6623,6 +6642,64 @@ def generate_and_render_derivative_image():
         return content_uri, img_width, img_height, derivative, polynomial
     else:
         print("Failed to upload the image to Matrix.")
+
+
+def generate_and_render_linear_problem():
+    # Generate coefficients ensuring x is an integer
+    a = random.randint(1, 9)  # Coefficient of x (non-zero)
+    x = random.randint(-10, 10)  # The integer solution for x
+    b = random.randint(-20, 20)  # Constant term
+
+    question_text = f"Solve for 'x' in the equation below."
+
+    # Compute the constant on the other side of the equation
+    c = a * x + b
+
+    # Formulate the problem as a linear equation
+    problem = f"{a}x {'+' if b >= 0 else '-'} {abs(b)} = {c}"
+    solution = x
+
+    print(f"Problem: {problem}")
+    print(f"Solution: {solution}")
+
+    # Define the font path relative to the current script
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+
+    # Create a blank image
+    img_width, img_height = 600, 150
+    img = Image.new('RGB', (img_width, img_height), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Load the font
+    font_size = 48
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return None, None, None, None
+
+    # Draw the problem text in the center in light purple
+    text_bbox = draw.textbbox((0, 0), problem, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2
+    draw.text((text_x, text_y), problem, fill=(200, 162, 200), font=font)  # Light purple color
+
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+
+    # Mock Matrix image upload
+    content_uri = True  # Placeholder for upload functionality
+
+    if content_uri:
+        return content_uri, img_width, img_height, question_text, solution, problem
+    else:
+        print("Failed to upload the image to Matrix.")
+        return None, None, None, None
+
 
 
 def generate_and_render_polynomial(type):

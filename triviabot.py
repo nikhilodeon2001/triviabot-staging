@@ -131,8 +131,8 @@ marx_mode_default = False
 marx_mode = marx_mode_default
 
 
-
-image_questions_default = True
+image_questions_default = False
+#image_questions_default = True
 image_questions = image_questions_default
 
 
@@ -6383,8 +6383,8 @@ def select_trivia_questions(questions_per_round):
             selected_questions.extend(jeopardy_questions)
             question_ids_to_store["jeopardy"].extend(doc["_id"] for doc in jeopardy_questions)
 
-        
-        num_math_questions_mod = random.randint(0, num_math_questions)
+        num_math_questions_mod = 10
+        #num_math_questions_mod = random.randint(0, num_math_questions)
         sample_size = min(num_math_questions_mod, questions_per_round - len(selected_questions))
         if sample_size > 0:
             math_questions = [get_math_question() for _ in range(sample_size)]

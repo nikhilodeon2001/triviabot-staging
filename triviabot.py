@@ -14,7 +14,7 @@ import importlib
 import traceback
 import unicodedata
 import datetime
-from datetime import timezonex
+from datetime import timezone
 import time
 import pytz
 import os

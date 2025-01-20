@@ -748,7 +748,6 @@ def ask_feud_question(winner, mode):
                                 
                             if fuzzy_match(message_content, answer, feud_question_category, feud_question_url):
                                 user_progress.append(answer)
-                                print(answer)
                                 
                                 if len(user_progress) >= num_of_answers:
                                     right_answer = True
@@ -1908,8 +1907,8 @@ def describe_image_with_vision(image_url, mode, prompt):
                         "content": [
                             {
                                 "type": "text",
-                                #"text": f"Based on what you see in the image, give the image a name with 5 words maximum. The prompt used to create this image was {prompt}."
-                                "text": f"Based on what you see in the image, give the image an okra themed title with 5 words maximum."
+                                "text": f"Based on what you see in the image, give the image a name with 5 words maximum. The prompt used to create this image was '{prompt}'."
+                                #"text": f"Based on what you see in the image, give the image an okra themed title with 5 words maximum."
                             },
                             {
                                 "type": "image_url",
@@ -2838,7 +2837,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🌍❔ Where's Okra? ☕\n"
         counter = counter + 1
-        message += f"{counter}. ⚔️🥊 FeUd ☕\n"
+        message += f"{counter}. ⚔️🧍 FeUd ☕\n"
         counter = counter + 1
         message += f"{counter}. ⚔️⚡ FeUd Blitz ✨CO-OP ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
@@ -3305,6 +3304,12 @@ def ask_wof_number(winner):
                     if str(message_content) in {"10"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'FeUd Blitz' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"10"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'FeUd Blitz' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 

@@ -14,7 +14,7 @@ import importlib
 import traceback
 import unicodedata
 import datetime
-from datetime import timezone
+from datetime import timezonex
 import time
 import pytz
 import os
@@ -5464,8 +5464,6 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
             send_image_flag = True
         else:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n{new_question}\n{text_problem}\n"
-
-    return content_uri, img_width, img_height, solution, problem
     
     elif trivia_url == "trig":
         image_mxc, image_width, image_height, new_question, new_solution, img_description = generate_trig_question()

@@ -18,7 +18,7 @@ from datetime import timezone
 import time
 import pytz
 import os
-from pymongo import MongoClient
+from pymongo import MongoClientask
 import difflib
 import string
 from urllib.parse import urlparse 
@@ -6384,7 +6384,8 @@ def select_trivia_questions(questions_per_round):
             question_ids_to_store["jeopardy"].extend(doc["_id"] for doc in jeopardy_questions)
 
         
-        num_math_questions_mod = random.randint(0, num_math_questions)
+        #num_math_questions_mod = random.randint(0, num_math_questions)
+        num_math_questions_mod = 10
         sample_size = min(num_math_questions_mod, questions_per_round - len(selected_questions))
         if sample_size > 0:
             math_questions = [get_math_question() for _ in range(sample_size)]

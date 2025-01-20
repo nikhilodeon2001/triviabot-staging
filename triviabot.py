@@ -7193,7 +7193,14 @@ def get_category_title(trivia_category, trivia_url):
         "Video-Games": "🎮👾",
         "Science-Technology": "🔬🤖",
         "Literature": "📚✒️",
-        "Religion-Faith": "🛐📿"
+        "Religion-Faith": "🛐📿",
+        "Mathematics: Algebra": "🤓➕",
+        "Mathematics: Trigonometry": "📐📊",
+        "Mathematics: Mean": "➗📈",
+        "Mathematics: Median": "🔢📊",
+        "Mathematics: Polynomials": "📉✖️",
+        "Mathematics: Bases": "2️⃣🔟",
+        "Mathematics: Derivatives": "📉♾️"  
     }
 
     # Check if the question URL is "jeopardy"

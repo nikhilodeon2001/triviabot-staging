@@ -18,7 +18,7 @@ from datetime import timezone
 import time
 import pytz
 import os
-from pymongo import MongoClientask
+from pymongo import MongoClient
 import difflib
 import string
 from urllib.parse import urlparse 

@@ -99,6 +99,8 @@ question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
 time_between_rounds = int(os.getenv("time_between_rounds"))
 time_between_questions = int(os.getenv("time_between_questions"))
+discount_step_amount = int(os.getenv("discount_step_amount"))
+discount_streak_amount = int(os.getenv("discount_streak_amount"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
@@ -5914,7 +5916,7 @@ def collect_responses(question_ask_time, question_number, time_limit):
 def check_correct_responses_delete(question_ask_time, trivia_answer_list, question_number, collected_responses, trivia_category, trivia_url):
     """Check and respond to users who answered the trivia question correctly."""
     global since_token, params, filter_json, headers, max_retries, delay_between_retries, current_longest_answer_streak
-    global question_responders, round_responders
+    global question_responders, round_responders, discount_percentage
     
     # Define the first item in the list as trivia_answer
     trivia_answer = trivia_answer_list[0]  # The first item is the main answer
@@ -6006,6 +6008,22 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 response_time = float('inf')
                 
             points = calculate_points(response_time)
+
+            # Check if the sender is the current user on the longest round streak
+            if sender_display_name == current_longest_round_streak["user"]:
+                streak = current_longest_round_streak["streak"]
+                # For every 5 in the streak, apply a 10% discount
+                discount_percentage = {discount_step_amount} * (streak // {discount_streak_amount})  # e.g., 5 => 10%, 10 => 20%, 15 => 30%, etc.
+
+            # You might want to cap the discount so it doesn't go negative or too high
+            discount_percentage = min(discount_percentage, 90)  # optional
+        
+            if discount_percentage > 0:
+                discount_factor = 1 - (discount_percentage / 100.0)
+                # Apply discount
+                points *= discount_factor
+
+            
             correct_responses.append((display_name, points, response_time, message_content))
     
             # Check if this is the fastest correct response so far
@@ -6058,10 +6076,14 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         # Loop through the responses and append to the message
         for display_name, points, response_time, message_content in correct_responses:
             time_diff = response_time - fastest_response_time
+            
+            name_str = display_name
+            if current_longest_round_streak["user"] == display_name and discount_percentage is not None and discount_percentage > 0:
+                name_str += f" (-{discount_percentage}%)"
         
             # Display the formatted message based on yolo_mode
             if time_diff == 0:
-                message += f"\n⚡ {display_name}"
+                message += f"\n⚡ {name_str}"
                 if not yolo_mode:
                     message += f": {points}"
                 if points == 420:
@@ -6069,7 +6091,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 if current_longest_answer_streak["streak"] > 1:
                     message += f"  🔥{current_longest_answer_streak['streak']}"
             else:
-                message += f"\n👥 {display_name}"
+                message += f"\n👥 {name_str}"
                 if not yolo_mode:
                     message += f": {points}"
                 if points == 420:
@@ -6238,20 +6260,29 @@ def show_standings():
         for rank, (user, points) in enumerate(standings, start=1):
             formatted_points = f"{points:,}"  # Format points with commas
             fastest_count = fastest_answers_count.get(user, 0)  # Get the user's fastest answer count, default to 0
-            
+
+            # Start by building a user string (possibly with discount info)
+            user_str = user
+
+            # Conditionally show discount, if the user matches the streak user
+            # and discount_percentage > 0
+            if current_longest_round_streak["user"] == user and discount_percentage > 0 and discount_percentage is not None:
+                # Convert decimal discount (e.g., 0.3) to integer percent (30)
+                user_str += f" (-{discount_percentage}%)"
+
             lightning_display = f" ⚡{fastest_count}" if fastest_count > 1 else " ⚡" if fastest_count == 1 else ""
             
             if points == 420:
-                standing_message += f"\n🥴 {user}: {formatted_points}"
+                standing_message += f"\n🥴 {user_str}: {formatted_points}"
                 
             elif rank <= 3:
-                standing_message += f"\n{medals[rank-1]} {user}: {formatted_points}"
+                standing_message += f"\n{medals[rank-1]} {user_str}: {formatted_points}"
                 
             elif rank == len(standings) and rank > 4:
-                standing_message += f"\n💩 {user}: {formatted_points}"
+                standing_message += f"\n💩 {user_str}: {formatted_points}"
                 
             else:
-                standing_message += f"\n{rank}. {user}: {formatted_points}"
+                standing_message += f"\n{rank}. {user_str}: {formatted_points}"
 
             standing_message += lightning_display
         

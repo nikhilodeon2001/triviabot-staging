@@ -6172,9 +6172,19 @@ def update_round_streaks(user):
 
     # Generate the round summary if the user is not None
     if user is not None:
-        
-        if current_longest_round_streak["streak"] > 1:
-            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n\n▶️ Live trivia stats available: https://livetriviastats.com\n"
+        streak = current_longest_round_streak["streak"]
+        if streak > 1:
+            message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n"
+            
+            # Check if it's a multiple of discount_streak_amount
+            if streak % discount_streak_amount == 0:
+                # Compute discount percentage
+                # e.g. if streak=10, discount_streak_amount=5, discount_step_amount=0.1 => 2 * 10% = 20%
+                discount_fraction = (streak // discount_streak_amount) * discount_step_amount
+                message += f"\n@{user}, next game you'll incur a -{discount_percent}% points handicap.\n"
+                
+            message += f"\n▶️ Live trivia stats available: https://livetriviastats.com\n"
+
         else:
             message = f"\n🏆 Winner: @{user}!\n\n▶️ Live trivia stats available: https://livetriviastats.com\n"
 

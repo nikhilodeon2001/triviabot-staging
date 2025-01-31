@@ -131,8 +131,8 @@ marx_mode_default = False
 marx_mode = marx_mode_default
 
 
-image_questions_default = False
-#image_questions_default = True
+
+image_questions_default = True
 image_questions = image_questions_default
 
 
@@ -6383,8 +6383,8 @@ def select_trivia_questions(questions_per_round):
             selected_questions.extend(jeopardy_questions)
             question_ids_to_store["jeopardy"].extend(doc["_id"] for doc in jeopardy_questions)
 
-        num_math_questions_mod = 10
-        #num_math_questions_mod = random.randint(0, num_math_questions)
+        
+        num_math_questions_mod = random.randint(0, num_math_questions)
         sample_size = min(num_math_questions_mod, questions_per_round - len(selected_questions))
         if sample_size > 0:
             math_questions = [get_math_question() for _ in range(sample_size)]
@@ -7525,7 +7525,7 @@ def start_trivia():
             process_round_options(round_winner, winner_points)
             
             if round_count % 5 == 0:
-                send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help Okra improve it: https://forms.gle/iWvmN24pfGEGSy7n7\n")
+                send_message(target_room_id, f"\n🧘‍♂️ A short breather. Relax, stretch, meditate.\n🎨 Live Trivia is a pure hobby effort.\n💡 Help make it better: https://forms.gle/iWvmN24pfGEGSy7n7\n")
                 time.sleep(30)
                 selected_questions = select_trivia_questions(questions_per_round)  #Pick the next question set
                 round_preview(selected_questions)

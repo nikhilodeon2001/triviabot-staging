@@ -425,34 +425,27 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
 
 def ask_poster_challenge(winner):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
-    
-    try:
-        recent_posters_ids = get_recent_question_ids_from_mongo("posters")
-        
-        # Fetch wheel of fortune questions using the random subset method
-        posters_collection = db["posters_questions"]
-        pipeline_posters = [
-            {"$match": {"_id": {"$nin": list(recent_posters_ids)}}},  # Exclude recent IDs
-            {"$group": {  # Group by question text to ensure uniqueness
-                "_id": "$question",  # Group by the question text field
-                "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
-            }},
-            {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
-            {"$sample": {"size": 1}}  # Sample 1 unique question
-        ]
-
-    except Exception as e:
-        sentry_sdk.capture_exception(e)
-        error_details = traceback.format_exc()
-        print(f"Error selecting posters questions: {e}\nDetailed traceback:\n{error_details}")
-        return None  # Return an empty list in case of failure
-
+   
     num_of_xs = 0
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
     
     while num_of_xs < 3:
         try:
+            recent_posters_ids = get_recent_question_ids_from_mongo("posters")
+
+            # Fetch wheel of fortune questions using the random subset method
+            posters_collection = db["posters_questions"]
+            pipeline_posters = [
+                {"$match": {"_id": {"$nin": list(recent_posters_ids)}}},  # Exclude recent IDs
+                {"$group": {  # Group by question text to ensure uniqueness
+                    "_id": "$question",  # Group by the question text field
+                    "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
+                }},
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
+
             posters_questions = list(posters_collection.aggregate(pipeline_posters))
             posters_question = posters_questions[0]
             posters_category = posters_question["category"]

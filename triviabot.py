@@ -6015,13 +6015,13 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 # For every 5 in the streak, apply a 10% discount
                 discount_percentage = {discount_step_amount} * (streak // {discount_streak_amount})  # e.g., 5 => 10%, 10 => 20%, 15 => 30%, etc.
 
-            # You might want to cap the discount so it doesn't go negative or too high
-            discount_percentage = min(discount_percentage, 90)  # optional
+                # You might want to cap the discount so it doesn't go negative or too high
+                discount_percentage = min(discount_percentage, 90)  # optional
         
-            if discount_percentage > 0:
-                discount_factor = 1 - (discount_percentage / 100.0)
-                # Apply discount
-                points *= discount_factor
+                if discount_percentage > 0:
+                    discount_factor = 1 - (discount_percentage / 100.0)
+                    # Apply discount
+                    points *= discount_factor
 
             
             correct_responses.append((display_name, points, response_time, message_content))

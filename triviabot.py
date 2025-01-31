@@ -224,10 +224,6 @@ cities = [
 ]
 
 
-
-
-
-
 def handle_sigterm(signum, frame):
     print(f"Received signal {signum}. Printing stack trace:")
     traceback.print_stack(frame)

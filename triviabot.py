@@ -224,6 +224,10 @@ cities = [
 ]
 
 
+
+
+
+
 def handle_sigterm(signum, frame):
     print(f"Received signal {signum}. Printing stack trace:")
     traceback.print_stack(frame)
@@ -834,17 +838,10 @@ def fetch_random_word_thes(min_length=5, max_length=12, max_retries=5, max_relat
         print(f"[Attempt {attempt}/{max_retries}] Fetching a random word...")
         try:
             # Fetch a random word
-            response = requests.get("https://random-word-form.herokuapp.com/random/noun", timeout=5)
-            response.raise_for_status()
-            word_list = response.json()
-            if not word_list:
-                print("No words returned by Random Word API.")
-                continue
-            word = word_list[0]
+            word = get_random_word()
 
-            # Check if word meets length constraints
-            if not (min_length <= len(word) <= max_length):
-                print(f"Word '{word}' does not meet length constraints ({min_length}-{max_length}).")
+            if not word:
+                print("No word returned from local list.")
                 continue
 
             # Look up the word in Merriam-Webster Thesaurus
@@ -887,6 +884,18 @@ def fetch_random_word_thes(min_length=5, max_length=12, max_retries=5, max_relat
 
 
 
+def load_words_from_file(filepath):
+    """Load words from a local text file."""
+    with open(filepath, 'r', encoding='utf-8') as f:
+        return [line.strip() for line in f if line.strip()]
+
+def get_random_word(min_length=5, max_length=12):
+    words = load_words_from_file("wordlist.txt")
+    valid_words = [w for w in words if min_length <= len(w) <= max_length]
+    if not valid_words:
+        return None
+    return random.choice(valid_words)
+
 
 
 def fetch_random_word(min_length=5, max_length=12, max_retries=5):
@@ -894,17 +903,10 @@ def fetch_random_word(min_length=5, max_length=12, max_retries=5):
         print(f"[Attempt {attempt}/{max_retries}] Fetching a random word...")
         try:
             # Fetch a random word
-            response = requests.get("https://random-word-api.herokuapp.com/word?number=1", timeout=5)
-            response.raise_for_status()
-            word_list = response.json()
-            if not word_list:
-                print("No words returned by Random Word API.")
-                continue
-            word = word_list[0]
+            word = get_random_word()
 
-            # Check if word meets length constraints
-            if not (min_length <= len(word) <= max_length):
-                print(f"Word '{word}' does not meet length constraints ({min_length}-{max_length}).")
+            if not word:
+                print("No word returned from local list.")
                 continue
 
             # Look up the word in Merriam-Webster

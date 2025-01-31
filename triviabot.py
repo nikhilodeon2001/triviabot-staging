@@ -6010,7 +6010,7 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
             points = calculate_points(response_time)
 
             # Check if the sender is the current user on the longest round streak
-            if sender_display_name == current_longest_round_streak["user"]:
+            if display_name == current_longest_round_streak["user"]:
                 streak = current_longest_round_streak["streak"]
                 # For every 5 in the streak, apply a 10% discount
                 discount_percentage = {discount_step_amount} * (streak // {discount_streak_amount})  # e.g., 5 => 10%, 10 => 20%, 15 => 30%, etc.

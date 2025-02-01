@@ -7454,7 +7454,6 @@ def start_trivia():
                 load_global_variables()
 
             load_parameters()
-            load_streak_data()
 
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()

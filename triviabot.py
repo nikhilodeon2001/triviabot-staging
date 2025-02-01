@@ -2080,6 +2080,8 @@ def load_parameters():
     global num_stats_questions_default
     global num_stats_questions
     global skip_summary
+    global discount_step_amount
+    global discount_streak_amount
  
     
     # Default values
@@ -2095,8 +2097,8 @@ def load_parameters():
         "num_math_questions_default": 1,
         "num_stats_questions_default": 0,
         "skip_summary": False,
-        "discount_step_amount": 5,
-        "discount_streak_amount": 20
+        "discount_step_amount": 20,
+        "discount_streak_amount": 5
     }
     
     for attempt in range(max_retries):
@@ -2157,6 +2159,9 @@ def load_parameters():
                 num_wf_letters = default_values["num_wf_letters"]
                 num_math_questions_default = default_values["num_math_questions_default"]
                 num_stats_questions_default = default_values["num_stats_questions_default"]
+                skip_summary = parameters["skip_summary"]
+                discount_step_amount = parameters["discount_step_amount"]
+                discount_streak_amount = parameters["discount_streak_amount"]
 
                 num_mysterybox_clues = num_mysterybox_clues_default
                 num_crossword_clues = num_crossword_clues_default

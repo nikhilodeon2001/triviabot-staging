@@ -6586,7 +6586,7 @@ def round_start_messages():
         # If the user is in the Hall of Sovereigns, only show the message if top_count == 6
         if username in sovereigns:
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
+                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
         else:
             # For users not in the Hall of Sovereigns, show all applicable messages
             if top_count == 6:

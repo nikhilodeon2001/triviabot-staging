@@ -97,7 +97,6 @@ webster_thes_api_key = os.getenv("webster_thes_api_key")
 target_room_id = os.getenv("target_room_id")
 question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
-time_between_rounds = int(os.getenv("time_between_rounds"))
 time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
@@ -7404,7 +7403,7 @@ def get_random_trivia_question():
 
 
 def start_trivia():
-    global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_rounds, time_between_questions, filler_words
+    global target_room_id, bot_user_id, bearer_token, question_time, questions_per_round, time_between_questions, filler_words
     global scoreboard, current_longest_round_streak, current_longest_answer_streak
     global headers, params, filter_json, since_token, round_count, selected_questions, magic_number
     global previous_question, current_question

@@ -6184,6 +6184,9 @@ def update_round_streaks(user):
             message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n"
             
             # Check if it's a multiple of discount_streak_amount
+            print(f"discount streak amount is {discount_streak_amount}")
+            print(f"discount step amount is {discount_step_amount}")
+            
             if streak % discount_streak_amount == 0:
                 # Compute discount percentage
                 # e.g. if streak=10, discount_streak_amount=5, discount_step_amount=0.1 => 2 * 10% = 20%

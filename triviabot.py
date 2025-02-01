@@ -6590,7 +6590,7 @@ def round_start_messages():
         else:
             # For users not in the Hall of Sovereigns, show all applicable messages
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We all bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
+                send_message(target_room_id, f"👑  {username} is #1 across the board. We all bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
             elif top_count == 5:
                 send_message(target_room_id, f"🔥​  {username} is on fire! Only 1 leaderboard left.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
             elif top_count == 4:

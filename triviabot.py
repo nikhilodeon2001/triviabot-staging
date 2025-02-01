@@ -99,8 +99,6 @@ question_time = int(os.getenv("question_time"))
 questions_per_round = int(os.getenv("questions_per_round"))
 time_between_rounds = int(os.getenv("time_between_rounds"))
 time_between_questions = int(os.getenv("time_between_questions"))
-discount_step_amount = int(os.getenv("discount_step_amount"))
-discount_streak_amount = int(os.getenv("discount_streak_amount"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
@@ -2097,9 +2095,10 @@ def load_parameters():
         "num_wf_letters": 3,
         "num_math_questions_default": 1,
         "num_stats_questions_default": 0,
-        "skip_summary": False
+        "skip_summary": False,
+        "discount_step_amount": 5,
+        "discount_streak_amount": 20
     }
-
     
     for attempt in range(max_retries):
         try:
@@ -2127,7 +2126,9 @@ def load_parameters():
             num_math_questions_default = parameters["num_math_questions_default"]
             num_stats_questions_default = parameters["num_stats_questions_default"]
             skip_summary = parameters["skip_summary"]
-
+            discount_step_amount = parameters["discount_step_amount"]
+            discount_streak_amount = parameters["discount_streak_amount"]
+            
             num_mysterybox_clues = num_mysterybox_clues_default
             num_crossword_clues = num_crossword_clues_default
             num_jeopardy_clues = num_jeopardy_clues_default

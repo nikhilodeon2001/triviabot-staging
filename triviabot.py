@@ -5652,11 +5652,11 @@ def initialize_sync():
 
 
 def calculate_points(response_time):  
-    # Max points is 1000, min points is 100. Points decrease linearly over n seconds
-    points = max(1000 - int(response_time * (900 / question_time)), 100)  # Linearly decrease
+    # Max points is 1000, min points is 0. Points decrease linearly over question_time
+    points = max(1000 - int(response_time * (1000 / question_time)), 0)  # Linearly decrease
     points = round(points / 5) * 5  # Round to the nearest 5
     return points
-
+    
 # List of filler words to remove
 filler_words = {'a', 'an', 'the', 'of', 'and', 'to', 'in', 'on', 'at', 'with', 'for', 'by'}
 
@@ -6021,9 +6021,11 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 if discount_percentage > 0:
                     discount_factor = 1 - (discount_percentage / 100.0)
                     # Apply discount
+                    print(f"old points are {points}")
                     points *= discount_factor
+                    points = round(points / 5) * 5
+                    print(f"new points are {points}")
 
-            
             correct_responses.append((display_name, points, response_time, message_content))
     
             # Check if this is the fastest correct response so far

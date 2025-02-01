@@ -2159,9 +2159,9 @@ def load_parameters():
                 num_wf_letters = default_values["num_wf_letters"]
                 num_math_questions_default = default_values["num_math_questions_default"]
                 num_stats_questions_default = default_values["num_stats_questions_default"]
-                skip_summary = parameters["skip_summary"]
-                discount_step_amount = parameters["discount_step_amount"]
-                discount_streak_amount = parameters["discount_streak_amount"]
+                skip_summary = default["skip_summary"]
+                discount_step_amount = default["discount_step_amount"]
+                discount_streak_amount = default["discount_streak_amount"]
 
                 num_mysterybox_clues = num_mysterybox_clues_default
                 num_crossword_clues = num_crossword_clues_default

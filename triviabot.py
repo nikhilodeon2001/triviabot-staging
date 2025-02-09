@@ -101,7 +101,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 500}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -575,6 +575,165 @@ def ask_poster_challenge(winner):
     wf_winner = True
     time.sleep(3)
     return None
+
+
+
+def ask_movie_scenes_challenge(winner):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+   
+    num_of_xs = 0
+    correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+    
+    while num_of_xs < 3:
+        try:
+            recent_movie_scenes_ids = get_recent_question_ids_from_mongo("movie_scenes")
+
+            # Fetch wheel of fortune questions using the random subset method
+            movie_scenes_collection = db["movie_scenes_questions"]
+            pipeline_movie_scenes = [
+                {"$match": {"_id": {"$nin": list(recent_movie_scenes_ids)}}},  # Exclude recent IDs
+                {"$group": {  # Group by question text to ensure uniqueness
+                    "_id": "$question",  # Group by the question text field
+                    "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
+                }},
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
+
+            movie_scenes_questions = list(movie_scenes_collection.aggregate(pipeline_movie_scenes))
+            movie_scenes_question = movie_scenes_questions[0]
+            movie_scenes_category = movie_scenes_question["category"]
+            movie_scenes_answers = movie_scenes_question["answers"]   
+            movie_scenes_year = movie_scenes_question["question"]
+            movie_scenes_url = movie_scenes_question["url"]
+            movie_scenes_question_id = movie_scenes_question["_id"]  # Get the ID of the selected question
+            
+            if movie_scenes_question_id:
+                store_question_ids_in_mongo([movie_scenes_question_id], "movie_scenes")  # Store it as a list containing a single ID
+            print(movie_scenes_question)
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting movie_scenes questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
+
+        movie_scenes_category_emojis = get_category_title(movie_scenes_category, "")
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+        movie_scenes_mxc, movie_scenes_width, movie_scenes_height = download_image_from_url(movie_scenes_url)
+        movie_scenes_size = 100
+
+        start_message = ""
+        
+        if num_of_xs == 0:
+            start_message += f"\n🟩🤔 Okrans, you have 0/3 strikes.\n"
+        elif num_of_xs == 1:
+            start_message += f"\n🟨🤔 Okrans, you have 1/3 strikes...\n"
+        elif num_of_xs == 2:
+            start_message += f"\n🟥🤔 Okrans, you have 2/3 strikes!\n"
+       
+        if correct_guesses > 0:
+            start_message += f"\nCorrect guesses: {correct_guesses}\n"
+
+        send_message(target_room_id, start_message)
+        time.sleep(2)
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        message += f"\n🎥🌟 What {movie_scenes_category.upper()} is depicted in the scene above?\n"
+        message += f"\n📅💡 Year: {movie_scenes_year}\n"
+        send_image(target_room_id, movie_scenes_mxc, movie_scenes_width, movie_scenes_height, movie_scenes_size)
+        send_message(target_room_id, message)
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        
+        while time.time() - start_time < 15 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+                        
+                        for answer in movie_scenes_answers:
+                            if fuzzy_match(message_content, answer, movie_scenes_category, movie_scenes_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
+                                send_message(target_room_id, message)
+                                right_answer = True
+                                correct_guesses = correct_guesses + 1
+
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                user_correct_answers[sender_display_name] += 1
+                                
+                                break   
+                        
+                        if right_answer == True:
+                            break
+
+                    if right_answer == True:
+                        break
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
+            num_of_xs = num_of_xs + 1
+            message = f"\n❌😢 No one got it.\n\nAnswer: {movie_scenes_answers[0].upper()}\n"
+            send_message(target_room_id, message)
+            time.sleep(1)
+                        
+    if correct_guesses == 0:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    else:
+        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        message += "\n 🏆 Commendable Okrans\n"
+
+        # Sort the dictionary by the count (value) in descending order
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+    
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+        
+    send_message(target_room_id, message)
+    wf_winner = True
+    time.sleep(3)
+    return None
+
+
+
 
 
 
@@ -2863,6 +3022,8 @@ def select_wof_questions(winner):
         message += f"{counter}. 📝🥊 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         message += f"{counter}. 🎥⚡ Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕"
+        counter = counter + 1
+        message += f"{counter}. 🎥⚡ Movie Scene Mayhem ✨CO-OP ({num_list_players}+)✨ ☕"
         
         send_message(target_room_id, message)  
         
@@ -2897,6 +3058,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "12":
             ask_poster_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "13":
+            ask_movie_scene_challenge(winner)
             time.sleep(3)
             return None
         
@@ -3342,6 +3508,19 @@ def ask_wof_number(winner):
                     if str(message_content) in {"12"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'Poster Blitz' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+
+                    if str(message_content) in {"13"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Movie Scene Mayhem' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"13"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Movie Scene Mayhem' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 

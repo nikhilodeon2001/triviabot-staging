@@ -643,7 +643,7 @@ def ask_feud_question(winner, mode):
     if mode == "solo":
         guess_time = 10
     elif mode == "cooperative":
-        guess_time = 6
+        guess_time = 10
 
     if mode == "solo":
         prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"
@@ -674,18 +674,30 @@ def ask_feud_question(winner, mode):
             
         if mode == "cooperative":
             if num_of_xs == 0:
-                start_message += f"\n🟩🤔 Okrans, round 1/3...GO!\n"
+                start_message += f"\n🟩🤔 Okrans, round 1/3...\n"
+                start_message += f"\n📜🔢 List as many as you can!\n"
+                start_message += f"\n🏁🚀 GO!\n"
             elif num_of_xs == 1:
-                start_message += f"\n🟨🤔 Okrans, round 2/3...GO!\n"
+                start_message += f"\n🟨🤔 Okrans, round 2/3...\n"
+                start_message += f"\n📜🔢 List as many as you can!\n"
+                start_message += f"\n🏁🚀 GO!\n"
             elif num_of_xs == 2:
-                start_message += f"\n🟥🤔 Okrans, last round...GO!\n"
+                start_message += f"\n🟥🤔 Okrans, last round...\n"
+                start_message += f"\n📜🔢 List as many as you can!\n"
+                start_message += f"\n🏁🚀 GO!\n"
         if mode == "solo":
             if num_of_xs == 0:
-                start_message += f"\n🟩🤔 @{winner}, round 1/3...GO!\n"
+                start_message += f"\n🟩🤔 @{winner}, round 1/3...\n"
+                start_message += f"\n📜🔢 List as many as you can!\n"
+                start_message += f"\n🏁🚀 GO!\n"
             elif num_of_xs == 1:
-                start_message += f"\n🟨🤔 @{winner}, round 2/3...GO!\n"
+                start_message += f"\n🟨🤔 @{winner}, round 2/3...\n"
+                start_message += f"\n📜🔢 List as many as you can!\n"
+                start_message += f"\n🏁🚀 GO!\n"
             elif num_of_xs == 2:
-                start_message += f"\n🟥🤔 @{winner}, last round...GO!\n"
+                start_message += f"\n🟥🤔 @{winner}, last round...\n"
+                start_message += f"\n📜🔢 List as many as you can!\n"
+                start_message += f"\n🏁🚀 GO!\n"
         send_message(target_room_id, start_message)
 
         
@@ -5658,7 +5670,7 @@ def initialize_sync():
 
 def calculate_points(response_time):  
     # Max points is 1000, min points is 0. Points decrease linearly over question_time
-    points = max(1000 - int(response_time * (1000 / question_time)), 0)  # Linearly decrease
+    points = max(1000 - int(response_time * (995 / question_time)), 5)
     points = round(points / 5) * 5  # Round to the nearest 5
     return points
     
@@ -5958,13 +5970,13 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         if "okra" in message_content.lower() and emoji_mode == True:
             react_to_message(event_id, target_room_id, "okra1")
 
-        if "#prev" in message_content.lower() and collect_feedback_mode == True:
+        if "#prev" in message_content.lower() and collect_feedback_mode == True and sender != bot_user_id:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
             #stripped_message_content = " ".join(message_content.split()[1:])
             insert_audit_question("audit_questions", previous_question, message_content, display_name)
 
-        if "#curr" in message_content.lower() and collect_feedback_mode == True:
+        if "#curr" in message_content.lower() and collect_feedback_mode == True and sender != bot_user_id:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
             #stripped_message_content = " ".join(message_content.split()[1:])
@@ -6094,7 +6106,9 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 if not yolo_mode:
                     message += f": {points}"
                 if points == 420:
-                    message += "🌿"
+                    message += " 🌿"
+                if points == 690:
+                    message += " 😎"
                 if current_longest_answer_streak["streak"] > 1:
                     message += f"  🔥{current_longest_answer_streak['streak']}"
             else:
@@ -6102,7 +6116,9 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 if not yolo_mode:
                     message += f": {points}"
                 if points == 420:
-                    message += "🌿"
+                    message += " 🌿"
+                if points == 690:
+                    message += " 😎"
 
     # Send the entire message at once
     if message:
@@ -6292,8 +6308,11 @@ def show_standings():
 
             lightning_display = f" ⚡{fastest_count}" if fastest_count > 1 else " ⚡" if fastest_count == 1 else ""
             
-            if points == 420:
-                standing_message += f"\n🥴 {user_str}: {formatted_points}"
+            if "420" in str(points):
+                standing_message += f"\n🌿 {user_str}: {formatted_points}"
+
+            elif "69" in str(points):
+                standing_message += f"\n😎 {user_str}: {formatted_points}"
                 
             elif rank <= 3:
                 standing_message += f"\n{medals[rank-1]} {user_str}: {formatted_points}"
@@ -6449,6 +6468,8 @@ def select_trivia_questions(questions_per_round):
             question_ids_to_store["wof"].extend(doc["_id"] for doc in wof_questions)
  
         sample_size = min(num_mysterybox_clues, questions_per_round - len(selected_questions))
+        print(f"num_mysterybox_clues is {num_mysterybox_clues}")
+        print(f"sample_size is {sample_size}")
         if sample_size > 0:
             mysterybox_collection = db["mysterybox_questions"]
             pipeline_mysterybox = [
@@ -6589,11 +6610,11 @@ def round_start_messages():
         # If the user is in the Hall of Sovereigns, only show the message if top_count == 6
         if username in sovereigns:
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. They are our Sovereign. We bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
+                send_message(target_room_id, f"👑  {username} is #1 across the board. We bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
         else:
             # For users not in the Hall of Sovereigns, show all applicable messages
             if top_count == 6:
-                send_message(target_room_id, f"👑  {username} is #1 across the board. We all bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
+                send_message(target_room_id, f"👑  {username} is #1 across the board. We bow to you.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
             elif top_count == 5:
                 send_message(target_room_id, f"🔥​  {username} is on fire! Only 1 leaderboard left.\n\n▶️ Live trivia stats available: https://livetriviastats.com\n")
             elif top_count == 4:
@@ -7515,8 +7536,9 @@ def start_trivia():
                     "trivia_url": trivia_url,
                     "trivia_answer_list": trivia_answer_list
                 }
-                
-                question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)         
+
+                initialize_sync()
+                question_ask_time, new_question, new_solution = ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_list, question_number)
                 collected_responses = collect_responses(question_time, question_number, question_time)
                 
                 #send_message(target_room_id, f"\n🛑 TIME 🛑\n")

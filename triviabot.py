@@ -486,7 +486,14 @@ def ask_poster_challenge(winner):
         message = f"\n⚠️🚨 Everyone's in!\n"
         message += f"\n🎥🌟 What {posters_category.upper()} is depicted in the poster above?\n"
         message += f"\n📅💡 Year: {posters_year}\n"
-        send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
+        image_response = send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
+
+        if image_response == False:
+            error_message = f"\n⚠️🚨 Reddit is preventing my image.\n"
+            error_message += f"\n🔄🤔 Let's try a different one.\n"
+            send_message(target_room_id, error_message)
+            continue
+        
         send_message(target_room_id, message)
 
         initialize_sync()
@@ -642,7 +649,14 @@ def ask_movie_scenes_challenge(winner):
         message = f"\n⚠️🚨 Everyone's in!\n"
         message += f"\n🎥🌟 What {movie_scenes_category.upper()} is depicted in the scene above?\n"
         message += f"\n📅💡 Year: {movie_scenes_year}\n"
-        send_image(target_room_id, movie_scenes_mxc, movie_scenes_width, movie_scenes_height, movie_scenes_size)
+        image_response = send_image(target_room_id, movie_scenes_mxc, movie_scenes_width, movie_scenes_height, movie_scenes_size)
+
+        if image_response == False:
+            error_message = f"\n⚠️🚨 Reddit is preventing my image.\n"
+            error_message += f"\n🔄🤔 Let's try a different one.\n"
+            send_message(target_room_id, error_message)
+            continue
+        
         send_message(target_room_id, message)
 
         initialize_sync()
@@ -3113,7 +3127,7 @@ def select_wof_questions(winner):
                 send_message(target_room_id, message)
                 street_response = send_image(target_room_id, street_view_mxc, street_view_width, street_view_height, image_size)
             
-                if street_response is None:                      
+                if street_response == False:                      
                     print("Error: Failed to send street image.")
                 
                 time.sleep(2)
@@ -3122,7 +3136,7 @@ def select_wof_questions(winner):
             send_message(target_room_id, message)
             satellite_response = send_image(target_room_id, satellite_view_mxc, satellite_view_width, satellite_view_height, image_size)
             
-            if satellite_response is None:                      
+            if satellite_response == False:                      
                 print("Error: Failed to send satellite image.")
                 
             time.sleep(2)
@@ -3131,7 +3145,7 @@ def select_wof_questions(winner):
             send_message(target_room_id, message)
             themed_response = send_image(target_room_id, themed_country_mxc, themed_country_width, themed_country_height, image_size)
             
-            if themed_response is None:                      
+            if themed_response == False:                      
                 print("Error: Failed to send satellite image.")
                 
             time.sleep(2)
@@ -3143,7 +3157,7 @@ def select_wof_questions(winner):
         
         if image_questions == True:    
             response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
-            if response is None:                      
+            if response == False:                      
                 print("Error: Failed to send image.")
         else:
             fixed_letters_str = "Revealed Letters: " + ' '.join(fixed_letters)
@@ -3158,7 +3172,7 @@ def select_wof_questions(winner):
             
             if image_questions == True:
                 response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
-                if response is None:                      
+                if response == False:                      
                     print("Error: Failed to send image.")
             else:
                 wof_letters_str = "Revealed Letters: " + ' '.join(wof_letters)
@@ -3853,7 +3867,7 @@ def send_magic_image(input_text):
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
-        if response.status_code != 200:                      
+        if response == False
             print("Error: Failed to send image.")
             print(response)
         else:
@@ -5593,7 +5607,7 @@ def send_image(room_id, image_mxc, image_width, image_height, image_size):
                 response_json = response.json()
                 message_id = response_json.get("event_id")
                 #distinguish_host(room_id, message_id)
-                return response  # Successfully sent the message, return the response
+                return True  # Successfully sent the message, return the response
                 
             else:
                 print(f"Failed to send message. Status code: {response.status_code}")
@@ -5610,7 +5624,7 @@ def send_image(room_id, image_mxc, image_width, image_height, image_size):
             time.sleep(delay_between_retries)
 
     print(f"Failed to send the message after {max_retries} attempts.")
-    return response  # Return the last response, even if it failed
+    return False  # Return the last response, even if it failed
 
 
 def is_valid_url(url): #IMAGE CODE
@@ -5775,7 +5789,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         image_size = 100
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
-        if response is None:                      
+        if response == False:                      
             print("Error: Failed to send image.")
             return None, None, None
             

@@ -2249,7 +2249,7 @@ def upload_okraverse_to_s3(buffer):
         return None
 
 def load_parameters():
-    global image_wins
+    global image_wins, image_points
     global num_list_players
     global num_mysterybox_clues_default
     global num_crossword_clues_default
@@ -2274,6 +2274,7 @@ def load_parameters():
     # Default values
     default_values = {
         "image_wins": 5,
+        "image_points": 5000,
         "num_list_players": 5,
         "num_mysterybox_clues_default": 3,
         "num_crossword_clues_default": 0,
@@ -2304,6 +2305,7 @@ def load_parameters():
 
             # Assign global variables
             image_wins = parameters["image_wins"]
+            image_points = parameters["image_points"]
             num_list_players = parameters["num_list_players"]
             num_mysterybox_clues_default = parameters["num_mysterybox_clues_default"]
             num_crossword_clues_default = parameters["num_crossword_clues_default"]
@@ -2337,6 +2339,7 @@ def load_parameters():
                 print("Max retries reached. Data loading failed.")
                 # Set all variables to defaults if loading fails
                 image_wins = default_values["image_wins"]
+                image_points = default_values["image_points"]
                 num_list_players = default_values["num_list_players"]
                 num_mysterybox_clues_default = default_values["num_mysterybox_clues_default"]
                 num_crossword_clues_default = default_values["num_crossword_clues_default"]
@@ -6420,8 +6423,14 @@ def update_round_streaks(user):
 
         gpt_message = f"\n{gpt_summary}\n"
         send_message(target_room_id, gpt_message)
+
+
+        highest_score_player = max(scoreboard, key=scoreboard.get)  # Player with the highest score
+        highest_score = scoreboard[highest_score_player]  # The highest score itself
+
         
-        if current_longest_round_streak['streak'] % image_wins == 0:
+        if len(scoreboard) >= image_wins and highest_score > image_points:
+        #if current_longest_round_streak['streak'] % image_wins == 0:
             time.sleep(5)
             generate_round_summary_image(round_data, user)
         else:
@@ -6439,15 +6448,21 @@ def update_round_streaks(user):
             }
             
             time.sleep(4)
-            remaining_games = image_wins - (current_longest_round_streak['streak'] % image_wins)
+            #remaining_games = image_wins - (current_longest_round_streak['streak'] % image_wins)
             #dynamic_emoji = number_to_emoji[remaining_games]
-            dynamic_emoji = number_to_emoji.get(remaining_games, "❗")  # ❓ is the default emoji
+            #dynamic_emoji = number_to_emoji.get(remaining_games, "❗")  # ❓ is the default emoji
             
-            if remaining_games == 1:
-                image_message = f"\n{dynamic_emoji}🎨 @{user} Win the next game and I'll draw you something.\n"
-            else:
-                image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
-            
+            #if remaining_games == 1:
+            #    image_message = f"\n{dynamic_emoji}🎨 @{user} Win the next game and I'll draw you something.\n"
+            #else:
+            #    image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
+
+            if len(scoreboard) < image_wins and highest_score > image_points:
+                image_message = f"\n🌟😞 @{user} Nice score! But barely any competition. No Okra Museum.\n"
+            if len(scoreboard) >= image_wins and highest_score < image_points:
+                image_message = f"\n🌟😞 @{user} You won. But your score isn't worthy of the Okra Museum.\n"
+
+            image_message += "\n👀🏛➡️ Check out the Okra Museum!"
             image_message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
                 
             send_message(target_room_id, image_message)
@@ -7798,7 +7813,7 @@ def start_trivia():
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
             
-            if len(scoreboard) > 400:
+            if len(scoreboard) > 40000:
                 ask_survey_question()
                 
             time.sleep(5)

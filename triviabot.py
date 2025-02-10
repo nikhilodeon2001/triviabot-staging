@@ -489,7 +489,6 @@ def ask_poster_challenge(winner):
         message += f"\n📅💡 Year: {posters_year}\n"
         image_response = send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
 
-        image_response = False
         if image_response == False:
             error_message = f"\n⚠️🚨 Reddit is preventing a poster from {posters_main_answer.upper()}.\n"
             error_message += f"\n🔄🤔 Let's try a different one.\n"
@@ -654,7 +653,6 @@ def ask_movie_scenes_challenge(winner):
         message += f"\n📅💡 Year: {movie_scenes_year}\n"
         image_response = send_image(target_room_id, movie_scenes_mxc, movie_scenes_width, movie_scenes_height, movie_scenes_size)
 
-        image_response = False
         if image_response == False:
             error_message = f"\n⚠️🚨 Reddit is preventing a scene from {movie_scene_main_answer.upper()}.\n"
             error_message += f"\n🔄🤔 Let's try a different one.\n"

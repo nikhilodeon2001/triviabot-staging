@@ -3035,7 +3035,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 📝🥊 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🎥⚡ Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕"
+        message += f"{counter}. 🎥⚡ Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         message += f"{counter}. 🎥⚡ Movie Scene Mayhem ✨CO-OP ({num_list_players}+)✨ ☕"
         
@@ -3453,7 +3453,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -3551,7 +3551,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"

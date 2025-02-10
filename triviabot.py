@@ -591,7 +591,8 @@ def ask_movie_scenes_challenge(winner):
     num_of_xs = 0
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
-    
+
+    counter = 0
     while num_of_xs < 3:
         try:
             recent_movie_scenes_ids = get_recent_question_ids_from_mongo("movie_scenes")
@@ -650,7 +651,10 @@ def ask_movie_scenes_challenge(winner):
         message += f"\n🎥🌟 What {movie_scenes_category.upper()} is depicted in the scene above?\n"
         message += f"\n📅💡 Year: {movie_scenes_year}\n"
         image_response = send_image(target_room_id, movie_scenes_mxc, movie_scenes_width, movie_scenes_height, movie_scenes_size)
-        image_response = False
+
+        if counter == 0:
+            image_response = False
+        counter = counter + 1
         
         if image_response == False:
             error_message = f"\n⚠️🚨 Reddit is preventing my image.\n"

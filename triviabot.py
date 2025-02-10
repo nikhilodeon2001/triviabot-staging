@@ -5607,7 +5607,7 @@ def send_image(room_id, image_mxc, image_width, image_height, image_size):
                 response_json = response.json()
                 message_id = response_json.get("event_id")
                 #distinguish_host(room_id, message_id)
-                return True  # Successfully sent the message, return the response
+                return response  # Successfully sent the message, return the response
                 
             else:
                 print(f"Failed to send message. Status code: {response.status_code}")

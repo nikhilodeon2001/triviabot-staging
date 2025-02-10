@@ -650,7 +650,8 @@ def ask_movie_scenes_challenge(winner):
         message += f"\n🎥🌟 What {movie_scenes_category.upper()} is depicted in the scene above?\n"
         message += f"\n📅💡 Year: {movie_scenes_year}\n"
         image_response = send_image(target_room_id, movie_scenes_mxc, movie_scenes_width, movie_scenes_height, movie_scenes_size)
-
+        image_response = False
+        
         if image_response == False:
             error_message = f"\n⚠️🚨 Reddit is preventing my image.\n"
             error_message += f"\n🔄🤔 Let's try a different one.\n"

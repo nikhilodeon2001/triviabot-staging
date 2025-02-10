@@ -3076,7 +3076,7 @@ def select_wof_questions(winner):
             return None
 
         elif selected_wof_category == "13":
-            ask_movie_scene_challenge(winner)
+            ask_movie_scenes_challenge(winner)
             time.sleep(3)
             return None
         

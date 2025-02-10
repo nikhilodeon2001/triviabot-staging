@@ -449,6 +449,7 @@ def ask_poster_challenge(winner):
             posters_question = posters_questions[0]
             posters_category = posters_question["category"]
             posters_answers = posters_question["answers"]   
+            posters_main_answer = posters_answers[0]
             posters_year = posters_question["question"]
             posters_url = posters_question["url"]
             posters_question_id = posters_question["_id"]  # Get the ID of the selected question
@@ -488,8 +489,9 @@ def ask_poster_challenge(winner):
         message += f"\n📅💡 Year: {posters_year}\n"
         image_response = send_image(target_room_id, posters_mxc, posters_width, posters_height, posters_size)
 
+        image_response = False
         if image_response == False:
-            error_message = f"\n⚠️🚨 Reddit is preventing my image.\n"
+            error_message = f"\n⚠️🚨 Reddit is preventing a poster from {posters_main_answer}.\n"
             error_message += f"\n🔄🤔 Let's try a different one.\n"
             send_message(target_room_id, error_message)
             continue
@@ -612,6 +614,7 @@ def ask_movie_scenes_challenge(winner):
             movie_scenes_question = movie_scenes_questions[0]
             movie_scenes_category = movie_scenes_question["category"]
             movie_scenes_answers = movie_scenes_question["answers"]   
+            movie_scene_main_answer = movie_scenes_answers[0]
             movie_scenes_year = movie_scenes_question["question"]
             movie_scenes_url = movie_scenes_question["url"]
             movie_scenes_question_id = movie_scenes_question["_id"]  # Get the ID of the selected question
@@ -650,9 +653,10 @@ def ask_movie_scenes_challenge(winner):
         message += f"\n🎥🌟 What {movie_scenes_category.upper()} is depicted in the scene above?\n"
         message += f"\n📅💡 Year: {movie_scenes_year}\n"
         image_response = send_image(target_room_id, movie_scenes_mxc, movie_scenes_width, movie_scenes_height, movie_scenes_size)
-        
+
+        image_response = False
         if image_response == False:
-            error_message = f"\n⚠️🚨 Reddit is preventing my image.\n"
+            error_message = f"\n⚠️🚨 Reddit is preventing a scene from {movie_scene_main_answer}.\n"
             error_message += f"\n🔄🤔 Let's try a different one.\n"
             send_message(target_room_id, error_message)
             continue
@@ -3037,7 +3041,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🎥⚡ Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🎥⚡ Movie Scene Mayhem ✨CO-OP ({num_list_players}+)✨ ☕"
+        message += f"{counter}. 🎬💥 Movie Mayhem ✨CO-OP ({num_list_players}+)✨ ☕"
         
         send_message(target_room_id, message)  
         
@@ -3528,13 +3532,13 @@ def ask_wof_number(winner):
 
                     if str(message_content) in {"13"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Movie Scene Mayhem' requires ☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Movie Mayhem' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
                     if str(message_content) in {"13"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Movie Scene Mayhem' requires {num_list_players}+ players.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Movie Mayhem' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 

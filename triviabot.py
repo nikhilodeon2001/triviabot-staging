@@ -2580,9 +2580,10 @@ def generate_round_summary_image(round_data, winner):
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
-        message = f"🔥💖 {winner_at} nice streak. I drew this of you.\n"
-        message += f"\nI call this masterpiece '{image_description}'\n"
-        message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
+        message = f"🔥💖 {winner_at}, you've done well. I drew this for you.\n"
+        message += f"\nI call it: '{image_description}'\n"
+        message += f"\n🏛️👋 Welcome to the Okra Museum\n"
+        message += "\n🌐➡️ https://livetriviastats.com/okra-museum\n"
         send_message(target_room_id, message)
 
          # Download and resize the image to 256x256
@@ -2618,9 +2619,10 @@ def generate_round_summary_image(round_data, winner):
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         
                 message = f"😈😉 {winner_at} Naughty naughty, I'll have to pick another.\n\n"
-                message += f"🔥💖 Nice streak. I drew this of you.\n"
-                message += f"\nI call this masterpiece '{image_description}'\n"
-                message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
+                message += f"🔥💖 {winner_at}, you've done well. I drew this for you.\n"
+                message += f"\nI call it: '{image_description}'\n"
+                message += f"\n🏛️👋 Welcome to the Okra Museum\n"
+                message += "\n🌐➡️ https://livetriviastats.com/okra-museum\n"
                 send_message(target_room_id, message)
         
                  # Download and resize the image to 256x256
@@ -6434,18 +6436,18 @@ def update_round_streaks(user):
             time.sleep(5)
             generate_round_summary_image(round_data, user)
         else:
-            number_to_emoji = {
-                1: "1️⃣",
-                2: "2️⃣",
-                3: "3️⃣",
-                4: "4️⃣",
-                5: "5️⃣",
-                6: "6️⃣",
-                7: "7️⃣",
-                8: "8️⃣",
-                9: "9️⃣",
-                10: "🔟"
-            }
+            #number_to_emoji = {
+            #    1: "1️⃣",
+            #    2: "2️⃣",
+            #    3: "3️⃣",
+            #    4: "4️⃣",
+            #    5: "5️⃣",
+            #    6: "6️⃣",
+            #    7: "7️⃣",
+            #    8: "8️⃣",
+            #    9: "9️⃣",
+            #    10: "🔟"
+            #}
             
             time.sleep(4)
             #remaining_games = image_wins - (current_longest_round_streak['streak'] % image_wins)
@@ -6457,12 +6459,13 @@ def update_round_streaks(user):
             #else:
             #    image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
 
+            image_message = ""
             if len(scoreboard) < image_wins and highest_score > image_points:
-                image_message = f"\n🌟😞 @{user} Nice score! But barely any competition. No Okra Museum.\n"
+                image_message += f"\n🌟😞 @{user} Awesome score! Easy when there's no competition.\n"
             if len(scoreboard) >= image_wins and highest_score < image_points:
-                image_message = f"\n🌟😞 @{user} You won. But your score isn't worthy of the Okra Museum.\n"
+                image_message += f"\n🌟😞 @{user} You emerged at the top! But you call that a score?\n"
 
-            image_message += "\n👀🏛➡️ Check out the Okra Museum!"
+            image_message += "\n👀➡️ You'll get into the Okra Museum next time..."
             image_message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
                 
             send_message(target_room_id, image_message)

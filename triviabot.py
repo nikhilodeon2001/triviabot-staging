@@ -3867,7 +3867,7 @@ def send_magic_image(input_text):
     
         response = send_image(target_room_id, image_mxc, image_width, image_height, image_size)
 
-        if response == False
+        if response == False:
             print("Error: Failed to send image.")
             print(response)
         else:

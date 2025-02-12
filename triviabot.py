@@ -662,10 +662,12 @@ def ask_missing_link(winner):
             
             
         message += f"\n📅💡 Clue: {missing_link_hint}\n"
-        message += f"\n{list_header}"
+        send_message(target_room_id, message)
+        time.sleep(2)
+
+        message = f"\n{list_header}"
 
         formatted_list = [name.strip() for name in missing_link_list.split(",") if name.strip()]  # Split by commas, remove extra spaces
-        
         for i, element in enumerate(formatted_list, start=1):
             message += f"\n{i}. {element}"
 

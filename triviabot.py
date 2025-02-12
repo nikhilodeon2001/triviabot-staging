@@ -6463,9 +6463,9 @@ def update_round_streaks(user):
             if len(scoreboard) < image_wins and highest_score > image_points:
                 image_message += f"\n🌟😞 @{user} Awesome score! But we need some more compeition.\n"
             if len(scoreboard) >= image_wins and highest_score < image_points:
-                image_message += f"\n🌟😞 @{user} You emerged at the top! But you score could be higher.\n"
+                image_message += f"\n🌟😞 @{user} You emerged at the top! But your score could be higher.\n"
             else:
-                image_message += f"\n🌟😞 @{user} You won! But we need more points (and more players).\n" 
+                image_message += f"\n🌟😞 @{user} You won! But more points (and more players).\n" 
 
             image_message += "\n👀➡️ You'll get into the Okra Museum next time..."
             image_message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"

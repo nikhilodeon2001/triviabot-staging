@@ -716,7 +716,7 @@ def ask_missing_link(winner):
                         message_content = event.get("content", {}).get("body", "")
                         
                         for answer in missing_link_answers:
-                            if fuzzy_match(message_content, answer, missing_link_category, missing_link_url):
+                            if fuzzy_match(message_content, answer, missing_link_category, missing_link_hint):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
                                 send_message(target_room_id, message)
                                 right_answer = True

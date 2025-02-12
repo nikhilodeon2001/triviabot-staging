@@ -585,6 +585,180 @@ def ask_poster_challenge(winner):
     return None
 
 
+def ask_missing_link(winner):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+   
+    num_of_xs = 0
+    correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+
+    while num_of_xs < 3:
+        try:
+            recent_missing_link_ids = get_recent_question_ids_from_mongo("missing_link")
+
+            # Fetch wheel of fortune questions using the random subset method
+            missing_link_collection = db["missing_link_questions"]
+            pipeline_missing_link = [
+                {"$match": {"_id": {"$nin": list(recent_missing_link_ids)}}},  # Exclude recent IDs
+                {"$group": {  # Group by question text to ensure uniqueness
+                    "_id": "$question",  # Group by the question text field
+                    "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
+                }},
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
+
+            missing_link_questions = list(missing_link_collection.aggregate(pipeline_missing_link))
+            missing_link_question = missing_link_questions[0]
+            
+            missing_link_category = missing_link_question["category"]
+            missing_link_answers = missing_link_question["answers"]   
+            
+            missing_link_list = missing_link_question["question"]
+            missing_link_hint = missing_link_question["url"]
+            missing_link_question_id = missing_link_question["_id"]  # Get the ID of the selected question
+            
+            if missing_link_question_id:
+                store_question_ids_in_mongo([missing_link_question_id], "missing_link")  # Store it as a list containing a single ID
+            print(missing_link_question)
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting missing_link questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
+
+        missing_link_category_emojis = get_category_title(missing_link_category, "")
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+        
+        start_message = ""
+        
+        if num_of_xs == 0:
+            start_message += f"\n🟩🤔 Okrans, you have 0/3 strikes.\n"
+        elif num_of_xs == 1:
+            start_message += f"\n🟨🤔 Okrans, you have 1/3 strikes...\n"
+        elif num_of_xs == 2:
+            start_message += f"\n🟥🤔 Okrans, you have 2/3 strikes!\n"
+       
+        if correct_guesses > 0:
+            start_message += f"\nCorrect guesses: {correct_guesses}\n"
+
+        send_message(target_room_id, start_message)
+        time.sleep(2)
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+
+        if missing_link_category == "Movie Characters":
+            message += f"\n🎥🌟 What MOVIE is the missing link?\n"
+            list_header = "Characters"
+
+        if  missing_link_category == "Movie Actors":
+            message += f"\n🎥🌟 What MOVIE is the missing link?\n"
+            list_header = "Actors / Actresses"
+        
+        if missing_link_category == "Actor / Actress":
+            message += f"\n🎥🌟 What ACTOR or ACTRESS is the missing link?\n"
+            list_header = "Movies"
+            
+            
+        message += f"\n📅💡 Clue: {missing_link_hint}\n"
+        message += f"\n{list_header}"
+        
+        for i, element in enumerate(missing_link_list, start=1):
+            message += f"\n{i}. {element}"
+    
+        message += "\n"
+        send_message(target_room_id, message)
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        
+        while time.time() - start_time < 15 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+                        
+                        for answer in missing_link_answers:
+                            if fuzzy_match(message_content, answer, missing_link_category, missing_link_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
+                                send_message(target_room_id, message)
+                                right_answer = True
+                                correct_guesses = correct_guesses + 1
+
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                user_correct_answers[sender_display_name] += 1
+                                
+                                break   
+                        
+                        if right_answer == True:
+                            break
+
+                    if right_answer == True:
+                        break
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
+            num_of_xs = num_of_xs + 1
+            message = f"\n❌😢 No one got it.\n\nAnswer: {missing_link_answers[0].upper()}\n"
+            send_message(target_room_id, message)
+            time.sleep(1)
+                        
+    if correct_guesses == 0:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    else:
+        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        message += "\n 🏆 Commendable Okrans\n"
+
+        # Sort the dictionary by the count (value) in descending order
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+    
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+        
+    send_message(target_room_id, message)
+    wf_winner = True
+    time.sleep(3)
+    return None
+
+
+
 
 def ask_movie_scenes_challenge(winner):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
@@ -3044,7 +3218,9 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🎥⚡ Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🎬💥 Movie Mayhem ✨CO-OP ({num_list_players}+)✨ ☕"
+        message += f"{counter}. 🎬💥 Movie Mayhem ✨CO-OP ({num_list_players}+)✨ ☕\n"
+        counter = counter + 1
+        message += f"{counter}. 🧩🔗 Missing Link ✨CO-OP ({num_list_players}+)✨ ☕"
         
         send_message(target_room_id, message)  
         
@@ -3084,6 +3260,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "13":
             ask_movie_scenes_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "14":
+            ask_missing_link(winner)
             time.sleep(3)
             return None
         
@@ -3460,7 +3641,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -3545,6 +3726,18 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    if str(message_content) in {"14"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Missing Link' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"14"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Missing Link' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -3558,7 +3751,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -3576,7 +3769,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11", "12"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 
@@ -7416,6 +7609,7 @@ def get_category_title(trivia_category, trivia_url):
         "Harry Potter": "⚡🧙‍♂️",
         "Memorial Day": "🇺🇸🪖",
         "Actors Actresses": "🎭🎬",
+        "Actor / Actress": "🎭🎬",
         "Royal Family": "👑👨‍👩‍👧‍👦",
         "Uk Football": "🇬🇧⚽",
         "Batman": "🦇🦸‍♂️",

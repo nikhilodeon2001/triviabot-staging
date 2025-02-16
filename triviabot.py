@@ -1193,7 +1193,7 @@ def log_execution_time(func):
     return wrapper
 
 
-def fetch_random_word_thes(min_length=5, max_length=12, max_retries=5, max_related=5):
+def fetch_random_word_thes(min_length=5, max_length=12, max_retries=20, max_related=5):
     for attempt in range(1, max_retries + 1):
         print(f"[Attempt {attempt}/{max_retries}] Fetching a random word...")
         try:
@@ -4326,7 +4326,8 @@ def generate_crossword_image(answer):
 
     # Determine prefilled letter count and positions
     if answer_length > 2:
-        prefill_count = int(answer_length * .5) + 1  # At least 1 letter should be filled in
+        #prefill_count = int(answer_length * .5) + 1  # At least 1 letter should be filled in
+        prefill_count = math.ceil(answer_length * 0.5)
         prefill_positions = random.sample(range(answer_length), prefill_count)
     else:
         prefill_positions = []

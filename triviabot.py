@@ -444,11 +444,12 @@ def ask_ranker_people_challenge(winner):
             people_collection = db["ranker_people_questions"]
             pipeline_people = [
                 {"$match": {"_id": {"$nin": list(recent_people_ids)}}},  # Exclude recent IDs
-                {"$group": {  # Group by question text to ensure uniqueness
-                    "_id": "$question",  # Group by the question text field
-                    "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
+                {"$sample": {"size": 100}},  # Sample a larger set first
+                {"$group": {  
+                    "_id": "$question",
+                    "question_doc": {"$first": "$$ROOT"}
                 }},
-                {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  
                 {"$sample": {"size": 1}}  # Sample 1 unique question
             ]
 

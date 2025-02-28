@@ -434,6 +434,7 @@ def ask_ranker_people_challenge(winner):
     time.sleep(3)
     
     ranker_url= "https://www.ranker.com/crowdranked-list/the-most-influential-people-of-all-time"
+    people_category  = "Ranker People"
     
     while num_of_xs < 3:
         try:
@@ -462,7 +463,6 @@ def ask_ranker_people_challenge(winner):
             people_profession = people_question["profession"]
             people_question_id = people_question["_id"]  # Get the ID of the selected question
             people_url= people_question["url"]  # Get the ID of the selected question
-              
             
             if people_question_id:
                 store_question_ids_in_mongo([people_question_id], "people")  # Store it as a list containing a single ID
@@ -496,8 +496,8 @@ def ask_ranker_people_challenge(winner):
         message = f"\n⚠️🚨 Everyone's in!\n"
         message += f"\n🎥🌟 #{people_rank}: Who that?\n"
         message += f"\n🌍🏡 Birthplace: {people_birthplace}"
-        message += f"\n🏳️🆔 Nationality {people_nationality}"
-        message += f"\n💼⚒️ Profession {people_profession}\n"
+        message += f"\n🏳️🆔 Nationality: {people_nationality}"
+        message += f"\n💼⚒️ Profession: {people_profession}\n"
         
         image_response = send_image(target_room_id, people_mxc, people_width, people_height, people_size)
 
@@ -577,7 +577,7 @@ def ask_ranker_people_challenge(winner):
         if right_answer == False:    
             message += f"❌😢 No one got it.\n\nAnswer: {people_answers[0].upper()}\n"
         
-            if people_rank > 2500:
+            if int(people_rank) > 2500:
                 message += f"\n❌😢 No penalty for 2500+.\n"
             else:
                 num_of_xs = num_of_xs + 1

@@ -601,7 +601,7 @@ def ask_ranker_people_challenge(winner):
     send_message(target_room_id, message)
     time.sleep(2)
     
-    message = f"\n Ranks determined by Ranker.com"
+    message = f"\n Ranks from Ranker.com\n"
     message += f"{ranker_url}\n"
     send_message(target_room_id, message)
     

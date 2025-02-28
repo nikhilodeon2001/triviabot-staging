@@ -429,7 +429,7 @@ def ask_ranker_people_challenge(winner):
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    message = f"\n👤🌟 Name Ranker.com's All Time Greats\n"
+    message = f"\n👤🌟 ID Ranker.com's All Time Greats\n"
     send_message(target_room_id, message)
     time.sleep(3)
     
@@ -440,7 +440,7 @@ def ask_ranker_people_challenge(winner):
             recent_people_ids = get_recent_question_ids_from_mongo("people")
 
             # Fetch wheel of fortune questions using the random subset method
-            people_collection = db["people_questions"]
+            people_collection = db["ranker_people_questions"]
             pipeline_people = [
                 {"$match": {"_id": {"$nin": list(recent_people_ids)}}},  # Exclude recent IDs
                 {"$group": {  # Group by question text to ensure uniqueness
@@ -3414,14 +3414,12 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🎬💥 Movie Mayhem ✨CO-OP ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🧩🔗 Missing Link ✨CO-OP ({num_list_players}+)✨ ☕"
+        message += f"{counter}. 🧩🔗 Missing Link ✨CO-OP ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 👤🌟 Famous Peeps ✨CO-OP ({num_list_players}+)✨ ☕"
-        
-        
         send_message(target_room_id, message)  
-        
-        message = f"00. 🥗🌟 Okra's Choice\n"
+
+        message = f"{counter}. 👤🌟 Famous Peeps ✨CO-OP ({num_list_players}+)✨ ☕\n"
+        message += f"00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
         
         selected_wof_category = ask_wof_number(winner)

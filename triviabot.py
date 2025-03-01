@@ -1766,7 +1766,7 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
                 
                             # Check if they have enough correct answers total
                             if len(total_progress) >= num_of_answers:
-                                message = f"\n🏆🎉 Okrans, you got all {num_of_answers}!\n"
+                                message = f"\n🏆🎉 Okrans, you got all {len(total_progress)}/{num_of_answers}!\n"
                             
                                 # 1) Compute individual scores
                                 score_list = [(user, len(answers)) for user, answers in user_progress.items()]
@@ -1778,13 +1778,15 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
                                 message += f"\n	🏆👏 Commendable Okrans\n"
                                 for rank, (user, score) in enumerate(score_list, start=1):
                                     message += f"{rank}. @{user}: {score}\n"
+
+                                message += "\nSee the full list:\n"
+                                message +=f"{ranker_list_question_url}"
                                 
                                 # 6) Send the message
                                 send_message(target_room_id, message)
+                                wf_winner = True
 
-                                if winner == sender_display_name:
-                                    wf_winner = True
-                                    
+                                
                                 return None
                                 
                             break
@@ -1795,25 +1797,26 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
     
     score_list = [(user, len(answers)) for user, answers in user_progress.items()]
     score_list.sort(key=lambda x: x[1], reverse=True)
-    
+
+    message = ""
     if len(score_list) == 0:
-        message = f"\n😬🤦 Wow. No one got a single one right. Embarassing."
-        send_message(target_room_id, message)
-        return None
+        message += f"\n😬🤦 Wow. No one got a single one right. Embarassing."
+
     
     if len(score_list) > 0:
-         message = f"\n🏆🎉 Okrans, you got {len(score_list)}/{num_of_answers}!\n"
+        message += f"\n🏅💪 Okrans, you got {len(total_progress)}/{num_of_answers}.\n"
+        message += f"\n	🏆👏 Commendable Okrans\n"
+        for rank, (user, score) in enumerate(score_list, start=1):
+            message += f"{rank}. @{user}: {score}\n"
 
-    send_message(target_room_id, message)
+    message += "\nSee the full list:\n"
+    message +=f"{ranker_list_question_url}"
     
-    if winner == first_user:
-        wf_winner = True
+    send_message(target_room_id, message)
+    wf_winner = True
     
     return None
     
-
-
-
 
 def ask_list_question(winner, mode="competition", target_percentage = 1.00):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner

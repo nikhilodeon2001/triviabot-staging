@@ -1678,6 +1678,7 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
         selected_list_question = int(ask_ranker_list_number(winner))
         
         ranker_list_question = ranker_list_questions[selected_list_question-1]
+        print(ranker_list_question)
 
         ranker_list_question_clue = ranker_list_question["question"]
         ranker_list_question_answers = ranker_list_question["answers"]   

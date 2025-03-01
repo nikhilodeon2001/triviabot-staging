@@ -1645,7 +1645,7 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
     
     try:
         time.sleep(2) 
-        recent_list_ids = get_recent_question_ids_from_mongo("ranker_list")
+        recent_ranker_list_ids = get_recent_question_ids_from_mongo("ranker_list")
         
         # Fetch wheel of fortune questions using the random subset method
         ranker_list_collection = db["ranker_list_questions"]

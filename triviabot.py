@@ -1575,6 +1575,245 @@ def load_previous_question():
 
 
 
+def ask_ranker_list_number(winner):
+    global since_token, params, headers, max_retries, delay_between_retries
+
+    sync_url = f"{matrix_base_url}/sync"
+    collected_responses = []  # Store all responses
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+    
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+    
+    selected_question = 0
+    while time.time() - start_time < magic_time:
+        try:
+            if since_token:
+                params["since"] = since_token
+
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")  # Get the type of the event
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "")
+
+                    if sender == bot_user_id or sender_display_name != winner:
+                        continue
+                        
+
+                    if str(message_content) in {"1", "2", "3"}:
+                        selected_question = str(message_content).lower()
+                        react_to_message(event_id, target_room_id, "okra21")
+                        message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
+                        send_message(target_room_id, message)
+                        return selected_question
+                    else:
+                        react_to_message(event_id, target_room_id, "okra5")
+    
+        except requests.exceptions.RequestException as e:
+                sentry_sdk.capture_exception(e)
+                print(f"Error collecting responses: {e}")                    
+
+    set_a = ["1", "2", "3"]
+    selected_question = random.choice(set_a)
+    send_message(target_room_id, f"\n🐢⏳ Too slow. I choose {selected_question}.\n")
+    return selected_question
+
+
+def ask_ranker_list_question(winner, target_percentage = 1.00):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+    
+    try:
+        time.sleep(2) 
+        recent_list_ids = get_recent_question_ids_from_mongo("ranker_list")
+        
+        # Fetch wheel of fortune questions using the random subset method
+        ranker_list_collection = db["ranker_list_questions"]
+        pipeline_ranker_list = [
+            {"$match": {"_id": {"$nin": list(recent_ranker_list_ids)}}},  # Exclude recent IDs
+            {"$sample": {"size": 100}},  # Sample 100 documents first
+            {"$group": {  
+                "_id": "$question",  # Group by unique question text
+                "question_doc": {"$first": "$$ROOT"}  # Keep the first document per unique question
+            }},
+            {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
+            {"$sample": {"size": 3}}  # Sample 3 random questions from the 100
+        ]
+
+        ranker_list_questions = list(ranker_list_collection.aggregate(pipeline_ranker_list))
+        ranker_list_question_1 = ranker_list_questions[0]
+        ranker_list_question_2 = ranker_list_questions[1]
+        ranker_list_question_3 = ranker_list_questions[2]
+
+        message = f"\n@{winner}, Choose the list #:"
+        message += f"\n1️⃣. {ranker_list_question_1["question"]}"
+        message += f"\n2️⃣. {ranker_list_question_2["question"]}"
+        message += f"\n3️⃣. {ranker_list_question_3["question"]}\n"
+
+        selected_list_question = ask_ranker_list_number(winner)
+        
+        ranker_list_question = ranker_list_questions[selected_list_question-1]
+
+        ranker_list_question_clue = ranker_list_question["question"]
+        ranker_list_question_answers = ranker_list_question["answers"]   
+        ranker_list_question_category = ranker_list_question["category"]
+        ranker_list_question_url = ranker_list_question["url"]
+        ranker_list_question_id = ranker_list_question["_id"]  # Get the ID of the selected question
+        
+        if ranker_list_question_id:
+            store_question_ids_in_mongo([ranker_list_question_id], "ranker_list")  # Store it as a list containing a single ID
+       
+    except Exception as e:
+        # Capture the exception in Sentry and print detailed error information
+        sentry_sdk.capture_exception(e)
+        
+        # Print a detailed error message with traceback
+        error_details = traceback.format_exc()
+        print(f"Error selecting ranker list questions: {e}\nDetailed traceback:\n{error_details}")
+        
+        return None  # Return an empty list in case of failure
+
+    ranker_list_category_emojis = get_category_title(ranker_list_question_category, "")
+    num_of_answers = len(ranker_list_question_answers)
+    target_num_answers = int(target_percentage * num_of_answers)
+    
+    message = f"\n⚠️🚨 Everyone's in...{ranker_list_category_emojis}\n" 
+    message += f"\n📝1️⃣ List ONE per message of...\n"
+    send_message(target_room_id, message)
+
+    time.sleep(5)
+
+    message = f"\n👉👉 {ranker_list_question_clue}\n\n🟢🚀 GO!"
+    send_message(target_room_id, message)
+
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+    user_progress = defaultdict(set)
+    total_progress = set()
+    
+    initialize_sync()
+    start_time = time.time()  # Track when the question starts
+
+    while time.time() - start_time < 30:
+        try:
+                
+            if since_token:
+                params["since"] = since_token
+
+            time.sleep(1)
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:                
+                event_id = event["event_id"]
+                event_type = event.get("type")
+
+                # Only process and redact if the event type is "m.room.message"
+                if event_type == "m.room.message":
+                    
+                    # Skip processing if this event_id was already processed
+                    if event_id in processed_events:
+                        continue
+    
+                    # Add event_id to the set of processed events
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "")
+
+                    if sender == bot_user_id:
+                        continue
+
+                    current_answers = user_progress[sender_display_name]
+
+                    # Iterate over all validAnswers
+                    for answer in ranker_list_question_answers:
+                        # Skip if user already has this answer
+                        if answer in total_progress:
+                            continue
+                
+                        # Compare user's guess to this official answer
+                        if fuzzy_match(message_content, answer, ranker_list_question_category, ranker_list_question_url):
+                            # It's a match => store the *official answer* in the user's set
+                            current_answers.add(answer)
+                            total_progress.add(answer)
+                
+                            # Check if they have enough correct answers total
+                            if len(total_progress) >= num_of_answers:
+                                message = f"\n🏆🎉 Okrans, you got all {num_of_answers}!\n"
+                            
+                                # 1) Compute individual scores
+                                score_list = [(user, len(answers)) for user, answers in user_progress.items()]
+                                
+                                # 2) Sort descending by score
+                                score_list.sort(key=lambda x: x[1], reverse=True)
+                                
+                                # 5) Print each user's score
+                                message += f"\n	🏆👏 Commendable Okrans\n"
+                                for rank, (user, score) in enumerate(score_list, start=1):
+                                    message += f"{rank}. @{user}: {score}\n"
+                                
+                                # 6) Send the message
+                                send_message(target_room_id, message)
+
+                                if winner == sender_display_name:
+                                    wf_winner = True
+                                    
+                                return None
+                                
+                            break
+        
+        except Exception as e:
+            print(f"Error processing events: {e}")
+
+    
+    score_list = [(user, len(answers)) for user, answers in user_progress.items()]
+    score_list.sort(key=lambda x: x[1], reverse=True)
+    
+    if len(score_list) == 0:
+        message = f"\n😬🤦 Wow. No one got a single one right. Embarassing."
+        send_message(target_room_id, message)
+        return None
+    
+    if len(score_list) > 0:
+         message = f"\n🏆🎉 Okrans, you got {len(score_list)}/{num_of_answers}!\n"
+
+    send_message(target_room_id, message)
+    
+    if winner == first_user:
+        wf_winner = True
+    
+    return None
+    
+
+
+
 
 def ask_list_question(winner, mode="competition", target_percentage = 1.00):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner

@@ -101,7 +101,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 5000}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -1586,7 +1586,7 @@ def ask_ranker_list_number(winner):
     start_time = time.time()  # Track when the question starts
     
     selected_question = 0
-    while time.time() - start_time < magic_time:
+    while time.time() - start_time < magic_time + 5:
         try:
             if since_token:
                 params["since"] = since_token
@@ -1621,7 +1621,7 @@ def ask_ranker_list_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"1", "2", "3"}:
+                    if str(message_content) in {"1", "2", "3", "4", "5"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -1634,7 +1634,7 @@ def ask_ranker_list_number(winner):
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")                    
 
-    set_a = ["1", "2", "3"]
+    set_a = ["1", "2", "3", "4", "5"]
     selected_question = random.choice(set_a)
     send_message(target_room_id, f"\n🐢⏳ Too slow. I choose {selected_question}.\n")
     return selected_question
@@ -1657,18 +1657,22 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
                 "question_doc": {"$first": "$$ROOT"}  # Keep the first document per unique question
             }},
             {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
-            {"$sample": {"size": 3}}  # Sample 3 random questions from the 100
+            {"$sample": {"size": 5}}  # Sample 3 random questions from the 100
         ]
 
         ranker_list_questions = list(ranker_list_collection.aggregate(pipeline_ranker_list))
         ranker_list_question_1 = ranker_list_questions[0]
         ranker_list_question_2 = ranker_list_questions[1]
         ranker_list_question_3 = ranker_list_questions[2]
+        ranker_list_question_4 = ranker_list_questions[3]
+        ranker_list_question_5 = ranker_list_questions[4]
 
         message = f"\n@{winner}, Choose the list #:"
         message += f"\n1️⃣. {ranker_list_question_1["question"]}"
         message += f"\n2️⃣. {ranker_list_question_2["question"]}"
-        message += f"\n3️⃣. {ranker_list_question_3["question"]}\n"
+        message += f"\n3️⃣. {ranker_list_question_3["question"]}"
+        message += f"\n4️⃣. {ranker_list_question_4["question"]}"
+        message += f"\n5️⃣. {ranker_list_question_5["question"]}\n"
         send_message(target_room_id, message)
 
         selected_list_question = int(ask_ranker_list_number(winner))

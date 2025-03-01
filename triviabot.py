@@ -1669,8 +1669,9 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
         message += f"\n1️⃣. {ranker_list_question_1["question"]}"
         message += f"\n2️⃣. {ranker_list_question_2["question"]}"
         message += f"\n3️⃣. {ranker_list_question_3["question"]}\n"
+        send_message(target_room_id, message)
 
-        selected_list_question = ask_ranker_list_number(winner)
+        selected_list_question = int(ask_ranker_list_number(winner))
         
         ranker_list_question = ranker_list_questions[selected_list_question-1]
 

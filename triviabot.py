@@ -1780,9 +1780,12 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
                                 # 2) Sort descending by score
                                 score_list.sort(key=lambda x: x[1], reverse=True)
                                 
+                                # 3) Filter out users with a score of 0
+                                filtered_score_list = [(user, score) for user, score in score_list if score > 0]
+                                
                                 # 5) Print each user's score
                                 message += f"\n	🏆👏 Commendable Okrans\n"
-                                for rank, (user, score) in enumerate(score_list, start=1):
+                                for rank, (user, score) in enumerate(filtered_score_list, start=1):
                                     message += f"{rank}. @{user}: {score}\n"
 
                                 message += "\nSee the full list:\n"
@@ -1803,16 +1806,17 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
     
     score_list = [(user, len(answers)) for user, answers in user_progress.items()]
     score_list.sort(key=lambda x: x[1], reverse=True)
+    filtered_score_list = [(user, score) for user, score in score_list if score > 0]
 
     message = ""
-    if len(score_list) == 0:
+    if len(filtered_score_list) == 0:
         message += f"\n😬🤦 Wow. No one got a single one right. Embarassing."
 
     
-    if len(score_list) > 0:
+    if len(filtered_score_list) > 0:
         message += f"\n🏅💪 Okrans, you got {len(total_progress)}/{num_of_answers}.\n"
         message += f"\n	🏆👏 Commendable Okrans\n"
-        for rank, (user, score) in enumerate(score_list, start=1):
+        for rank, (user, score) in enumerate(filtered_score_list, start=1):
             message += f"{rank}. @{user}: {score}\n"
 
     message += "\nSee the full list:\n"

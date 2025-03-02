@@ -4592,6 +4592,8 @@ def ask_magic_challenge(winner):
     send_message(target_room_id, message)
     time.sleep(3)
 
+    user_scores = {}  
+
     for round_num in range(1, 6):  # Loop for 5 rounds
         magic_number = random.randint(1000, 9999)
         print(f"Magic number for Round {round_num}: {magic_number}")

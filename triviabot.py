@@ -4607,7 +4607,7 @@ def ask_magic_challenge(winner):
         start_time = time.time()
         magic_number_correct = False
 
-        while time.time() - start_time < magic_time:
+        while time.time() - start_time < magic_time + 10:
             try:
                 if since_token:
                     params["since"] = since_token

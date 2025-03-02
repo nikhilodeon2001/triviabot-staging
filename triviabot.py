@@ -3660,21 +3660,23 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. ⚔️🧍 FeUd ☕\n"
         counter = counter + 1
-        message += f"{counter}. ⚔️⚡ FeUd Blitz ✨CO-OP ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. ⚔️⚡ FeUd Blitz ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         message += f"{counter}. 📝🥊 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🎥⚡ Poster Blitz ✨CO-OP ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🎥⚡ Poster Blitz ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🎬💥 Movie Mayhem ✨CO-OP ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🎬💥 Movie Mayhem ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🧩🔗 Missing Link ✨CO-OP ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🧩🔗 Missing Link ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         send_message(target_room_id, message)  
 
-        message = f"{counter}. 👤🌟 Famous Peeps ✨CO-OP ({num_list_players}+)✨ ☕\n"
+        message = f"{counter}. 👤🌟 Famous Peeps ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
-        message += f"{counter}. 🔢📜 Ranker Lists ✨CO-OP ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🔢📜 Ranker Lists ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        counter = counter + 1
+        message += f"{counter}. 👁️✨ Magic Eye D ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         message += f"00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
         
@@ -3726,6 +3728,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "16":
             ask_ranker_list_question(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "17":
+            ask_magic_challenge(winner)
             time.sleep(3)
             return None
         
@@ -4103,7 +4110,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -4224,6 +4231,18 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    if str(message_content) in {"17"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Magic Eye D' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"17"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Magic Eye D' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -4237,7 +4256,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -4255,7 +4274,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 
@@ -4556,21 +4575,105 @@ def send_magic_image(input_text):
         if response == False:
             print("Error: Failed to send image.")
             print(response)
-        else:
-            time.sleep(3)
+
+        return
 
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running main.py: {e}")
         print("Error output:", e.stderr)
 
 
+def ask_magic_challenge(winner):
+    global since_token, params, headers, max_retries, delay_between_retries
+
+    sync_url = f"{matrix_base_url}/sync"
+    
+    message = f"👁️✨ Who's got the Magic Eye?"
+    send_message(target_room_id, message)
+    time.sleep(3)
+
+     for round_num in range(1, 6):  # Loop for 5 rounds
+        magic_number = random.randint(1000, 9999)
+        print(f"Magic number for Round {round_num}: {magic_number}")
+
+        message = f"🔵 Round {round_num}: What do you see?\n"
+         
+        send_magic_image(magic_number)
+        send_message(target_room_id, message)
+
+        processed_events = set()
+        start_time = time.time()
+        magic_number_correct = False
+
+        while time.time() - start_time < magic_time:
+            try:
+                if since_token:
+                    params["since"] = since_token
+
+                response = requests.get(sync_url, headers=headers, params=params)
+
+                if response.status_code != 200:
+                    continue
+
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token
+
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+                for event in room_events:
+                    if magic_number_correct:  # Stop checking if already guessed correctly
+                        break
+
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+
+                    if event_type == "m.room.message":
+                        if event_id in processed_events:
+                            continue  # Skip already processed messages
+
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+
+                        if sender == bot_user_id:
+                            continue  # Ignore bot messages
+
+                        # Check if the user's guess matches the magic number
+                        if str(magic_number).lower() in str(message_content).lower():
+                            magic_number_correct = True
+                            react_to_message(event_id, target_room_id, "okra21")
+
+                            # Update user scores
+                            if sender_display_name not in user_scores:
+                                user_scores[sender_display_name] = 0
+                            user_scores[sender_display_name] += 1
+
+                            message = f"🎉🥳 @{sender_display_name} got it right!\n👀✨ The Magic Number was **{magic_number}**."
+                            send_message(target_room_id, message)
+
+            except requests.exceptions.RequestException as e:
+                sentry_sdk.capture_exception(e)
+                print(f"Error collecting responses: {e}")
+
+        time.sleep(3)  # Small delay before next round
+
+    # Final score announcement
+    message = "🏆✨ **Final Scores** ✨🏆\n"
+    sorted_scores = sorted(user_scores.items(), key=lambda x: x[1], reverse=True)
+
+    for rank, (user, score) in enumerate(sorted_scores, start=1):
+        message += f"{rank}. @{user}: {score} correct guesses\n"
+
+    send_message(target_room_id, message)
+         
+    
+
 def ask_magic_number(winner):
     global since_token, params, headers, max_retries, delay_between_retries
 
     sync_url = f"{matrix_base_url}/sync"
-
     collected_responses = []  # Store all responses
-    
     processed_events = set()  # Track processed event IDs to avoid duplicates
 
     initialize_sync()

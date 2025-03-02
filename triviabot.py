@@ -4651,24 +4651,29 @@ def ask_magic_challenge(winner):
                                 user_scores[sender_display_name] = 0
                             user_scores[sender_display_name] += 1
 
-                            message = f"🎉🥳 @{sender_display_name} got it right!\n👀✨ The Magic Number was **{magic_number}**."
+                            message = f"\n🎉🥳 @{sender_display_name} got it right!\n\n👀✨ The Magic Number was **{magic_number}**."
                             send_message(target_room_id, message)
+                            break  # Stop checking more messages in this round
 
             except requests.exceptions.RequestException as e:
                 sentry_sdk.capture_exception(e)
                 print(f"Error collecting responses: {e}")
 
+        # If no one got it right, announce the correct number
+        if not magic_number_correct:
+            message = f"\n😢 No one got it right this round!\n\n👀✨ The Magic Number was **{magic_number}**."
+            send_message(target_room_id, message)
+
         time.sleep(3)  # Small delay before next round
 
     # Final score announcement
-    message = "🏆✨ **Final Scores** ✨🏆\n"
+    message = "\n🏆✨ **Final Scores** ✨🏆\n"
     sorted_scores = sorted(user_scores.items(), key=lambda x: x[1], reverse=True)
 
     for rank, (user, score) in enumerate(sorted_scores, start=1):
-        message += f"{rank}. @{user}: {score} correct guesses\n"
+        message += f"{rank}. @{user}: {score}\n"
 
-    send_message(target_room_id, message)
-         
+    send_message(target_room_id, message)        
     
 
 def ask_magic_number(winner):

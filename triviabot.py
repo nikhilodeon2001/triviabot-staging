@@ -1,3 +1,4 @@
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -1810,7 +1811,7 @@ def ask_ranker_list_question(winner, target_percentage = 1.00):
 
     message = ""
     if len(filtered_score_list) == 0:
-        message += f"\n😬🤦 Wow. No one got a single one right. Embarassing."
+        message += f"\n😬🤦 Wow. No one got a single one right. Embarassing.\n"
 
     
     if len(filtered_score_list) > 0:
@@ -7801,6 +7802,8 @@ def get_category_title(trivia_category, trivia_url):
         "Music": "🎶🎸",
         "Art & Literature": "🎨📚",
         "Chemistry": "🧪⚗️",
+        "Business": "💼📈",
+        "Cars & Other Vehicles": "🚗🛩️",
         "Geography": "🧭🗺️",
         "Mathematics": "➕➗",
         "Statistics": "📊🔢",
@@ -7829,9 +7832,12 @@ def get_category_title(trivia_category, trivia_url):
         "TV Shows": "📺🎥",
         "Religion & Mythology": "🛐🐉",
         "Sports & Leisure": "⚽🌴",
+        "Politics & History": "🏛️📜",
         "Sports": "🏈⚾",
+        "Sports & Games": "⚽🎮",
         "World Culture": "🎭🗿",
         "General Knowledge": "📚💡",
+        "Anything": "🌐🔀",
         "Crossword": "📰✏️",
         "English": "🇬🇧🗣️",
         "Philippines": "🇵🇭🏝️",
@@ -7850,10 +7856,13 @@ def get_category_title(trivia_category, trivia_url):
         "Baking": "🧁🥣",
         "Australia": "🇦🇺🦘",
         "Shopping": "🛍️🛒",
+        "Books & Publications": "📚📰",
         "Chicago": "🌆🍕",
         "World War 1": "🌍⚔️",
         "For Seniors": "👴👵",
         "Ice Cream": "🍦🍨",
+        "Military History": "⚔️🎖️",
+        "Places & Travel": "🌍✈️",
         "Military History": "⚔️🎖️",
         "British History": "🏰🇬🇧",
         "Wimbledon": "🎾🏆",
@@ -7874,6 +7883,7 @@ def get_category_title(trivia_category, trivia_url):
         "Avengers": "🛡️⚡",
         "Nintendo": "🕹️🍄",
         "Playstation Games": "🎮⚙️",
+        "Games": "🎮🎲",
         "Swedish Cuisine": "🥔🐟",
         "Disney Princess": "👑🏰",
         "Extreme Sports": "🏂🚵",
@@ -7888,6 +7898,7 @@ def get_category_title(trivia_category, trivia_url):
         "Sherlock Holmes": "🕵️‍♂️🔎",
         "Board Games": "♟️🎲",
         "Architecture": "🏛️🏗️",
+        "Art & Architecture": "🎨🏛️",
         "Weather": "☀️🌧️",
         "Albert Einstein": "🧠💡",
         "Serial Killer": "🔪😈",
@@ -8067,6 +8078,7 @@ def get_category_title(trivia_category, trivia_url):
         "Oscars Awards": "🏆🎞️",
         "St Patrick S Day": "🍀🇮🇪",
         "Medicine": "💊🩺",
+        "Science & Medicine": "🔬🧬",
         "Famous Authors": "🖋️📚",
         "Nfl": "🏈🏟️",
         "Funny": "🤣😜",
@@ -8139,6 +8151,7 @@ def get_category_title(trivia_category, trivia_url):
         "Space": "🚀🪐",
         "Science": "🔬🧪",
         "Tv": "📺🍿",
+        "TV": "📺🍿",
         "People & Places": "👨‍👩‍👧‍👦🏙️",
         "Toys": "🧸🪀",
         "Food": "🍔🥗",

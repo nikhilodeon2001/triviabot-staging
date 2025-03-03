@@ -8460,14 +8460,16 @@ def start_trivia():
     # You can now use and reset them in the function
     
     okra_gif_urls = [
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra2.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra3.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra4.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra5.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra7.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra8.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/merry.gif"
+        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif",
+        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra2.gif",
+        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra3.gif",
+        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra4.gif",
+        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra5.gif",
+        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra7.gif",
+        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra8.gif",
+        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/merry.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_logo1.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_logo2.gif"
     ]
 
     signal.signal(signal.SIGTERM, handle_sigterm)

@@ -6448,7 +6448,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     new_question = None
     send_image_flag = False
 
-     single_answer = (
+    single_answer = (
         (len(trivia_answer_list) == 1 and (is_number(trivia_answer) or len(trivia_answer_list[0]) == 1)) or
         trivia_url in [
             "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors",

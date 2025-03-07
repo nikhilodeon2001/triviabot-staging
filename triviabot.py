@@ -6935,8 +6935,15 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
     fastest_correct_event_id = None
 
     # Check if trivia_answer_list is a single-element list with a numeric answer  
-    single_answer = (len(trivia_answer_list) == 1 and is_number(trivia_answer)) or trivia_url in ["multiple choice opentrivia", "multiple choice oracle", "multiple choice", "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors", "derivative", "trig", "algebra"]
-
+    single_answer = (
+        (len(trivia_answer_list) == 1 and (is_number(trivia_answer) or len(trivia_answer_list[0]) == 1)) or
+        trivia_url in [
+            "multiple choice opentrivia", "multiple choice oracle", "multiple choice",
+            "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors",
+            "derivative", "trig", "algebra"
+        ]
+    )
+    
     # Dictionary to track first numerical response from each user if answer is a number
     user_first_response = {}
 
@@ -6985,7 +6992,8 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
                 is_number(message_content) or  # Rule 1: message_content is a number
                 message_content[0].isdigit() or  # Rule 2: first character is a number
                 message_content.lower() in {"a", "b", "c", "d", "t", "f", "true", "false"} or  # Rule 3: exact match
-                message_content[0].lower() in {"-", "x", "y", "z", "("}  # Rule 4: first character match
+                message_content[0].lower() in {"-", "x", "y", "z", "("} or # Rule 4: first character match
+                len(message_content) == 1
             ):
                 user_first_response[display_name] = message_content
             else:

@@ -580,7 +580,7 @@ def ask_ranker_people_challenge(winner):
             message += f"❌😢 No one got it.\n\nAnswer: {people_answers[0].upper()}\n"
         
             if int(people_rank) > 2500:
-                message += f"\n❌😢 No penalty for 2500+.\n"
+                message += f"\n🆓✅ No penalty for 2500+.\n"
             else:
                 num_of_xs = num_of_xs + 1
         
@@ -6448,10 +6448,18 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
     new_question = None
     send_image_flag = False
 
+     single_answer = (
+        (len(trivia_answer_list) == 1 and (is_number(trivia_answer) or len(trivia_answer_list[0]) == 1)) or
+        trivia_url in [
+            "median", "mean", "zeroes sum", "zeroes product", "zeroes", "base", "factors",
+            "derivative", "trig", "algebra"
+        ]
+    )
+
     message_body = ""
-    if (len(trivia_answer_list) == 1 and is_number(trivia_answer_list[0])) or trivia_url in ["mean", "median", "zeroes sum", "zeroes product", "zeroes", "base", "derivative", "factors", "trig", "algebra"]:
-        message_body += "\n🚨 ONE GUESS 🚨"
-    
+    if single_answer:
+        message_body += "\n🚨 1 GUESS 🚨"
+        
     if is_valid_url(trivia_url): 
         image_mxc, image_width, image_height = download_image_from_url(trivia_url) 
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
@@ -6566,9 +6574,9 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         
     elif trivia_url == "multiple choice" or trivia_url == "multiple choice opentrivia" or trivia_url == "multiple choice oracle": 
         if trivia_answer_list[0] in {"True", "False"}:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨TRUE or FALSE🚨 {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 T/F - 1 GUESS 🚨 {trivia_question}\n\n"
         else:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨Enter Letter🚨 {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 Letter - 1 GUESS 🚨 {trivia_question}\n\n"
             for answer in trivia_answer_list[1:]:
                 message_body += f"{answer}\n"
         trivia_answer_list[:] = trivia_answer_list[:1]

@@ -3443,6 +3443,8 @@ def get_coffees(username):
 
 
 def fetch_donations():
+    import re
+
     base_url = "https://developers.buymeacoffee.com/api/v1/supporters"
     headers = {"Authorization": f"Bearer {buymeacoffee_api_key}"}
 
@@ -3455,7 +3457,7 @@ def fetch_donations():
         while next_page_url:
             response = requests.get(next_page_url, headers=headers)
             response.raise_for_status()  # Raise an error for HTTP issues
-            
+
             # Parse and validate JSON response
             try:
                 api_response = response.json()
@@ -3465,24 +3467,34 @@ def fetch_donations():
 
             # Extract donations list from the 'data' key
             donations = api_response.get("data", [])
-            if not isinstance(donations, list):  # Validate expected data type
+            if not isinstance(donations, list):
                 print(f"Unexpected donations format: {type(donations)}. Donations: {donations}")
                 break
 
-            print(donations)
-            
             for donor in donations:
-                if isinstance(donor, dict):  # Ensure donor is a dictionary
-                    # Extract and process donor details
+                if isinstance(donor, dict):
                     donor_id = donor.get("support_id")
                     donor_name = donor.get("supporter_name", "")
                     donor_coffees = donor.get("support_coffees")
                     donor_coffee_price = donor.get("support_coffee_price")
                     donor_date = donor.get("support_created_on")
+                    donor_note = donor.get("support_note", "")
 
+                    # Normalize initial donor_name
                     if donor_name.startswith("@"):
                         donor_name = donor_name[1:]
                     donor_name = donor_name.lower()
+
+                    # Extract a word starting with @ or r/ from donor_note if present
+                    if isinstance(donor_note, str):
+                        words = donor_note.split()
+                        for word in words:
+                            if word.startswith("@"):
+                                donor_name = word[1:].lower()
+                                break  # prefer first match
+                            elif word.startswith("r/"):
+                                donor_name = word[2:].lower()
+                                break  # prefer first match
 
                     # Check if donor already exists in MongoDB
                     if not donors_collection.find_one({"donor_id": donor_id}):
@@ -3494,14 +3506,13 @@ def fetch_donations():
                             "date": donor_date
                         }
                         try:
-                            donors_collection.insert_one(new_donor)  # Insert into MongoDB
+                            donors_collection.insert_one(new_donor)
                             new_donors.append(new_donor)
                         except Exception as e:
                             print(f"Error inserting donor into MongoDB: {e}")
                 else:
                     print(f"Skipping invalid donor format: {donor}")
 
-            # Get the next page URL from the response
             next_page_url = api_response.get("next_page_url")
 
         print(f"New donors added: {new_donors}")

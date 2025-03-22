@@ -3677,7 +3677,7 @@ def select_wof_questions(winner):
         message += f"{counter}. 🔢📜 Ranker Lists ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         message += f"{counter}. 👁️✨ Magic Eye D ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
-        message += f"00. 🥗🌟 Okra's Choice\n"
+        message += f"\n00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
         
         selected_wof_category = ask_wof_number(winner)

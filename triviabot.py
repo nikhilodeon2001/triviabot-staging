@@ -8499,8 +8499,8 @@ def start_trivia():
         #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra7.gif",
         #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra8.gif",
         #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/merry.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_logo1.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_logo2.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_logo1.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_logo2.gif",
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/goduke.gif"
     ]
 

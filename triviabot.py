@@ -7538,6 +7538,8 @@ def select_trivia_questions(questions_per_round):
         # Shuffle the combined list of selected questions
         random.shuffle(selected_questions)
 
+        print(selected_questions)
+
         # Store question IDs in MongoDB (batch operation)
         store_all_question_ids(question_ids_to_store)
 

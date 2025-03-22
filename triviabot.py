@@ -1549,7 +1549,9 @@ def load_previous_question():
                     "trivia_catetgory": previous_question_retrieved.get("trivia_category"),
                     "trivia_question": previous_question_retrieved.get("trivia_question"),
                     "trivia_url": previous_question_retrieved.get("trivia_url"),
-                    "trivia_answer_list": previous_question_retrieved.get("trivia_answer_list")
+                    "trivia_answer_list": previous_question_retrieved.get("trivia_answer_list"),
+                    "trivia_db": previous_question_retrieved.get("trivia_db"),
+                    "trivia_id": previous_question_retrieved.get("trivia_id"),
                 }
             else:
                 # If the document is not found, set default values

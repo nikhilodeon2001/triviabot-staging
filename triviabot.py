@@ -7521,6 +7521,7 @@ def select_trivia_questions(questions_per_round):
 
             for doc in math_questions:
                 doc["db"] = "math_questions"
+                doc["_id"] = str(random.randint(10000, 99999))
                 
             selected_questions.extend(math_questions)
 
@@ -7530,6 +7531,7 @@ def select_trivia_questions(questions_per_round):
 
             for doc in stats_questions:
                 doc["db"] = "stats_questions"
+                doc["_id"] = str(random.randint(10000, 99999))
                 
             selected_questions.extend(stats_questions)
 

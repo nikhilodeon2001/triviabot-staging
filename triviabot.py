@@ -3469,6 +3469,8 @@ def fetch_donations():
                 print(f"Unexpected donations format: {type(donations)}. Donations: {donations}")
                 break
 
+            print(donations)
+            
             for donor in donations:
                 if isinstance(donor, dict):  # Ensure donor is a dictionary
                     # Extract and process donor details

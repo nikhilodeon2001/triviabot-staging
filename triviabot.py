@@ -1,4 +1,5 @@
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -451,7 +452,7 @@ def ask_ranker_people_challenge(winner):
         time.sleep(2)
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        message += f"\n🎥🌟 #{people_rank}: Who that?\n"
+        message += f"\n🎥🌟 #{people_rank}: Who dat?!?\n"
         message += f"\n🌍🏡 Birthplace: {people_birthplace}"
         message += f"\n🏳️🆔 Nationality: {people_nationality}"
         message += f"\n💼⚒️ Profession: {people_profession}\n"
@@ -2444,7 +2445,7 @@ def get_random_city(winner):
 
     themed_image_url = generate_themed_country_image(country_name, city_name)
     
-    return city_name, country_name, "World Capital", location_clue, street_view_url, satellite_view_url, satellite_view_live_url, themed_image_url
+    return city_name, country_name, "World Cities", location_clue, street_view_url, satellite_view_url, satellite_view_live_url, themed_image_url
 
 
 
@@ -3421,8 +3422,6 @@ def get_coffees(username):
 
 
 def fetch_donations():
-    import re
-
     base_url = "https://developers.buymeacoffee.com/api/v1/supporters"
     headers = {"Authorization": f"Bearer {buymeacoffee_api_key}"}
 
@@ -5278,9 +5277,6 @@ def redact_message(event_id, room_id):
     except requests.exceptions.RequestException as e:
         print(f"Error redacting message {event_id}: {e}")
 
-
-
-import requests
 
 def react_to_message(event_id, room_id, emoji_type):
     """React to a message in the Matrix room with a specified reaction."""

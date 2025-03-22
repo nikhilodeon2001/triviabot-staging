@@ -7572,7 +7572,7 @@ def select_trivia_questions(questions_per_round):
         store_all_question_ids(question_ids_to_store)
 
         final_selected_questions = [
-            (doc["category"], doc["question"], doc["url"], doc["answers"], doc["db"], doc["id"])
+            (doc["category"], doc["question"], doc["url"], doc["answers"], doc["db"], doc["_id"])
             for doc in selected_questions
         ]
         

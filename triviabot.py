@@ -7545,7 +7545,9 @@ def select_trivia_questions(questions_per_round):
             (doc["category"], doc["question"], doc["url"], doc["answers"])
             for doc in selected_questions
         ]
-
+        
+        print(final_selected_questions)
+        
         return final_selected_questions
 
     except Exception as e:

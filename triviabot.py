@@ -2334,15 +2334,24 @@ def get_random_city(winner):
     # Connect to the collection
     collection = db["where_is_okra"]
 
-    # Use MongoDB's aggregation with $sample to get one random document
-    result = list(collection.aggregate([{"$sample": {"size": 1}}]))
-
-    if not result:
+    # Count total documents
+    total = collection.count_documents({})
+    if total == 0:
         print("No cities found in 'where_is_okra' collection.")
         return None
 
+    # Generate a random skip index
+    skip = random.randint(0, total - 1)
+
+    # Use skip + limit to select a random document
+    result = collection.find().skip(skip).limit(1)
+    random_city = next(result, None)
+
+    if not random_city:
+        print("Failed to fetch a random city.")
+        return None
+
     # Extract city details
-    random_city = result[0]
     city_name = random_city.get("city")
     country_name = random_city.get("country")
     is_capital = random_city.get("capital")

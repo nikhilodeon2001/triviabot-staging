@@ -1453,18 +1453,6 @@ def fetch_random_word(min_length=5, max_length=12, max_retries=5):
 
 
 def update_audit_question(question, message_content, display_name):
-    """
-    Add an audit entry to a specific MongoDB document, based on the 'db' and 'id' fields in the question.
-    
-    :param question: Dictionary with at least 'db' (collection name) and 'id' (_id of the document to update).
-    :param message_content: The message content to add.
-    :param display_name: The display name to pair with the message content.
-    """
-    if not isinstance(question, dict):
-        raise TypeError("The question parameter must be a dictionary")
-
-    if "trivia_db" not in question or "trivia_id" not in question:
-        raise ValueError("The 'question' dictionary must contain 'trivia_db' and 'trivia_id' fields")
 
     if "trivia_db" == "math" or "trivia_db" == "stats":
         return

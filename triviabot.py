@@ -229,6 +229,27 @@ def handle_sigterm(signum, frame):
     traceback.print_stack(frame)
     sys.exit(0)  # Exit gracefully after handling SIGTERM
 
+
+def select_intro_image_url():
+    # Connect to the collection
+    collection = db["intro_image_urls"]
+
+    # Fetch one random document where enabled is True
+    result = list(
+        collection.aggregate([
+            {"$match": {"enabled": True}},
+            {"$sample": {"size": 1}}
+        ])
+    )
+
+    if not result:
+        print("No enabled intro image URLs found.")
+        return None
+
+    # Return just the URL field
+    return result[0].get("url")
+
+
 def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     """
     Creates a Family Feud–style board with:
@@ -8489,20 +8510,6 @@ def start_trivia():
     global question_responders, round_responders
 
     # You can now use and reset them in the function
-    
-    okra_gif_urls = [
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra1.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra2.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra3.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra4.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra5.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra7.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra8.gif",
-        #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/merry.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_logo1.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/okra_logo2.gif",
-        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/okra/goduke.gif"
-    ]
 
     signal.signal(signal.SIGTERM, handle_sigterm)
     print(f"Script is running with PID: {os.getpid()}")
@@ -8551,7 +8558,7 @@ def start_trivia():
                 print(f"Magic number is {magic_number}")
                 send_magic_image(magic_number)
             elif image_questions == True:
-                selected_gif_url = random.choice(okra_gif_urls)           
+                selected_gif_url = select_intro_image_url()         
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
                 #time.sleep(2)

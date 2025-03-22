@@ -7440,6 +7440,10 @@ def select_trivia_questions(questions_per_round):
                 {"$sample": {"size":sample_size}}  # Apply sampling on the filtered subset
             ]
             crossword_questions = list(crossword_collection.aggregate(pipeline_crossword))
+
+            for doc in crossword_questions:
+                doc["db"] = "crossword_questions"
+                
             selected_questions.extend(crossword_questions)
             question_ids_to_store["crossword"].extend(doc["_id"] for doc in crossword_questions)
 
@@ -7451,6 +7455,10 @@ def select_trivia_questions(questions_per_round):
                 {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
             ]
             jeopardy_questions = list(jeopardy_collection.aggregate(pipeline_jeopardy))
+
+            for doc in jeopardy_questions:
+                doc["db"] = "jeopardy_questions"
+                
             selected_questions.extend(jeopardy_questions)
             question_ids_to_store["jeopardy"].extend(doc["_id"] for doc in jeopardy_questions)
 
@@ -7459,11 +7467,19 @@ def select_trivia_questions(questions_per_round):
         sample_size = min(num_math_questions_mod, questions_per_round - len(selected_questions))
         if sample_size > 0:
             math_questions = [get_math_question() for _ in range(sample_size)]
+
+            for doc in math_questions:
+                doc["db"] = "math_questions"
+                
             selected_questions.extend(math_questions)
 
         sample_size = min(num_stats_questions, questions_per_round - len(selected_questions))
         if sample_size > 0:
             stats_questions = [get_stats_question() for _ in range(sample_size)]
+
+            for doc in stats_questions:
+                doc["db"] = "stats_questions"
+                
             selected_questions.extend(stats_questions)
 
         sample_size = min(num_wof_clues, questions_per_round - len(selected_questions))
@@ -7474,6 +7490,10 @@ def select_trivia_questions(questions_per_round):
                 {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
             ]
             wof_questions = list(wof_collection.aggregate(pipeline_wof))
+
+            for doc in wof_questions:
+                doc["db"] = "wof_questions"
+                
             selected_questions.extend(wof_questions)
             question_ids_to_store["wof"].extend(doc["_id"] for doc in wof_questions)
  
@@ -7485,6 +7505,10 @@ def select_trivia_questions(questions_per_round):
                 {"$sample": {"size": sample_size}}  # Apply sampling on the filtered subset
             ]
             mysterybox_questions = list(mysterybox_collection.aggregate(pipeline_mysterybox))
+
+            for doc in mysterybox_questions:
+                doc["db"] = "mysterybox_questions"
+            
             selected_questions.extend(mysterybox_questions)
             question_ids_to_store["mysterybox"].extend(doc["_id"] for doc in mysterybox_questions)
         
@@ -7531,6 +7555,10 @@ def select_trivia_questions(questions_per_round):
                 ]
 
             trivia_questions = list(trivia_collection.aggregate(pipeline_trivia))
+
+            for doc in trivia_questions:
+                doc["db"] = "trivia_questions"
+                
             selected_questions.extend(trivia_questions)
             question_ids_to_store["general"].extend(doc["_id"] for doc in trivia_questions)
 
@@ -7544,7 +7572,7 @@ def select_trivia_questions(questions_per_round):
         store_all_question_ids(question_ids_to_store)
 
         final_selected_questions = [
-            (doc["category"], doc["question"], doc["url"], doc["answers"])
+            (doc["category"], doc["question"], doc["url"], doc["answers"], doc["db"], doc["id"])
             for doc in selected_questions
         ]
         

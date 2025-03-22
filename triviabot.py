@@ -1463,11 +1463,14 @@ def update_audit_question(question, message_content, display_name):
     if not isinstance(question, dict):
         raise TypeError("The question parameter must be a dictionary")
 
-    if "db" not in question or "id" not in question:
-        raise ValueError("The 'question' dictionary must contain 'db' and 'id' fields")
+    if "trivia_db" not in question or "trivia_id" not in question:
+        raise ValueError("The 'question' dictionary must contain 'trivia_db' and 'trivia_id' fields")
 
-    collection = db[question["db"]]
-    document_id = question["id"]
+    if "trivia_db" == "math" or "trivia_db" == "stats":
+        return
+
+    collection = db[question["trivia_db"]]
+    document_id = question["trivia_id"]
 
     audit_entry = {
         "display_name": display_name,

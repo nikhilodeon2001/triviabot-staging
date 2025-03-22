@@ -1453,6 +1453,7 @@ def fetch_random_word(min_length=5, max_length=12, max_retries=5):
 
 
 def update_audit_question(question, message_content, display_name):
+    print(question)
 
     if question["trivia_db"] == "math" or question["trivia_db"] == "stats":
         return

@@ -158,72 +158,6 @@ reddit = praw.Reddit(
 )
 
 
-# List of world capitals and major cities
-cities = [
-{"city": "Accra", "country": "Ghana", "lat": 5.6037, "lon": -0.1870, "capital": True},
-{"city": "Addis Ababa", "country": "Ethiopia", "lat": 9.0300, "lon": 38.7400, "capital": True},
-{"city": "Algiers", "country": "Algeria", "lat": 36.7525, "lon": 3.0420, "capital": True},
-{"city": "Athens", "country": "Greece", "lat": 37.9838, "lon": 23.7275, "capital": True},
-{"city": "Baghdad", "country": "Iraq", "lat": 33.3152, "lon": 44.3661, "capital": True},
-{"city": "Baku", "country": "Azerbaijan", "lat": 40.4093, "lon": 49.8671, "capital": True},
-{"city": "Beijing", "country": "China", "lat": 39.9042, "lon": 116.4074, "capital": True},
-{"city": "Belmopan", "country": "Belize", "lat": 17.2510, "lon": -88.7590, "capital": True},
-{"city": "Berlin", "country": "Germany", "lat": 52.5200, "lon": 13.4050, "capital": True},
-{"city": "Bogota", "country": "Colombia", "lat": 4.7110, "lon": -74.0721, "capital": True},
-{"city": "Brasilia", "country": "Brazil", "lat": -15.8267, "lon": -47.9218, "capital": True},
-{"city": "Brazzaville", "country": "Congo", "lat": 4.2634, "lon": 15.2429, "capital": True},
-{"city": "Brussels", "country": "Belgium", "lat": 50.8503, "lon": 4.3517, "capital": True},
-{"city": "Budapest", "country": "Hungary", "lat": 47.4979, "lon": 19.0402, "capital": True},
-{"city": "Buenos Aires", "country": "Argentina", "lat": -34.6037, "lon": -58.3816, "capital": True},
-{"city": "Cairo", "country": "Egypt", "lat": 30.0444, "lon": 31.2357, "capital": True},
-{"city": "Canberra", "country": "Australia", "lat": -35.2820, "lon": 149.1287, "capital": True},
-{"city": "Copenhagen", "country": "Denmark", "lat": 55.6761, "lon": 12.5683, "capital": True},
-{"city": "Dhaka", "country": "Bangladesh", "lat": 23.8103, "lon": 90.4125, "capital": True},
-{"city": "Djibouti", "country": "Djibouti", "lat": 11.8251, "lon": 42.5903, "capital": True},
-{"city": "Dublin", "country": "Ireland", "lat": 53.3498, "lon": -6.2603, "capital": True},
-{"city": "Gaborone", "country": "Botswana", "lat": -24.6282, "lon": 25.9231, "capital": True},
-{"city": "Havana", "country": "Cuba", "lat": 23.1136, "lon": -82.3666, "capital": True},
-{"city": "Helsinki", "country": "Finland", "lat": 60.1695, "lon": 24.9354, "capital": True},
-{"city": "Jakarta", "country": "Indonesia", "lat": -6.2088, "lon": 106.8456, "capital": True},
-{"city": "Jerusalem", "country": "Israel", "lat": 31.7683, "lon": 35.2137, "capital": True},
-{"city": "Kabul", "country": "Afghanistan", "lat": 34.5289, "lon": 69.1725, "capital": True},
-{"city": "Kingston", "country": "Jamaica", "lat": 17.9712, "lon": -76.7936, "capital": True},
-{"city": "Kinshasa", "country": "Democratic Republic of the Congo", "lat": -4.4419, "lon": 15.2663, "capital": True},
-{"city": "Manama", "country": "Bahrain", "lat": 26.2285, "lon": 50.5860, "capital": True},
-{"city": "Minsk", "country": "Belarus", "lat": 53.9045, "lon": 27.5615, "capital": True},
-{"city": "NDjamena", "country": "Chad", "lat": 12.1348, "lon": 15.0557, "capital": True},
-{"city": "Nassau", "country": "Bahamas", "lat": 25.0343, "lon": -77.3963, "capital": True},
-{"city": "New Delhi", "country": "India", "lat": 28.6139, "lon": 77.2090, "capital": True},
-{"city": "Nicosia", "country": "Cyprus", "lat": 35.1856, "lon": 33.3823, "capital": True},
-{"city": "Ottawa", "country": "Canada", "lat": 45.4215, "lon": -75.6972, "capital": True},
-{"city": "Ouagadougou", "country": "Burkina Faso", "lat": 12.3714, "lon": -1.5197, "capital": True},
-{"city": "Paris", "country": "France", "lat": 48.8566, "lon": 2.3522, "capital": True},
-{"city": "Phnom Penh", "country": "Cambodia", "lat": 11.5564, "lon": 104.9282, "capital": True},
-{"city": "Port au Prince", "country": "Haiti", "lat": 18.5944, "lon": -72.3074, "capital": True},
-{"city": "Prague", "country": "Czech Republic", "lat": 50.0755, "lon": 14.4378, "capital": True},
-{"city": "Quito", "country": "Ecuador", "lat": -0.1807, "lon": -78.4678, "capital": True},
-{"city": "Reykjavik", "country": "Iceland", "lat": 64.1355, "lon": -21.8954, "capital": True},
-{"city": "Rome", "country": "Italy", "lat": 41.9028, "lon": 12.4964, "capital": True},
-{"city": "San Jose", "country": "Costa Rica", "lat": 9.9281, "lon": -84.0907, "capital": True},
-{"city": "San Salvador", "country": "El Salvador", "lat": 13.6929, "lon": -89.2182, "capital": True},
-{"city": "Santiago", "country": "Chile", "lat": -33.4489, "lon": -70.6693, "capital": True},
-{"city": "Sarajevo", "country": "Bosnia and Herzegovina", "lat": 43.8563, "lon": 18.4131, "capital": True},
-{"city": "Sofia", "country": "Bulgaria", "lat": 42.6977, "lon": 23.3219, "capital": True},
-{"city": "Sucre", "country": "Bolivia", "lat": -19.0196, "lon": -65.2619, "capital": True},
-{"city": "Suva", "country": "Fiji", "lat": -18.1248, "lon": 178.4501, "capital": True},
-{"city": "Tallinn", "country": "Estonia", "lat": 59.4370, "lon": 24.7535, "capital": True},
-{"city": "Tbilisi", "country": "Georgia", "lat": 41.7151, "lon": 44.8271, "capital": True},
-{"city": "Tegucigalpa", "country": "Honduras", "lat": 14.0723, "lon": -87.1921, "capital": True},
-{"city": "Tehran", "country": "Iran", "lat": 35.6892, "lon": 51.3890, "capital": True},
-{"city": "Thimphu", "country": "Bhutan", "lat": 27.4728, "lon": 89.6390, "capital": True},
-{"city": "Tirana", "country": "Albania", "lat": 41.3275, "lon": 19.8189, "capital": True},
-{"city": "Vienna", "country": "Austria", "lat": 48.2082, "lon": 16.3738, "capital": True},
-{"city": "Yaounde", "country": "Cameroon", "lat": 3.8480, "lon": 11.5021, "capital": True},
-{"city": "Yerevan", "country": "Armenia", "lat": 40.1792, "lon": 44.4991, "capital": True},
-{"city": "Zagreb", "country": "Croatia", "lat": 45.8150, "lon": 15.9819, "capital": True}
-]
-
-
 def handle_sigterm(signum, frame):
     print(f"Received signal {signum}. Printing stack trace:")
     traceback.print_stack(frame)
@@ -2393,13 +2327,23 @@ def get_google_maps(lat, lon):
 
 
 def get_random_city(winner):
-    # Select a random city from the list
-    random_city = random.choice(cities)
-    city_name = random_city["city"]
-    country_name = random_city["country"]
-    is_capital = random_city["capital"]
-    lat = random_city["lat"]
-    lon = random_city["lon"]
+    # Connect to the collection
+    collection = db["where_is_okra"]
+
+    # Use MongoDB's aggregation with $sample to get one random document
+    result = list(collection.aggregate([{"$sample": {"size": 1}}]))
+
+    if not result:
+        print("No cities found in 'where_is_okra' collection.")
+        return None
+
+    # Extract city details
+    random_city = result[0]
+    city_name = random_city.get("city")
+    country_name = random_city.get("country")
+    is_capital = random_city.get("capital")
+    lat = random_city.get("lat")
+    lon = random_city.get("lon")
 
     # Conversion factors
     miles_per_lat_degree = 1 / 69  # 1 degree latitude ≈ 69 miles

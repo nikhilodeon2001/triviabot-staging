@@ -1451,6 +1451,52 @@ def fetch_random_word(min_length=5, max_length=12, max_retries=5):
 
 
 
+
+def update_audit_question(question, message_content, display_name):
+    """
+    Add an audit entry to a specific MongoDB document, based on the 'db' and 'id' fields in the question.
+    
+    :param question: Dictionary with at least 'db' (collection name) and 'id' (_id of the document to update).
+    :param message_content: The message content to add.
+    :param display_name: The display name to pair with the message content.
+    """
+    if not isinstance(question, dict):
+        raise TypeError("The question parameter must be a dictionary")
+
+    if "db" not in question or "id" not in question:
+        raise ValueError("The 'question' dictionary must contain 'db' and 'id' fields")
+
+    collection = db[question["db"]]
+    document_id = question["id"]
+
+    audit_entry = {
+        "display_name": display_name,
+        "message_content": message_content
+    }
+
+    for attempt in range(max_retries):
+        try:
+            update = {
+                "$push": {"audit": audit_entry},
+                "$setOnInsert": {"timestamp": time.time()}
+            }
+
+            # Ensure 'audit' exists and append the new entry
+            collection.update_one({"_id": document_id}, update, upsert=False)
+            break  # Success, exit loop
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Attempt {attempt + 1} failed: {e}")
+
+            if attempt < max_retries - 1:
+                print(f"Retrying in {delay_between_retries} seconds...")
+                time.sleep(delay_between_retries)
+            else:
+                print(f"Failed to update audit for document '{document_id}' in {question['db']}.")
+
+
+
 def insert_audit_question(collection_name, question, message_content, display_name):
     """
     Insert a structured question into a MongoDB collection with a frequency field and comments.
@@ -6968,13 +7014,15 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
             #stripped_message_content = " ".join(message_content.split()[1:])
-            insert_audit_question("audit_questions", previous_question, message_content, display_name)
+            #insert_audit_question("audit_questions", previous_question, message_content, display_name)
+            update_audit_question(previous_question, message_content, display_name)
 
         if "#curr" in message_content.lower() and collect_feedback_mode == True and sender != bot_user_id:
             if emoji_mode == True:
                 react_to_message(event_id, target_room_id, "okra3")
             #stripped_message_content = " ".join(message_content.split()[1:])
-            insert_audit_question("audit_questions", current_question, message_content, display_name)
+            #insert_audit_question("audit_questions", current_question, message_content, display_name)
+            update_audit_question(current_question, message_content, display_name)
 
         # Check if the user has already answered correctly, ignore if they have
         if any(resp[0] == display_name for resp in correct_responses):
@@ -8572,13 +8620,15 @@ def start_trivia():
                 else:
                     selected_question = selected_questions[0]
 
-                trivia_category, trivia_question, trivia_url, trivia_answer_list = selected_question
+                trivia_category, trivia_question, trivia_url, trivia_answer_list, trivia_db, trivia_id = selected_question
 
                 current_question = {
                     "trivia_category": trivia_category,
                     "trivia_question": trivia_question,
                     "trivia_url": trivia_url,
-                    "trivia_answer_list": trivia_answer_list
+                    "trivia_answer_list": trivia_answer_list,
+                    "trivia_db": trivia_db,
+                    "trivia_id": trivia_id
                 }
 
                 initialize_sync()
@@ -8614,7 +8664,9 @@ def start_trivia():
                     "trivia_category": trivia_category,
                     "trivia_question": trivia_question,
                     "trivia_url": trivia_url,
-                    "trivia_answer_list": trivia_answer_list
+                    "trivia_answer_list": trivia_answer_list,
+                    "trivia_db": trivia_db,
+                    "trivia_id": trivia_id
                 }
 
                 save_data_to_mongo("previous_question", "previous_question", previous_question)

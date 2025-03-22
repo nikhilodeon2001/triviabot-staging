@@ -2243,8 +2243,12 @@ def ask_survey_question():
 
 def generate_themed_country_image(country, city):
 
+    #prompt = (
+    #    f"Create an okra themed image of a kitchen in the country: {country}. "
+    #)
+
     prompt = (
-        f"Create an okra themed image of a kitchen in the country: {country}. "
+        f"Show a stereotypical person from {country} holding an okra in a stereotypical setting in {country}. "
     )
     
     # Generate the image using DALL-E

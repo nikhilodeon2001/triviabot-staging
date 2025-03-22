@@ -7525,8 +7525,6 @@ def select_trivia_questions(questions_per_round):
             question_ids_to_store["wof"].extend(doc["_id"] for doc in wof_questions)
  
         sample_size = min(num_mysterybox_clues, questions_per_round - len(selected_questions))
-        print(f"num_mysterybox_clues is {num_mysterybox_clues}")
-        print(f"sample_size is {sample_size}")
         if sample_size > 0:
             mysterybox_collection = db["mysterybox_questions"]
             pipeline_mysterybox = [

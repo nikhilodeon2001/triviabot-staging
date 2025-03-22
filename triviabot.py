@@ -1454,7 +1454,7 @@ def fetch_random_word(min_length=5, max_length=12, max_retries=5):
 
 def update_audit_question(question, message_content, display_name):
 
-    if "trivia_db" == "math" or "trivia_db" == "stats":
+    if question["trivia_db"] == "math" or question["trivia_db"] == "stats":
         return
 
     collection = db[question["trivia_db"]]

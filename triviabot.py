@@ -3464,21 +3464,26 @@ def fetch_donations():
     headers = {"Authorization": f"Bearer {buymeacoffee_api_key}"}
 
     try:
-        donors_collection = db["donors"]  # Use the 'donors' collection
-
+        donors_collection = db["donors"]
         new_donors = []
-        next_page_url = base_url  # Start with the base URL
+        next_page_url = base_url
 
         while next_page_url:
-            response = requests.get(next_page_url, headers=headers)
-            response.raise_for_status()  # Raise an error for HTTP issues
-
-            # Parse and validate JSON response
-            try:
-                api_response = response.json()
-            except ValueError as ve:
-                print(f"Error parsing JSON: {ve}")
-                break
+            # Retry logic for fetching the page
+            for attempt in range(max_retries):
+                try:
+                    response = requests.get(next_page_url, headers=headers)
+                    response.raise_for_status()
+                    api_response = response.json()
+                    break  # success, exit retry loop
+                except (requests.exceptions.RequestException, ValueError) as e:
+                    print(f"Attempt {attempt + 1} failed: {e}")
+                    if attempt < max_retries - 1:
+                        time.sleep(delay_between_retries)
+                    else:
+                        sentry_sdk.capture_exception(e)
+                        print(f"Failed to fetch page after {max_retries} attempts. Aborting.")
+                        return new_donors  # Return what we got so far
 
             # Extract donations list from the 'data' key
             donations = api_response.get("data", [])
@@ -3506,10 +3511,10 @@ def fetch_donations():
                         for word in words:
                             if word.startswith("@"):
                                 donor_name = word[1:].lower()
-                                break  # prefer first match
+                                break
                             elif word.startswith("r/"):
                                 donor_name = word[2:].lower()
-                                break  # prefer first match
+                                break
 
                     # Check if donor already exists in MongoDB
                     if not donors_collection.find_one({"donor_id": donor_id}):
@@ -3532,11 +3537,6 @@ def fetch_donations():
 
         print(f"New donors added: {new_donors}")
         return new_donors
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching donations: {e}")
-        sentry_sdk.capture_exception(e)
-        return []
 
     except Exception as e:
         print(f"Unexpected error: {e}")
@@ -7072,11 +7072,8 @@ def check_correct_responses_delete(question_ask_time, trivia_answer_list, questi
         
                 if discount_percentage > 0:
                     discount_factor = 1 - (discount_percentage / 100.0)
-                    # Apply discount
-                    print(f"old points are {points}")
                     points *= discount_factor
                     points = round(points / 5) * 5
-                    print(f"new points are {points}")
 
             correct_responses.append((display_name, points, response_time, message_content))
     

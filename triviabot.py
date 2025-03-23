@@ -8511,9 +8511,6 @@ def get_random_trivia_question():
                 "trivia_questions",
                 selected_question["_id"]
             )
-
-                                "trivia_db": trivia_db,
-                    "trivia_id": trivia_id
             
             return final_selected_question
         else:

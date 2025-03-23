@@ -110,7 +110,7 @@ magic_number = 0000
 
 ghost_mode_default = False
 ghost_mode = ghost_mode_default
-god_mode_default = True
+god_mode_default = False
 god_mode = god_mode_default
 god_mode_points = 5000
 god_mode_players = 5

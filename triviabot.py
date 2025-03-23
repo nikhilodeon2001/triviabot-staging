@@ -8507,8 +8507,13 @@ def get_random_trivia_question():
                 selected_question["category"],
                 selected_question["question"],
                 selected_question["url"],
-                selected_question["answers"]
+                selected_question["answers"],
+                "trivia_questions",
+                selected_question["_id"]
             )
+
+                                "trivia_db": trivia_db,
+                    "trivia_id": trivia_id
             
             return final_selected_question
         else:

@@ -410,7 +410,9 @@ def ask_animal_challenge(winner):
             ]
 
             animal_questions = list(animal_collection.aggregate(pipeline_animal))
+            print(animal_questions)
             animal_question = animal_questions[0]
+            print(animal_question)
             animal_detail_url = animal_question["animal_url"]   
             animal_image_url = animal_question["image_url"]   
             animal_name = animal_question["name"]
@@ -452,6 +454,14 @@ def ask_animal_challenge(winner):
 
         send_message(target_room_id, start_message)
         time.sleep(2)
+
+        image_response = send_image(target_room_id, animal_mxc, animal_width, animal_height, animal_size)
+
+        if image_response == False:
+            error_message = f"\n⚠️🚨 Reddit is preventing a image of {animal_name.upper()}.\n"
+            error_message += f"\n🔄🤔 Let's try a different one.\n"
+            send_message(target_room_id, error_message)
+            continue
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         message += f"\n❓🦓 The $@!# is dat?!?\n"
@@ -460,17 +470,10 @@ def ask_animal_challenge(winner):
         message += f"\n🏫📚 Class: {animal_class}"
         message += f"\n🧾🔢 Order: {animal_order}"
         message += f"\n👨‍👩‍👧‍👦🏡 Family: {animal_family}"
-        message += f"\n🔬🧪 Genus: {animal_genus}"
-        message += f"\n🐾🧍 Species: {animal_species}"
- 
-        image_response = send_image(target_room_id, animal_mxc, animal_width, animal_height, animal_size)
-
-        if image_response == False:
-            error_message = f"\n⚠️🚨 Reddit is preventing a image of {animal_name.upper()}.\n"
-            error_message += f"\n🔄🤔 Let's try a different one.\n"
-            send_message(target_room_id, error_message)
-            continue
+        send_message(target_room_id, message)
         
+        message = f"\n🔬🧪 Genus: {animal_genus}"
+        message += f"\n🐾🧍 Species: {animal_species}"
         send_message(target_room_id, message)
 
         initialize_sync()

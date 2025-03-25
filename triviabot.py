@@ -387,7 +387,7 @@ def ask_animal_challenge(winner):
 
     message = f"\n❓🦓 Name that OkrAnimal!!\n"
     send_message(target_room_id, message)
-    time.sleep(3)
+    time.sleep(5)
     
     animal_main_url= "https://a-z-animals.com/animals/"
     animal_category  = "Animals"
@@ -516,7 +516,7 @@ def ask_animal_challenge(winner):
                         
                        
                         if fuzzy_match(message_content, animal_name, animal_category, animal_detail_url):
-                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
+                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {animal_name.upper()}"
                             send_message(target_room_id, message)
                             right_answer = True
                             correct_guesses = correct_guesses + 1

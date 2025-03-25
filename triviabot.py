@@ -411,10 +411,9 @@ def ask_animal_challenge(winner):
 
             animal_questions = list(animal_collection.aggregate(pipeline_animal))
             animal_question = animal_questions[0]
-            animal_answers = animal_question["answers"]
             animal_detail_url = animal_question["animal_url"]   
             animal_image_url = animal_question["image_url"]   
-            animal_name = animal_answers[0]
+            animal_name = animal_question["name"]
             animal_kingdom = animal_question["kingdom"] or "N/A"
             animal_phylum = animal_question["phylum"] or "N/A"
             animal_class = animal_question["class"] or "N/A"
@@ -515,25 +514,18 @@ def ask_animal_challenge(winner):
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
                         
-                        for answer in animal_answers:
-                            if fuzzy_match(message_content, answer, animal_category, animal_url):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
-                                send_message(target_room_id, message)
-                                right_answer = True
-                                correct_guesses = correct_guesses + 1
+                       
+                        if fuzzy_match(message_content, answer, animal_category, animal_detail_url):
+                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
+                            send_message(target_room_id, message)
+                            right_answer = True
+                            correct_guesses = correct_guesses + 1
 
-                                # Update user-specific correct answer count
-                                if sender_display_name not in user_correct_answers:
-                                    user_correct_answers[sender_display_name] = 0
-                                user_correct_answers[sender_display_name] += 1
+                            # Update user-specific correct answer count
+                            if sender_display_name not in user_correct_answers:
+                                user_correct_answers[sender_display_name] = 0
                                 
-                                break   
-                        
-                        if right_answer == True:
-                            break
-
-                    if right_answer == True:
-                        break
+                            user_correct_answers[sender_display_name] += 1
                         
             except Exception as e:
                 print(f"Error processing events: {e}")

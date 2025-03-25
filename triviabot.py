@@ -3718,7 +3718,7 @@ def fetch_donations():
                     print(f"Skipping invalid donor format: {donor}")
 
             next_page_url = api_response.get("next_page_url")
-
+        
         print(f"New donors added: {new_donors}")
         return new_donors
 

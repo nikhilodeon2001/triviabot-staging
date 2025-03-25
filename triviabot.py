@@ -415,13 +415,13 @@ def ask_animal_challenge(winner):
             animal_detail_url = animal_question["animal_url"]   
             animal_image_url = animal_question["image_url"]   
             animal_name = animal_answers[0]
-            animal_kingdom = animal_question["kingdom"]
-            animal_phylum = animal_question["phylum"]
-            animal_class = animal_question["class"]
-            animal_order = animal_question["order"]
-            animal_family = animal_question["family"]
-            animal_genus = animal_question["genus"]
-            animal_species = animal_question["species"]
+            animal_kingdom = animal_question["kingdom"] or "N/A"
+            animal_phylum = animal_question["phylum"] or "N/A"
+            animal_class = animal_question["class"] or "N/A"
+            animal_order = animal_question["order"] or "N/A"
+            animal_family = animal_question["family"] or "N/A"
+            animal_genus = animal_question["genus"] or "N/A"
+            animal_species = animal_question["species"] or "N/A"
             animal_question_id = animal_question["_id"] 
 
 

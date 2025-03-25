@@ -422,10 +422,10 @@ def ask_animal_challenge(winner):
             animal_genus = animal_question["genus"] or "N/A"
             animal_species = animal_question["species"] or "N/A"
             animal_question_id = animal_question["_id"] 
+            print(f"Animal Name: {animal_name}")
 
             if animal_question_id:
                 store_question_ids_in_mongo([animal_question_id], "animal")  # Store it as a list containing a single ID
-            print(animal_question)
 
         except Exception as e:
             sentry_sdk.capture_exception(e)
@@ -466,7 +466,7 @@ def ask_animal_challenge(winner):
         message += f"\n🧩🧱 Phylum: {animal_phylum}"
         message += f"\n🏫📚 Class: {animal_class}"
         message += f"\n🧾🔢 Order: {animal_order}"
-        message += f"\n👨‍👩‍👧‍👦🏡 Family: {animal_family}"
+        message += f"\n👨‍👩‍👧‍👦🏡 Family: {animal_family}"        
         send_message(target_room_id, message)
         
         message = f"🔬🧪 Genus: {animal_genus}"
@@ -554,7 +554,7 @@ def ask_animal_challenge(winner):
     send_message(target_room_id, message)
     time.sleep(2)
     
-    message = f"\nLearn more here.n"
+    message = f"\nSee more cute animals."
     message += f"\n{animal_main_url}\n"
     send_message(target_room_id, message)
     
@@ -7433,10 +7433,6 @@ def update_round_streaks(user):
         streak = current_longest_round_streak["streak"]
         if streak > 1:
             message = f"\n🏆 Winner: @{user}...🔥{current_longest_round_streak['streak']} in a row!\n"
-            
-            # Check if it's a multiple of discount_streak_amount
-            print(f"discount streak amount is {discount_streak_amount}")
-            print(f"discount step amount is {discount_step_amount}")
             
             if streak % discount_streak_amount == 0:
                 # Compute discount percentage

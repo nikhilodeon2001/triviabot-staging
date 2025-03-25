@@ -410,9 +410,7 @@ def ask_animal_challenge(winner):
             ]
 
             animal_questions = list(animal_collection.aggregate(pipeline_animal))
-            print(animal_questions)
             animal_question = animal_questions[0]
-            print(animal_question)
             animal_detail_url = animal_question["animal_url"]   
             animal_image_url = animal_question["image_url"]   
             animal_name = animal_question["name"]
@@ -424,7 +422,6 @@ def ask_animal_challenge(winner):
             animal_genus = animal_question["genus"] or "N/A"
             animal_species = animal_question["species"] or "N/A"
             animal_question_id = animal_question["_id"] 
-
 
             if animal_question_id:
                 store_question_ids_in_mongo([animal_question_id], "animal")  # Store it as a list containing a single ID
@@ -472,7 +469,7 @@ def ask_animal_challenge(winner):
         message += f"\n👨‍👩‍👧‍👦🏡 Family: {animal_family}"
         send_message(target_room_id, message)
         
-        message = f"\n🔬🧪 Genus: {animal_genus}"
+        message = f"🔬🧪 Genus: {animal_genus}"
         message += f"\n🐾🧍 Species: {animal_species}"
         send_message(target_room_id, message)
 
@@ -518,7 +515,7 @@ def ask_animal_challenge(winner):
                         message_content = event.get("content", {}).get("body", "")
                         
                        
-                        if fuzzy_match(message_content, answer, animal_category, animal_detail_url):
+                        if fuzzy_match(message_content, animal_name, animal_category, animal_detail_url):
                             message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
                             send_message(target_room_id, message)
                             right_answer = True

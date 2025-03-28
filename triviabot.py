@@ -394,12 +394,12 @@ def ask_riddle_challenge(winner):
     ]
 
     riddler_gif_url = random.choice(riddler_gifs)
-    message = f"\n🟢🎩 The Riddler\n"
+    message = f"🟢🎩 The Riddler\n"
     image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url)
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
-    message = f"\n3️5️⃣🥇 Let's do a best of 5...\n"
+    message = f"\n35️⃣🥇 Let's do a best of 5...\n"
     send_message(target_room_id, message)
     time.sleep(3)
 
@@ -524,12 +524,13 @@ def ask_riddle_challenge(winner):
         riddle_num = riddle_num + 1
                         
         # Sort the dictionary by the count (value) in descending order
-        
+        message = ""
         sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
         if sorted_users:
+            message += "\n📊🏆 Current Standings\n"
             winner_name, winner_score = sorted_users[0]
 
-        message = "\n📊🏆 Current Standings\n"
+
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count}\n"
             

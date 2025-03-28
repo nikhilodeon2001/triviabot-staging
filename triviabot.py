@@ -386,15 +386,25 @@ def ask_riddle_challenge(winner):
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
+
+    riddler_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-carey.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-vintage.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-cartoon.gif"
+    ]
+
+    riddler_gif_url = random.choice(riddler_gifs)
     message = f"\n🟢🎩 The Riddler\n"
+    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url)
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
-    time.sleep(2)
-    message = f"\n3️⃣🥇 First to 3 wins...\n"
+    time.sleep(3)
+    message = f"\n3️5️⃣🥇 Let's do a best of 5...\n"
     send_message(target_room_id, message)
     time.sleep(3)
 
     riddle_num = 1
-    while all(score < 3 for score in user_correct_answers.values()) and riddle_num <= 5:
+    while riddle_num <= 5:
         try:
             recent_riddle_ids = get_recent_question_ids_from_mongo("riddle")
 
@@ -426,9 +436,9 @@ def ask_riddle_challenge(winner):
             riddle_category = riddle_question["category"]
             riddle_url = riddle_question["url"]
             riddle_question_id = riddle_question["_id"] 
-            print(f"Category: {riddle_category}")
-            print(f"Riddle: {riddle_text}")
-            print(f"Answer: {riddle_main_answer}")
+            print(f"Category {riddle_num}: {riddle_category}")
+            print(f"Riddle {riddle_num}: {riddle_text}")
+            print(f"Answer {riddle_num}: {riddle_main_answer}")
 
             if riddle_question_id:
                 store_question_ids_in_mongo([riddle_question_id], "riddle")  # Store it as a list containing a single ID
@@ -443,7 +453,7 @@ def ask_riddle_challenge(winner):
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         time.sleep(2)
-        message += f"\n🧠❓ Riddle: {riddle_text}"       
+        message += f"\n🧠❓ Riddle {riddle_num}/5: {riddle_text}"       
         send_message(target_room_id, message)
 
         initialize_sync()
@@ -519,7 +529,7 @@ def ask_riddle_challenge(winner):
         if sorted_users:
             winner_name, winner_score = sorted_users[0]
 
-        message = "\n"
+        message = "\n📊🏆 Current Standings\n"
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count}\n"
             

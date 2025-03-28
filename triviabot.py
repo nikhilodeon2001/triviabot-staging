@@ -104,7 +104,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -377,6 +377,149 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
 
     image_mxc = upload_image_to_matrix(img_buffer.read())
     return image_mxc, width, height
+
+
+def ask_riddle_challenge(winner):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+   
+    num_of_xs = 0
+    correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+
+    message = f"\n🟢🎩 The Riddler\n"
+    send_message(target_room_id, message)
+    time.sleep(2)
+    message = f"\n3️⃣🥇 First to 3 wins...\n"
+    send_message(target_room_id, message)
+    time.sleep(3)
+
+    counter = 1
+    while all(score < 3 for score in user_correct_answers.values()) and counter <= 10:
+        try:
+            recent_riddle_ids = get_recent_question_ids_from_mongo("riddle")
+
+            # Fetch wheel of fortune questions using the random subset method
+            riddle_collection = db["riddle_questions"]
+            pipeline_riddle = [
+                {"$match": {"_id": {"$nin": list(recent_riddle_ids)}}},  # Exclude recent IDs
+                {"$sample": {"size": 100}},  # Sample a larger set first
+                {"$group": {  
+                    "_id": "$question",
+                    "question_doc": {"$first": "$$ROOT"}
+                }},
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
+
+            riddle_questions = list(riddle_collection.aggregate(pipeline_riddle))
+            riddle_question = riddle_questions[0]
+            riddle_text = riddle_question["question"]
+            riddle_answers = riddle_question["answers"]
+            riddle_main_answer = riddle_answers[0]
+            riddle_category = riddle_question["category"]
+            riddle_url = riddle_question["url"]
+            riddle_question_id = riddle_question["_id"] 
+            print(f"Category: {riddle_category}")
+            print(f"Riddle: {riddle_text}")
+            print(f"Answer: {riddle_answer}")
+
+            if riddle_question_id:
+                store_question_ids_in_mongo([riddle_question_id], "riddle")  # Store it as a list containing a single ID
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting riddle questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
+
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        message += f"\n🧠❓ Riddle: {riddle_text}"       
+        send_message(target_room_id, message)
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        winner_name = ""
+        winner_score = ""
+        
+        while time.time() - start_time < 15 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+
+                        for answer in riddle_answers:
+                        
+                            if fuzzy_match(message_content, answer, riddle_category, riddle_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
+                                send_message(target_room_id, message)
+                                right_answer = True
+    
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                    
+                                user_correct_answers[sender_display_name] += 1
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        message = ""
+        if right_answer == False:    
+            message += f"❌😢 No one got it.\n\nAnswer: {riddle_main_answer.upper()}\n"
+        
+        time.sleep(2)
+
+        counter = counter + 1
+                        
+        # Sort the dictionary by the count (value) in descending order
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+        winner_name, winner_score = sorted_users[0]
+    
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+        
+    
+    message = f"\n🎉🥇 The winner is @{winner_name}~~\n"
+    send_message(target_room_id, message)
+    
+    wf_winner = True
+    time.sleep(3)
+    return None
+
 
 
 def ask_animal_challenge(winner):    
@@ -3892,6 +4035,8 @@ def select_wof_questions(winner):
         message += f"{counter}. 👁️✨ Magic Eye D ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         message += f"{counter}. ❓🦓 OkrAnimal ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        counter = counter + 1
+        message += f"{counter}. 🟢🎩 The Riddler ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
         
@@ -3953,6 +4098,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "18":
             ask_animal_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "19":
+            ask_riddle_challenge(winner)
             time.sleep(3)
             return None
         
@@ -4330,7 +4480,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -4475,6 +4625,18 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    if str(message_content) in {"19"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'The Riddler' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"19"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'The Riddler' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -4488,7 +4650,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -4506,7 +4668,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 

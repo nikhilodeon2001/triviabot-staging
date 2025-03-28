@@ -394,7 +394,7 @@ def ask_riddle_challenge(winner):
     time.sleep(3)
 
     counter = 1
-    while all(score < 3 for score in user_correct_answers.values()) and counter <= 20:
+    while all(score < 3 for score in user_correct_answers.values()) and counter <= 5:
         try:
             recent_riddle_ids = get_recent_question_ids_from_mongo("riddle")
 
@@ -442,6 +442,7 @@ def ask_riddle_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
+        time.slee(2)
         message += f"\n🧠❓ Riddle: {riddle_text}"       
         send_message(target_room_id, message)
 

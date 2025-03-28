@@ -505,9 +505,9 @@ def ask_riddle_challenge(winner):
             except Exception as e:
                 print(f"Error processing events: {e}")
         
-        message = ""
         if right_answer == False:    
-            message += f"❌😢 No one got it.\n\nAnswer: {riddle_main_answer.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\nAnswer: {riddle_main_answer.upper()}\n"
+            send_message(target_room_id, message)
         
         time.sleep(2)
 
@@ -516,7 +516,8 @@ def ask_riddle_challenge(winner):
         # Sort the dictionary by the count (value) in descending order
         sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
         winner_name, winner_score = sorted_users[0]
-    
+
+        message = "\n"
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count}\n"
             

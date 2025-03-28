@@ -1,5 +1,6 @@
 
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -8182,6 +8183,7 @@ def get_category_title(trivia_category, trivia_url):
         "Art & Literature": "🎨📚",
         "Chemistry": "🧪⚗️",
         "Business": "💼📈",
+        "Rebus Puzzle": "🤔🖼️",
         "Cars & Other Vehicles": "🚗🛩️",
         "Geography": "🧭🗺️",
         "Mathematics": "➕➗",

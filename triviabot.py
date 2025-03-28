@@ -421,7 +421,7 @@ def ask_riddle_challenge(winner):
             riddle_question_id = riddle_question["_id"] 
             print(f"Category: {riddle_category}")
             print(f"Riddle: {riddle_text}")
-            print(f"Answer: {riddle_answer}")
+            print(f"Answer: {riddle_main_answer}")
 
             if riddle_question_id:
                 store_question_ids_in_mongo([riddle_question_id], "riddle")  # Store it as a list containing a single ID

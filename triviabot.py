@@ -399,7 +399,7 @@ def ask_riddle_challenge(winner):
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
-    message = f"\n35️⃣🥇 Let's do a best of 5...\n"
+    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
     send_message(target_room_id, message)
     time.sleep(3)
 

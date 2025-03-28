@@ -394,7 +394,7 @@ def ask_riddle_challenge(winner):
     time.sleep(3)
 
     counter = 1
-    while all(score < 3 for score in user_correct_answers.values()) and counter <= 10:
+    while all(score < 3 for score in user_correct_answers.values()) and counter <= 20:
         try:
             recent_riddle_ids = get_recent_question_ids_from_mongo("riddle")
 
@@ -452,7 +452,7 @@ def ask_riddle_challenge(winner):
         winner_name = ""
         winner_score = ""
         
-        while time.time() - start_time < 15 and right_answer == False:
+        while time.time() - start_time < 20 and right_answer == False:
             try:                                                      
                 if since_token:
                     params["since"] = since_token

@@ -401,12 +401,19 @@ def ask_riddle_challenge(winner):
             # Fetch wheel of fortune questions using the random subset method
             riddle_collection = db["riddle_questions"]
             pipeline_riddle = [
-                {"$match": {"_id": {"$nin": list(recent_riddle_ids)}}},  # Exclude recent IDs
+                {
+                    "$match": {
+                        "_id": {"$nin": list(recent_riddle_ids)},
+                        "enabled": "1"  # Ensure only enabled riddles are included
+                    }
+                },
                 {"$sample": {"size": 100}},  # Sample a larger set first
-                {"$group": {  
-                    "_id": "$question",
-                    "question_doc": {"$first": "$$ROOT"}
-                }},
+                {
+                    "$group": {  
+                        "_id": "$question",
+                        "question_doc": {"$first": "$$ROOT"}
+                    }
+                },
                 {"$replaceRoot": {"newRoot": "$question_doc"}},  
                 {"$sample": {"size": 1}}  # Sample 1 unique question
             ]

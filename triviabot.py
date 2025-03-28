@@ -394,7 +394,7 @@ def ask_riddle_challenge(winner):
     time.sleep(3)
 
     counter = 1
-    while all(score < 3 for score in user_correct_answers.values()) and counter <= 5:
+    while all(score < 3 for score in user_correct_answers.values()) and riddle_num <= 5:
         try:
             recent_riddle_ids = get_recent_question_ids_from_mongo("riddle")
 
@@ -511,7 +511,7 @@ def ask_riddle_challenge(winner):
         
         time.sleep(2)
 
-        counter = counter + 1
+        riddle_num = riddle_num + 1
                         
         # Sort the dictionary by the count (value) in descending order
         if sorted_users:

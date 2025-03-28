@@ -527,7 +527,10 @@ def ask_riddle_challenge(winner):
         message = ""
         sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
         if sorted_users:
-            message += "\n📊🏆 Current Standings\n"
+            if riddle_num > 5:
+                message += "\n🏁🏆 Final Standings\n"
+            else:   
+                message += "\n📊🏆 Current Standings\n"
             winner_name, winner_score = sorted_users[0]
 
 
@@ -536,7 +539,7 @@ def ask_riddle_challenge(winner):
             
         send_message(target_room_id, message)
         
-    
+    time.sleep(2)
     message = f"\n🎉🥇 The winner is @{winner_name}!\n"
     send_message(target_room_id, message)
     

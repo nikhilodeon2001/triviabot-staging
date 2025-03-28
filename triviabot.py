@@ -442,7 +442,7 @@ def ask_riddle_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        time.slee(2)
+        time.sleep(2)
         message += f"\n🧠❓ Riddle: {riddle_text}"       
         send_message(target_room_id, message)
 

@@ -492,7 +492,7 @@ def ask_riddle_challenge(winner):
                         for answer in riddle_answers:
                         
                             if fuzzy_match(message_content, answer, riddle_category, riddle_url):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}"
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
                                 send_message(target_room_id, message)
                                 right_answer = True
     

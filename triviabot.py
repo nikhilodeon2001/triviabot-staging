@@ -514,8 +514,9 @@ def ask_riddle_challenge(winner):
         riddle_num = riddle_num + 1
                         
         # Sort the dictionary by the count (value) in descending order
+        
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
         if sorted_users:
-            sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
             winner_name, winner_score = sorted_users[0]
 
         message = "\n"

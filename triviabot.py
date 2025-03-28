@@ -518,9 +518,11 @@ def ask_riddle_challenge(winner):
     
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count}\n"
+            
+        send_message(target_room_id, message)
         
     
-    message = f"\n🎉🥇 The winner is @{winner_name}~~\n"
+    message = f"\n🎉🥇 The winner is @{winner_name}!\n"
     send_message(target_room_id, message)
     
     wf_winner = True

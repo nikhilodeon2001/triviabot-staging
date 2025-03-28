@@ -393,7 +393,7 @@ def ask_riddle_challenge(winner):
     send_message(target_room_id, message)
     time.sleep(3)
 
-    counter = 1
+    riddle_num = 1
     while all(score < 3 for score in user_correct_answers.values()) and riddle_num <= 5:
         try:
             recent_riddle_ids = get_recent_question_ids_from_mongo("riddle")

@@ -1,6 +1,3 @@
-
-
-
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -377,6 +374,177 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
 
     image_mxc = upload_image_to_matrix(img_buffer.read())
     return image_mxc, width, height
+
+
+def ask_dictionary_challenge(winner):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+   
+    num_of_xs = 0
+    correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+
+
+    dictionary_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-carey.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-vintage.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-cartoon.gif"
+    ]
+
+    dictionary_gif_url = random.choice(dictionary_gifs)
+    message = f"🤓📚 Word Nerd\n"
+    image_mxc, image_width, image_height = download_image_from_url(dictionary_gif_url)
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id, message)
+    time.sleep(3)
+    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
+    send_message(target_room_id, message)
+    time.sleep(3)
+
+    dictionary_num = 1
+    while dictionary_num <= 5:
+        try:
+            recent_dictionary_ids = get_recent_question_ids_from_mongo("dictionary")
+
+            # Fetch wheel of fortune questions using the random subset method
+            dictionary_collection = db["dictionary_questions"]
+            pipeline_riddle = [
+                {
+                    "$match": {
+                        "_id": {"$nin": list(recent_riddle_ids)},
+                        "enabled": "1"  # Ensure only enabled riddles are included
+                    }
+                },
+                {"$sample": {"size": 100}},  # Sample a larger set first
+                {
+                    "$group": {  
+                        "_id": "$question",
+                        "question_doc": {"$first": "$$ROOT"}
+                    }
+                },
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
+
+            riddle_questions = list(riddle_collection.aggregate(pipeline_riddle))
+            riddle_question = riddle_questions[0]
+            riddle_text = riddle_question["question"]
+            riddle_answers = riddle_question["answers"]
+            riddle_main_answer = riddle_answers[0]
+            riddle_category = riddle_question["category"]
+            riddle_url = riddle_question["url"]
+            riddle_question_id = riddle_question["_id"] 
+            print(f"Category {riddle_num}: {riddle_category}")
+            print(f"Riddle {riddle_num}: {riddle_text}")
+            print(f"Answer {riddle_num}: {riddle_main_answer}")
+
+            if riddle_question_id:
+                store_question_ids_in_mongo([riddle_question_id], "riddle")  # Store it as a list containing a single ID
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting riddle questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
+
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        time.sleep(2)
+        message += f"\n🧠❓ Riddle {riddle_num}/5: {riddle_text}"       
+        send_message(target_room_id, message)
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        winner_name = ""
+        winner_score = ""
+        
+        while time.time() - start_time < 20 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+
+                        for answer in riddle_answers:
+                        
+                            if fuzzy_match(message_content, answer, riddle_category, riddle_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
+                                send_message(target_room_id, message)
+                                right_answer = True
+    
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                    
+                                user_correct_answers[sender_display_name] += 1
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
+            message = f"\n❌😢 No one got it.\n\nAnswer: {riddle_main_answer.upper()}\n"
+            send_message(target_room_id, message)
+        
+        time.sleep(2)
+
+        riddle_num = riddle_num + 1
+                        
+        # Sort the dictionary by the count (value) in descending order
+        message = ""
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+        if sorted_users:
+            if riddle_num > 5:
+                message += "\n🏁🏆 Final Standings\n"
+            else:   
+                message += "\n📊🏆 Current Standings\n"
+            winner_name, winner_score = sorted_users[0]
+
+
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+            
+        send_message(target_room_id, message)
+        
+    time.sleep(2)
+    message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    send_message(target_room_id, message)
+    
+    wf_winner = True
+    time.sleep(3)
+    return None
+
+
 
 
 def ask_riddle_challenge(winner):    
@@ -8979,6 +9147,9 @@ def start_trivia():
             send_message(target_room_id, start_message)
         
             time.sleep(3)
+            start_message = f"\n🟢🎩 Check out the new 'The Riddler' mode!\n"
+            send_message(target_room_id, start_message)
+            time.sleep(3)
 
             start_message = "\n🏁 Get ready 🏁\n"
             send_message(target_room_id, start_message)
@@ -9093,16 +9264,6 @@ def start_trivia():
 
 try:
     sentry_sdk.capture_message("Sentry initiatlized...", level="info")
-
-    # Decorate all functions in a module
-    #current_module = sys.modules[__name__]
-    
-    # Make a static copy of the module's items to prevent modification during iteration
-    #module_items = list(vars(current_module).items())
-    
-    #for name, obj in module_items:
-    #    if callable(obj) and obj.__module__ == __name__:  # Ensure it's a user-defined function
-    #        vars(current_module)[name] = log_execution_time(obj)
     start_trivia()
     
 except Exception as e:

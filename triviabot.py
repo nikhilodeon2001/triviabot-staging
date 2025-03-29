@@ -483,7 +483,7 @@ def ask_dictionary_challenge(winner):
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         time.sleep(2)
-        message += f"\n🧠❓ Definition {dictionary_num}/5: {dictionary_text}"       
+        message += f"\n🧠❓ Definition {dictionary_num}/5: {dictionary_definition}"       
         send_message(target_room_id, message)
 
         initialize_sync()

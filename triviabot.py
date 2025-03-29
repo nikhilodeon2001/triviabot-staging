@@ -550,25 +550,29 @@ def ask_dictionary_challenge(winner):
         
         if right_answer == False:    
             message = f"\n❌😢 No one got it.\n\nAnswer: {dictionary_word.upper()}\n"
+            if closest_guesses:
             # Sort and show top 3 closest guesses
-            closest_guesses.sort(key=lambda x: x[2], reverse=True)  # Sort by similarity score
-        
-            top_n = 3
-            message += "\n🔍 Top 3 least worst guesses:\n"
-            for i, (user, guess, score) in enumerate(closest_guesses[:top_n], 1):
-                point_str = f"{score:.2f}"
-                message += f"{i}. @{user}: \"{guess}\" — score: {point_str}\n"
-
-            message += f"\n🥈🤡 50% credit for your 'effort'.\n"
-        
-            # Optional: award fractional points
-            for user, _, score in closest_guesses[:top_n]:
-                if user not in user_correct_answers:
-                    user_correct_answers[user] = 0
-                user_correct_answers[user] += score*.5  # Or round(score, 2) if you want
-
-            send_message(target_room_id, message)
-        
+                closest_guesses.sort(key=lambda x: x[2], reverse=True)  # Sort by similarity score
+            
+                top_n = 3
+                message += "\n🔍 Top 3 least worst guesses:\n"
+                for i, (user, guess, score) in enumerate(closest_guesses[:top_n], 1):
+                    point_str = f"{score:.2f}"
+                    message += f"{i}. @{user}: \"{guess}\" — score: {point_str}\n"
+    
+                send_message(target_room_id, message)
+    
+                message = f"\n🥈🤡 50% credit for your 'effort'.\n"
+                send_message(target_room_id, message)
+            
+                # Optional: award fractional points
+                for user, _, score in closest_guesses[:top_n]:
+                    if user not in user_correct_answers:
+                        user_correct_answers[user] = 0
+                    user_correct_answers[user] += score*.5  # Or round(score, 2) if you want
+    
+                send_message(target_room_id, message)
+            
         time.sleep(2)
 
         dictionary_num = dictionary_num + 1

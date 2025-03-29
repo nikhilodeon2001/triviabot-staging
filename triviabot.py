@@ -554,24 +554,33 @@ def ask_dictionary_challenge(winner):
             # Sort and show top 3 closest guesses
                 closest_guesses.sort(key=lambda x: x[2], reverse=True)  # Sort by similarity score
             
+                # Keep only the highest-scoring guess per user
+                best_guesses = {}
+                for user, guess, score in closest_guesses:
+                    if user not in best_guesses or score > best_guesses[user][1]:
+                        best_guesses[user] = (guess, score)
+                
+                # Convert to list and sort by score descending
+                deduped_guesses = [(user, guess, score) for user, (guess, score) in best_guesses.items()]
+                deduped_guesses.sort(key=lambda x: x[2], reverse=True)
+                
+                # Show top 3
                 top_n = 3
                 message += "\n🔍 Top 3 least worst guesses:\n"
-                for i, (user, guess, score) in enumerate(closest_guesses[:top_n], 1):
+                for i, (user, guess, score) in enumerate(deduped_guesses[:top_n], 1):
                     point_str = f"{score:.2f}"
                     message += f"{i}. @{user}: \"{guess}\" — score: {point_str}\n"
-    
+                
                 send_message(target_room_id, message)
-    
+                
                 message = f"\n🥈🤡 50% credit for your 'effort'.\n"
                 send_message(target_room_id, message)
-            
-                # Optional: award fractional points
-                for user, _, score in closest_guesses[:top_n]:
+                
+                # Award fractional points to top 3
+                for user, _, score in deduped_guesses[:top_n]:
                     if user not in user_correct_answers:
                         user_correct_answers[user] = 0
-                    user_correct_answers[user] += score*.5  # Or round(score, 2) if you want
-    
-                send_message(target_room_id, message)
+                    user_correct_answers[user] += score * 0.5
             
         time.sleep(2)
 

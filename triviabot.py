@@ -421,9 +421,9 @@ def ask_dictionary_challenge(winner):
 
 
     dictionary_gifs = [
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-carey.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-vintage.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/riddler/riddler-cartoon.gif"
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/wordnerd/wordnerd_nerds.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/wordnerd/wordnerd_urkel.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/wordnerd/wordnerd_simpsons.gif"
     ]
 
     dictionary_gif_url = random.choice(dictionary_gifs)

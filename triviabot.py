@@ -585,7 +585,7 @@ def ask_dictionary_challenge(winner):
 
 
         for counter, (user, count) in enumerate(sorted_users, start=1):
-            message += f"{counter}. @{user}: {count}\n"
+            message += f"{counter}. @{user}: {count:.2f}\n"
             
         send_message(target_room_id, message)
         

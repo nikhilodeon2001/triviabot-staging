@@ -27,4 +27,6 @@ six==1.16.0
 virtualenv==20.27.1
 boto3==1.28.0
 praw
+nltk==3.8.1
+Metaphone==0.6
 

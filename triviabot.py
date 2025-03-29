@@ -376,6 +376,43 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     return image_mxc, width, height
 
 
+import difflib
+import nltk
+from nltk.corpus import wordnet as wn
+from metaphone import doublemetaphone
+
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+
+def enhanced_score_with_phonetic_and_synonyms(guess, answer):
+    guess = guess.lower().strip()
+    answer = answer.lower().strip()
+
+    if not guess or not answer:
+        return 0.0
+
+    if guess == answer:
+        return 1.0
+
+    seq_similarity = difflib.SequenceMatcher(None, guess, answer).ratio()
+    first_letter_bonus = 0.1 if guess[0] == answer[0] else 0
+    last_letter_bonus = 0.1 if guess[-1] == answer[-1] else 0
+
+    max_len = max(len(guess), len(answer))
+    len_diff = abs(len(guess) - len(answer))
+    length_similarity = max(0, 1 - (len_diff / max_len)) * 0.2
+
+    guess_phonetic = doublemetaphone(guess)
+    answer_phonetic = doublemetaphone(answer)
+    phonetic_match = 0.2 if any(g == a and g != '' for g in guess_phonetic for a in answer_phonetic) else 0
+
+    guess_synonyms = {lemma.name().lower() for syn in wn.synsets(guess) for lemma in syn.lemmas()}
+    synonym_match = 0.2 if answer in guess_synonyms else 0
+
+    score = (seq_similarity * 0.5) + first_letter_bonus + last_letter_bonus + length_similarity + phonetic_match + synonym_match
+    return round(min(score, 1.0), 3)
+
+
 def ask_dictionary_challenge(winner):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
    
@@ -407,11 +444,10 @@ def ask_dictionary_challenge(winner):
 
             # Fetch wheel of fortune questions using the random subset method
             dictionary_collection = db["dictionary_questions"]
-            pipeline_riddle = [
+            pipeline_dictionary = [
                 {
                     "$match": {
-                        "_id": {"$nin": list(recent_riddle_ids)},
-                        "enabled": "1"  # Ensure only enabled riddles are included
+                        "_id": {"$nin": list(recent_dictionary_ids)}
                     }
                 },
                 {"$sample": {"size": 100}},  # Sample a larger set first
@@ -425,32 +461,30 @@ def ask_dictionary_challenge(winner):
                 {"$sample": {"size": 1}}  # Sample 1 unique question
             ]
 
-            riddle_questions = list(riddle_collection.aggregate(pipeline_riddle))
-            riddle_question = riddle_questions[0]
-            riddle_text = riddle_question["question"]
-            riddle_answers = riddle_question["answers"]
-            riddle_main_answer = riddle_answers[0]
-            riddle_category = riddle_question["category"]
-            riddle_url = riddle_question["url"]
-            riddle_question_id = riddle_question["_id"] 
-            print(f"Category {riddle_num}: {riddle_category}")
-            print(f"Riddle {riddle_num}: {riddle_text}")
-            print(f"Answer {riddle_num}: {riddle_main_answer}")
+            dictionary_questions = list(dictionary_collection.aggregate(pipeline_dictionary))
+            dictionary_question = dictionary_questions[0]
+            dictionary_word = dictionary_question["word"]
+            dictionary_definition = dictionary_question["definition"]
+            dictionary_question_id = dictionary_question["_id"] 
+            dictionary_category = "Dictionary"
+            dictionary_url = ""
+            print(f"Word {dictionary_num}: {dictionary_word}")
+            print(f"Definition {dictionary_num}: {dictionary_definition}")
 
-            if riddle_question_id:
-                store_question_ids_in_mongo([riddle_question_id], "riddle")  # Store it as a list containing a single ID
+            if dictionary_question_id:
+                store_question_ids_in_mongo([dictionary_question_id], "dictionary")  # Store it as a list containing a single ID
 
         except Exception as e:
             sentry_sdk.capture_exception(e)
             error_details = traceback.format_exc()
-            print(f"Error selecting riddle questions: {e}\nDetailed traceback:\n{error_details}")
+            print(f"Error selecting dictionary questions: {e}\nDetailed traceback:\n{error_details}")
             return None  # Return an empty list in case of failure
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         time.sleep(2)
-        message += f"\n🧠❓ Riddle {riddle_num}/5: {riddle_text}"       
+        message += f"\n🧠❓ dictionary {dictionary_num}/5: {dictionary_text}"       
         send_message(target_room_id, message)
 
         initialize_sync()
@@ -495,36 +529,34 @@ def ask_dictionary_challenge(winner):
     
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
-
-                        for answer in riddle_answers:
                         
-                            if fuzzy_match(message_content, answer, riddle_category, riddle_url):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
-                                send_message(target_room_id, message)
-                                right_answer = True
-    
-                                # Update user-specific correct answer count
-                                if sender_display_name not in user_correct_answers:
-                                    user_correct_answers[sender_display_name] = 0
-                                    
-                                user_correct_answers[sender_display_name] += 1
+                        if fuzzy_match(message_content, dictionary_word, dictionary_category, dictionary_url):
+                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
+                            send_message(target_room_id, message)
+                            right_answer = True
+
+                            # Update user-specific correct answer count
+                            if sender_display_name not in user_correct_answers:
+                                user_correct_answers[sender_display_name] = 0
+                                
+                            user_correct_answers[sender_display_name] += 1
                         
             except Exception as e:
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\nAnswer: {riddle_main_answer.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\nAnswer: {dictionary_main_answer.upper()}\n"
             send_message(target_room_id, message)
         
         time.sleep(2)
 
-        riddle_num = riddle_num + 1
+        dictionary_num = dictionary_num + 1
                         
         # Sort the dictionary by the count (value) in descending order
         message = ""
         sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
         if sorted_users:
-            if riddle_num > 5:
+            if dictionary_num > 5:
                 message += "\n🏁🏆 Final Standings\n"
             else:   
                 message += "\n📊🏆 Current Standings\n"

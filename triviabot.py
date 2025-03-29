@@ -380,9 +380,8 @@ import difflib
 import nltk
 from nltk.corpus import wordnet as wn
 from metaphone import doublemetaphone
+nltk.data.path.append("./nltk_data")
 
-nltk.download('wordnet')
-nltk.download('omw-1.4')
 
 def enhanced_score_with_phonetic_and_synonyms(guess, answer):
     guess = guess.lower().strip()

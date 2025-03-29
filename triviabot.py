@@ -383,7 +383,7 @@ from metaphone import doublemetaphone
 nltk.data.path.append("./nltk_data")
 
 
-def enhanced_score_with_phonetic_and_synonyms(guess, answer):
+def word_similarity(guess, answer):
     guess = guess.lower().strip()
     answer = answer.lower().strip()
 
@@ -483,7 +483,7 @@ def ask_dictionary_challenge(winner):
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         time.sleep(2)
-        message += f"\n🧠❓ dictionary {dictionary_num}/5: {dictionary_text}"       
+        message += f"\n🧠❓ Definition {dictionary_num}/5: {dictionary_text}"       
         send_message(target_room_id, message)
 
         initialize_sync()
@@ -492,6 +492,7 @@ def ask_dictionary_challenge(winner):
         right_answer = False
         winner_name = ""
         winner_score = ""
+        closest_guesses = []  # Track (display_name, guess, score)
         
         while time.time() - start_time < 20 and right_answer == False:
             try:                                                      
@@ -507,6 +508,7 @@ def ask_dictionary_challenge(winner):
                 sync_data = response.json()
                 since_token = sync_data.get("next_batch")  # Update since_token for the next batch
                 room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
     
                 for event in room_events:                
                     event_id = event["event_id"]
@@ -529,22 +531,42 @@ def ask_dictionary_challenge(winner):
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
                         
-                        if fuzzy_match(message_content, dictionary_word, dictionary_category, dictionary_url):
-                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
+                        similarity_score = word_similarity(message_content, dictionary_word)
+
+                        # Track all guesses for later ranking
+                        closest_guesses.append((sender_display_name, message_content, similarity_score))
+
+                        if similarity_score == 1:
+                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {dictionary_word.upper()}\n"
                             send_message(target_room_id, message)
                             right_answer = True
-
-                            # Update user-specific correct answer count
+                
                             if sender_display_name not in user_correct_answers:
                                 user_correct_answers[sender_display_name] = 0
-                                
                             user_correct_answers[sender_display_name] += 1
                         
             except Exception as e:
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\nAnswer: {dictionary_main_answer.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\nAnswer: {dictionary_word.upper()}\n"
+            # Sort and show top 3 closest guesses
+            closest_guesses.sort(key=lambda x: x[2], reverse=True)  # Sort by similarity score
+        
+            top_n = 3
+            message += "\n🔍 Top 3 least worst guesses:\n"
+            for i, (user, guess, score) in enumerate(closest_guesses[:top_n], 1):
+                point_str = f"{score:.2f}"
+                message += f"{i}. @{user}: \"{guess}\" — score: {point_str}\n"
+
+            message += f"\n🥈🤡 50% credit for your 'effort'.\n"
+        
+            # Optional: award fractional points
+            for user, _, score in closest_guesses[:top_n]:
+                if user not in user_correct_answers:
+                    user_correct_answers[user] = 0
+                user_correct_answers[user] += score*.5  # Or round(score, 2) if you want
+
             send_message(target_room_id, message)
         
         time.sleep(2)
@@ -4263,6 +4285,8 @@ def select_wof_questions(winner):
         message += f"{counter}. ❓🦓 OkrAnimal ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         message += f"{counter}. 🟢🎩 The Riddler ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        counter = counter + 1
+        message += f"{counter}. 🤓📚 Word Nerd ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
         
@@ -4329,6 +4353,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "19":
             ask_riddle_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "20":
+            ask_dictionary_challenge(winner)
             time.sleep(3)
             return None
         
@@ -4706,7 +4735,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -4863,6 +4892,19 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    if str(message_content) in {"20"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Word Nerd' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"20"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Word Nerd' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+
                     if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -4876,7 +4918,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -4894,7 +4936,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 
@@ -9176,16 +9218,17 @@ def start_trivia():
             start_message += f"\n🚩 Flag errors during response time"
             start_message += f"\n↔️ #curr, #prev to tag question\n"
             send_message(target_room_id, start_message)
-        
             time.sleep(3)
-            start_message = f"\n🟢🎩 Check out the new 'The Riddler' mode!\n"
+            
+            start_message = f"\n✨🧪 Check out the new modes!\n"
+            start_message += f"\n🟢🎩 The Riddler"
+            start_message += f"\n🤓📚 Word Nerd\n"
             send_message(target_room_id, start_message)
             time.sleep(3)
 
             start_message = "\n🏁 Get ready 🏁\n"
             send_message(target_room_id, start_message)
             round_start_messages()
-        
             time.sleep(5)
                 
             # Randomly select n questions

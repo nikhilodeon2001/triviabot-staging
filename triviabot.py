@@ -486,7 +486,7 @@ def ask_dictionary_challenge(winner):
         word_length = len(dictionary_word)
         message = f"\n⚠️🚨 Everyone's in!\n"
         message += f"\n🧠❓ Guess the word...\n"
-        message += f"\n🔤🔢 Starts with '{word_first_length.upper()}', '{word_length}' characters.\n"
+        message += f"\n🔤🔢 Starts with '{word_first_char.upper()}', '{word_length}' characters.\n"
                 
         send_message(target_room_id, message)
         time.sleep(2)

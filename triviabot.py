@@ -3477,7 +3477,6 @@ def get_image_url_from_s3():
     # Step 2: Extract with regex
     pattern = r'^(.+?)\s*&\s*(.+?)\s+\((.+?)\)$'
     match = re.match(pattern, filename)
-    message = ""
 
     if match:
         title = match.group(1)
@@ -3486,8 +3485,8 @@ def get_image_url_from_s3():
         
         # Remove the time from the date string
         date_only = ' '.join(full_date.split()[:-1])
-    
-        message += f"\nMasterpiece: '{title}'\n"
+
+        message = f"\nMasterpiece: '{title}'\n"
         message += f"Okra's Muse: {user}\n"
         message += f"Creation Date: {date_only}\n"
 

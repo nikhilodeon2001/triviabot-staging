@@ -9262,7 +9262,6 @@ def start_trivia():
         load_streak_data()
         load_previous_question()
         initialize_sync()  
-        get_image_url_from_s3()
 
         fetch_donations()
         

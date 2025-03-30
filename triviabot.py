@@ -3474,10 +3474,11 @@ def get_image_url_from_s3():
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
     print(random_file)
+   # Step 1: Remove the prefix and file extension
     filename = os.path.basename(random_file).replace('.png', '')
-
-    # Step 2: Extract title, user, and date using regex
-    pattern = r'"(.*?)"\s*&\s*(.*?)\s+\((.*?)\)'
+    
+    # Step 2: Extract using updated regex
+    pattern = r'^"(.+?)"\s*&\s*(.+?)\s+\((.+?)\)$'
     match = re.match(pattern, filename)
     
     if match:
@@ -3488,6 +3489,8 @@ def get_image_url_from_s3():
         print(f"Title: {title}")
         print(f"User: {user}")
         print(f"Date: {date}")
+    else:
+        print("❌ Pattern did not match.")
     
     print(f"Random image URL: {public_url}")
 

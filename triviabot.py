@@ -436,6 +436,7 @@ def ask_dictionary_challenge(winner):
     send_message(target_room_id, message)
     time.sleep(3)
     message = f"\n5️⃣🥇 Let's do a best of 5...\n"
+    message += f"\n😏🎯 I'll take the best answer per person.\n"
     send_message(target_room_id, message)
     time.sleep(3)
 
@@ -488,13 +489,13 @@ def ask_dictionary_challenge(winner):
         word_first_char = dictionary_word[0]
         word_length = len(dictionary_word)
         message = f"\n⚠️🚨 Everyone's in!\n"
-        message += f"\n🧠❓ Guess the word...\n"
+        message += f"\n🧠❓ Word {dictionary_num}/5\n"
         message += f"\n🔤 Starts with {word_first_char.upper()}"
         message += f"\n🔢 {word_length} characters\n"
                 
         send_message(target_room_id, message)
         time.sleep(3)
-        message = f"\n📘📝 Definition {dictionary_num}/5: {dictionary_definition}\n"
+        message = f"\n📘📝 Definition: {dictionary_definition}\n"
         message += f"\n🟢💨 GO!\n"   
         send_message(target_room_id, message)
 
@@ -3452,7 +3453,7 @@ def sovereign_check(user):
 
 
 
-def get_image_url_from_s3()
+def get_image_url_from_s3():
     bucket_name = "triviabotwebsite"
     prefix = "generated-images/"
     

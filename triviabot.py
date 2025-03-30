@@ -7993,7 +7993,7 @@ def update_round_streaks(user):
             #else:
             #    image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
 
-            image_message = "\n👀➡️ Check out the Okra Museum"
+            image_message = "\n🖼️✨ A memory from the Okra Museum"
             image_message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
             #if len(scoreboard) < image_wins and highest_score > image_points:
             #    image_message += f"\n🌟😞 @{user} Awesome score! But we need some more compeition.\n"

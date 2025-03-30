@@ -558,6 +558,8 @@ def ask_dictionary_challenge(winner):
         
         if right_answer == False:    
             message = f"\n❌😢 No one got it.\n\nAnswer: {dictionary_word.upper()}\n"
+            send_message(target_room_id, message)
+            message = ""
             if closest_guesses:
             # Sort and show top 3 closest guesses
                 closest_guesses.sort(key=lambda x: x[2], reverse=True)  # Sort by similarity score

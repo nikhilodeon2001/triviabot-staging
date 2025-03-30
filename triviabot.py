@@ -3451,6 +3451,26 @@ def sovereign_check(user):
         return False
 
 
+
+def get_image_url_from_s3()
+    bucket_name = "triviabotwebsite"
+    prefix = "generated-images/"
+    
+    # Connect to S3
+    s3 = boto3.client("s3")
+    
+    # List objects in the bucket
+    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    
+    # Extract file keys
+    files = [item['Key'] for item in response.get('Contents', []) if item['Key'].lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
+    
+    # Pick a random file
+    random_file = random.choice(files)
+    public_url = f"https://{bucket_name}.s3.amazonaws.com/{random_file}"
+    
+    print(f"Random image URL: {public_url}")
+
 def upload_image_to_s3(buffer, winner, description):
     global okra_museum_url
     try:
@@ -9211,6 +9231,7 @@ def start_trivia():
         load_streak_data()
         load_previous_question()
         initialize_sync()  
+        get_image_url_from_s3()
 
         fetch_donations()
         

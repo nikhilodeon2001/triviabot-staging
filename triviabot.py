@@ -467,6 +467,7 @@ def ask_dictionary_challenge(winner):
             dictionary_question_id = dictionary_question["_id"] 
             dictionary_category = "Dictionary"
             dictionary_url = ""
+
             print(f"Word {dictionary_num}: {dictionary_word}")
             print(f"Definition {dictionary_num}: {dictionary_definition}")
 
@@ -480,9 +481,13 @@ def ask_dictionary_challenge(winner):
             return None  # Return an empty list in case of failure
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-            
+
+        word_first_char = dictionary_word[0]
+        word_length = len(dictionary_word)
         message = f"\n⚠️🚨 Everyone's in!\n"
-        message += f"\n🧠❓ Guess the word...\n"   
+        message += f"\n🧠❓ Guess the word...\n"
+        message += f"\n🔤🔢 Starts with '{word_first_length.upper()}', '{word_length}' characters.\n"
+                
         send_message(target_room_id, message)
         time.sleep(2)
         message = f"\n📘📝 Definition {dictionary_num}/5: {dictionary_definition}"

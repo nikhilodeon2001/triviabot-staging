@@ -3499,7 +3499,7 @@ def get_image_url_from_s3():
                 
 
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-    send_message(target_room_id message)
+    send_message(target_room_id, message)
 
 
 def upload_image_to_s3(buffer, winner, description):

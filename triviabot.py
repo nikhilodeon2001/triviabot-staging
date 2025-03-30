@@ -482,8 +482,11 @@ def ask_dictionary_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
+        message += f"\n🧠❓ Guess the word...\n"   
+        send_message(target_room_id, message)
         time.sleep(2)
-        message += f"\n🧠❓ Definition {dictionary_num}/5: {dictionary_definition}"       
+        message = f"\n📘📝 Definition {dictionary_num}/5: {dictionary_definition}"
+        message += f"\n🟢💨 GO!!!\n"   
         send_message(target_room_id, message)
 
         initialize_sync()
@@ -1731,9 +1734,9 @@ def ask_feud_question(winner, mode):
     right_answer = False
 
     if mode == "solo":
-        guess_time = 10
+        guess_time = 20
     elif mode == "cooperative":
-        guess_time = 10
+        guess_time = 20
 
     if mode == "solo":
         prompt_message = f"\n⚠{numbered_blocks[num_of_answers - 1]} Top {num_of_answers} answers on the board. We asked 100 Okrans...\n"

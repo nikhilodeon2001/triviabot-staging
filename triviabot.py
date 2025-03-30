@@ -3471,28 +3471,36 @@ def get_image_url_from_s3():
     public_url = f"https://{bucket_name}.s3.amazonaws.com/{random_file}"
    
     image_mxc, image_width, image_height = download_image_from_url(public_url)
-    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    
 
     print(random_file)
    # Step 1: Remove the prefix and file extension
-    filename = os.path.basename(random_file).replace('.png', '')
-    
-    # Step 2: Extract using updated regex
+   filename = os.path.basename(random_file).replace('.png', '')
+
+    # Step 2: Extract with regex
     pattern = r'^"(.+?)"\s*&\s*(.+?)\s+\((.+?)\)$'
     match = re.match(pattern, filename)
-    
+    message = ""
+
     if match:
         title = match.group(1)
         user = match.group(2)
-        date = match.group(3)
+        full_date = match.group(3)
+        
+        # Remove the time from the date string
+        date_only = ' '.join(full_date.split()[:-1])
     
-        print(f"Title: {title}")
-        print(f"User: {user}")
-        print(f"Date: {date}")
+        message += f"\nMasterpiece: '{title}'\n"
+        message += f"Okra's Muse: {user}\n"
+        message += f"Creation Date: {date_only}\n"
+
     else:
-        print("❌ Pattern did not match.")
-    
-    print(f"Random image URL: {public_url}")
+        message += f"\nA masterpiece from the Okra Museum.\n"
+                
+
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id message)
+
 
 def upload_image_to_s3(buffer, winner, description):
     global okra_museum_url
@@ -7998,18 +8006,18 @@ def update_round_streaks(user):
             #else:
             #    image_message = f"\n{dynamic_emoji}🎨 @{user} Win {remaining_games} more in a row and I'll draw you something.\n"
 
-            image_message = ""
-            if len(scoreboard) < image_wins and highest_score > image_points:
-                image_message += f"\n🌟😞 @{user} Awesome score! But we need some more compeition.\n"
-            if len(scoreboard) >= image_wins and highest_score < image_points:
-                image_message += f"\n🌟😞 @{user} You emerged at the top! But your score could be higher.\n"
-            else:
-                image_message += f"\n🌟😞 @{user} You won! But more points (and more players).\n" 
-
-            image_message += "\n👀➡️ You'll get into the Okra Museum next time..."
+            image_message = "\n👀➡️ Check out the Okra Museum"
             image_message += "\n🥒🏛️ https://livetriviastats.com/okra-museum\n"
-                
+            #if len(scoreboard) < image_wins and highest_score > image_points:
+            #    image_message += f"\n🌟😞 @{user} Awesome score! But we need some more compeition.\n"
+            #if len(scoreboard) >= image_wins and highest_score < image_points:
+            #    image_message += f"\n🌟😞 @{user} You emerged at the top! But your score could be higher.\n"
+            #else:
+            #    image_message += f"\n🌟😞 @{user} You won! But more points (and more players).\n" 
+
             send_message(target_room_id, image_message)
+            get_image_url_from_s3()
+            
             time.sleep(1)
 
     # Perform all MongoDB operations at the end

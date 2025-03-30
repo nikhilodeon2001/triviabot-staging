@@ -3473,6 +3473,7 @@ def get_image_url_from_s3():
     image_mxc, image_width, image_height = download_image_from_url(public_url)
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
+    print(random_file)
     pattern = r'"(.*?)"\s*&\s*(.*?)\s+\((.*?\d{4})'  # extract title, user, date
     match = re.match(pattern, random_file)
     

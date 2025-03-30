@@ -3478,7 +3478,7 @@ def get_image_url_from_s3():
     filename = os.path.basename(random_file).replace('.png', '')
 
     # Step 2: Extract with regex
-    pattern = r'^"(.+?)"\s*&\s*(.+?)\s+\((.+?)\)$'
+    pattern = r'^(.+?)\s*&\s*(.+?)\s+\((.+?)\)$'
     match = re.match(pattern, filename)
     message = ""
 

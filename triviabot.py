@@ -3469,6 +3469,21 @@ def get_image_url_from_s3():
     # Pick a random file
     random_file = random.choice(files)
     public_url = f"https://{bucket_name}.s3.amazonaws.com/{random_file}"
+   
+    image_mxc, image_width, image_height = download_image_from_url(public_url)
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+
+    pattern = r'"(.*?)"\s*&\s*(.*?)\s+\((.*?\d{4})'  # extract title, user, date
+    match = re.match(pattern, random_file)
+    
+    if match:
+        title = match.group(1)
+        user = match.group(2)
+        date = match.group(3)
+        
+        print(f"Title: {title}")
+        print(f"User: {user}")
+        print(f"Date: {date}")
     
     print(f"Random image URL: {public_url}")
 

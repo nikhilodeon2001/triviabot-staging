@@ -106,6 +106,9 @@ first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
 
+okra_museum_url = ""
+okra_museum_text = ""
+
 ghost_mode_default = False
 ghost_mode = ghost_mode_default
 god_mode_default = False
@@ -3449,6 +3452,7 @@ def sovereign_check(user):
 
 
 def upload_image_to_s3(buffer, winner, description):
+    global okra_museum_url
     try:
         bucket_name='triviabotwebsite'
         folder_name='generated-images'
@@ -3462,6 +3466,10 @@ def upload_image_to_s3(buffer, winner, description):
         # Step 3: Connect to S3 and upload the file
         s3_client = boto3.client("s3")
         s3_client.put_object(Bucket=bucket_name, Key=object_name, Body=buffer.getvalue(), ContentType="image/png")
+
+        # URL encode the object name for safe use in a public URL
+        encoded_object_name = urllib.parse.quote(object_name, safe='/')
+        okra_museum_url = f"https://{bucket_name}.s3.amazonaws.com/{encoded_object_name}"
 
         # Step 4: Generate and return the S3 URL
         return None
@@ -3713,6 +3721,7 @@ def nice_creep_okra_option(winner):
 
 
 def generate_round_summary_image(round_data, winner):
+    global okra_museum_text
 
     if skip_summary == True:
         message += "\nBe sure to drink your Okratine.\n"
@@ -3814,7 +3823,8 @@ def generate_round_summary_image(round_data, winner):
             image_description = describe_image_with_vision(image_url, "title", prompt)
         else:
             image_description = describe_image_with_vision(image_url, "title", prompt)
-
+        
+        okra_museum_text = image_description
             
         image_mxc, image_width, image_height = download_image_from_url(image_url)
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)

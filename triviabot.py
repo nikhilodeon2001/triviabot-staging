@@ -1180,8 +1180,8 @@ def ask_flags_challenge(winner):
 
     flags_gifs = [
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_usc.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_cartoon.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_friends.gif"
+    #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_cartoon.gif",
+    #"https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_friends.gif"
     ]
 
     flags_gif_url = random.choice(flags_gifs)
@@ -9494,9 +9494,10 @@ def start_trivia():
             time.sleep(3)
             
             start_message = f"\n✨🧪 Check out the new modes!\n"
-            start_message += f"\n🟢🎩 The Riddler"
+            start_message += f"\n🎏🎉 Flag Fest"
             start_message += f"\n🤓📚 Word Nerd"
-            start_message += f"\n🎏🎉 Flag Fest\n"
+            start_message += f"\n🟢🎩 The Riddler\n"
+            
             send_message(target_room_id, start_message)
             time.sleep(3)
 

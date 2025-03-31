@@ -1171,22 +1171,22 @@ def ask_ranker_people_challenge(winner):
 
 
 
-def ask_flag_challenge(winner):    
+def ask_flags_challenge(winner):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
    
     num_of_xs = 0
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    flag_gifs = [
+    flags_gifs = [
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_usc.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_cartoon.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_friends.gif"
     ]
 
-    flag_gif_url = random.choice(flag_gifs)
+    flags_gif_url = random.choice(flags_gifs)
     message = f"🎏🎉 Flag Fest\n"
-    image_mxc, image_width, image_height = download_image_from_url(flag_gif_url)
+    image_mxc, image_width, image_height = download_image_from_url(flags_gif_url)
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
@@ -1249,7 +1249,7 @@ def ask_flag_challenge(winner):
         if flags_category == "country_region_org":
             message += f"\n🌍🏳️ Which country or international organization does this flag represent?\n"
             message += f"\n✋🔤 Do NOT abbreviate countries.\n"
-        elif flags_cagegory == "signal":
+        elif flags_category == "signal":
             message += f"\n🔣🏳️ What symbol does this flag represent?\n"
             
         image_response = send_image(target_room_id, flags_mxc, flags_width, flags_height, flags_size)
@@ -1305,7 +1305,7 @@ def ask_flag_challenge(winner):
                         
                         if fuzzy_match(message_content, flags_answer, flags_category, flags_url):
                             message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
-                            message += f"🏴‍☠️📖 Details: {flag_detail}\n"
+                            message += f"🏴‍☠️📖 Details: {flags_detail}\n"
                             send_message(target_room_id, message)
                             right_answer = True
                             correct_guesses = correct_guesses + 1
@@ -4619,7 +4619,7 @@ def select_wof_questions(winner):
             return None
 
         elif selected_wof_category == "21":
-            ask_flag_challenge(winner)
+            ask_flags_challenge(winner)
             time.sleep(3)
             return None
         

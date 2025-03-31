@@ -1177,6 +1177,19 @@ def ask_flag_challenge(winner):
     num_of_xs = 0
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+
+    flag_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_usc.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_cartoon.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/flagsnet/flags_friends.gif"
+    ]
+
+    flag_gif_url = random.choice(flag_gifs)
+    message = f"🎏🎉 Flag Fest\n"
+    image_mxc, image_width, image_height = download_image_from_url(flag_gif_url)
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id, message)
+    time.sleep(3)
     
     while num_of_xs < 3:
         try:
@@ -1232,14 +1245,12 @@ def ask_flag_challenge(winner):
         send_message(target_room_id, start_message)
         time.sleep(2)
 
-        
-            
         message = f"\n⚠️🚨 Everyone's in!\n"
         if flags_category == "country_region_org":
-            message = f"\n🌍🏳️ Which country or international organization does this flag represent?\n"
+            message += f"\n🌍🏳️ Which country or international organization does this flag represent?\n"
             message += f"\n✋🔤 Do NOT abbreviate countries.\n"
         elif flags_cagegory == "signal":
-            message = f"\n🔣🏳️ What symbol does this flag represent?\n"
+            message += f"\n🔣🏳️ What symbol does this flag represent?\n"
             
         image_response = send_image(target_room_id, flags_mxc, flags_width, flags_height, flags_size)
 

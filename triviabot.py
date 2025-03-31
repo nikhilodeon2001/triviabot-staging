@@ -1198,13 +1198,14 @@ def ask_flags_challenge(winner):
             # Fetch wheel of fortune questions using the random subset method
             flags_collection = db["flags_questions"]
             pipeline_flags = [
-                {"$match": {"_id": {"$nin": list(recent_flags_ids)}}},  # Exclude recent IDs
-                {"$group": {  # Group by question text to ensure uniqueness
-                    "_id": "$question",  # Group by the question text field
-                    "question_doc": {"$first": "$$ROOT"}  # Select the first document with each unique text
+                {"$match": {"_id": {"$nin": list(recent_flags_ids)}}},
+                {"$sample": {"size": 50}},  # sample 50 first
+                {"$group": {
+                    "_id": "$question",
+                    "question_doc": {"$first": "$$ROOT"}
                 }},
-                {"$replaceRoot": {"newRoot": "$question_doc"}},  # Flatten the grouped results
-                {"$sample": {"size": 1}}  # Sample 1 unique question
+                {"$replaceRoot": {"newRoot": "$question_doc"}},
+                {"$sample": {"size": 1}}  # optional, if you want to randomize final pick again
             ]
 
             flags_questions = list(flags_collection.aggregate(pipeline_flags))

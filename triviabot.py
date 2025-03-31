@@ -1304,7 +1304,7 @@ def ask_flags_challenge(winner):
                         message_content = event.get("content", {}).get("body", "")
                         
                         if fuzzy_match(message_content, flags_answer, flags_category, flags_url):
-                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
+                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {flags_answer.upper()}\n"
                             message += f"🏴‍☠️📖 Details: {flags_detail}\n"
                             send_message(target_room_id, message)
                             right_answer = True

@@ -1199,7 +1199,7 @@ def ask_flags_challenge(winner):
             flags_collection = db["flags_questions"]
             pipeline_flags = [
                 {"$match": {"_id": {"$nin": list(recent_flags_ids)}}},
-                {"$sample": {"size": 50}},  # sample 50 first
+                {"$sample": {"size": 20}},  # sample 50 first
                 {"$group": {
                     "_id": "$question",
                     "question_doc": {"$first": "$$ROOT"}
@@ -1346,6 +1346,9 @@ def ask_flags_challenge(winner):
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count}\n"
         
+    send_message(target_room_id, message)
+    time.sleep(2)
+    message = f"\n👀➡️ See more flags...if you want: http://flags.net/\n"
     send_message(target_room_id, message)
     wf_winner = True
     time.sleep(3)

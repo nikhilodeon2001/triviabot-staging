@@ -1307,6 +1307,7 @@ def ask_flags_challenge(winner):
                         if fuzzy_match(message_content, flags_answer, flags_category, flags_url):
                             message = f"\n✅🎉 Correct! @{sender_display_name} got it! {flags_answer.upper()}\n"
                             message += f"🏴‍☠️📖 Details: {flags_detail}\n"
+                            message += f"\n👀➡️ See more: {flags_source_url}\n"
                             send_message(target_room_id, message)
                             right_answer = True
                             correct_guesses = correct_guesses + 1
@@ -1328,6 +1329,8 @@ def ask_flags_challenge(winner):
         if right_answer == False:    
             num_of_xs = num_of_xs + 1
             message = f"\n❌😢 No one got it.\n\nAnswer: {flags_answer.upper()}\n"
+            message += f"🏴‍☠️📖 Details: {flags_detail}\n"
+            message += f"\n👀➡️ See more: {flags_source_url}\n"
             send_message(target_room_id, message)
             time.sleep(1)
                         

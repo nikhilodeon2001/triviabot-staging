@@ -977,11 +977,11 @@ def ask_animal_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
-    elif correct_guesses >= 20:
-        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
-        message += "\n 🏆 Commendable Okrans\n"
     else:
-        message = f"\n🎉✅ Congrats Okrans! You got {correct_guesses} right!\n"
+        if correct_guesses >= 20:
+            message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        else:
+            message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
 
         # Sort the dictionary by the count (value) in descending order
@@ -1169,11 +1169,11 @@ def ask_ranker_people_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
-    elif correct_guesses >= 20:
-        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
-        message += "\n 🏆 Commendable Okrans\n"
     else:
-        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        if correct_guesses >= 20:
+            message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        else:
+            message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
 
         # Sort the dictionary by the count (value) in descending order
@@ -1361,11 +1361,11 @@ def ask_flags_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
-    elif correct_guesses >= 20:
-        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
-        message += "\n 🏆 Commendable Okrans\n"
     else:
-        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        if correct_guesses >= 20:
+            message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        else:
+            message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
 
         # Sort the dictionary by the count (value) in descending order
@@ -1536,11 +1536,11 @@ def ask_poster_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
-    elif correct_guesses >= 20:
-        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
-        message += "\n 🏆 Commendable Okrans\n"
     else:
-        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        if correct_guesses >= 20:
+            message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        else:
+            message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
 
         # Sort the dictionary by the count (value) in descending order
@@ -1716,11 +1716,11 @@ def ask_missing_link(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
-    elif correct_guesses >= 20:
-        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
-        message += "\n 🏆 Commendable Okrans\n"
     else:
-        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        if correct_guesses >= 20:
+            message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        else:
+            message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
 
         # Sort the dictionary by the count (value) in descending order
@@ -1884,11 +1884,11 @@ def ask_movie_scenes_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
-    elif correct_guesses >= 20:
-        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
-        message += "\n 🏆 Commendable Okrans\n"
     else:
-        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        if correct_guesses >= 20:
+            message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        else:
+            message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
 
         # Sort the dictionary by the count (value) in descending order

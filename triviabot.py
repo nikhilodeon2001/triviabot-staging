@@ -465,10 +465,12 @@ def ask_dictionary_challenge(winner):
             dictionary_questions = list(dictionary_collection.aggregate(pipeline_dictionary))
             dictionary_question = dictionary_questions[0]
             dictionary_word = dictionary_question["word"]
-            dictionary_definition = dictionary_question["definition"]
+            pattern = re.compile(re.escape(dictionary_word), re.IGNORECASE)
+            dictionary_definition = pattern.sub("OKRACTED", dictionary_definition)
             dictionary_question_id = dictionary_question["_id"] 
             dictionary_category = "Dictionary"
             dictionary_url = ""
+            
 
             print(f"Word {dictionary_num}: {dictionary_word}")
             print(f"Definition {dictionary_num}: {dictionary_definition}")
@@ -809,8 +811,9 @@ def ask_animal_challenge(winner):
     
     animal_main_url= "https://a-z-animals.com/animals/"
     animal_category  = "Animals"
-    
-    while num_of_xs < 3:
+
+    counter = 1
+    while num_of_xs < 3 and correct_guesses < 20:
         try:
             recent_animal_ids = get_recent_question_ids_from_mongo("animal")
 
@@ -829,17 +832,32 @@ def ask_animal_challenge(winner):
 
             animal_questions = list(animal_collection.aggregate(pipeline_animal))
             animal_question = animal_questions[0]
+            
             animal_detail_url = animal_question["animal_url"]   
             animal_image_url = animal_question["image_url"]   
             animal_name = animal_question["name"]
-            animal_kingdom = animal_question["kingdom"] or "N/A"
-            animal_phylum = animal_question["phylum"] or "N/A"
-            animal_class = animal_question["class"] or "N/A"
-            animal_order = animal_question["order"] or "N/A"
-            animal_family = animal_question["family"] or "N/A"
-            animal_genus = animal_question["genus"] or "N/A"
-            animal_species = animal_question["species"] or "N/A"
             animal_question_id = animal_question["_id"] 
+            
+            # Fields to clean and redact
+            taxonomy_fields = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
+            taxonomy_data = {}
+            
+            # Case-insensitive pattern for the animal name
+            pattern = re.compile(re.escape(animal_name), re.IGNORECASE)
+            
+            for field in taxonomy_fields:
+                raw_value = animal_question.get(field) or "N/A"
+                redacted_value = pattern.sub("OKRACTED", raw_value)
+                taxonomy_data[field] = redacted_value
+            
+            # Extract individual fields if needed
+            animal_kingdom = taxonomy_data["kingdom"]
+            animal_phylum = taxonomy_data["phylum"]
+            animal_class = taxonomy_data["class"]
+            animal_order = taxonomy_data["order"]
+            animal_family = taxonomy_data["family"]
+            animal_genus = taxonomy_data["genus"]
+            animal_species = taxonomy_data["species"]
             print(f"Animal Name: {animal_name}")
 
             if animal_question_id:
@@ -959,8 +977,11 @@ def ask_animal_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    elif correct_guesses >= 20:
+        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        message += "\n 🏆 Commendable Okrans\n"
     else:
-        message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
+        message = f"\n🎉✅ Congrats Okrans! You got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
 
         # Sort the dictionary by the count (value) in descending order
@@ -995,7 +1016,7 @@ def ask_ranker_people_challenge(winner):
     ranker_url= "https://www.ranker.com/crowdranked-list/the-most-influential-people-of-all-time"
     people_category  = "Ranker People"
     
-    while num_of_xs < 3:
+    while num_of_xs < 3 and correct_guesses < 20:
         try:
             recent_people_ids = get_recent_question_ids_from_mongo("people")
 
@@ -1148,6 +1169,9 @@ def ask_ranker_people_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    elif correct_guesses >= 20:
+        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        message += "\n 🏆 Commendable Okrans\n"
     else:
         message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
@@ -1192,7 +1216,7 @@ def ask_flags_challenge(winner):
     send_message(target_room_id, message)
     time.sleep(3)
     
-    while num_of_xs < 3:
+    while num_of_xs < 3 and correct_guesses < 20:
         try:
             recent_flags_ids = get_recent_question_ids_from_mongo("flags")
 
@@ -1337,6 +1361,9 @@ def ask_flags_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    elif correct_guesses >= 20:
+        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        message += "\n 🏆 Commendable Okrans\n"
     else:
         message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
@@ -1369,7 +1396,7 @@ def ask_poster_challenge(winner):
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
     
-    while num_of_xs < 3:
+    while num_of_xs < 3 and correct_guesses < 20:
         try:
             recent_posters_ids = get_recent_question_ids_from_mongo("posters")
 
@@ -1509,6 +1536,9 @@ def ask_poster_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    elif correct_guesses >= 20:
+        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        message += "\n 🏆 Commendable Okrans\n"
     else:
         message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
@@ -1532,7 +1562,7 @@ def ask_missing_link(winner):
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    while num_of_xs < 3:
+    while num_of_xs < 3 and correct_guesses < 20:
         try:
             recent_missing_link_ids = get_recent_question_ids_from_mongo("missing_link")
 
@@ -1686,6 +1716,9 @@ def ask_missing_link(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    elif correct_guesses >= 20:
+        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        message += "\n 🏆 Commendable Okrans\n"
     else:
         message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"
@@ -1711,7 +1744,7 @@ def ask_movie_scenes_challenge(winner):
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    while num_of_xs < 3:
+    while num_of_xs < 3 and correct_guesses < 20:
         try:
             recent_movie_scenes_ids = get_recent_question_ids_from_mongo("movie_scenes")
 
@@ -1851,6 +1884,9 @@ def ask_movie_scenes_challenge(winner):
                         
     if correct_guesses == 0:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    elif correct_guesses >= 20:
+        message = f"\n✅✌️ {correct_guesses} right! I get the point. Let's move on.\n"
+        message += "\n 🏆 Commendable Okrans\n"
     else:
         message = f"\n🎉✅ Congrats Okrans! you got {correct_guesses} right!\n"
         message += "\n 🏆 Commendable Okrans\n"

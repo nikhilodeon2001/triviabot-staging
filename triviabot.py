@@ -466,7 +466,8 @@ def ask_dictionary_challenge(winner):
             dictionary_question = dictionary_questions[0]
             dictionary_word = dictionary_question["word"]
             pattern = re.compile(re.escape(dictionary_word), re.IGNORECASE)
-            dictionary_definition = pattern.sub("OKRACTED", dictionary_definition)
+            dictionary_definition = dictionary_question["definition"]
+            dictionary_definition = pattern.sub("OKRA", dictionary_definition)
             dictionary_question_id = dictionary_question["_id"] 
             dictionary_category = "Dictionary"
             dictionary_url = ""
@@ -847,7 +848,7 @@ def ask_animal_challenge(winner):
             
             for field in taxonomy_fields:
                 raw_value = animal_question.get(field) or "N/A"
-                redacted_value = pattern.sub("OKRACTED", raw_value)
+                redacted_value = pattern.sub("OKRA", raw_value)
                 taxonomy_data[field] = redacted_value
             
             # Extract individual fields if needed

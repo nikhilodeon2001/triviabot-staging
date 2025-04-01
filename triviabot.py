@@ -5544,7 +5544,7 @@ def send_magic_image(input_text):
         image = Image.open(io.BytesIO(image_data))
         image_width, image_height = image.size
 
-        image_mxc = upload_image_to_matrix(image_data)
+        image_mxc = upload_image_to_matrix(image_data, add_okra=False)
         image_size = 100
         
         #message = "Find the magic number and Okra will be nice (to you)\n"
@@ -6957,13 +6957,10 @@ def download_image_from_url(url): #IMAGE CODE
     return None, None, None
     
 
-def upload_image_to_matrix(image_data):  # IMAGE CODE
+def upload_image_to_matrix(image_data, add_okra=True):
     global max_retries, delay_between_retries
 
-    """Upload an image to Matrix with retry logic and content type detection."""
-    
     def get_image_content_type(image_data):
-        """Detect the content type of the image (JPEG, PNG, GIF) based on its format."""
         try:
             img = Image.open(io.BytesIO(image_data))
             image_format = img.format.lower()
@@ -6974,24 +6971,46 @@ def upload_image_to_matrix(image_data):  # IMAGE CODE
             elif image_format == "gif":
                 return "image/gif"
             else:
-                return "application/octet-stream"  # Default/fallback
+                return "application/octet-stream"
         except Exception as e:
             sentry_sdk.capture_exception(e)
-            return "application/octet-stream"  # Fallback in case of detection error
-    
-    # Detect content type
+            return "application/octet-stream"
+
+    def overlay_okra(image_data):
+        try:
+            base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
+            okra_path = os.path.join(os.path.dirname(__file__), "okra.png")
+            okra_img = Image.open(okra_path).convert("RGBA")
+
+            scale = 0.25
+            new_okra_width = int(base_img.width * scale)
+            okra_img = okra_img.resize((new_okra_width, int(okra_img.height * (new_okra_width / okra_img.width))))
+
+            position = (base_img.width - okra_img.width - 10, base_img.height - okra_img.height - 10)
+            base_img.alpha_composite(okra_img, dest=position)
+
+            output = io.BytesIO()
+            base_img.save(output, format="PNG")
+            return output.getvalue()
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            print("⚠️ Failed to overlay okra. Proceeding with original image.")
+            return image_data
+
+    # ✅ Conditionally overlay okra
+    if add_okra:
+        image_data = overlay_okra(image_data)
+
     content_type = get_image_content_type(image_data)
-    
-    headers_media['content-type'] = content_type  # Update the content type in headers
+    headers_media['content-type'] = content_type
 
     for attempt in range(max_retries):
         try:
-            # Attempt to upload the image data to Matrix
             response = requests.post(upload_url, headers=headers_media, data=image_data)
 
             if response.status_code == 200:
-                return response.json().get('content_uri')  # Return the content URI
-            
+                return response.json().get('content_uri')
             else:
                 print(f"Failed to upload image. Status code: {response.status_code}")
         
@@ -6999,14 +7018,12 @@ def upload_image_to_matrix(image_data):  # IMAGE CODE
             sentry_sdk.capture_exception(e)
             print(f"Error: {e}")
         
-        # If the upload was not successful, wait for a bit before retrying
         if attempt < max_retries - 1:
             print(f"Retrying in {delay_between_retries} seconds... (Attempt {attempt + 1} of {max_retries})")
             time.sleep(delay_between_retries)
-    
+
     print("Failed to upload image after several attempts.")
     return None
-
 
 def reddit_login():
     global token_v2, max_retries, delay_between_retries, username, password

@@ -6970,44 +6970,44 @@ def upload_image_to_matrix(image_data, add_okra=True):
 
     
     def obfuscate_image(image_data, okra_path="okra.png"):
-    """Applies noise, warping, and overlays to make image hard for AI, but visible to humans."""
-    try:
-        base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
-
-        # === 1. Apply mild random rotation and warp ===
-        angle = random.uniform(-5, 5)
-        base_img = base_img.rotate(angle, expand=True, fillcolor=(255,255,255,0))
-
-        # === 2. Add noise ===
-        def add_noise(img):
-            np_img = np.array(img)
-            noise = np.random.randint(0, 60, np_img.shape, dtype='uint8')
-            np_noisy = np.clip(np_img + noise, 0, 255)
-            return Image.fromarray(np_noisy.astype('uint8'), 'RGBA')
-
-        base_img = add_noise(base_img)
-
-        # === 3. Add multiple okra overlays ===
-        okra = Image.open(okra_path).convert("RGBA")
-        okra = okra.resize((int(base_img.width * 0.25), int(base_img.height * 0.25)))
-
-        for _ in range(2):  # Two okras, random positions
-            x = random.randint(0, base_img.width - okra.width)
-            y = random.randint(0, base_img.height - okra.height)
-            base_img.alpha_composite(okra, (x, y))
-
-        # === 4. Optional blur or edge enhancement ===
-        base_img = base_img.filter(ImageFilter.SHARPEN)
-
-        # Convert back to bytes
-        output = io.BytesIO()
-        base_img.save(output, format="PNG")
-        return output.getvalue()
-
-    except Exception as e:
-        print(f"⚠️ Obfuscation failed: {e}")
-        return image_data  # fallback to original
+        """Applies noise, warping, and overlays to make image hard for AI, but visible to humans."""
+        try:
+            base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
     
+            # === 1. Apply mild random rotation and warp ===
+            angle = random.uniform(-5, 5)
+            base_img = base_img.rotate(angle, expand=True, fillcolor=(255,255,255,0))
+    
+            # === 2. Add noise ===
+            def add_noise(img):
+                np_img = np.array(img)
+                noise = np.random.randint(0, 60, np_img.shape, dtype='uint8')
+                np_noisy = np.clip(np_img + noise, 0, 255)
+                return Image.fromarray(np_noisy.astype('uint8'), 'RGBA')
+    
+            base_img = add_noise(base_img)
+    
+            # === 3. Add multiple okra overlays ===
+            okra = Image.open(okra_path).convert("RGBA")
+            okra = okra.resize((int(base_img.width * 0.25), int(base_img.height * 0.25)))
+    
+            for _ in range(2):  # Two okras, random positions
+                x = random.randint(0, base_img.width - okra.width)
+                y = random.randint(0, base_img.height - okra.height)
+                base_img.alpha_composite(okra, (x, y))
+    
+            # === 4. Optional blur or edge enhancement ===
+            base_img = base_img.filter(ImageFilter.SHARPEN)
+    
+            # Convert back to bytes
+            output = io.BytesIO()
+            base_img.save(output, format="PNG")
+            return output.getvalue()
+    
+        except Exception as e:
+            print(f"⚠️ Obfuscation failed: {e}")
+            return image_data  # fallback to original
+        
     
     
     def get_image_content_type(image_data):

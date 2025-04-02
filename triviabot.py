@@ -5756,7 +5756,7 @@ def generate_jeopardy_image(question_text):
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
     
     # Upload the image and send to the chat
-    image_mxc = upload_image_to_matrix(image_buffer.read())
+    image_mxc = upload_image_to_matrix(image_buffer.read(), add_okra=False)
     
     if image_mxc:
         # Return image_mxc, image_width, and image_height
@@ -5929,7 +5929,7 @@ def generate_crossword_image(answer):
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix or your media server
-    content_uri = upload_image_to_matrix(image_buffer.read())
+    content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
 
     # Return the content_uri, image width, height, and the answer
     return content_uri, img_width, img_height, display_string
@@ -6421,7 +6421,7 @@ def generate_base_question():
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix (assuming the upload function exists)
-    content_uri = upload_image_to_matrix(image_buffer.read()) if image_questions else None
+    content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False) if image_questions else None
 
     # Return the content_uri, image dimensions, decimal equivalent, and base number
     return content_uri, img_width, img_height, question_text, str(decimal_equivalent), base_number
@@ -6483,7 +6483,7 @@ def generate_median_question():
 
     # Upload the image to Matrix (assuming the upload function exists)
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read())
+        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
 
     # Calculate the median and return it for verification
     sorted_numbers = sorted(random_numbers)
@@ -6565,7 +6565,7 @@ def generate_mean_question():
 
     # Upload the image to Matrix (assuming the upload function exists)
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read())
+        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
 
     print(f"Mean: {int(mean_value)}")
 
@@ -6612,7 +6612,7 @@ def generate_scrambled_image(scrambled_text):
 
     # Upload the image to Matrix
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read())
+        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
     if content_uri:
         return content_uri, img_width, img_height, scrambled_text
     else:
@@ -6955,11 +6955,61 @@ def download_image_from_url(url): #IMAGE CODE
     
     print("Failed to download image after several attempts.")
     return None, None, None
-    
+
+
+import io
+import os
+import random
+from PIL import Image, ImageDraw, ImageFilter
+import numpy as np
+
+
 
 def upload_image_to_matrix(image_data, add_okra=True):
     global max_retries, delay_between_retries
 
+    
+    def obfuscate_image(image_data, okra_path="okra.png"):
+    """Applies noise, warping, and overlays to make image hard for AI, but visible to humans."""
+    try:
+        base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
+
+        # === 1. Apply mild random rotation and warp ===
+        angle = random.uniform(-5, 5)
+        base_img = base_img.rotate(angle, expand=True, fillcolor=(255,255,255,0))
+
+        # === 2. Add noise ===
+        def add_noise(img):
+            np_img = np.array(img)
+            noise = np.random.randint(0, 60, np_img.shape, dtype='uint8')
+            np_noisy = np.clip(np_img + noise, 0, 255)
+            return Image.fromarray(np_noisy.astype('uint8'), 'RGBA')
+
+        base_img = add_noise(base_img)
+
+        # === 3. Add multiple okra overlays ===
+        okra = Image.open(okra_path).convert("RGBA")
+        okra = okra.resize((int(base_img.width * 0.25), int(base_img.height * 0.25)))
+
+        for _ in range(2):  # Two okras, random positions
+            x = random.randint(0, base_img.width - okra.width)
+            y = random.randint(0, base_img.height - okra.height)
+            base_img.alpha_composite(okra, (x, y))
+
+        # === 4. Optional blur or edge enhancement ===
+        base_img = base_img.filter(ImageFilter.SHARPEN)
+
+        # Convert back to bytes
+        output = io.BytesIO()
+        base_img.save(output, format="PNG")
+        return output.getvalue()
+
+    except Exception as e:
+        print(f"⚠️ Obfuscation failed: {e}")
+        return image_data  # fallback to original
+    
+    
+    
     def get_image_content_type(image_data):
         try:
             img = Image.open(io.BytesIO(image_data))
@@ -7000,7 +7050,7 @@ def upload_image_to_matrix(image_data, add_okra=True):
 
     # ✅ Conditionally overlay okra
     if add_okra:
-        image_data = overlay_okra(image_data)
+        image_data = obfuscate_image(image_data)
 
     content_type = get_image_content_type(image_data)
     headers_media['content-type'] = content_type
@@ -8738,7 +8788,7 @@ def generate_and_render_derivative_image():
 
     # Upload the image to Matrix
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read())
+        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
     if content_uri:
         return content_uri, img_width, img_height, derivative, polynomial
     else:
@@ -8805,7 +8855,7 @@ def generate_and_render_linear_problem():
 
     # Upload the image to Matrix (if enabled)
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read())
+        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
     else:
         content_uri = True  # Mock successful upload
 
@@ -8887,7 +8937,7 @@ def generate_and_render_polynomial(type):
 
     # Upload the image to Matrix
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read())
+        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
         
     if content_uri:
         if type == "zeroes sum":

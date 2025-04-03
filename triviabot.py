@@ -1254,7 +1254,7 @@ def ask_flags_challenge(winner):
             return None  # Return an empty list in case of failure
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-        flags_mxc, flags_width, flags_height = download_image_from_url(flags_url, okra_path="usa.png")
+        flags_mxc, flags_width, flags_height = download_image_from_url(flags_url, add_okra=True, okra_path="usa.png")
         flags_size = 100
 
         start_message = ""

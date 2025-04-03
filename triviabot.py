@@ -373,7 +373,7 @@ def create_family_feud_board_image(total_answers, user_answers, num_of_xs=0):
     img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
 
-    image_mxc = upload_image_to_matrix(img_buffer.read())
+    image_mxc = upload_image_to_matrix(img_buffer.read(), False, "okra.png")
     return image_mxc, width, height
 
 
@@ -429,7 +429,7 @@ def ask_dictionary_challenge(winner):
 
     dictionary_gif_url = random.choice(dictionary_gifs)
     message = f"🤓📚 Word Nerd\n"
-    image_mxc, image_width, image_height = download_image_from_url(dictionary_gif_url)
+    image_mxc, image_width, image_height = download_image_from_url(dictionary_gif_url, False, "okra.png"))
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
@@ -645,7 +645,7 @@ def ask_riddle_challenge(winner):
 
     riddler_gif_url = random.choice(riddler_gifs)
     message = f"🟢🎩 The Riddler\n"
-    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url)
+    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url, False, "okra.png"))
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
@@ -871,7 +871,7 @@ def ask_animal_challenge(winner):
             return None  # Return an empty list in case of failure
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-        animal_mxc, animal_width, animal_height = download_image_from_url(animal_image_url)
+        animal_mxc, animal_width, animal_height = download_image_from_url(animal_image_url, True, "okra.png"))
         animal_size = 100
 
         start_message = ""
@@ -1057,7 +1057,7 @@ def ask_ranker_people_challenge(winner):
             return None  # Return an empty list in case of failure
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-        people_mxc, people_width, people_height = download_image_from_url(people_url)
+        people_mxc, people_width, people_height = download_image_from_url(people_url, True, "okra.png"))
         people_size = 100
 
         start_message = ""
@@ -1212,7 +1212,7 @@ def ask_flags_challenge(winner):
 
     flags_gif_url = random.choice(flags_gifs)
     message = f"🎏🎉 Flag Fest\n"
-    image_mxc, image_width, image_height = download_image_from_url(flags_gif_url, add_okra=False)
+    image_mxc, image_width, image_height = download_image_from_url(flags_gif_url, False, "usa.png"))
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
@@ -1254,7 +1254,7 @@ def ask_flags_challenge(winner):
             return None  # Return an empty list in case of failure
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-        flags_mxc, flags_width, flags_height = download_image_from_url(flags_url, add_okra=True, okra_path="usa.png")
+        flags_mxc, flags_width, flags_height = download_image_from_url(flags_url, True, "usa.png")
         flags_size = 100
 
         start_message = ""
@@ -1434,7 +1434,7 @@ def ask_poster_challenge(winner):
 
         poster_category_emojis = get_category_title(posters_category, "")
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-        posters_mxc, posters_width, posters_height = download_image_from_url(posters_url)
+        posters_mxc, posters_width, posters_height = download_image_from_url(posters_url, True, "okra.png"))
         posters_size = 100
 
         start_message = ""
@@ -1782,7 +1782,7 @@ def ask_movie_scenes_challenge(winner):
 
         movie_scenes_category_emojis = get_category_title(movie_scenes_category, "")
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-        movie_scenes_mxc, movie_scenes_width, movie_scenes_height = download_image_from_url(movie_scenes_url)
+        movie_scenes_mxc, movie_scenes_width, movie_scenes_height = download_image_from_url(movie_scenes_url, True, "okra.png"))
         movie_scenes_size = 100
 
         start_message = ""
@@ -1950,8 +1950,8 @@ def ask_feud_question(winner, mode):
         if feud_question_id:
             store_question_ids_in_mongo([feud_question_id], "feud")  # Store it as a list containing a single ID
 
-        win_image_mxc, win_image_width, win_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+win.gif")
-        loss_image_mxc, loss_image_width, loss_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+loss.gif")
+        win_image_mxc, win_image_width, win_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+win.gif", False, "okra.png"))
+        loss_image_mxc, loss_image_width, loss_image_height = download_image_from_url("https://triviabotwebsite.s3.us-east-2.amazonaws.com/harvey/harvey+loss.gif", False, "okra.png"))
         win_image_size = 100
         loss_image_size = 100
 
@@ -3073,7 +3073,7 @@ def ask_survey_question():
                     )
                     # Return the image URL from the API response
                     image_url = response["data"][0]["url"]
-                    image_mxc, image_width, image_height = download_image_from_url(image_url)
+                    image_mxc, image_width, image_height = download_image_from_url(image_url, False, "okra.png"))
                     image_description = describe_image_with_vision(image_url, "title", prompt)
 
                     pre_message = f"\n🥒🌀 Behold, your Okraverse"
@@ -3695,7 +3695,7 @@ def get_image_url_from_s3():
     random_file = random.choice(files)
     public_url = f"https://{bucket_name}.s3.amazonaws.com/{random_file}"
    
-    image_mxc, image_width, image_height = download_image_from_url(public_url, add_okra=False)
+    image_mxc, image_width, image_height = download_image_from_url(public_url, False, "okra.png"))
     
 
     print(random_file)
@@ -4092,7 +4092,7 @@ def generate_round_summary_image(round_data, winner):
         else:
             image_description = describe_image_with_vision(image_url, "title", prompt)
             
-        image_mxc, image_width, image_height = download_image_from_url(image_url)
+        image_mxc, image_width, image_height = download_image_from_url(image_url, False, "okra.png"))
         send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
 
         message = f"🔥💖 {winner_at}, you've done well. I drew this for you.\n"
@@ -4130,7 +4130,7 @@ def generate_round_summary_image(round_data, winner):
                 # Return the image URL from the API response
                 image_url = response["data"][0]["url"]
                 image_description = describe_image_with_vision(image_url, "title", prompt)
-                image_mxc, image_width, image_height = download_image_from_url(image_url)
+                image_mxc, image_width, image_height = download_image_from_url(image_url, False, "okra.png"))
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
         
                 message = f"😈😉 {winner_at} Naughty naughty, I'll have to pick another.\n\n"
@@ -4706,12 +4706,12 @@ def select_wof_questions(winner):
 
             image_size = 100
 
-            satellite_view_mxc, satellite_view_width, satellite_view_height = download_image_from_url(satellite_view_url)  
-            themed_country_mxc, themed_country_width, themed_country_height = download_image_from_url(themed_country_url)
+            satellite_view_mxc, satellite_view_width, satellite_view_height = download_image_from_url(satellite_view_url, False, "okra.png"))  
+            themed_country_mxc, themed_country_width, themed_country_height = download_image_from_url(themed_country_url, False, "okra.png"))
 
             if street_view_url != None:
                 message = "\n🏙️👁️ We saw OkraStrut post this to X...\n"
-                street_view_mxc, street_view_width, street_view_height = download_image_from_url(street_view_url)  
+                street_view_mxc, street_view_width, street_view_height = download_image_from_url(street_view_url, False, "okra.png"))  
                 send_message(target_room_id, message)
                 street_response = send_image(target_room_id, street_view_mxc, street_view_width, street_view_height, image_size)
             
@@ -5510,7 +5510,7 @@ def generate_wof_image(
     image_buffer.seek(0)
 
     if image_questions:
-        image_mxc = upload_image_to_matrix(image_buffer.read())
+        image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
     else:
         image_mxc = True
 
@@ -5544,7 +5544,7 @@ def send_magic_image(input_text):
         image = Image.open(io.BytesIO(image_data))
         image_width, image_height = image.size
 
-        image_mxc = upload_image_to_matrix(image_data, add_okra=False)
+        image_mxc = upload_image_to_matrix(image_data, False, "okra.png")
         image_size = 100
         
         #message = "Find the magic number and Okra will be nice (to you)\n"
@@ -5756,7 +5756,7 @@ def generate_jeopardy_image(question_text):
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
     
     # Upload the image and send to the chat
-    image_mxc = upload_image_to_matrix(image_buffer.read(), add_okra=False)
+    image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
     
     if image_mxc:
         # Return image_mxc, image_width, and image_height
@@ -5833,7 +5833,7 @@ def generate_mc_image(answers):
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
     
     # Upload the image and send to the chat
-    image_mxc = upload_image_to_matrix(image_buffer.read())
+    image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
     
     if image_mxc:
         # Return image_mxc, image_width, and image_height
@@ -5929,7 +5929,7 @@ def generate_crossword_image(answer):
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix or your media server
-    content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
+    content_uri = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
 
     # Return the content_uri, image width, height, and the answer
     return content_uri, img_width, img_height, display_string
@@ -6363,7 +6363,7 @@ def generate_trig_question():
     print(f"Question: {question_text}")
     print(f"Answer: {new_solution}")
 
-    content_uri, image_width, image_height = download_image_from_url('https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/triangle.png')
+    content_uri, image_width, image_height = download_image_from_url('https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/triangle.png', False, "okra.png"))
 
     # Return the content_uri, image dimensions, decimal equivalent, and base number
     return content_uri, image_width, image_height, question_text, new_solution, image_description
@@ -6421,7 +6421,7 @@ def generate_base_question():
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
 
     # Upload the image to Matrix (assuming the upload function exists)
-    content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False) if image_questions else None
+    content_uri = upload_image_to_matrix(image_buffer.read(), False, "okra.png") if image_questions else None
 
     # Return the content_uri, image dimensions, decimal equivalent, and base number
     return content_uri, img_width, img_height, question_text, str(decimal_equivalent), base_number
@@ -6483,7 +6483,7 @@ def generate_median_question():
 
     # Upload the image to Matrix (assuming the upload function exists)
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
+        content_uri = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
 
     # Calculate the median and return it for verification
     sorted_numbers = sorted(random_numbers)
@@ -6565,7 +6565,7 @@ def generate_mean_question():
 
     # Upload the image to Matrix (assuming the upload function exists)
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
+        content_uri = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
 
     print(f"Mean: {int(mean_value)}")
 
@@ -6612,7 +6612,7 @@ def generate_scrambled_image(scrambled_text):
 
     # Upload the image to Matrix
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
+        content_uri = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
     if content_uri:
         return content_uri, img_width, img_height, scrambled_text
     else:
@@ -6925,7 +6925,7 @@ def flush_submission_queue():
         print(f"Failed to flush submission queue: {e}")
 
 
-def download_image_from_url(url, add_okra=True, okra_path="okra.png"): #IMAGE CODE
+def download_image_from_url(url, add_okra, okra_path): #IMAGE CODE
     global max_retries, delay_between_retries
 
     """Download an image from a URL with retry logic."""
@@ -6966,7 +6966,7 @@ import numpy as np
 
 
 
-def upload_image_to_matrix(image_data, add_okra=True, okra_path="okra.png"):
+def upload_image_to_matrix(image_data, add_okra, okra_path):
     global max_retries, delay_between_retries
 
     
@@ -7030,7 +7030,7 @@ def upload_image_to_matrix(image_data, add_okra=True, okra_path="okra.png"):
     def overlay_okra(image_data):
         try:
             base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
-            okra_path = os.path.join(os.path.dirname(__file__), "okra.png")
+            okra_path = os.path.join(os.path.dirname(__file__), okra_path)
             okra_img = Image.open(okra_path).convert("RGBA")
     
             # Smaller okras
@@ -7517,7 +7517,7 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         message_body += "\n🚨 1 GUESS 🚨"
         
     if is_valid_url(trivia_url): 
-        image_mxc, image_width, image_height = download_image_from_url(trivia_url) 
+        image_mxc, image_width, image_height = download_image_from_url(trivia_url, True, "okra.png")) 
         message_body += f"\n{number_block}📷 {get_category_title(trivia_category, trivia_url)}\n\n{trivia_question}\n"
         send_image_flag = True
 
@@ -8798,7 +8798,7 @@ def generate_and_render_derivative_image():
 
     # Upload the image to Matrix
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
+        content_uri = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
     if content_uri:
         return content_uri, img_width, img_height, derivative, polynomial
     else:
@@ -8865,7 +8865,7 @@ def generate_and_render_linear_problem():
 
     # Upload the image to Matrix (if enabled)
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
+        content_uri = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
     else:
         content_uri = True  # Mock successful upload
 
@@ -8947,7 +8947,7 @@ def generate_and_render_polynomial(type):
 
     # Upload the image to Matrix
     if image_questions == True:
-        content_uri = upload_image_to_matrix(image_buffer.read(), add_okra=False)
+        content_uri = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
         
     if content_uri:
         if type == "zeroes sum":
@@ -9605,7 +9605,7 @@ def start_trivia():
                 send_magic_image(magic_number)
             elif image_questions == True:
                 selected_gif_url = select_intro_image_url()         
-                image_mxc, image_width, image_height = download_image_from_url(selected_gif_url, add_okra=False)
+                image_mxc, image_width, image_height = download_image_from_url(selected_gif_url, False, "okra.png"))
                 send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
                 #time.sleep(2)
 

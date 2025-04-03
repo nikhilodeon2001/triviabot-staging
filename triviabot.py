@@ -7026,32 +7026,36 @@ def upload_image_to_matrix(image_data, add_okra=True):
             sentry_sdk.capture_exception(e)
             return "application/octet-stream"
 
-    def overlay_okra(image_data):
-        try:
-            base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
-            okra_path = os.path.join(os.path.dirname(__file__), "okra.png")
-            okra_img = Image.open(okra_path).convert("RGBA")
-    
-            # Scale the okra to a smaller size
-            scale = 0.2
-            new_okra_width = int(base_img.width * scale)
-            okra_img = okra_img.resize(
-                (new_okra_width, int(okra_img.height * (new_okra_width / okra_img.width)))
-            )
-    
-            # Determine how many rows and columns of okra fit
-            step_x = okra_img.width + 10
-            step_y = okra_img.height + 10
-    
-            for y in range(0, base_img.height, step_y):
-                for x in range(0, base_img.width, step_x):
-                    # Checkerboard pattern: only draw on every other tile
-                    if (x // step_x + y // step_y) % 2 == 0:
-                        base_img.alpha_composite(okra_img, dest=(x, y))
+   def overlay_okra(image_data):
+    try:
+        base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
+        okra_path = os.path.join(os.path.dirname(__file__), "okra.png")
+        okra_img = Image.open(okra_path).convert("RGBA")
 
-            output = io.BytesIO()
-            base_img.save(output, format="PNG")
-            return output.getvalue()
+        # Smaller okras
+        scale = 0.05  # ↓ from 0.2 to 0.05 = 4x smaller
+        new_okra_width = int(base_img.width * scale)
+        okra_img = okra_img.resize(
+            (new_okra_width, int(okra_img.height * (new_okra_width / okra_img.width)))
+        )
+
+        # Tight spacing between okras
+        step_x = okra_img.width + 2  # was +10
+        step_y = okra_img.height + 2
+
+        for y in range(0, base_img.height, step_y):
+            for x in range(0, base_img.width, step_x):
+                if (x // step_x + y // step_y) % 2 == 0:
+                    base_img.alpha_composite(okra_img, dest=(x, y))
+
+        output = io.BytesIO()
+        base_img.save(output, format="PNG")
+        return output.getvalue()
+
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        print("⚠️ Failed to overlay okra. Proceeding with original image.")
+        return image_data
 
         except Exception as e:
             sentry_sdk.capture_exception(e)

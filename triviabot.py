@@ -6939,6 +6939,7 @@ def download_image_from_url(url, add_okra=True, okra_path="okra.png"): #IMAGE CO
                 image = Image.open(io.BytesIO(image_data))
                 image_width, image_height = image.size
                 image_mxc = upload_image_to_matrix(image_data, add_okra, okra_path)
+                print(okra_path)
                 return image_mxc, image_width, image_height  # Successfully downloaded the image, return the binary data
                 
             else:

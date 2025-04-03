@@ -7049,9 +7049,9 @@ def upload_image_to_matrix(image_data, add_okra=True):
                     if (x // step_x + y // step_y) % 2 == 0:
                         base_img.alpha_composite(okra_img, dest=(x, y))
 
-        output = io.BytesIO()
-        base_img.save(output, format="PNG")
-        return output.getvalue()
+            output = io.BytesIO()
+            base_img.save(output, format="PNG")
+            return output.getvalue()
 
         except Exception as e:
             sentry_sdk.capture_exception(e)

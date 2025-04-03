@@ -1254,7 +1254,7 @@ def ask_flags_challenge(winner):
             return None  # Return an empty list in case of failure
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-        flags_mxc, flags_width, flags_height = download_image_from_url(flags_url)
+        flags_mxc, flags_width, flags_height = download_image_from_url(flags_url, "usa.png")
         flags_size = 100
 
         start_message = ""
@@ -6925,7 +6925,7 @@ def flush_submission_queue():
         print(f"Failed to flush submission queue: {e}")
 
 
-def download_image_from_url(url, add_okra=True): #IMAGE CODE
+def download_image_from_url(url, add_okra=True, okra_path="okra.png"): #IMAGE CODE
     global max_retries, delay_between_retries
 
     """Download an image from a URL with retry logic."""
@@ -6938,7 +6938,7 @@ def download_image_from_url(url, add_okra=True): #IMAGE CODE
 
                 image = Image.open(io.BytesIO(image_data))
                 image_width, image_height = image.size
-                image_mxc = upload_image_to_matrix(image_data, add_okra)
+                image_mxc = upload_image_to_matrix(image_data, add_okra, okra_path)
                 return image_mxc, image_width, image_height  # Successfully downloaded the image, return the binary data
                 
             else:
@@ -6965,11 +6965,11 @@ import numpy as np
 
 
 
-def upload_image_to_matrix(image_data, add_okra=True):
+def upload_image_to_matrix(image_data, add_okra=True, okra_path="okra.png"):
     global max_retries, delay_between_retries
 
     
-    def obfuscate_image(image_data, okra_path="okra.png"):
+    def obfuscate_image(image_data, okra_path):
         """Applies noise, warping, and overlays to make image hard for AI, but visible to humans."""
         try:
             base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")

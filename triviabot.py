@@ -3695,7 +3695,7 @@ def get_image_url_from_s3():
     random_file = random.choice(files)
     public_url = f"https://{bucket_name}.s3.amazonaws.com/{random_file}"
    
-    image_mxc, image_width, image_height = download_image_from_url(public_url)
+    image_mxc, image_width, image_height = download_image_from_url(public_url, add_okra=False)
     
 
     print(random_file)
@@ -3722,7 +3722,7 @@ def get_image_url_from_s3():
         message += f"\nA masterpiece from the Okra Museum.\n"
                 
 
-    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100, add_okra=False)
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
 
 
@@ -6925,7 +6925,7 @@ def flush_submission_queue():
         print(f"Failed to flush submission queue: {e}")
 
 
-def download_image_from_url(url): #IMAGE CODE
+def download_image_from_url(url, add_okra=True): #IMAGE CODE
     global max_retries, delay_between_retries
 
     """Download an image from a URL with retry logic."""
@@ -6938,7 +6938,7 @@ def download_image_from_url(url): #IMAGE CODE
 
                 image = Image.open(io.BytesIO(image_data))
                 image_width, image_height = image.size
-                image_mxc = upload_image_to_matrix(image_data)
+                image_mxc = upload_image_to_matrix(image_data, add_okra)
                 return image_mxc, image_width, image_height  # Successfully downloaded the image, return the binary data
                 
             else:
@@ -9605,8 +9605,8 @@ def start_trivia():
                 send_magic_image(magic_number)
             elif image_questions == True:
                 selected_gif_url = select_intro_image_url()         
-                image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
-                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100, add_okra=False)
+                image_mxc, image_width, image_height = download_image_from_url(selected_gif_url, add_okra=False)
+                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
                 #time.sleep(2)
 
             start_message = f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n"

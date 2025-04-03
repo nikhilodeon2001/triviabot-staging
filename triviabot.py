@@ -645,7 +645,7 @@ def ask_riddle_challenge(winner):
 
     riddler_gif_url = random.choice(riddler_gifs)
     message = f"🟢🎩 The Riddler\n"
-    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url, False, "okra.png"))
+    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)

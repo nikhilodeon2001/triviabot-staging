@@ -7031,17 +7031,27 @@ def upload_image_to_matrix(image_data, add_okra=True):
             base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
             okra_path = os.path.join(os.path.dirname(__file__), "okra.png")
             okra_img = Image.open(okra_path).convert("RGBA")
-
-            scale = 0.25
+    
+            # Scale the okra to a smaller size
+            scale = 0.2
             new_okra_width = int(base_img.width * scale)
-            okra_img = okra_img.resize((new_okra_width, int(okra_img.height * (new_okra_width / okra_img.width))))
+            okra_img = okra_img.resize(
+                (new_okra_width, int(okra_img.height * (new_okra_width / okra_img.width)))
+            )
+    
+            # Determine how many rows and columns of okra fit
+            step_x = okra_img.width + 10
+            step_y = okra_img.height + 10
+    
+            for y in range(0, base_img.height, step_y):
+                for x in range(0, base_img.width, step_x):
+                    # Checkerboard pattern: only draw on every other tile
+                    if (x // step_x + y // step_y) % 2 == 0:
+                        base_img.alpha_composite(okra_img, dest=(x, y))
 
-            position = (base_img.width - okra_img.width - 10, base_img.height - okra_img.height - 10)
-            base_img.alpha_composite(okra_img, dest=position)
-
-            output = io.BytesIO()
-            base_img.save(output, format="PNG")
-            return output.getvalue()
+        output = io.BytesIO()
+        base_img.save(output, format="PNG")
+        return output.getvalue()
 
         except Exception as e:
             sentry_sdk.capture_exception(e)
@@ -7050,7 +7060,7 @@ def upload_image_to_matrix(image_data, add_okra=True):
 
     # ✅ Conditionally overlay okra
     if add_okra:
-        image_data = obfuscate_image(image_data)
+        image_data = overlay_okra(image_data)
 
     content_type = get_image_content_type(image_data)
     headers_media['content-type'] = content_type

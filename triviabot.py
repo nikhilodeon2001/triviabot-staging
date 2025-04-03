@@ -1212,7 +1212,7 @@ def ask_flags_challenge(winner):
 
     flags_gif_url = random.choice(flags_gifs)
     message = f"🎏🎉 Flag Fest\n"
-    image_mxc, image_width, image_height = download_image_from_url(flags_gif_url)
+    image_mxc, image_width, image_height = download_image_from_url(flags_gif_url, add_okra=False)
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
@@ -1254,7 +1254,7 @@ def ask_flags_challenge(winner):
             return None  # Return an empty list in case of failure
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
-        flags_mxc, flags_width, flags_height = download_image_from_url(flags_url, "usa.png")
+        flags_mxc, flags_width, flags_height = download_image_from_url(flags_url, okra_path="usa.png")
         flags_size = 100
 
         start_message = ""

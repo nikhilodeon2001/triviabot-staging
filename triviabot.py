@@ -7056,11 +7056,6 @@ def upload_image_to_matrix(image_data, add_okra=True):
             sentry_sdk.capture_exception(e)
             print("⚠️ Failed to overlay okra. Proceeding with original image.")
             return image_data
-    
-            except Exception as e:
-                sentry_sdk.capture_exception(e)
-                print("⚠️ Failed to overlay okra. Proceeding with original image.")
-                return image_data
 
     # ✅ Conditionally overlay okra
     if add_okra:

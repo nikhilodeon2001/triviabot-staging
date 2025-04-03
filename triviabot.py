@@ -9606,7 +9606,7 @@ def start_trivia():
             elif image_questions == True:
                 selected_gif_url = select_intro_image_url()         
                 image_mxc, image_width, image_height = download_image_from_url(selected_gif_url)
-                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+                send_image(target_room_id, image_mxc, image_width, image_height, image_size=100, add_okra=False)
                 #time.sleep(2)
 
             start_message = f"\n⏩ Starting a round of {questions_per_round} questions ⏩\n"

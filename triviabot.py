@@ -3722,7 +3722,7 @@ def get_image_url_from_s3():
         message += f"\nA masterpiece from the Okra Museum.\n"
                 
 
-    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100, add_okra=False)
     send_message(target_room_id, message)
 
 

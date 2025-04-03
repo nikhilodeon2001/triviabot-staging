@@ -7026,7 +7026,7 @@ def upload_image_to_matrix(image_data, add_okra=True):
             sentry_sdk.capture_exception(e)
             return "application/octet-stream"
 
-   def overlay_okra(image_data):
+    def overlay_okra(image_data):
         try:
             base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
             okra_path = os.path.join(os.path.dirname(__file__), "okra.png")

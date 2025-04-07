@@ -627,6 +627,180 @@ def ask_dictionary_challenge(winner):
     return None
 
 
+def ask_lyric_challenge(winner):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+   
+    num_of_xs = 0
+    correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+
+
+    lyric_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/riddler-carey.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/riddler-vintage.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/riddler-cartoon.gif"
+    ]
+
+    lyric_gif_url = random.choice(lyric_gifs)
+    message = f"🎧🎤 LyrIQ\n"
+    image_mxc, image_width, image_height = download_image_from_url(lyric_gif_url, False, "okra.png")
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id, message)
+    time.sleep(3)
+    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
+    send_message(target_room_id, message)
+    time.sleep(3)
+
+    _num = 1
+    while lyric_num <= 5:
+        try:
+            recent_lyric_ids = get_recent_question_ids_from_mongo("lyric")
+
+            # Fetch wheel of fortune questions using the random subset method
+            lyric_collection = db["lyric_questions"]
+            pipeline_lyric = [
+                {
+                    "$match": {
+                        "_id": {"$nin": list(recent_lyric_ids)},
+                        "enabled": "1"  # Ensure only enabled lyrics are included
+                    }
+                },
+                {"$sample": {"size": 100}},  # Sample a larger set first
+                {
+                    "$group": {  
+                        "_id": "$question",
+                        "question_doc": {"$first": "$$ROOT"}
+                    }
+                },
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
+
+            lyric_questions = list(lyric_collection.aggregate(pipeline_lyric))
+            lyric_question = lyric_questions[0]
+            lyric_text = lyric_question["question"]
+            lyric_answers = lyric_question["answers"]
+            lyric_main_answer = lyric_answers[0]
+            lyric_category = lyric_question["category"]
+            lyric_url = lyric_question["url"]
+            lyric_question_id = lyric_question["_id"] 
+            print(f"Category {lyric_num}: {lyric_category}")
+            print(f"lyric {lyric_num}: {lyric_text}")
+            print(f"Answer {lyric_num}: {lyric_main_answer}")
+
+            if lyric_question_id:
+                store_question_ids_in_mongo([lyric_question_id], "lyric")  # Store it as a list containing a single ID
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting lyric questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
+
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        time.sleep(2)
+        message += f"\n🧠❓ lyric {lyric_num}/5: {lyric_text}"       
+        send_message(target_room_id, message)
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        winner_name = ""
+        winner_score = ""
+        
+        while time.time() - start_time < 20 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+
+                        for answer in lyric_answers:
+                        
+                            if fuzzy_match(message_content, answer, lyric_category, lyric_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
+                                send_message(target_room_id, message)
+                                right_answer = True
+    
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                    
+                                user_correct_answers[sender_display_name] += 1
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
+            message = f"\n❌😢 No one got it.\n\nAnswer: {lyric_main_answer.upper()}\n"
+            send_message(target_room_id, message)
+        
+        time.sleep(2)
+
+        lyric_num = lyric_num + 1
+                        
+        # Sort the dictionary by the count (value) in descending order
+        message = ""
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+        if sorted_users:
+            if lyric_num > 5:
+                message += "\n🏁🏆 Final Standings\n"
+            else:   
+                message += "\n📊🏆 Current Standings\n"
+            winner_name, winner_score = sorted_users[0]
+
+
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+            
+        send_message(target_room_id, message)
+        
+    time.sleep(2)
+    message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    send_message(target_room_id, message)
+    
+    wf_winner = True
+    time.sleep(3)
+    return None
+
+
+
+
+
+
+
 
 
 def ask_riddle_challenge(winner):    
@@ -4589,6 +4763,8 @@ def select_wof_questions(winner):
         message += f"{counter}. 🤓📚 Word Nerd ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         counter = counter + 1
         message += f"{counter}. 🎏🎉 Flag Fest ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        counter = counter + 1
+        message += f"{counter}. 🎧🎤 LyrIQ ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
         
@@ -4665,6 +4841,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "21":
             ask_flags_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "22":
+            ask_lyric_challenge(winner)
             time.sleep(3)
             return None
         
@@ -5042,7 +5223,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -5223,6 +5404,18 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    if str(message_content) in {"22"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'LyrIQ' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"22"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'LyrIQ' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -5236,7 +5429,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -5254,7 +5447,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 

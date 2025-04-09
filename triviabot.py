@@ -703,18 +703,10 @@ def ask_lyric_challenge(winner):
             if len(lyric_lyrics) >= 2:
                 selected_lines = random.sample(lyric_lyrics, 2)
                 selected_lines.sort(key=lambda x: x["line_number"])  # Optional: sort by line number for readability
-                for i, line in enumerate(selected_lines, start=1):
-                    print(f"Line {i}: (#{line['line_number']}) {line['text']}")
-            else:
-                print("Not enough lyric lines to choose from.")
-
-            if len(lyric_lyrics) >= 2:
-                selected_lines = random.sample(lyric_lyrics, 2)
-                selected_lines.sort(key=lambda x: x["line_number"])  # Optional: sort by line number for readability
             
                 # Store formatted strings in variables
-                lyric_line_1 = f"Line {selected_lines[0]['line_number']}: {selected_lines[0]['text']}"
-                lyric_line_2 = f"Line {selected_lines[1]['line_number']}: {selected_lines[1]['text']}"
+                lyric_line_1 = f"Line {selected_lines[0]['line_number']}: '{selected_lines[0]['text']}'"
+                lyric_line_2 = f"Line {selected_lines[1]['line_number']}: '{selected_lines[1]['text']}'"
             
                 # Print for debug
                 print(lyric_line_1)
@@ -737,8 +729,11 @@ def ask_lyric_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
+        send_message(target_room_id, message)
         time.sleep(2)
-        message += f"\n🧠❓ lyric {lyric_num}/5: {lyric_text}"       
+        message = f"\n🎧🎤 Song {lyric_num}/5: Name the Song or Artist..."    
+        message += f"\n{lyric_line_1}"
+        message += f"\n{lyric_line_2}"
         send_message(target_room_id, message)
 
         initialize_sync()

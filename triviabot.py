@@ -651,7 +651,7 @@ def ask_lyric_challenge(winner):
     send_message(target_room_id, message)
     time.sleep(3)
 
-    _num = 1
+    lyric_num = 1
     while lyric_num <= 5:
         try:
             recent_lyric_ids = get_recent_question_ids_from_mongo("lyric")

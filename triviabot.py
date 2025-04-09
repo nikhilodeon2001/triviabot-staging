@@ -642,7 +642,7 @@ def ask_lyric_challenge(winner):
     ]
 
     #lyric_gif_url = random.choice(lyric_gifs)
-    message = f"\n🎧🎤 LyrIQ\n"
+    message = f"\n🎧🎤 LyrIQ: Name the Song OR Artist from the lyrics...\n"
     #image_mxc, image_width, image_height = download_image_from_url(lyric_gif_url, False, "okra.png")
     #send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -783,7 +783,7 @@ def ask_lyric_challenge(winner):
                         for answer in [lyric_artist, lyric_title]:
                         
                             if fuzzy_match(message_content, answer, lyric_category, lyric_url):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {lyric_artist.upper() - lyric_title.upper()}\n"
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {lyric_artist.upper()} - {lyric_title.upper()}\n"
                                 send_message(target_room_id, message)
                                 right_answer = True
     
@@ -797,7 +797,7 @@ def ask_lyric_challenge(winner):
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\nAnswer: {lyric_artist.upper() - lyric_title.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\nAnswer: {lyric_artist.upper()} - {lyric_title.upper()}\n"
             send_message(target_room_id, message)
         
         time.sleep(2)

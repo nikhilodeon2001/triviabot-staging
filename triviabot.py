@@ -641,10 +641,10 @@ def ask_lyric_challenge(winner):
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/riddler-cartoon.gif"
     ]
 
-    lyric_gif_url = random.choice(lyric_gifs)
+    #lyric_gif_url = random.choice(lyric_gifs)
     message = f"🎧🎤 LyrIQ\n"
-    image_mxc, image_width, image_height = download_image_from_url(lyric_gif_url, False, "okra.png")
-    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    #image_mxc, image_width, image_height = download_image_from_url(lyric_gif_url, False, "okra.png")
+    #send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
     message = f"\n5️⃣🥇 Let's do a best of 5...\n"

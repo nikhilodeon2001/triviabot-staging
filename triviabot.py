@@ -786,18 +786,18 @@ def ask_lyric_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        send_message(target_room_id, message)
-        time.sleep(2)
-        message = f"\n🎧🎤 Song {lyric_num} of 5\n"    
+        #send_message(target_room_id, message)
+        message += f"\n🎧🎤 Song {lyric_num} of 5\n"    
         message += f"\n🎶🏷️ Categories: {', '.join(pretty_categories)}\n"
         #message += f"\n1️⃣ {lyric_line_1}"
         #message += f"\n2️⃣ {lyric_line_2}"
         send_message(target_room_id, message)
-        message = f"\n1️⃣"
-        send_message(target_room_id, message)
+        time.sleep(2)
+        #message = f"\n1️⃣"
+        #send_message(target_room_id, message)
         send_image(target_room_id, line_1_mxc, line_1_width, line_1_height, 100) 
-        message = f"\n2️⃣"
-        send_message(target_room_id, message)
+        #message = f"\n2️⃣"
+        #send_message(target_room_id, message)
         send_image(target_room_id, line_2_mxc, line_2_width, line_2_height, 100)
 
         initialize_sync()

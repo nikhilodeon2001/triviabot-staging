@@ -678,15 +678,52 @@ def ask_lyric_challenge(winner):
 
             lyric_questions = list(lyric_collection.aggregate(pipeline_lyric))
             lyric_question = lyric_questions[0]
-            lyric_text = lyric_question["question"]
-            lyric_answers = lyric_question["answers"]
-            lyric_main_answer = lyric_answers[0]
+            lyric_title = lyric_question["title"]
+            lyric_artist = lyric_question["artist"]
             lyric_category = lyric_question["category"]
+            lyric_lyrics = lyric_question['lyrics']
             lyric_url = lyric_question["url"]
             lyric_question_id = lyric_question["_id"] 
-            print(f"Category {lyric_num}: {lyric_category}")
-            print(f"lyric {lyric_num}: {lyric_text}")
-            print(f"Answer {lyric_num}: {lyric_main_answer}")
+            
+            pretty_categories = []
+            for c in lyric_category:
+                if c == "all":
+                    continue
+                elif c == "rb":
+                    pretty_categories.append("R&B")
+                else:
+                    pretty_categories.append(c.title())
+            
+            print(f"Aritst: {lyric_artist}")
+            print(f"Title: {lyric_title}")
+            if pretty_categories:
+                print(f"Categories: {', '.join(pretty_categories)}")
+
+            # Select 2 unique lyric lines at random
+            if len(lyric_lyrics) >= 2:
+                selected_lines = random.sample(lyric_lyrics, 2)
+                selected_lines.sort(key=lambda x: x["line_number"])  # Optional: sort by line number for readability
+                for i, line in enumerate(selected_lines, start=1):
+                    print(f"Line {i}: (#{line['line_number']}) {line['text']}")
+            else:
+                print("Not enough lyric lines to choose from.")
+
+            if len(lyric_lyrics) >= 2:
+                selected_lines = random.sample(lyric_lyrics, 2)
+                selected_lines.sort(key=lambda x: x["line_number"])  # Optional: sort by line number for readability
+            
+                # Store formatted strings in variables
+                lyric_line_1 = f"Line {selected_lines[0]['line_number']}: {selected_lines[0]['text']}"
+                lyric_line_2 = f"Line {selected_lines[1]['line_number']}: {selected_lines[1]['text']}"
+            
+                # Print for debug
+                print(lyric_line_1)
+                print(lyric_line_2)
+            
+            else:
+                print("Not enough lyric lines to choose from.")
+                lyric_line_1 = ""
+                lyric_line_2 = ""
 
             if lyric_question_id:
                 store_question_ids_in_mongo([lyric_question_id], "lyric")  # Store it as a list containing a single ID
@@ -3542,7 +3579,7 @@ def get_wikipedia_article(max_words=3, max_length=16):
         
         if response.status_code != 200:
             print("Error fetching from Wikipedia API")
-            return None, None, None
+            return None, None, None, None
         
         data = response.json()
         pages = data.get("query", {}).get("pages", {})

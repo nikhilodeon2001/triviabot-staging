@@ -642,7 +642,7 @@ def ask_lyric_challenge(winner):
     ]
 
     #lyric_gif_url = random.choice(lyric_gifs)
-    message = f"🎧🎤 LyrIQ\n"
+    message = f"\n🎧🎤 LyrIQ\n"
     #image_mxc, image_width, image_height = download_image_from_url(lyric_gif_url, False, "okra.png")
     #send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -731,9 +731,10 @@ def ask_lyric_challenge(winner):
         message = f"\n⚠️🚨 Everyone's in!\n"
         send_message(target_room_id, message)
         time.sleep(2)
-        message = f"\n🎧🎤 Song {lyric_num}/5: Name the Song or Artist..."    
-        message += f"\n{lyric_line_1}"
-        message += f"\n{lyric_line_2}"
+        message = f"\n🎧🎤 Song {lyric_num} of 5\n"    
+        message += f"\n🎶🏷️ Categories: {', '.join(pretty_categories)}\n"
+        message += f"\n1️⃣ {lyric_line_1}"
+        message += f"\n2️⃣ {lyric_line_2}"
         send_message(target_room_id, message)
 
         initialize_sync()

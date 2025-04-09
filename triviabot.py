@@ -627,6 +627,61 @@ def ask_dictionary_challenge(winner):
     return None
 
 
+def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f):
+    # Define the background color and text properties
+    #background_color = (6, 12, 233)  # Blue color similar to Jeopardy screen
+    background_color = (red_value_bk, green_value_bk, blue_value_bk)
+    text_color = (255, 255, 255)    # White text
+    text_color = (red_value_f, green_value_f, blue_value_f)
+    
+    # Define image size and font properties
+    img_width, img_height = 800, 600
+    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    font_size = 60
+
+    # Create a blank image with blue background
+    img = Image.new('RGB', (img_width, img_height), color=background_color)
+    draw = ImageDraw.Draw(img)
+    
+    # Load the font
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Error: Font file not found at {font_path}")
+        return None
+    
+    # Prepare the text for drawing (wrap text if too long)
+    wrapped_text = "\n".join(draw_text_wrapper(question_text, font, img_width - 40))
+    
+    # Calculate text position for centering
+    text_bbox = draw.textbbox((0, 0), wrapped_text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2
+    
+    # Draw the question text on the image
+    draw.multiline_text((text_x, text_y), wrapped_text, fill=text_color, font=font, align="center")
+    
+    # Save the image to a bytes buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format='PNG')
+    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
+    
+    # Upload the image and send to the chat
+    image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
+    
+    if image_mxc:
+        # Return image_mxc, image_width, and image_height
+        return image_mxc, img_width, img_height
+    else:
+        print("Failed to upload the image to Matrix.")
+        return None
+
+
+
+
+
 def ask_lyric_challenge(winner):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
    
@@ -707,6 +762,8 @@ def ask_lyric_challenge(winner):
                 # Store formatted strings in variables
                 lyric_line_1 = f"Line {selected_lines[0]['line_number']}: '{selected_lines[0]['text']}'"
                 lyric_line_2 = f"Line {selected_lines[1]['line_number']}: '{selected_lines[1]['text']}'"
+                line_1_mxc, line_1_width, line_1_height = generate_text_image(lyric_line_1, 255, 99, 130, 255, 255, 255)
+                line_2_mxc, line_2_width, line_2_height = generate_text_image(lyric_line_2, 255, 99, 130, 255, 255, 255)
             
                 # Print for debug
                 print(lyric_line_1)
@@ -733,9 +790,15 @@ def ask_lyric_challenge(winner):
         time.sleep(2)
         message = f"\n🎧🎤 Song {lyric_num} of 5\n"    
         message += f"\n🎶🏷️ Categories: {', '.join(pretty_categories)}\n"
-        message += f"\n1️⃣ {lyric_line_1}"
-        message += f"\n2️⃣ {lyric_line_2}"
+        #message += f"\n1️⃣ {lyric_line_1}"
+        #message += f"\n2️⃣ {lyric_line_2}"
         send_message(target_room_id, message)
+        message = f"\n1️⃣"
+        send_message(target_room_id, message)
+        send_image(target_room_id, line_1_mxc, line_1_width, line_1_height, 100) 
+        message = f"\n2️⃣"
+        send_message(target_room_id, message)
+        send_image(target_room_id, line_2_mxc, line_2_width, line_2_height, 100)
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts

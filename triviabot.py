@@ -780,10 +780,10 @@ def ask_lyric_challenge(winner):
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
 
-                        for answer in lyric_answers:
+                        for answer in [lyric_artist, lyric_title]:
                         
                             if fuzzy_match(message_content, answer, lyric_category, lyric_url):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {answer.upper()}\n"
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {lyric_artist.upper() - lyric_title.upper()}\n"
                                 send_message(target_room_id, message)
                                 right_answer = True
     
@@ -797,7 +797,7 @@ def ask_lyric_challenge(winner):
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\nAnswer: {lyric_main_answer.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\nAnswer: {lyric_artist.upper() - lyric_title.upper()}\n"
             send_message(target_room_id, message)
         
         time.sleep(2)

@@ -1423,7 +1423,7 @@ def ask_flags_challenge(winner):
 
     flags_gif_url = random.choice(flags_gifs)
     message = f"🎏🎉 Flag Fest\n"
-    image_mxc, image_width, image_height = download_image_from_url(flags_gif_url, False, "usa.png"))
+    image_mxc, image_width, image_height = download_image_from_url(flags_gif_url, False, "usa.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)

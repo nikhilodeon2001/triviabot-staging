@@ -7318,11 +7318,11 @@ def upload_image_to_matrix(image_data, add_okra, okra_path):
             sentry_sdk.capture_exception(e)
             return "application/octet-stream"
 
-    def overlay_okra(image_data):
+    def overlay_okra(image_data, okra_path):
         try:
             base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")
-            okra_path = os.path.join(os.path.dirname(__file__), okra_path)
-            okra_img = Image.open(okra_path).convert("RGBA")
+            okra_full_path = os.path.join(os.path.dirname(__file__), okra_path)
+            okra_img = Image.open(okra_full_path).convert("RGBA")
     
             # Smaller okras
             scale = 0.05  # ↓ from 0.2 to 0.05 = 4x smaller
@@ -7352,7 +7352,7 @@ def upload_image_to_matrix(image_data, add_okra, okra_path):
 
     # ✅ Conditionally overlay okra
     if add_okra:
-        image_data = overlay_okra(image_data)
+        image_data = overlay_okra(image_data, okra_path)
 
     content_type = get_image_content_type(image_data)
     headers_media['content-type'] = content_type

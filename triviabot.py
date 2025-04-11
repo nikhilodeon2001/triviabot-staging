@@ -7257,11 +7257,11 @@ import numpy as np
 
 def upload_image_to_matrix(image_data, add_okra, okra_path):
     global max_retries, delay_between_retries
-
     
-    def obfuscate_image(image_data, okra_path):
-        print(f"obfuscate image is {okra_path}")
-        
+    print(f"add_okra is {add_okra}")
+    print(f"okra_path is {okra_path}")
+
+    def obfuscate_image(image_data, okra_path):        
         """Applies noise, warping, and overlays to make image hard for AI, but visible to humans."""
         try:
             base_img = Image.open(io.BytesIO(image_data)).convert("RGBA")

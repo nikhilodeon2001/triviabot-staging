@@ -7257,6 +7257,7 @@ import numpy as np
 
 def upload_image_to_matrix(image_data, add_okra, okra_path):
     global max_retries, delay_between_retries
+    add_okra = False
     
     print(f"add_okra is {add_okra}")
     print(f"okra_path is {okra_path}")

@@ -627,7 +627,7 @@ def ask_dictionary_challenge(winner):
     return None
 
 
-def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f):
+def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f, add_okra, okra_path):
     # Define the background color and text properties
     #background_color = (6, 12, 233)  # Blue color similar to Jeopardy screen
     background_color = (red_value_bk, green_value_bk, blue_value_bk)
@@ -669,7 +669,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
     image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
     
     # Upload the image and send to the chat
-    image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
+    image_mxc = upload_image_to_matrix(image_buffer.read(), add_okra, okra_path)
     
     if image_mxc:
         # Return image_mxc, image_width, and image_height
@@ -762,8 +762,8 @@ def ask_lyric_challenge(winner):
                 # Store formatted strings in variables
                 lyric_line_1 = f"Line {selected_lines[0]['line_number']}: '{selected_lines[0]['text']}'"
                 lyric_line_2 = f"Line {selected_lines[1]['line_number']}: '{selected_lines[1]['text']}'"
-                line_1_mxc, line_1_width, line_1_height = generate_text_image(lyric_line_1, 255, 99, 130, 255, 255, 255)
-                line_2_mxc, line_2_width, line_2_height = generate_text_image(lyric_line_2, 255, 99, 130, 255, 255, 255)
+                line_1_mxc, line_1_width, line_1_height = generate_text_image(lyric_line_1, 255, 99, 130, 255, 255, 255, True, "okra.png")
+                line_2_mxc, line_2_width, line_2_height = generate_text_image(lyric_line_2, 255, 99, 130, 255, 255, 255, True, "okra.png")
             
                 # Print for debug
                 print(lyric_line_1)

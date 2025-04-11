@@ -7346,6 +7346,7 @@ def upload_image_to_matrix(image_data, add_okra, okra_path):
     
         except Exception as e:
             sentry_sdk.capture_exception(e)
+            print(e)
             print("⚠️ Failed to overlay okra. Proceeding with original image.")
             return image_data
 

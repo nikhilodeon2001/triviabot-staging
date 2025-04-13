@@ -3631,9 +3631,13 @@ def get_wikipedia_article(max_words=3, max_length=16):
         response = requests.get(base_url, {
             "action": "query",
             "format": "json",
-            "generator": "random",
-            "grnnamespace": 0,  # Only fetch content pages
-            "grnlimit": 1  # Fetch one page at a time
+            "list": "random",
+            "rnlimit": 5,
+            "rncontentmodel": "Content",
+            "rnnamespace": 0
+            #"generator": "random",
+            #"grnnamespace": 0,  # Only fetch content pages
+            #"grnlimit": 1  # Fetch one page at a time
         })
         
         if response.status_code != 200:

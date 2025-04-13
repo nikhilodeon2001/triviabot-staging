@@ -3642,10 +3642,6 @@ def get_wikipedia_article(max_words=3, max_length=16):
         
         if response.status_code != 200:
             print("Error fetching from Wikipedia API")
-            try:
-                print("Response JSON:", response.json())
-            except ValueError:
-                print("Non-JSON response:", response.text)
             return None, None, None, None
         
         data = response.json()
@@ -4967,8 +4963,8 @@ def select_wof_questions(winner):
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             if wof_answer is None:
                 message = f"\n❌ Wikipedia API Error. Falling back to Word Nerd\n."
-                ask_dictionary_challenge(winner)
                 send_message(target_room_id, wikipedia_message)
+                ask_dictionary_challenge(winner)
                 return None
             else:
                 wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"

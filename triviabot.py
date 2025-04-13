@@ -4966,8 +4966,14 @@ def select_wof_questions(winner):
         
         elif selected_wof_category == "5":
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
-            wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
-            send_message(target_room_id, wikipedia_message)
+            if wof_answer is None:
+                message = f"\n❌ Wikipedia API Error. Falling back to Word Nerd\n."
+                ask_dictionary_challenge(winner)
+                time.sleep(3)
+                return None
+            else:
+                wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
+                send_message(target_room_id, wikipedia_message)
             time.sleep(3)
 
         elif selected_wof_category == "6":

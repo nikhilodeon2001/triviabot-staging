@@ -4819,7 +4819,7 @@ def select_wof_questions(winner):
         wof_questions = list(wof_collection.aggregate(pipeline_wof))
         #print(wof_questions)
 
-        message = f"\n🍷⚔️ @{winner}, choose the mini-game (#). \n\n"
+        message = f"\n🍷⚔️ @{winner}, your mini-game awaits (#)... \n\n"
         message += f"☕: Coffee Needed to Play\n"
         message += f"✨: Everyone Plays ({num_list_players}+ players needed)\n"
         send_message(target_room_id, message)  
@@ -4828,7 +4828,7 @@ def select_wof_questions(winner):
         message = ""
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
-            message += f"{counter}. WoF: {category}\n"
+            message += f"{counter}. 🎡💰 WoF: {category}\n"
             counter = counter + 1
         send_message(target_room_id, message)  
         

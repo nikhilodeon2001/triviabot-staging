@@ -4827,7 +4827,6 @@ def select_wof_questions(winner):
         message += f"☕: Coffee Needed to Play\n"
         message += f"✨: Everyone Plays ({num_list_players}+ players needed)\n"
         send_message(target_room_id, message)  
-        time.sleep(1)
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 0
         message = ""
@@ -4968,8 +4967,9 @@ def select_wof_questions(winner):
             wof_answer, redacted_intro, wof_clue, wiki_url = get_wikipedia_article(3, 16)
             if wof_answer is None:
                 message = f"\n❌ Wikipedia API Error. Falling back to Word Nerd\n."
+                sendM
                 ask_dictionary_challenge(winner)
-                time.sleep(3)
+                send_message(target_room_id, wikipedia_message)
                 return None
             else:
                 wikipedia_message = f"\n🥒⬛ Okracted Clue:\n\n{redacted_intro}\n"
@@ -7253,7 +7253,6 @@ def download_image_from_url(url, add_okra, okra_path): #IMAGE CODE
                 image = Image.open(io.BytesIO(image_data))
                 image_width, image_height = image.size
                 image_mxc = upload_image_to_matrix(image_data, add_okra, okra_path)
-                print(okra_path)
                 return image_mxc, image_width, image_height  # Successfully downloaded the image, return the binary data
                 
             else:
@@ -7284,9 +7283,6 @@ def upload_image_to_matrix(image_data, add_okra, okra_path):
     global max_retries, delay_between_retries
     add_okra = False
     
-    print(f"add_okra is {add_okra}")
-    print(f"okra_path is {okra_path}")
-
     def obfuscate_image(image_data, okra_path):        
         """Applies noise, warping, and overlays to make image hard for AI, but visible to humans."""
         try:
@@ -9933,7 +9929,7 @@ def start_trivia():
             send_message(target_room_id, start_message)
             time.sleep(3)
             
-            start_message = f"\n✨🧪 Check out the new modes!\n"
+            start_message = f"\n✨🧪 Check out the new mini-games!\n"
             start_message += f"\n🎧🎤 LyrIQ"
             start_message += f"\n🎏🎉 Flag Fest"
             start_message += f"\n🤓📚 Word Nerd"

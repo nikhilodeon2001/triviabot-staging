@@ -4823,6 +4823,7 @@ def select_wof_questions(winner):
             message += f"{counter}. {category}\n"
             counter = counter + 1
         send_message(target_room_id, message)  
+        
         premium_counts = counter
         message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
         counter = counter + 1
@@ -4834,35 +4835,40 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. ⚔️🧍 FeUd ☕\n"
         counter = counter + 1
-        message += f"{counter}. ⚔️⚡ FeUd Blitz ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. ⚔️⚡ FeUd Blitz ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 📝🥊 List Battle ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 📝🥊 List Battle ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🎥⚡ Poster Blitz ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🎥⚡ Poster Blitz ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🎬💥 Movie Mayhem ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🎬💥 Movie Mayhem ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🧩🔗 Missing Link ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🧩🔗 Missing Link ☕✨\n"
         counter = counter + 1
         send_message(target_room_id, message)  
 
-        message = f"{counter}. 👤🌟 Famous Peeps ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message = f"{counter}. 👤🌟 Famous Peeps ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🔢📜 Ranker Lists ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🔢📜 Ranker Lists ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 👁️✨ Magic Eye D ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 👁️✨ Magic Eye D ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. ❓🦓 OkrAnimal ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. ❓🦓 OkrAnimal ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🟢🎩 The Riddler ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🟢🎩 The Riddler ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🤓📚 Word Nerd ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🤓📚 Word Nerd ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🎏🎉 Flag Fest ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🎏🎉 Flag Fest ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🎧🎤 LyrIQ ✨ALL PLAY ({num_list_players}+)✨ ☕\n"
+        message += f"{counter}. 🎧🎤 LyrIQ ☕✨\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
+        
+        message = f"☕: Coffee Needed to Play\n"
+        message += f"✨: Everyone Plays ({num_list_players}+ PLayers Needed)\n"
+        send_message(target_room_id, message) 
+        
         
         selected_wof_category = ask_wof_number(winner)
 

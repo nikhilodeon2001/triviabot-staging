@@ -3638,6 +3638,10 @@ def get_wikipedia_article(max_words=3, max_length=16):
         
         if response.status_code != 200:
             print("Error fetching from Wikipedia API")
+            try:
+                print("Response JSON:", response.json())
+            except ValueError:
+                print("Non-JSON response:", response.text)
             return None, None, None, None
         
         data = response.json()

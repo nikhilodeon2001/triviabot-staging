@@ -10309,7 +10309,7 @@ def start_trivia():
         load_previous_question()
         initialize_sync()  
 
-        fetch_donations()
+        #fetch_donations()
         
         round_winner = None
         selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set

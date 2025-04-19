@@ -613,7 +613,7 @@ def ask_polyglottery_challenge(winner):
             print(f"Translated Text: {translated_collected_words}")
             print(f"Language Code ({polyglottery_num}/5): {language_code}")
             print(f"Language Name ({polyglottery_num}/5): {language_name}")
-            translation_mxc, translation_width, tranlation_height = generate_text_image(translated_collected_words, 173, 216, 230, 0, 0, 0, True, "okra.png")
+            translation_mxc, translation_width, translation_height = generate_text_image(translated_collected_words, 173, 216, 230, 0, 0, 0, True, "okra.png")
 
             if polyglottery_question_id:
                 store_question_ids_in_mongo([polyglottery_question_id], "polyglottery")  # Store it as a list containing a single ID

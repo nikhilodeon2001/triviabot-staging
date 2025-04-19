@@ -977,6 +977,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
         "mr": "NotoSansDevanagari-Regular.ttf",
         "or": "NotoSansOriya-Regular.ttf",
         "sa": "NotoSansDevanagari-Regular.ttf",
+        "sd": "NotoSansDevanagari-Regular.ttf" ,
     
         # === Middle Eastern ===
         "ar": "NotoSansArabic-Regular.ttf",

@@ -437,6 +437,7 @@ def ask_polyglottery_challenge(winner):
 
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
     # Initialize the sync and message to prompt user for input
     initialize_sync()

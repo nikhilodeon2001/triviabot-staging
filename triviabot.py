@@ -429,7 +429,7 @@ def ask_polyglottery_challenge(winner):
 
     polyglottery_gif_url = random.choice(polyglottery_gifs)
     message = f"\n🎰🗣️ PolygLottery\n"
-    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url, False, "okra.png")
+    image_mxc, image_width, image_height = download_image_from_url(polyglottery_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
@@ -5173,7 +5173,9 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🤓📚 Word Nerd ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🎏🎉 Flag Fest ☕✨\n"
+        send_message(target_room_id, message)  
+        
+        message = f"{counter}. 🎏🎉 Flag Fest ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🎧🎤 LyrIQ ☕✨\n"
         counter = counter + 1
@@ -10251,6 +10253,7 @@ def start_trivia():
             time.sleep(3)
             
             start_message = f"\n✨🧪 Check out the new mini-games!\n"
+            start_message += f"\n🎰🗣️ PolygLottery"
             start_message += f"\n🎧🎤 LyrIQ"
             start_message += f"\n🎏🎉 Flag Fest"
             start_message += f"\n🤓📚 Word Nerd"

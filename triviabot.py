@@ -956,7 +956,9 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
     
     # Define image size and font properties
     img_width, img_height = 800, 600
-    font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    #font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
+    font_path = os.path.join(os.path.dirname(__file__), "NotoSans-Regular.ttf")
+    
     font_size = 60
 
     # Create a blank image with blue background

@@ -638,7 +638,7 @@ def ask_polyglottery_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        message += f"\n🗣💬❓ ({polyglottery_num}/5) Name this tongue noise system\n"
+        message += f"\n🗣💬❓ ({polyglottery_num}/5) Name this tongue noise system...\n"
         send_message(target_room_id, message)
         time.sleep(2)        
         send_image(target_room_id, translation_mxc, translation_width, translation_height, 100) 

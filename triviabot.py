@@ -722,6 +722,10 @@ def ask_polyglottery_challenge(winner):
     time.sleep(2)
     message = f"\n🎉🥇 The winner is @{winner_name}!\n"
     send_message(target_room_id, message)
+    time.sleep(3)
+
+    message = f"\n@{winner}'s text was: '{collected_words}'\n"
+    send_message(target_room_id, message)
     
     wf_winner = True
     time.sleep(3)

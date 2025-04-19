@@ -978,6 +978,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
         "or": "NotoSansOriya-Regular.ttf",
         "sa": "NotoSansDevanagari-Regular.ttf",
         "sd": "NotoSansDevanagari-Regular.ttf" ,
+        "as": "NotoSansBengali-Regular.ttf",
     
         # === Middle Eastern ===
         "ar": "NotoSansArabic-Regular.ttf",
@@ -993,6 +994,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
         "my": "NotoSansMyanmar-Regular.ttf",
         "km": "NotoSansKhmer-Regular.ttf",
         "si": "NotoSansSinhala-Regular.ttf",
+        "dz": "NotoSansTibetan-Regular.ttf",
     
         # === Cyrillic ===
         "ru": "NotoSans-Regular.ttf",

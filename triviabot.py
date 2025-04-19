@@ -436,7 +436,7 @@ def ask_polyglottery_challenge(winner):
     time.sleep(3)
 
     sync_url = f"{matrix_base_url}/sync"
-    processed_events = []  # Track processed event IDs to avoid duplicates
+    processed_events = set()  # Track processed event IDs to avoid duplicates
 
     # Initialize the sync and message to prompt user for input
     initialize_sync()

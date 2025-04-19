@@ -582,6 +582,8 @@ def ask_polyglottery_challenge(winner):
                 "format": "text",
                 "key": googletranslate_api_key
             }
+
+            print(params)
         
             for attempt in range(1, max_retries + 1):
                 try:
@@ -589,6 +591,7 @@ def ask_polyglottery_challenge(winner):
                     response.raise_for_status()
         
                     data = response.json()
+                    print(data)
                     translated_collected_words = data['data']['translations'][0]['translatedText']
                     break
         
@@ -640,6 +643,7 @@ def ask_polyglottery_challenge(winner):
         winner_score = ""
         
         while time.time() - start_time < 20 and right_answer == False:
+            time.sleep(1)
             try:                                                      
                 if since_token:
                     params["since"] = since_token

@@ -5133,6 +5133,7 @@ def select_wof_questions(winner):
         message += f"☕: Coffee Needed to Play\n"
         message += f"✨: Everyone Plays ({num_list_players}+ players needed)\n"
         send_message(target_room_id, message)  
+        time.sleep(0.2)
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 0
         message = ""
@@ -5141,6 +5142,7 @@ def select_wof_questions(winner):
             message += f"{counter}. 🎡💰 WoF: {category}\n"
             counter = counter + 1
         send_message(target_room_id, message)  
+        time.sleep(0.2)
         
         premium_counts = counter
         message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
@@ -5164,7 +5166,7 @@ def select_wof_questions(winner):
         message += f"{counter}. 🧩🔗 Missing Link ☕✨\n"
         counter = counter + 1
         send_message(target_room_id, message)  
-
+        time.sleep(0.2)
         message = f"{counter}. 👤🌟 Famous Peeps ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🔢📜 Ranker Lists ☕✨\n"
@@ -5178,7 +5180,7 @@ def select_wof_questions(winner):
         message += f"{counter}. 🤓📚 Word Nerd ☕✨\n"
         counter = counter + 1
         send_message(target_room_id, message)  
-        
+        time.sleep(0.2)
         message = f"{counter}. 🎏🎉 Flag Fest ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🎧🎤 LyrIQ ☕✨\n"

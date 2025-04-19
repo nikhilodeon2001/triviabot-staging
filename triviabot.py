@@ -84,6 +84,7 @@ submission_queue = []
 max_queue_size = 100  # Number of submissions to accumulate before flushing
 
 # Initialize all variables
+prod_or_stage = os.getenv("prod_or_stage")
 username = os.getenv("username")
 password = os.getenv("password")
 mongo_db_string = os.getenv("mongo_db_string")
@@ -4916,6 +4917,9 @@ def get_coffees(username):
 
 
 def fetch_donations():
+    if prod_or_stage == "stage":
+        return
+        
     base_url = "https://developers.buymeacoffee.com/api/v1/supporters"
     headers = {"Authorization": f"Bearer {buymeacoffee_api_key}"}
 

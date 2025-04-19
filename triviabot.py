@@ -947,59 +947,135 @@ def ask_dictionary_challenge(winner):
     return None
 
 
-def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f, add_okra, okra_path):
-    # Define the background color and text properties
-    #background_color = (6, 12, 233)  # Blue color similar to Jeopardy screen
-    background_color = (red_value_bk, green_value_bk, blue_value_bk)
-    text_color = (255, 255, 255)    # White text
-    text_color = (red_value_f, green_value_f, blue_value_f)
-    
-    # Define image size and font properties
-    img_width, img_height = 800, 600
-    #font_path = os.path.join(os.path.dirname(__file__), "DejaVuSerif.ttf")
-    font_path = os.path.join(os.path.dirname(__file__), "NotoSans-Regular.ttf")
-    
-    font_size = 60
 
-    # Create a blank image with blue background
+def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f, add_okra, okra_path, lang_code="en"):
+    LANGUAGE_FONT_MAP = {
+        # === CJK ===
+        "zh": "NotoSansCJKsc-Regular.otf",
+        "zh-CN": "NotoSansCJKsc-Regular.otf",
+        "zh-TW": "NotoSansCJKtc-Regular.otf",
+        "ja": "NotoSansCJKjp-Regular.otf",
+        "ko": "NotoSansCJKkr-Regular.otf",
+    
+        # === Common Latin-based ===
+        "en": "NotoSans-Regular.ttf",
+        "fr": "NotoSans-Regular.ttf",
+        "es": "NotoSans-Regular.ttf",
+        "de": "NotoSans-Regular.ttf",
+        "it": "NotoSans-Regular.ttf",
+        "pt": "NotoSans-Regular.ttf",
+        "nl": "NotoSans-Regular.ttf",
+        "sv": "NotoSans-Regular.ttf",
+        "fi": "NotoSans-Regular.ttf",
+        "no": "NotoSans-Regular.ttf",
+    
+        # === Indic Scripts ===
+        "hi": "NotoSansDevanagari-Regular.ttf",
+        "bn": "NotoSansBengali-Regular.ttf",
+        "gu": "NotoSansGujarati-Regular.ttf",
+        "pa": "NotoSansGurmukhi-Regular.ttf",
+        "ta": "NotoSansTamil-Regular.ttf",
+        "te": "NotoSansTelugu-Regular.ttf",
+        "kn": "NotoSansKannada-Regular.ttf",
+        "ml": "NotoSansMalayalam-Regular.ttf",
+        "mr": "NotoSansDevanagari-Regular.ttf",
+        "or": "NotoSansOriya-Regular.ttf",
+        "sa": "NotoSansDevanagari-Regular.ttf",
+    
+        # === Middle Eastern ===
+        "ar": "NotoSansArabic-Regular.ttf",
+        "fa": "NotoSansArabic-Regular.ttf",
+        "ur": "NotoSansArabic-Regular.ttf",
+        "he": "NotoSansHebrew-Regular.ttf",
+        "iw": "NotoSansHebrew-Regular.ttf",
+    
+        # === Southeast Asian ===
+        "th": "NotoSansThai-Regular.ttf",
+        "lo": "NotoSansLao-Regular.ttf",
+        "my": "NotoSansMyanmar-Regular.ttf",
+        "km": "NotoSansKhmer-Regular.ttf",
+        "si": "NotoSansSinhala-Regular.ttf",
+    
+        # === Cyrillic ===
+        "ru": "NotoSans-Regular.ttf",
+        "uk": "NotoSans-Regular.ttf",
+        "sr": "NotoSans-Regular.ttf",
+        "bg": "NotoSans-Regular.ttf",
+        "mk": "NotoSans-Regular.ttf",
+    
+        # === Ethiopic ===
+        "am": "NotoSansEthiopic-Regular.ttf",
+        "ti": "NotoSansEthiopic-Regular.ttf",
+    
+        # === Miscellaneous ===
+        "el": "NotoSans-Regular.ttf",
+        "vi": "NotoSans-Regular.ttf",
+        "id": "NotoSans-Regular.ttf",
+        "ms": "NotoSans-Regular.ttf",
+        "tr": "NotoSans-Regular.ttf",
+        "pl": "NotoSans-Regular.ttf",
+        "ro": "NotoSans-Regular.ttf",
+        "cs": "NotoSans-Regular.ttf",
+        "sk": "NotoSans-Regular.ttf",
+        "sl": "NotoSans-Regular.ttf",
+        "hu": "NotoSans-Regular.ttf",
+        "lt": "NotoSans-Regular.ttf",
+        "lv": "NotoSans-Regular.ttf",
+        "et": "NotoSans-Regular.ttf",
+    
+        # === African + Pacific + Ext ===
+        "sw": "NotoSans-Regular.ttf",
+        "zu": "NotoSans-Regular.ttf",
+        "xh": "NotoSans-Regular.ttf",
+        "st": "NotoSans-Regular.ttf",
+        "tn": "NotoSans-Regular.ttf",
+        "ny": "NotoSans-Regular.ttf",
+        "rw": "NotoSans-Regular.ttf",
+        "so": "NotoSans-Regular.ttf",
+        "sm": "NotoSans-Regular.ttf",
+        "mi": "NotoSans-Regular.ttf",
+        "haw": "NotoSans-Regular.ttf",
+    
+        # === Default fallback ===
+        "default": "NotoSans-Regular.ttf"
+    }
+
+    background_color = (red_value_bk, green_value_bk, blue_value_bk)
+    text_color = (red_value_f, green_value_f, blue_value_f)
+
+    img_width, img_height = 800, 600
+    font_file = LANGUAGE_FONT_MAP.get(lang_code, LANGUAGE_FONT_MAP["default"])
+    font_path = os.path.join(os.path.dirname(__file__), "fonts", font_file)
+
+    font_size = 60
     img = Image.new('RGB', (img_width, img_height), color=background_color)
     draw = ImageDraw.Draw(img)
-    
-    # Load the font
+
     try:
         font = ImageFont.truetype(font_path, font_size)
     except IOError:
         print(f"Error: Font file not found at {font_path}")
         return None
-    
-    # Prepare the text for drawing (wrap text if too long)
+
     wrapped_text = "\n".join(draw_text_wrapper(question_text, font, img_width - 40))
-    
-    # Calculate text position for centering
     text_bbox = draw.textbbox((0, 0), wrapped_text, font=font)
     text_width = text_bbox[2] - text_bbox[0]
     text_height = text_bbox[3] - text_bbox[1]
     text_x = (img_width - text_width) // 2
     text_y = (img_height - text_height) // 2
-    
-    # Draw the question text on the image
+
     draw.multiline_text((text_x, text_y), wrapped_text, fill=text_color, font=font, align="center")
-    
-    # Save the image to a bytes buffer
+
     image_buffer = io.BytesIO()
     img.save(image_buffer, format='PNG')
-    image_buffer.seek(0)  # Move the pointer to the beginning of the buffer
-    
-    # Upload the image and send to the chat
+    image_buffer.seek(0)
+
     image_mxc = upload_image_to_matrix(image_buffer.read(), add_okra, okra_path)
-    
     if image_mxc:
-        # Return image_mxc, image_width, and image_height
         return image_mxc, img_width, img_height
     else:
         print("Failed to upload the image to Matrix.")
         return None
-
 
 
 

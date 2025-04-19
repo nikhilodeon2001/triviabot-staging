@@ -418,6 +418,22 @@ def word_similarity(guess, answer):
 def ask_polyglottery_challenge(winner):
     global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id
 
+
+    polyglottery_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery1.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery2.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery3.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery4.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery5.gif"
+    ]
+
+    polyglottery_gif_url = random.choice(polyglottery_gifs)
+    message = f"\n🎰🗣️ PolygLottery\n"
+    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url, False, "okra.png")
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id, message)
+    time.sleep(3)
+
     sync_url = f"{matrix_base_url}/sync"
     processed_events = done_events  # Track processed event IDs to avoid duplicates
 
@@ -518,20 +534,6 @@ def ask_polyglottery_challenge(winner):
         message = f"\n💥🤯 Ok...ra I got: '{' '.join(collected_words)}'\n"
     send_message(target_room_id, message)
 
-
-    polyglottery_gifs = [
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery1.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery2.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery3.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery4.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery5.gif"
-    ]
-
-    polyglottery_gif_url = random.choice(polyglottery_gifs)
-    message = f"🎰🗣️ PolygLottery\n"
-    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url, False, "okra.png")
-    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-    send_message(target_room_id, message)
     time.sleep(3)
     message = f"\n5️⃣🥇 Let's do a best of 5...\n"
     send_message(target_room_id, message)
@@ -569,10 +571,48 @@ def ask_polyglottery_challenge(winner):
             polyglottery_category = "PolygLottery"
             polyglottery_url = ""
             polyglottery_question_id = polyglottery_question["_id"] 
-            print(f"Text to Translate: {collected_words}")
-            print(f"Language Code {polyglottery_num}: {language_code}")
-            print(f"Language Name {polyglottery_num}: {language_name}")
-            translation_mxc, translation_width, tranlation_height = generate_text_image(collected_words, 173, 216, 230, 0, 0, 0, True, "okra.png")
+
+            url = "https://translation.googleapis.com/language/translate/v2"
+
+            params = {
+                "q": collected_words,
+                "source": "en",
+                "target": language_code,
+                "format": "text",
+                "key": googletranslate_api_key
+            }
+        
+            for attempt in range(1, max_retries + 1):
+                try:
+                    response = requests.post(url, data=params, timeout=10)
+                    response.raise_for_status()
+        
+                    data = response.json()
+                    translated_collected_words = data['data']['translations'][0]['translatedText']
+                    break
+        
+                except requests.exceptions.RequestException as e:
+                    print(f"[Attempt {attempt}] Translation request failed: {e}")
+                    if attempt < max_retries:
+                        time.sleep(delay_seconds)
+                    else:
+                        print("Max retries reached. Giving up.")
+                        translated_collected_words = collected_words
+                        language_code = "en"
+                        language_name = "English"
+                        break
+                except (KeyError, ValueError) as e:
+                    print(f"Error parsing translation response: {e}")
+                    translated_collected_words = collected_words
+                    language_code = "en"
+                    language_name = "English"
+                    break
+
+            print(f"English Text: {collected_words}")
+            print(f"Translated Text: {translated_collected_words}")
+            print(f"Language Code ({polyglottery_num}/5): {language_code}")
+            print(f"Language Name ({polyglottery_num}/5): {language_name}")
+            translation_mxc, translation_width, tranlation_height = generate_text_image(translated_collected_words, 173, 216, 230, 0, 0, 0, True, "okra.png")
 
             if polyglottery_question_id:
                 store_question_ids_in_mongo([polyglottery_question_id], "polyglottery")  # Store it as a list containing a single ID
@@ -586,7 +626,7 @@ def ask_polyglottery_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        message += f"\n🗣💬❓ Name the language ({polyglottery_num}/5)\n"
+        message += f"\n🗣💬❓ ({polyglottery_num}/5) Name this tongue noise system\n"
         send_message(target_room_id, message)
         time.sleep(2)        
         send_image(target_room_id, translation_mxc, translation_width, translation_height, 100) 

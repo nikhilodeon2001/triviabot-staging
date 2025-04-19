@@ -985,6 +985,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
         "ur": "NotoSansArabic-Regular.ttf",
         "he": "NotoSansHebrew-Regular.ttf",
         "iw": "NotoSansHebrew-Regular.ttf",
+        "yi": "NotoSansHebrew-Regular.ttf",
     
         # === Southeast Asian ===
         "th": "NotoSansThai-Regular.ttf",
@@ -1032,6 +1033,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
         "sm": "NotoSans-Regular.ttf",
         "mi": "NotoSans-Regular.ttf",
         "haw": "NotoSans-Regular.ttf",
+        "ckb": "NotoSansArabic-Regular.ttf",
     
         # === Default fallback ===
         "default": "NotoSans-Regular.ttf"

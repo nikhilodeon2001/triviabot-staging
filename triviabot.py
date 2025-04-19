@@ -1045,7 +1045,9 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
 
     img_width, img_height = 800, 600
     font_file = LANGUAGE_FONT_MAP.get(lang_code, LANGUAGE_FONT_MAP["default"])
+    print(font_file)
     font_path = os.path.join(os.path.dirname(__file__), "fonts", font_file)
+    print(file_path)
 
     if not os.path.exists(font_path):
         print(f"❌ Font path does not exist: {font_path}")

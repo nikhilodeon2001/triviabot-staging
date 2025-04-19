@@ -433,7 +433,7 @@ def ask_polyglottery_challenge(winner):
     image_mxc, image_width, image_height = download_image_from_url(polyglottery_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
-    time.sleep(3)
+    time.sleep(5)
 
     sync_url = f"{matrix_base_url}/sync"
     processed_events = set()  # Track processed event IDs to avoid duplicates
@@ -446,6 +446,7 @@ def ask_polyglottery_challenge(winner):
         
     start_time = time.time()  # Track when the question starts
     message = f"\n✍️🌍 @{winner}, Give me a set or sentence of 5 words to translate.\n"
+    message += f"\n🤫😉 I'll try to keep it our little secret.\n"
     send_message(target_room_id, message)
 
     collected_words = []
@@ -478,15 +479,17 @@ def ask_polyglottery_challenge(winner):
                     processed_events.add(event_id)
                     sender = event["sender"]
                     sender_display_name = get_display_name(sender)
-                    message_content = event.get("content", {}).get("body", "").strip()
 
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
+                        
+                    redact_message(event_id, target_room_id)
+                    message_content = event.get("content", {}).get("body", "").strip()
 
                     # Split the message content into words and add them to collected_words
                     words = message_content.split()
                     for word in words:
-                        if len(collected_words) < 10:
+                        if len(collected_words) < 5:
                             collected_words.append(word)
                         else:
                             break
@@ -495,7 +498,7 @@ def ask_polyglottery_challenge(winner):
                     react_to_message(event_id, target_room_id, "okra21")
 
                     # Check if we have collected enough words
-                    if len(collected_words) >= 10:
+                    if len(collected_words) >= 5:
                         break
 
         except requests.exceptions.RequestException as e:
@@ -576,7 +579,7 @@ def ask_polyglottery_challenge(winner):
             url = "https://translation.googleapis.com/language/translate/v2"
 
             params = {
-                "q": collected_words,
+                "q": " ".join(collected_words), 
                 "source": "en",
                 "target": language_code,
                 "format": "text",

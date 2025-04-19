@@ -611,11 +611,19 @@ def ask_polyglottery_challenge(winner):
                     language_code = "en"
                     language_name = "English"
                     break
+                    
 
             print(f"English Text: {collected_words}")
             print(f"Translated Text: {translated_collected_words}")
             print(f"Language Code ({polyglottery_num}/5): {language_code}")
             print(f"Language Name ({polyglottery_num}/5): {language_name}")
+
+            if collected words == translated_collected_words:
+                message = f"\n🌐🔄 Translation error. Trying a different language.\n"
+                send_message(target_room_id, message)
+                time.sleep(2)
+                continue
+                
             translation_mxc, translation_width, translation_height = generate_text_image(translated_collected_words, 0, 0, 0, 0, 153, 255, True, "okra.png", language_code)
 
             if polyglottery_question_id:

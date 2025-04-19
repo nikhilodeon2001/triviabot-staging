@@ -447,7 +447,7 @@ def ask_polyglottery_challenge(winner):
         
     start_time = time.time()  # Track when the question starts
     message = f"\n✍️🌍 @{winner}, Give me a set or sentence of 5 words to translate.\n"
-    message += f"\n🤫😉 I'll try to keep it our little secret.\n"
+    #message += f"\n🤫😉 I'll try to keep it our little secret.\n"
     send_message(target_room_id, message)
 
     collected_words = []
@@ -484,16 +484,12 @@ def ask_polyglottery_challenge(winner):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
                         
-                    redact_message(event_id, target_room_id)
+                    #redact_message(event_id, target_room_id)
                     message_content = event.get("content", {}).get("body", "").strip()
 
                     # Split the message content into words and add them to collected_words
-                    words = message_content.split()
-                    for word in words:
-                        if len(collected_words) < 5:
-                            collected_words.append(word)
-                        else:
-                            break
+                    if len(collected_words) < 5:
+                        collected_words.append(message_content.strip())
 
                     # React to the user's message
                     react_to_message(event_id, target_room_id, "okra21")
@@ -723,10 +719,10 @@ def ask_polyglottery_challenge(winner):
     time.sleep(2)
     message = f"\n🎉🥇 The winner is @{winner_name}!\n"
     send_message(target_room_id, message)
-    time.sleep(3)
+    #time.sleep(3)
 
-    message = f"\n@{winner}'s text was: '{collected_words}'\n"
-    send_message(target_room_id, message)
+    #message = f"\n@{winner}'s text was: '{collected_words}'\n"
+    #send_message(target_room_id, message)
     
     wf_winner = True
     time.sleep(3)
@@ -1047,7 +1043,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
     font_file = LANGUAGE_FONT_MAP.get(lang_code, LANGUAGE_FONT_MAP["default"])
     print(font_file)
     font_path = os.path.join(os.path.dirname(__file__), "fonts", font_file)
-    print(file_path)
+    print(font_path)
 
     if not os.path.exists(font_path):
         print(f"❌ Font path does not exist: {font_path}")

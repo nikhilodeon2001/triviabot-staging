@@ -413,6 +413,138 @@ def word_similarity(guess, answer):
     return round(min(score, 1.0), 3)
 
 
+
+def ask_polyglottery_challenge(winner):
+    global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id
+
+    sync_url = f"{matrix_base_url}/sync"
+    processed_events = done_events  # Track processed event IDs to avoid duplicates
+
+    # Initialize the sync and message to prompt user for input
+    initialize_sync()
+
+    if since_token:
+        params["since"] = since_token
+        
+    start_time = time.time()  # Track when the question starts
+    message = f"\n✍️🌍 @{winner}, Give me a set or sentence of 5 words to translate.\n"
+    send_message(target_room_id, message)
+
+    collected_words = []
+
+    while time.time() - start_time < magic_time + 5:
+        try:
+            time.sleep(1)  # Slight delay to avoid overwhelming the server
+            if since_token:
+                params["since"] = since_token
+                
+            if len(collected_words) >= 5:
+                break
+                
+            response = requests.get(sync_url, headers=headers, params=params)
+
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")
+
+                # Only process if the event type is "m.room.message"
+                if event_type == "m.room.message" and event_id not in processed_events:
+                    processed_events.add(event_id)
+                    sender = event["sender"]
+                    sender_display_name = get_display_name(sender)
+                    message_content = event.get("content", {}).get("body", "").strip()
+
+                    if sender == bot_user_id or sender_display_name != winner:
+                        continue
+
+                    # Split the message content into words and add them to collected_words
+                    words = message_content.split()
+                    for word in words:
+                        if len(collected_words) < 10:
+                            collected_words.append(word)
+                        else:
+                            break
+
+                    # React to the user's message
+                    react_to_message(event_id, target_room_id, "okra21")
+
+                    # Check if we have collected enough words
+                    if len(collected_words) >= 10:
+                        break
+
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting responses: {e}")
+
+    if not collected_words:
+        okra_sentences = [
+            "Okra stole my left sock.",
+            "I dreamt about okra karaoke.",
+            "My okra talks to pigeons.",
+            "Dancing okra invaded the office.",
+            "Okra wears sunglasses at night.",
+            "I married an okra magician.",
+            "Okra joined a punk band.",
+            "That okra moonwalks on command.",
+            "Grandma’s okra knows dark secrets.",
+            "Okra challenged me to chess.",
+            "We adopted an emotional okra.",
+            "Okra runs faster than turtles.",
+            "Psychic okra told my future.",
+            "The okra demanded a crown.",
+            "Okra hosts a cooking podcast.",
+            "Three okras rode tiny scooters.",
+            "Okra eloped with a mushroom.",
+            "Okra formed a jazz quartet.",
+            "Why is okra wearing lipstick?",
+            "That okra smells like Tuesdays."
+        ]
+        
+        collected_words = random.choice(okra_sentences)
+        message = "\nNothing? Let's go with: "
+        message += "'"
+        message += collected_words
+        message += "'\n"
+    else:
+        message = f"\n💥🤯 Ok...ra I got: '{' '.join(collected_words)}'\n"
+    send_message(target_room_id, message)
+
+
+    polyglottery_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery1.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery2.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery3.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery4.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/polyglottery/polyglottery5.gif"
+    ]
+
+    polyglottery_gif_url = random.choice(polyglottery_gifs)
+    message = f"🎰🗣️ PolygLottery\n"
+    image_mxc, image_width, image_height = download_image_from_url(riddler_gif_url, False, "okra.png")
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id, message)
+    time.sleep(3)
+    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
+    send_message(target_room_id, message)
+    time.sleep(3)
+
+    polyglottery_num = 1
+    while polyglottery_num <= 5:
+
+
+
+
+
+
+
 def ask_dictionary_challenge(winner):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
    
@@ -4531,7 +4663,7 @@ def request_prompt(winner, done_events):
 
     collected_words = []
 
-    while time.time() - start_time < magic_time:
+    while time.time() - start_time < magic_time + 5:
         try:
             time.sleep(1)  # Slight delay to avoid overwhelming the server
             if since_token:
@@ -4870,6 +5002,8 @@ def select_wof_questions(winner):
         message += f"{counter}. 🎏🎉 Flag Fest ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🎧🎤 LyrIQ ☕✨\n"
+        counter = counter + 1
+        message += f"{counter}. 🎰🗣️ PolygLottery ☕✨\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
         
@@ -4956,6 +5090,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "22":
             ask_lyric_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "23":
+            ask_polyglottery_challenge(winner)
             time.sleep(3)
             return None
         
@@ -5339,7 +5478,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -5532,6 +5671,19 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    
+                    if str(message_content) in {"23"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'PolygLottery' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"23"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'PolygLottery' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -5545,7 +5697,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -5563,7 +5715,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 

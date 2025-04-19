@@ -93,6 +93,7 @@ reddit_client_id = os.getenv("reddit_client_id")
 reddit_secret_id = os.getenv("reddit_secret_id")
 openweather_api_key = os.getenv("openweather_api_key")
 googlemaps_api_key = os.getenv("googlemaps_api_key")
+googletranslate_api_key = os.getenv("googletranslate_api_key")
 webster_api_key = os.getenv("webster_api_key")
 webster_thes_api_key = os.getenv("webster_thes_api_key")
 target_room_id = os.getenv("target_room_id")
@@ -102,7 +103,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 180}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -538,11 +539,145 @@ def ask_polyglottery_challenge(winner):
 
     polyglottery_num = 1
     while polyglottery_num <= 5:
+        try:
+            recent_polyglottery_ids = get_recent_question_ids_from_mongo("polyglottery")
 
+            # Fetch wheel of fortune questions using the random subset method
+            polyglottery_collection = db["polyglottery_questions"]
+            pipeline_polyglottery = [
+                {
+                    "$match": {
+                        "_id": {"$nin": list(recent_polyglottery_ids)},
+                        "enabled": "1"  # Ensure only enabled polyglottery are included
+                    }
+                },
+                {"$sample": {"size": 5}},  # Sample a larger set first
+                {
+                    "$group": {  
+                        "_id": "$question",
+                        "question_doc": {"$first": "$$ROOT"}
+                    }
+                },
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
 
+            polyglottery_questions = list(polyglottery_collection.aggregate(pipeline_polyglottery))
+            polyglottery_question = polyglottery_questions[0]
+            language_code = polyglottery_question["language_code"]
+            language_name = polyglottery_question["language_name"]
+            polyglottery_category = "PolygLottery"
+            polyglottery_url = ""
+            polyglottery_question_id = polyglottery_question["_id"] 
+            print(f"Text to Translate: {collected_words}")
+            print(f"Language Code {polyglottery_num}: {language_code}")
+            print(f"Language Name {polyglottery_num}: {language_name}")
+            translation_mxc, translation_width, tranlation_height = generate_text_image(collected_words, 173, 216, 230, 0, 0, 0, True, "okra.png")
 
+            if polyglottery_question_id:
+                store_question_ids_in_mongo([polyglottery_question_id], "polyglottery")  # Store it as a list containing a single ID
 
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting polyglottery questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
 
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        message += f"\n🗣💬❓ Name the language ({polyglottery_num}/5)\n"
+        send_message(target_room_id, message)
+        time.sleep(2)        
+        send_image(target_room_id, translation_mxc, translation_width, translation_height, 100) 
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        winner_name = ""
+        winner_score = ""
+        
+        while time.time() - start_time < 20 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+                        
+                        if fuzzy_match(message_content, language_name, polyglottery_category, polyglottery_url):
+                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {language_name.upper()}\n"
+                            send_message(target_room_id, message)
+                            right_answer = True
+
+                            # Update user-specific correct answer count
+                            if sender_display_name not in user_correct_answers:
+                                user_correct_answers[sender_display_name] = 0
+                                
+                            user_correct_answers[sender_display_name] += 1
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
+            message = f"\n❌😢 No one got it.\n\nAnswer: {language_name.upper()}\n"
+            send_message(target_room_id, message)
+        
+        time.sleep(2)
+
+        polyglottery_num = polyglottery_num + 1
+                        
+        # Sort the dictionary by the count (value) in descending order
+        message = ""
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+        if sorted_users:
+            if polyglottery_num > 5:
+                message += "\n🏁🏆 Final Standings\n"
+            else:   
+                message += "\n📊🏆 Current Standings\n"
+            winner_name, winner_score = sorted_users[0]
+
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+            
+        send_message(target_room_id, message)
+        
+    time.sleep(2)
+    message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    send_message(target_room_id, message)
+    
+    wf_winner = True
+    time.sleep(3)
+    return None
 
 
 def ask_dictionary_challenge(winner):    
@@ -821,17 +956,16 @@ def ask_lyric_challenge(winner):
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-
     lyric_gifs = [
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/riddler-carey.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/riddler-vintage.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/riddler-cartoon.gif"
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/lyric1.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/lyric2.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/lyric/lyric3.gif",
     ]
 
-    #lyric_gif_url = random.choice(lyric_gifs)
+    lyric_gif_url = random.choice(lyric_gifs)
     message = f"\n🎧🎤 LyrIQ: Name the Song OR Artist from the lyrics...\n"
-    #image_mxc, image_width, image_height = download_image_from_url(lyric_gif_url, False, "okra.png")
-    #send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    image_mxc, image_width, image_height = download_image_from_url(lyric_gif_url, False, "okra.png")
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
     message = f"\n5️⃣🥇 Let's do a best of 5...\n"

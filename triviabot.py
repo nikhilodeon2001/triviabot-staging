@@ -1047,6 +1047,11 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
     font_file = LANGUAGE_FONT_MAP.get(lang_code, LANGUAGE_FONT_MAP["default"])
     font_path = os.path.join(os.path.dirname(__file__), "fonts", font_file)
 
+    if not os.path.exists(font_path):
+        print(f"❌ Font path does not exist: {font_path}")
+    else:
+        print(f"✅ Using font: {font_path}")
+
     font_size = 60
     img = Image.new('RGB', (img_width, img_height), color=background_color)
     draw = ImageDraw.Draw(img)

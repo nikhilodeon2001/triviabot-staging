@@ -612,13 +612,13 @@ def ask_polyglottery_challenge(winner):
                     language_name = "English"
                     break
                     
-
+            collected_words = " ".join(collected_words)
             print(f"English Text: {collected_words}")
             print(f"Translated Text: {translated_collected_words}")
             print(f"Language Code ({polyglottery_num}/5): {language_code}")
             print(f"Language Name ({polyglottery_num}/5): {language_name}")
 
-            if collected_words == translated_collected_words:
+            if collected_words.strip().lower() == translated_collected_words.strip().lower():
                 message = f"\n🌐🔄 Translation error. Trying a different language.\n"
                 send_message(target_room_id, message)
                 time.sleep(2)
@@ -717,7 +717,7 @@ def ask_polyglottery_challenge(winner):
                 message += "\n🏁🏆 Final Standings\n"
             else:   
                 message += "\n📊🏆 Current Standings\n"
-            winner_name, winner_score = sorted_users[0]
+            
 
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count}\n"
@@ -725,12 +725,12 @@ def ask_polyglottery_challenge(winner):
         send_message(target_room_id, message)
         
     time.sleep(2)
-    message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    if sorted_users:
+        winner_name, winner_score = sorted_users[0]
+        message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    else:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
     send_message(target_room_id, message)
-    #time.sleep(3)
-
-    #message = f"\n@{winner}'s text was: '{collected_words}'\n"
-    #send_message(target_room_id, message)
     
     wf_winner = True
     time.sleep(3)
@@ -934,8 +934,6 @@ def ask_dictionary_challenge(winner):
                 message += "\n🏁🏆 Final Standings\n"
             else:   
                 message += "\n📊🏆 Current Standings\n"
-            winner_name, winner_score = sorted_users[0]
-
 
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count:.2f}\n"
@@ -943,7 +941,12 @@ def ask_dictionary_challenge(winner):
         send_message(target_room_id, message)
         
     time.sleep(2)
-    message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    
+    if sorted_users:
+        winner_name, winner_score = sorted_users[0]
+        message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    else:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
     send_message(target_room_id, message)
     
     wf_winner = True
@@ -1389,8 +1392,6 @@ def ask_lyric_challenge(winner):
                 message += "\n🏁🏆 Final Standings\n"
             else:   
                 message += "\n📊🏆 Current Standings\n"
-            winner_name, winner_score = sorted_users[0]
-
 
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count}\n"
@@ -1398,8 +1399,14 @@ def ask_lyric_challenge(winner):
         send_message(target_room_id, message)
         
     time.sleep(2)
-    message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    
+    if sorted_users:
+        winner_name, winner_score = sorted_users[0]
+        message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    else:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
     send_message(target_room_id, message)
+
     
     wf_winner = True
     time.sleep(3)
@@ -1565,8 +1572,6 @@ def ask_riddle_challenge(winner):
                 message += "\n🏁🏆 Final Standings\n"
             else:   
                 message += "\n📊🏆 Current Standings\n"
-            winner_name, winner_score = sorted_users[0]
-
 
         for counter, (user, count) in enumerate(sorted_users, start=1):
             message += f"{counter}. @{user}: {count}\n"
@@ -1574,7 +1579,12 @@ def ask_riddle_challenge(winner):
         send_message(target_room_id, message)
         
     time.sleep(2)
-    message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    
+    if sorted_users:
+        winner_name, winner_score = sorted_users[0]
+        message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    else:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
     send_message(target_room_id, message)
     
     wf_winner = True

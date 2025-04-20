@@ -446,7 +446,7 @@ def ask_polyglottery_challenge(winner):
         params["since"] = since_token
         
     start_time = time.time()  # Track when the question starts
-    message = f"\n✍️🌍 @{winner}, Give me a set or sentence of 5 words to translate.\n"
+    message = f"\n✍️🌍 @{winner}, Give me 3-5 words to translate...\n"
     #message += f"\n🤫😉 I'll try to keep it our little secret.\n"
     send_message(target_room_id, message)
 
@@ -528,12 +528,13 @@ def ask_polyglottery_challenge(winner):
         ]
         
         collected_words = random.choice(okra_sentences)
-        message = "\nI need at least 3 words. I'll pick for you: "
+        message = "\nI need at least 3 words. I'm picking for you: "
         message += "'"
         message += collected_words
         message += "'\n"
     else:
-        message = f"\n💥🤯 Ok...ra I got: '{' '.join(collected_words)}'\n"
+        collected_sentence = " ".join(collected_words)
+        message = f"\n💥🤯 Ok...ra I got: '{collected_words}'\n"
     send_message(target_room_id, message)
 
     time.sleep(3)
@@ -577,7 +578,8 @@ def ask_polyglottery_challenge(winner):
             url = "https://translation.googleapis.com/language/translate/v2"
 
             params = {
-                "q": " ".join(collected_words), 
+                #"q": " ".join(collected_words), 
+                "q": collected_words, 
                 "source": "en",
                 "target": language_code,
                 "format": "text",
@@ -612,8 +614,7 @@ def ask_polyglottery_challenge(winner):
                     language_code = "en"
                     language_name = "English"
                     break
-                    
-            collected_words = " ".join(collected_words)
+
             print(f"English Text: {collected_words}")
             print(f"Translated Text: {translated_collected_words}")
             print(f"Language Code ({polyglottery_num}/5): {language_code}")

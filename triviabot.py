@@ -502,9 +502,7 @@ def ask_polyglottery_challenge(winner):
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
 
-    #if not collected_words:
-    print(collected_words)
-    print(len(collected_words))
+    collected_words = " ".join(collected_words)
     if len(collected_words) < 3:
         okra_sentences = [
             "Okra stole my left sock.",
@@ -535,7 +533,6 @@ def ask_polyglottery_challenge(winner):
         message += collected_words
         message += "'\n"
     else:
-        collected_sentence = " ".join(collected_words)
         message = f"\n💥🤯 Ok...ra I got: '{collected_words}'\n"
     send_message(target_room_id, message)
 

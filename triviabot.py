@@ -502,7 +502,8 @@ def ask_polyglottery_challenge(winner):
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
 
-    if not collected_words:
+    #if not collected_words:
+    if len(collected_words) < 3:
         okra_sentences = [
             "Okra stole my left sock.",
             "I dreamt about okra karaoke.",
@@ -527,7 +528,7 @@ def ask_polyglottery_challenge(winner):
         ]
         
         collected_words = random.choice(okra_sentences)
-        message = "\nNothing? Let's go with: "
+        message = "\nI need at least 3 words. I'll pick for you: "
         message += "'"
         message += collected_words
         message += "'\n"
@@ -619,7 +620,7 @@ def ask_polyglottery_challenge(winner):
             print(f"Language Name ({polyglottery_num}/5): {language_name}")
 
             if collected_words.strip().lower() == translated_collected_words.strip().lower():
-                message = f"\n🌐🔄 Translation error. Trying a different language.\n"
+                message = f"\n🌐🔄 Translation is same as original. Trying a different language.\n"
                 send_message(target_room_id, message)
                 time.sleep(2)
                 continue

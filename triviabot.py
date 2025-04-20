@@ -528,12 +528,11 @@ def ask_polyglottery_challenge(winner):
         ]
         
         collected_words = random.choice(okra_sentences)
-        message = "\nI need at least 3 words. I'm picking for you: "
-        message += "'"
-        message += collected_words
-        message += "'\n"
+        message = "\n🤖📢 I need at least 3 words. I'm picking this:\n"
     else:
-        message = f"\n💥🤯 Ok...ra I got: '{collected_words}'\n"
+        message = f"\n💥🤯 Ok...ra we're going with this:\n"
+        
+    message += f"\n'{collected_words}'\n"
     send_message(target_room_id, message)
 
     time.sleep(3)

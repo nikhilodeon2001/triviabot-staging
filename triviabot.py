@@ -503,7 +503,7 @@ def ask_polyglottery_challenge(winner):
             print(f"Error collecting responses: {e}")
 
     collected_words = " ".join(collected_words)
-    if len(collected_words) < 3:
+    if len(collected_words.split()) < 3:
         okra_sentences = [
             "Okra stole my left sock.",
             "I dreamt about okra karaoke.",
@@ -577,23 +577,18 @@ def ask_polyglottery_challenge(winner):
             url = "https://translation.googleapis.com/language/translate/v2"
 
             params = {
-                #"q": " ".join(collected_words), 
                 "q": collected_words, 
                 "source": "en",
                 "target": language_code,
                 "format": "text",
                 "key": googletranslate_api_key
             }
-
-            print(params)
         
             for attempt in range(1, max_retries + 1):
                 try:
                     response = requests.post(url, data=params, timeout=10)
                     response.raise_for_status()
-        
                     data = response.json()
-                    print(data)
                     translated_collected_words = data['data']['translations'][0]['translatedText']
                     break
         
@@ -1159,15 +1154,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
 
     img_width, img_height = 800, 600
     font_file = LANGUAGE_FONT_MAP.get(lang_code, LANGUAGE_FONT_MAP["default"])
-    print(font_file)
     font_path = os.path.join(os.path.dirname(__file__), "fonts", font_file)
-    print(font_path)
-
-    if not os.path.exists(font_path):
-        print(f"❌ Font path does not exist: {font_path}")
-    else:
-        print(f"✅ Using font: {font_path}")
-
     font_size = 60
     img = Image.new('RGB', (img_width, img_height), color=background_color)
     draw = ImageDraw.Draw(img)

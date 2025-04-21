@@ -3690,16 +3690,15 @@ def ask_survey_question():
     question_info = question_type_lookup.get(question_type, {})
     emojis = question_info.get("emojis", "🤔❓")
     intro_text = question_info.get("intro_text", "What do you think?")
-       
-    #message = f"\n{emojis} {intro_text}\n"
-    #message += f"\n❓ {question_text}\n"
 
-    message = "\n🤔❓Should I rename LiveTrivia?\n"
-    message += "\nA. No."
-    message += "\nB. Yes. Trivia Okra."
-    message += "\nC. Yes. Okra Trivia."
-    message += "\nD. Yes. Something else.\n"
-    
+    message = f"\n📋✅ Survey Time!\n"
+    message += f"\n1️⃣☝️ Only 1 answer stored per user, per question.\n"
+    send_message(target_room_id, message)
+
+    time.sleep(3)
+       
+    message = f"\n{emojis} {intro_text}\n"
+    message += f"\n❓ {question_text}\n"
     send_message(target_room_id, message)
         
     while time.time() - start_time < 15:
@@ -10570,7 +10569,7 @@ def start_trivia():
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
             
-            if len(scoreboard) > 40000:
+            if len(scoreboard) >= 5:
                 ask_survey_question()
                 
             time.sleep(5)

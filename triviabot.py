@@ -1,4 +1,5 @@
 
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -8479,9 +8480,12 @@ def ask_question(trivia_category, trivia_question, trivia_url, trivia_answer_lis
         if trivia_answer_list[0] in {"True", "False"}:
             message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 T/F - 1 GUESS 🚨 {trivia_question}\n\n"
         else:
-            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 Letter - 1 GUESS 🚨 {trivia_question}\n\n"
+            message_body += f"\n{number_block} {get_category_title(trivia_category, trivia_url)}\n\n🚨 Letter - 1 GUESS 🚨 {trivia_question}\n"
+            send_message(target_room_id, message_body)
+            message_body = ""
             for answer in trivia_answer_list[1:]:
                 message_body += f"{answer}\n"
+            message_body += "\n"
         trivia_answer_list[:] = trivia_answer_list[:1]
 
     else:
@@ -9825,21 +9829,27 @@ def generate_and_render_polynomial(type):
 
 
 
-
-
 def round_preview(selected_questions):
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-    message = "\n🔮 Next Round Preview 🔮\n"
     
+    message_1 = "\n🔮 Next Round Preview 🔮\n"
+    message_2 = ""
+
     for i, question_data in enumerate(selected_questions):
         trivia_category = question_data[0]
         trivia_url = question_data[2]
-        number_block = numbered_blocks[i] if i < len(numbered_blocks) else f"{i + 1}️⃣"  # Use fallback if needed
-        message += f"{number_block} {get_category_title(trivia_category, trivia_url)}\n"
-    
-    message += "\n"
-    # Send the message to the chat
-    send_message(target_room_id, message)
+        number_block = numbered_blocks[i] if i < len(numbered_blocks) else f"{i + 1}."
+        line = f"{number_block} {get_category_title(trivia_category, trivia_url)}\n"
+        if i < 5:
+            message_1 += line
+        else:
+            message_2 += line
+
+    send_message(target_room_id, message_1.rstrip())  # strip trailing newline to avoid break
+    if message_2:
+        message_2 += "\n"
+        time.sleep(0.1)
+        send_message(target_room_id, message_2)
 
 
 def get_category_title(trivia_category, trivia_url):
@@ -10243,19 +10253,36 @@ def get_player_selected_question(questions, round_winner):
     categories = [q[0] for q in questions]
     num_of_questions = len(questions)
     
-    message = "\n" f"@{round_winner} choose a number: \n\n"
-
+    message_1 = "\n" f"@{round_winner} pick the question (#): \n\n"
+    message_2 = ""
 
     numbered_blocks = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+
     for i, question_data in enumerate(questions):
         trivia_category = question_data[0]
         trivia_url = question_data[2]
-        number_block = numbered_blocks[i] if i < len(numbered_blocks) else f"{i + 1}️⃣"  # Use fallback if needed
-        message += f"{number_block} {get_category_title(trivia_category, trivia_url)}\n"
     
-    message += "\n"
-    # Send the message to the chat
-    send_message(target_room_id, message)
+        # Use emoji for 1-10, fallback to plain number + period after that to avoid tofu
+        number_block = numbered_blocks[i] if i < len(numbered_blocks) else f"{i + 1}."
+    
+        line = f"{number_block} {get_category_title(trivia_category, trivia_url)}\n"
+    
+        if i < 5:
+            message_1 += line
+        else:
+            message_2 += line
+    
+    # Send messages as if they're one, avoiding truncation
+    send_message(target_room_id, message_1.rstrip())
+    if message_2:
+        message_2 += "\n"
+        time.sleep(0.1)
+        send_message(target_room_id, message_2.rstrip())
+
+
+
+
+    
 
     initialize_sync()
     time.sleep(10)
@@ -10421,11 +10448,6 @@ def start_trivia():
         initialize_sync()  
 
         #fetch_donations()
-
-        while True:
-            ask_survey_question()
-        
-        
         
         round_winner = None
         selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set

@@ -4136,19 +4136,18 @@ def categorize_text(input_text, title):
 
 def get_wikipedia_article(max_words=3, max_length=16):
     base_url = "https://en.wikipedia.org/w/api.php"
+    headers = {
+        "User-Agent": "Live Trivia & Games/2.4 (redditlivetrivia@gmail.com)"
+    }
     
     while True:
         # Fetch a random page from Wikipedia
-        response = requests.get(base_url, {
+        response = requests.get(base_url, headers=headers, params={
             "action": "query",
             "format": "json",
-            "list": "random",
-            "rnlimit": 5,
-            "rncontentmodel": "Content",
-            "rnnamespace": 0
-            #"generator": "random",
-            #"grnnamespace": 0,  # Only fetch content pages
-            #"grnlimit": 1  # Fetch one page at a time
+            "generator": "random",
+            "grnnamespace": 0,  # Only fetch content pages
+            "grnlimit": 1  # Fetch one page at a time
         })
         
         if response.status_code != 200:
@@ -4188,6 +4187,8 @@ def get_wikipedia_article(max_words=3, max_length=16):
 
                 # Construct the Wikipedia article URL
                 wiki_url = f"https://en.wikipedia.org/wiki/{quote(title)}"
+
+                time.sleep(0.5)
 
                 return norm_title, redacted_text, category, wiki_url
 

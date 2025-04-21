@@ -10569,7 +10569,7 @@ def start_trivia():
                 round_preview(selected_questions)
                 time.sleep(10)  # Adjust this time to whatever delay you need between rounds
             
-            if len(scoreboard) >= 1:
+            if len(scoreboard) >= 5:
                 ask_survey_question()
                 
             time.sleep(5)

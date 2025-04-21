@@ -10421,6 +10421,11 @@ def start_trivia():
         initialize_sync()  
 
         #fetch_donations()
+
+        while True:
+            ask_survey_question()
+        
+        
         
         round_winner = None
         selected_questions = select_trivia_questions(questions_per_round)  #Pick the initial question set

@@ -3679,7 +3679,7 @@ def ask_survey_question():
         },
         "rating-10": {
             "emojis": "⭐️🔟",
-            "intro_text": "On a scale from 1 to 10"
+            "intro_text": "Rate on a scale from 1 👎 to 10 👍:"
         },
          "word-3": {
             "emojis": "3️⃣🔤",
@@ -5375,7 +5375,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🔢📜 Ranker Lists ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 👁️✨ Magic Eye D ☕✨\n"
+        message += f"{counter}. 👁️✨ Magic EyeD ☕✨\n"
         counter = counter + 1
         message += f"{counter}. ❓🦓 OkrAnimal ☕✨\n"
         counter = counter + 1
@@ -5987,13 +5987,13 @@ def ask_wof_number(winner):
 
                     if str(message_content) in {"17"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Magic Eye D' requires ☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Magic EyeD' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
                     if str(message_content) in {"17"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Magic Eye D' requires {num_list_players}+ players.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Magic EyeD' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 

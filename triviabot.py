@@ -105,7 +105,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 150}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -1403,6 +1403,217 @@ def ask_lyric_challenge(winner):
 
 
 
+def ask_book_challenge(winner):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+   
+    num_of_xs = 0
+    correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+
+    book_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/book/book1.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/book/book2.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/book/book3.gif",
+    ]
+
+    book_gif_url = random.choice(book_gifs)
+    message = f"\n🎧🎤 LyrIQ: Name the Song OR Artist from the books...\n"
+    image_mxc, image_width, image_height = download_image_from_url(book_gif_url, False, "okra.png")
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id, message)
+    time.sleep(3)
+    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
+    send_message(target_room_id, message)
+    time.sleep(3)
+
+    book_num = 1
+    while book_num <= 5:
+        try:
+            recent_book_ids = get_recent_question_ids_from_mongo("book")
+
+            # Fetch wheel of fortune questions using the random subset method
+            book_collection = db["book_questions"]
+            pipeline_book = [
+                {
+                    "$match": {
+                        "_id": {"$nin": list(recent_book_ids)},
+                        "enabled": "1"  # Ensure only enabled books are included
+                    }
+                },
+                {"$sample": {"size": 100}},  # Sample a larger set first
+                {
+                    "$group": {  
+                        "_id": "$question",
+                        "question_doc": {"$first": "$$ROOT"}
+                    }
+                },
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
+
+            book_questions = list(book_collection.aggregate(pipeline_book))
+            book_question = book_questions[0]
+            book_title = book_question["title"]
+            book_artist = book_question["artist"]
+            book_category = book_question["category"]
+            book_books = book_question['books']
+            book_url = book_question["url"]
+            book_question_id = book_question["_id"] 
+            
+            pretty_categories = []
+            for c in book_category:
+                if c == "all":
+                    continue
+                elif c == "rb":
+                    pretty_categories.append("R&B")
+                else:
+                    pretty_categories.append(c.title())
+            
+            print(f"Aritst: {book_artist}")
+            print(f"Title: {book_title}")
+            if pretty_categories:
+                print(f"Categories: {', '.join(pretty_categories)}")
+
+            # Select 2 unique book lines at random
+            if len(book_books) >= 2:
+                selected_lines = random.sample(book_books, 2)
+                selected_lines.sort(key=lambda x: x["line_number"])  # Optional: sort by line number for readability
+            
+                # Store formatted strings in variables
+                book_line_1 = f"Line {selected_lines[0]['line_number']}: '{selected_lines[0]['text']}'"
+                book_line_2 = f"Line {selected_lines[1]['line_number']}: '{selected_lines[1]['text']}'"
+                line_1_mxc, line_1_width, line_1_height = generate_text_image(book_line_1, 255, 99, 130, 255, 255, 255, True, "okra.png")
+                line_2_mxc, line_2_width, line_2_height = generate_text_image(book_line_2, 255, 99, 130, 255, 255, 255, True, "okra.png")
+            
+                # Print for debug
+                print(book_line_1)
+                print(book_line_2)
+            
+            else:
+                print("Not enough book lines to choose from.")
+                book_line_1 = ""
+                book_line_2 = ""
+
+            if book_question_id:
+                store_question_ids_in_mongo([book_question_id], "book")  # Store it as a list containing a single ID
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting book questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
+
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        #send_message(target_room_id, message)
+        message += f"\n🎧🎤 Song {book_num} of 5\n"    
+        message += f"\n🎶🏷️ Categories: {', '.join(pretty_categories)}\n"
+        #message += f"\n1️⃣ {book_line_1}"
+        #message += f"\n2️⃣ {book_line_2}"
+        send_message(target_room_id, message)
+        time.sleep(2)
+        #message = f"\n1️⃣"
+        #send_message(target_room_id, message)
+        send_image(target_room_id, line_1_mxc, line_1_width, line_1_height, 100) 
+        #message = f"\n2️⃣"
+        #send_message(target_room_id, message)
+        send_image(target_room_id, line_2_mxc, line_2_width, line_2_height, 100)
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        winner_name = ""
+        winner_score = ""
+        
+        while time.time() - start_time < 20 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+
+                        for answer in [book_artist, book_title]:
+                        
+                            if fuzzy_match(message_content, answer, book_category, book_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {book_artist.upper()} - {book_title.upper()}\n"
+                                send_message(target_room_id, message)
+                                right_answer = True
+    
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                    
+                                user_correct_answers[sender_display_name] += 1
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
+            message = f"\n❌😢 No one got it.\n\nAnswer: {book_artist.upper()} - {book_title.upper()}\n"
+            send_message(target_room_id, message)
+        
+        time.sleep(2)
+
+        book_num = book_num + 1
+                        
+        # Sort the dictionary by the count (value) in descending order
+        message = ""
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+        if sorted_users:
+            if book_num > 5:
+                message += "\n🏁🏆 Final Standings\n"
+            else:   
+                message += "\n📊🏆 Current Standings\n"
+
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+            
+        send_message(target_room_id, message)
+        
+    time.sleep(2)
+    
+    if sorted_users:
+        winner_name, winner_score = sorted_users[0]
+        message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    else:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    send_message(target_room_id, message)
+
+    
+    wf_winner = True
+    time.sleep(3)
+    return None
 
 
 
@@ -5338,16 +5549,16 @@ def select_wof_questions(winner):
         message += f"☕: Coffee Needed to Play\n"
         message += f"✨: Everyone Plays ({num_list_players}+ players needed)\n"
         send_message(target_room_id, message)  
-        time.sleep(0.2)
+        time.sleep(0.1)
         # Assuming wof_questions contains the sampled questions, with each document as a list/tuple
         counter = 0
         message = ""
         for doc in wof_questions:
             category = doc["question"]  # Use the key name to access category
-            message += f"{counter}. 🎡💰 WoF: {category}\n"
+            message += f"\n{counter}. 🎡💰 WoF: {category}"
             counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.2)
+        time.sleep(0.1)
         
         premium_counts = counter
         message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
@@ -5368,10 +5579,10 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🎬💥 Movie Mayhem ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🧩🔗 Missing Link ☕✨\n"
+        message += f"{counter}. 🧩🔗 Missing Link ☕✨"
         counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.2)
+        time.sleep(0.1)
         message = f"{counter}. 👤🌟 Famous Peeps ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🔢📜 Ranker Lists ☕✨\n"
@@ -5382,23 +5593,21 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🟢🎩 The Riddler ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 🤓📚 Word Nerd ☕✨\n"
+        message += f"{counter}. 🤓📚 Word Nerd ☕✨"
         counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.2)
+        time.sleep(0.1)
         message = f"{counter}. 🎏🎉 Flag Fest ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🎧🎤 LyrIQ ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🎰🗣️ PolygLottery ☕✨\n"
+        counter = counter + 1
+        message += f"{counter}. 📖🕵️‍♂️ BoOkra ☕✨\n"
+        
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
-        
-        #message = f"☕: Coffee Needed to Play\n"
-        #message += f"✨: Everyone Plays ({num_list_players}+ PLayers Needed)\n"
-        #send_message(target_room_id, message) 
-        
-        
+                
         selected_wof_category = ask_wof_number(winner)
 
         if int(selected_wof_category) < premium_counts:
@@ -5482,6 +5691,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "23":
             ask_polyglottery_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "24":
+            ask_book_challenge(winner)
             time.sleep(3)
             return None
         
@@ -5865,7 +6079,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23","24"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -6071,6 +6285,19 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+
+                    if str(message_content) in {"24"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'BoOkra' requires ☕️.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"24"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'BoOkra' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -6084,7 +6311,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -6102,7 +6329,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 

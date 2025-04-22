@@ -1470,7 +1470,7 @@ def ask_book_challenge(winner):
     book_gif_url = random.choice(book_gifs)
     message = f"\n📖🕵️‍♂️ BoOkra: Name the Title OR Author...\n"
     image_mxc, image_width, image_height = download_image_from_url(book_gif_url, False, "okra.png")
-    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    #send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
     message = f"\n5️⃣🥇 Let's do a best of 5...\n"
@@ -1515,7 +1515,7 @@ def ask_book_challenge(winner):
             print(f"Aritst: {book_author}")
 
             categories_message = "\n📚🗂️ Categories include...\n"
-            for subject in subjects:
+            for subject in book_subjects:
                 categories_message += f"• {subject}\n"
                 
             snippets = get_random_epub_snippets(book_epub_url)

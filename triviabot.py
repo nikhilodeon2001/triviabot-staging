@@ -41,6 +41,8 @@ from collections import Counter, defaultdict
 import math
 import sys
 import signal
+from ebooklib import epub
+from html.parser import HTMLParser
 
 
 # Define the base API URL for Matrix
@@ -1454,26 +1456,16 @@ def ask_book_challenge(winner):
             book_questions = list(book_collection.aggregate(pipeline_book))
             book_question = book_questions[0]
             book_title = book_question["title"]
-            book_artist = book_question["artist"]
-            book_category = book_question["category"]
-            book_books = book_question['books']
-            book_url = book_question["url"]
+            book_author = book_question["author"]
+            book_subjects = book_question["subjects"]
+            book_author_only = book_question['author_only']
+            book_epub_url = book_question["epub_url"]
             book_question_id = book_question["_id"] 
             
-            pretty_categories = []
-            for c in book_category:
-                if c == "all":
-                    continue
-                elif c == "rb":
-                    pretty_categories.append("R&B")
-                else:
-                    pretty_categories.append(c.title())
-            
-            print(f"Aritst: {book_artist}")
             print(f"Title: {book_title}")
-            if pretty_categories:
-                print(f"Categories: {', '.join(pretty_categories)}")
+            print(f"Aritst: {book_author}")
 
+    
             # Select 2 unique book lines at random
             if len(book_books) >= 2:
                 selected_lines = random.sample(book_books, 2)

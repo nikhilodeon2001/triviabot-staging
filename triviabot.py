@@ -1434,7 +1434,7 @@ def get_random_epub_snippets(book_epub_url, snippet_length=100, count=2):
                 full_text += " " + clean_text
 
         full_text = full_text.strip()
-
+        print(f"📏 Extracted {len(full_text)} characters from EPUB")
         if len(full_text) < snippet_length * count:
             print("❌ Not enough content to pull snippets.")
             return []

@@ -29,4 +29,4 @@ boto3==1.28.0
 praw
 nltk==3.8.1
 Metaphone==0.6
-
+EbookLib==0.17.1

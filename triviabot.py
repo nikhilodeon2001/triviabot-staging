@@ -107,7 +107,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 150}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 100}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -1403,6 +1403,55 @@ def ask_lyric_challenge(winner):
     return None
 
 
+class HTMLTextExtractor(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.text_parts = []
+
+    def handle_data(self, data):
+        self.text_parts.append(data)
+
+    def get_text(self):
+        return ' '.join(self.text_parts)
+
+def strip_html_tags(html):
+    parser = HTMLTextExtractor()
+    parser.feed(html)
+    return parser.get_text()
+
+def get_random_epub_snippets(book_epub_url, snippet_length=100, count=2):
+    try:
+        response = requests.get(book_epub_url)
+        response.raise_for_status()
+
+        book = epub.read_epub(io.BytesIO(response.content))
+        full_text = ""
+
+        for item in book.get_items():
+            if item.get_type() == epub.EpubHtml:
+                html = item.get_content().decode("utf-8", errors="ignore")
+                clean_text = strip_html_tags(html)
+                full_text += " " + clean_text
+
+        full_text = full_text.strip()
+
+        if len(full_text) < snippet_length * count:
+            print("❌ Not enough content to pull snippets.")
+            return []
+
+        snippets = []
+        for _ in range(count):
+            start = random.randint(0, len(full_text) - snippet_length)
+            snippet = full_text[start:start + snippet_length].strip()
+            snippets.append(snippet)
+
+        return snippets
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return []
+
+
 
 
 def ask_book_challenge(winner):    
@@ -1419,7 +1468,7 @@ def ask_book_challenge(winner):
     ]
 
     book_gif_url = random.choice(book_gifs)
-    message = f"\n🎧🎤 LyrIQ: Name the Song OR Artist from the books...\n"
+    message = f"\n📖🕵️‍♂️ BoOkra: Name the Title OR Author...\n"
     image_mxc, image_width, image_height = download_image_from_url(book_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -1442,7 +1491,7 @@ def ask_book_challenge(winner):
                         "enabled": "1"  # Ensure only enabled books are included
                     }
                 },
-                {"$sample": {"size": 100}},  # Sample a larger set first
+                {"$sample": {"size": 10}},  # Sample a larger set first
                 {
                     "$group": {  
                         "_id": "$question",
@@ -1465,26 +1514,17 @@ def ask_book_challenge(winner):
             print(f"Title: {book_title}")
             print(f"Aritst: {book_author}")
 
-    
-            # Select 2 unique book lines at random
-            if len(book_books) >= 2:
-                selected_lines = random.sample(book_books, 2)
-                selected_lines.sort(key=lambda x: x["line_number"])  # Optional: sort by line number for readability
-            
-                # Store formatted strings in variables
-                book_line_1 = f"Line {selected_lines[0]['line_number']}: '{selected_lines[0]['text']}'"
-                book_line_2 = f"Line {selected_lines[1]['line_number']}: '{selected_lines[1]['text']}'"
-                line_1_mxc, line_1_width, line_1_height = generate_text_image(book_line_1, 255, 99, 130, 255, 255, 255, True, "okra.png")
-                line_2_mxc, line_2_width, line_2_height = generate_text_image(book_line_2, 255, 99, 130, 255, 255, 255, True, "okra.png")
-            
-                # Print for debug
-                print(book_line_1)
-                print(book_line_2)
-            
-            else:
-                print("Not enough book lines to choose from.")
-                book_line_1 = ""
-                book_line_2 = ""
+            categories_message = "\n📚🗂️ Categories include...\n"
+            for subject in subjects:
+                categories_message += f"• {subject}\n"
+                
+            snippets = get_random_epub_snippets(book_epub_url)
+
+            snippet_1 = f"📖1️⃣ Snippet 1:\n\n'{snippets[0]}'\n"
+            snippet_2 = f"📖2️⃣ Snippet 2:\n\n'{snippets[1]}'\n"
+
+            print(f"📖1️⃣ Snippet 1: {snippet_1}")
+            print(f"📖2️⃣ Snippet 2: {snippet_2}")
 
             if book_question_id:
                 store_question_ids_in_mongo([book_question_id], "book")  # Store it as a list containing a single ID
@@ -1499,18 +1539,14 @@ def ask_book_challenge(winner):
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         #send_message(target_room_id, message)
-        message += f"\n🎧🎤 Song {book_num} of 5\n"    
-        message += f"\n🎶🏷️ Categories: {', '.join(pretty_categories)}\n"
-        #message += f"\n1️⃣ {book_line_1}"
-        #message += f"\n2️⃣ {book_line_2}"
+        message += f"\n🎧🎤 Book {book_num} of 5\n"    
         send_message(target_room_id, message)
+        time.sleep(0.1)
+        send_message(target_room_id, categories_message)
         time.sleep(2)
-        #message = f"\n1️⃣"
-        #send_message(target_room_id, message)
-        send_image(target_room_id, line_1_mxc, line_1_width, line_1_height, 100) 
-        #message = f"\n2️⃣"
-        #send_message(target_room_id, message)
-        send_image(target_room_id, line_2_mxc, line_2_width, line_2_height, 100)
+        send_message(target_room_id, snippet_1)
+        time.sleep(1)
+        send_message(target_room_id, snippet_2)
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts
@@ -1555,10 +1591,10 @@ def ask_book_challenge(winner):
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
 
-                        for answer in [book_artist, book_title]:
+                        for answer in [book_author, book_title]:
                         
                             if fuzzy_match(message_content, answer, book_category, book_url):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {book_artist.upper()} - {book_title.upper()}\n"
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it!\n\n'{book_title.upper()}'\n\n{book_author.upper()}\n"
                                 send_message(target_room_id, message)
                                 right_answer = True
     
@@ -1572,7 +1608,7 @@ def ask_book_challenge(winner):
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\nAnswer: {book_artist.upper()} - {book_title.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\n'{book_title.upper()}'\n\n{book_author.upper()}\n"
             send_message(target_room_id, message)
         
         time.sleep(2)
@@ -1602,7 +1638,6 @@ def ask_book_challenge(winner):
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
     send_message(target_room_id, message)
 
-    
     wf_winner = True
     time.sleep(3)
     return None

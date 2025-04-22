@@ -10744,6 +10744,7 @@ def start_trivia():
             time.sleep(3)
             
             start_message = f"\n✨🧪 Check out the new mini-games!\n"
+            start_message += f"\n📖🕵️‍♂️ BoOkra"
             start_message += f"\n🎰🗣️ PolygLottery"
             start_message += f"\n🎧🎤 LyrIQ"
             start_message += f"\n🎏🎉 Flag Fest"

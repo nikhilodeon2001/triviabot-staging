@@ -1577,8 +1577,12 @@ def ask_book_challenge(winner):
                 
             snippets = get_random_epub_snippets(book_epub_url)
 
-            snippet_1 = f"\n📖1️⃣ Snippet 1:\n'{snippets[0]}'\n"
-            snippet_2 = f"\n📖2️⃣ Snippet 2:\n'{snippets[1]}'\n"
+            #snippet_1 = f"\n📖1️⃣ Snippet 1:\n'{snippets[0]}'\n"
+            #snippet_2 = f"\n📖2️⃣ Snippet 2:\n'{snippets[1]}'\n"
+            snippet_1 = f"\n'{snippets[0]}'\n"
+            snippet_2 = f"\n'{snippets[1]}'\n"
+            snippet_1_intro = f"\n📖1️⃣ Snippet 1\n"
+            snippet_2_intro = f"\n📖2️⃣ Snippet 2\n"
             snippet_1_mxc, snippet_1_width, snippet_1_height = generate_text_image(snippet_1, 0, 0, 0, 255, 255, 102, True, "okra.png", "en", 40)
             snippet_2_mxc, snippet_2_width, snippet_2_height = generate_text_image(snippet_2, 0, 0, 0, 255, 255, 102, True, "okra.png", "en", 40)
 
@@ -1604,9 +1608,11 @@ def ask_book_challenge(winner):
         send_message(target_room_id, categories_message)
         time.sleep(2)
         #send_message(target_room_id, snippet_1)
+        send_message(target_room_id, snippet_1_intro)
         send_image(target_room_id, snippet_1_mxc, snippet_1_width, snippet_1_height, 100) 
-        #time.sleep(1)
+        time.sleep(0.2)
         #send_message(target_room_id, snippet_2)
+        send_message(target_room_id, snippet_1_intro)
         send_image(target_room_id, snippet_2_mxc, snippet_2_width, snippet_2_height, 100) 
 
         initialize_sync()
@@ -5692,13 +5698,38 @@ def select_wof_questions(winner):
         message += f"{counter}. 🎰🗣️ PolygLottery ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 📖🕵️‍♂️ Prose & Cons ☕✨\n"
-        
         message += f"\n00. 🥗🌟 Okra's Choice\n"
+        message += f"\nX. 🥗🌟 Skip Mini-Game\n"
         send_message(target_room_id, message) 
                 
         selected_wof_category = ask_wof_number(winner)
 
-        if int(selected_wof_category) < premium_counts:
+        if selected_wof_caetgory == "X":
+            gif_set = [
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad1.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad2.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad3.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad4.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad5.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad6.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad7.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad8.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad9.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad10.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad11.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad12.gif",
+            "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad13.gif"
+            ]
+
+            gif_url = random.choice(gif_set)
+            message = f"\n⏭️🕹️ We'll skip the mini-game this time.'\n"
+            image_mxc, image_width, image_height = download_image_from_url(gif_url, False, "okra.png")
+            send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+            send_message(target_room_id)
+            time.sleep(3)
+            return None
+        
+        elif int(selected_wof_category) < premium_counts:
             wof_question = wof_questions[int(selected_wof_category)]
             wof_answer = wof_question["answers"][0]
             wof_clue = wof_question["question"]
@@ -6161,6 +6192,10 @@ def ask_wof_number(winner):
 
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
+
+                    if str(message_content) in {"X"}:
+                        selected_question = "X"
+                        return selected_question
 
                     if str(message_content) in {"00"}:
                         set_a = ["0", "1", "2", "3", "4"]

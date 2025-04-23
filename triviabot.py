@@ -445,19 +445,20 @@ def ask_polyglottery_challenge(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
+    collected_words = []
+    
     # Initialize the sync and message to prompt user for input
+    message = f"\n✍️🌍 @{winner}, Give me 3-5 words to translate...\n"
+    #message += f"\n🤫😉 I'll try to keep it our little secret.\n"
+    
+    send_message(target_room_id, message)
     initialize_sync()
-
+    
     if since_token:
         params["since"] = since_token
         
     start_time = time.time()  # Track when the question starts
-    message = f"\n✍️🌍 @{winner}, Give me 3-5 words to translate...\n"
-    #message += f"\n🤫😉 I'll try to keep it our little secret.\n"
-    send_message(target_room_id, message)
-
-    collected_words = []
-
+   
     while time.time() - start_time < magic_time + 5:
         try:
             time.sleep(1)  # Slight delay to avoid overwhelming the server
@@ -478,6 +479,9 @@ def ask_polyglottery_challenge(winner):
             room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
 
             for event in room_events:
+                if len(collected_words) >= 5:
+                    break
+                    
                 event_id = event["event_id"]
                 event_type = event.get("type")
 
@@ -491,11 +495,18 @@ def ask_polyglottery_challenge(winner):
                         continue
                         
                     #redact_message(event_id, target_room_id)
+                    # Split the message content into words and add them to collected_words
                     message_content = event.get("content", {}).get("body", "").strip()
 
-                    # Split the message content into words and add them to collected_words
-                    if len(collected_words) < 5:
-                        collected_words.append(message_content.strip())
+                    if not message_content:
+                        continue  # skip empty messages
+                        
+                    words = message_content.strip().split()
+                    for word in words:
+                        if len(collected_words) < 5:
+                            collected_words.append(word)
+                        else:
+                            break
 
                     # React to the user's message
                     react_to_message(event_id, target_room_id, "okra21")
@@ -508,7 +519,8 @@ def ask_polyglottery_challenge(winner):
             sentry_sdk.capture_exception(e)
             print(f"Error collecting responses: {e}")
 
-    collected_words = " ".join(collected_words)
+    collected_words = " ".join(collected_words[:5])
+    
     if len(collected_words.split()) < 3:
         okra_sentences = [
             "Okra stole my left sock.",

@@ -1579,8 +1579,8 @@ def ask_book_challenge(winner):
 
             snippet_1 = f"\n📖1️⃣ Snippet 1:\n'{snippets[0]}'\n"
             snippet_2 = f"\n📖2️⃣ Snippet 2:\n'{snippets[1]}'\n"
-            snippet_1_mxc, snippet_1_width, snippet_1_height = generate_text_image(snippet_1, 0, 0, 0, 255, 255, 102, True, "okra.png", 40)
-            snippet_2_mxc, snippet_2_width, snippet_2_height = generate_text_image(snippet_2, 0, 0, 0, 255, 255, 102, True, "okra.png", 40)
+            snippet_1_mxc, snippet_1_width, snippet_1_height = generate_text_image(snippet_1, 0, 0, 0, 255, 255, 102, True, "okra.png", "en", 40)
+            snippet_2_mxc, snippet_2_width, snippet_2_height = generate_text_image(snippet_2, 0, 0, 0, 255, 255, 102, True, "okra.png", "en", 40)
 
             print(f"📖1️⃣ Snippet 1: {snippet_1}")
             print(f"📖2️⃣ Snippet 2: {snippet_2}")

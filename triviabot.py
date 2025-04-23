@@ -5699,7 +5699,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 📖🕵️‍♂️ Prose & Cons ☕✨\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
-        message += f"\nX. 🥗🌟 Skip Mini-Game\n"
+        message += f"\nX. ⏭️🕹️ Skip Mini-Game\n"
         send_message(target_room_id, message) 
                 
         selected_wof_category = ask_wof_number(winner)
@@ -5722,10 +5722,10 @@ def select_wof_questions(winner):
             ]
 
             gif_url = random.choice(gif_set)
-            message = f"\n⏭️🕹️ We'll skip the mini-game this time.'\n"
+            message = f"\n⏭️🕹️ @{winner}: 'Less Games. More Trivia.'\n"
             image_mxc, image_width, image_height = download_image_from_url(gif_url, False, "okra.png")
             send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
-            send_message(target_room_id)
+            send_message(target_room_id, message)
             time.sleep(3)
             return None
         

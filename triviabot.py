@@ -968,7 +968,7 @@ def ask_dictionary_challenge(winner):
 
 
 
-def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f, add_okra, okra_path, lang_code="en"):
+def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f, add_okra, okra_path, lang_code="en", font_size=60):
     LANGUAGE_FONT_MAP = {
         "ab": "NotoSans-Regular.ttf",
         "ace": "NotoSans-Regular.ttf",
@@ -1172,7 +1172,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
     img_width, img_height = 800, 600
     font_file = LANGUAGE_FONT_MAP.get(lang_code, LANGUAGE_FONT_MAP["default"])
     font_path = os.path.join(os.path.dirname(__file__), "fonts", font_file)
-    font_size = 60
+    #font_size = 60
     img = Image.new('RGB', (img_width, img_height), color=background_color)
     draw = ImageDraw.Draw(img)
 
@@ -1579,8 +1579,8 @@ def ask_book_challenge(winner):
 
             snippet_1 = f"\n📖1️⃣ Snippet 1:\n'{snippets[0]}'\n"
             snippet_2 = f"\n📖2️⃣ Snippet 2:\n'{snippets[1]}'\n"
-            snippet_1_mxc, snippet_1_width, snippet_1_height = generate_text_image(snippet_1, 0, 0, 0, 255, 255, 102, True, "okra.png")
-            snippet_2_mxc, snippet_2_width, snippet_2_height = generate_text_image(snippet_2, 0, 0, 0, 255, 255, 102, True, "okra.png")
+            snippet_1_mxc, snippet_1_width, snippet_1_height = generate_text_image(snippet_1, 0, 0, 0, 255, 255, 102, True, "okra.png", 40)
+            snippet_2_mxc, snippet_2_width, snippet_2_height = generate_text_image(snippet_2, 0, 0, 0, 255, 255, 102, True, "okra.png", 40)
 
             print(f"📖1️⃣ Snippet 1: {snippet_1}")
             print(f"📖2️⃣ Snippet 2: {snippet_2}")

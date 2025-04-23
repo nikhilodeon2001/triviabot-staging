@@ -5704,7 +5704,7 @@ def select_wof_questions(winner):
                 
         selected_wof_category = ask_wof_number(winner)
 
-        if selected_wof_caetgory == "X":
+        if selected_wof_category == "x":
             gif_set = [
             "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad1.gif",
             "https://triviabotwebsite.s3.us-east-2.amazonaws.com/sad/sad2.gif",
@@ -6193,8 +6193,8 @@ def ask_wof_number(winner):
                     if sender == bot_user_id or sender_display_name != winner:
                         continue
 
-                    if str(message_content) in {"X"}:
-                        selected_question = "X"
+                    if str(message_content).strip().lower() in {"x"}:
+                        selected_question = "x"
                         return selected_question
 
                     if str(message_content) in {"00"}:

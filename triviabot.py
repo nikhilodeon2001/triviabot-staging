@@ -1507,7 +1507,7 @@ def ask_book_challenge(winner):
     ]
 
     book_gif_url = random.choice(book_gifs)
-    message = f"\n📖🕵️‍♂️ BoOkra: Name the Title OR Author...\n"
+    message = f"\n📖🕵️‍♂️ Prose & Cons: Name the Title OR Author...\n"
     image_mxc, image_width, image_height = download_image_from_url(book_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -5670,7 +5670,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 🎰🗣️ PolygLottery ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 📖🕵️‍♂️ BoOkra ☕✨\n"
+        message += f"{counter}. 📖🕵️‍♂️ Prose & Cons ☕✨\n"
         
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         send_message(target_room_id, message) 
@@ -6355,13 +6355,13 @@ def ask_wof_number(winner):
 
                     if str(message_content) in {"24"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'BoOkra' requires ☕️.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Prose & Cons' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
                     if str(message_content) in {"24"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'BoOkra' requires {num_list_players}+ players.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Prose & Cons' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 
@@ -10784,7 +10784,7 @@ def start_trivia():
             time.sleep(3)
             
             start_message = f"\n✨🧪 Check out the new mini-games!\n"
-            start_message += f"\n📖🕵️‍♂️ BoOkra"
+            start_message += f"\n📖🕵️‍♂️ Prose & Cons"
             start_message += f"\n🎰🗣️ PolygLottery"
             start_message += f"\n🎧🎤 LyrIQ"
             start_message += f"\n🎏🎉 Flag Fest"

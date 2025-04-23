@@ -1556,11 +1556,12 @@ def ask_book_challenge(winner):
             categories_message = "\n📚🗂️ Categories include...\n"
             for subject in book_subjects:
                 categories_message += f"• {subject}\n"
+            categories_message += "\n"
                 
             snippets = get_random_epub_snippets(book_epub_url)
 
-            snippet_1 = f"📖1️⃣ Snippet 1:\n\n'{snippets[0]}'\n"
-            snippet_2 = f"📖2️⃣ Snippet 2:\n\n'{snippets[1]}'\n"
+            snippet_1 = f"📖1️⃣ Snippet 1:\n'{snippets[0]}'\n"
+            snippet_2 = f"📖2️⃣ Snippet 2:\n'{snippets[1]}'\n"
 
             print(f"📖1️⃣ Snippet 1: {snippet_1}")
             print(f"📖2️⃣ Snippet 2: {snippet_2}")
@@ -1632,8 +1633,8 @@ def ask_book_challenge(winner):
 
                         for answer in [book_author, book_title]:
                         
-                            if fuzzy_match(message_content, answer, "", book_url):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it!\n\n'{book_title.upper()}'\n\n{book_author.upper()}\n"
+                            if fuzzy_match(message_content, answer, "", book_epub_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it!\n\nTitle: {book_title.upper()}\nAuthor: {book_author.upper()}\n"
                                 send_message(target_room_id, message)
                                 right_answer = True
     
@@ -1647,7 +1648,7 @@ def ask_book_challenge(winner):
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\n'{book_title.upper()}'\n\n{book_author.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\nTitle: {book_title.upper()}\nAuthor: {book_author.upper()}\n"
             send_message(target_room_id, message)
         
         time.sleep(2)
@@ -5624,7 +5625,7 @@ def select_wof_questions(winner):
             message += f"\n{counter}. 🎡💰 WoF: {category}"
             counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.1)
+        time.sleep(0.2)
         
         premium_counts = counter
         message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
@@ -5648,7 +5649,7 @@ def select_wof_questions(winner):
         message += f"{counter}. 🧩🔗 Missing Link ☕✨"
         counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.1)
+        time.sleep(0.2)
         message = f"{counter}. 👤🌟 Famous Peeps ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🔢📜 Ranker Lists ☕✨\n"
@@ -5662,7 +5663,7 @@ def select_wof_questions(winner):
         message += f"{counter}. 🤓📚 Word Nerd ☕✨"
         counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.1)
+        time.sleep(0.2)
         message = f"{counter}. 🎏🎉 Flag Fest ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🎧🎤 LyrIQ ☕✨\n"

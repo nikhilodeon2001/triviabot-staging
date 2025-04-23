@@ -43,6 +43,7 @@ import sys
 import signal
 from ebooklib import epub
 from html.parser import HTMLParser
+import warnings
 
 
 # Define the base API URL for Matrix
@@ -1403,6 +1404,10 @@ def ask_lyric_challenge(winner):
     return None
 
 
+# Suppress ebooklib warnings
+warnings.filterwarnings("ignore", message="In the future version we will turn default option ignore_ncx to True.")
+warnings.filterwarnings("ignore", message="This search incorrectly ignores the root element, and will be fixed in a future version.")
+
 class HTMLTextExtractor(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -1419,30 +1424,64 @@ def strip_html_tags(html):
     parser.feed(html)
     return parser.get_text()
 
-def get_random_epub_snippets(book_epub_url, snippet_length=100, count=2):
+def clean_snippet_text(text):
+    return re.sub(r'\s+', ' ', text).strip()
+
+def get_random_epub_snippets(book_epub_url, snippet_length=300, count=2):
     try:
         response = requests.get(book_epub_url)
         response.raise_for_status()
 
-        book = epub.read_epub(io.BytesIO(response.content))
+        # Write EPUB content to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".epub") as tmp_file:
+            tmp_file.write(response.content)
+            tmp_path = tmp_file.name
+
+        book = epub.read_epub(tmp_path)
         full_text = ""
 
-        for item in book.get_items():
-            if item.get_type() == epub.EpubHtml:
+        # Try extracting via spine first
+        for spine_id, _ in book.spine:
+            item = book.get_item_with_id(spine_id)
+            if item:
                 html = item.get_content().decode("utf-8", errors="ignore")
                 clean_text = strip_html_tags(html)
                 full_text += " " + clean_text
 
-        full_text = full_text.strip()
-        print(f"📏 Extracted {len(full_text)} characters from EPUB")
+        # Fallback to any EpubHtml content
+        if len(full_text.strip()) < 300:
+            for item in book.get_items():
+                if item.get_type() == epub.EpubHtml:
+                    html = item.get_content().decode("utf-8", errors="ignore")
+                    full_text += " " + strip_html_tags(html)
+
+        # Clean and collapse whitespace
+        full_text = clean_snippet_text(full_text)
+        print(f"📏 Extracted {len(full_text)} characters.")
+
+        # Clean up temp file
+        os.unlink(tmp_path)
+
         if len(full_text) < snippet_length * count:
             print("❌ Not enough content to pull snippets.")
             return []
 
         snippets = []
         for _ in range(count):
-            start = random.randint(0, len(full_text) - snippet_length)
-            snippet = full_text[start:start + snippet_length].strip()
+            start = random.randint(0, len(full_text) - snippet_length - 1)
+
+            # Adjust start to word boundary
+            while start > 0 and full_text[start - 1].isalnum():
+                start -= 1
+
+            end = start + snippet_length
+
+            # Adjust end to finish the word
+            while end < len(full_text) and full_text[end].isalnum():
+                end += 1
+
+            snippet = full_text[start:end].strip()
+            snippet = f"'...{snippet}...'"
             snippets.append(snippet)
 
         return snippets

@@ -1567,6 +1567,8 @@ def ask_book_challenge(winner):
 
             snippet_1 = f"\n📖1️⃣ Snippet 1:\n'{snippets[0]}'\n"
             snippet_2 = f"\n📖2️⃣ Snippet 2:\n'{snippets[1]}'\n"
+            snippet_1_mxc, snippet_1_width, snippet_1_height = generate_text_image(snippet_1, 255, 255, 102, 255, 255, 255, True, "okra.png")
+            snippet_2_mxc, snippet_2_width, snippet_2_height = generate_text_image(snippet_2, 255, 255, 102, 255, 255, 255, True, "okra.png")
 
             print(f"📖1️⃣ Snippet 1: {snippet_1}")
             print(f"📖2️⃣ Snippet 2: {snippet_2}")
@@ -1589,9 +1591,11 @@ def ask_book_challenge(winner):
         time.sleep(0.1)
         send_message(target_room_id, categories_message)
         time.sleep(2)
-        send_message(target_room_id, snippet_1)
-        time.sleep(1)
-        send_message(target_room_id, snippet_2)
+        #send_message(target_room_id, snippet_1)
+        send_image(target_room_id, snippet_1_mxc, snippet_1_width, snippet_1_height, 100) 
+        #time.sleep(1)
+        #send_message(target_room_id, snippet_2)
+        send_image(target_room_id, snippet_2_mxc, snippet_2_width, snippet_2_height, 100) 
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts

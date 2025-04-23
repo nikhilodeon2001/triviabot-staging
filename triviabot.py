@@ -1560,8 +1560,8 @@ def ask_book_challenge(winner):
                 
             snippets = get_random_epub_snippets(book_epub_url)
 
-            snippet_1 = f"📖1️⃣ Snippet 1:\n'{snippets[0]}'\n"
-            snippet_2 = f"📖2️⃣ Snippet 2:\n'{snippets[1]}'\n"
+            snippet_1 = f"\n📖1️⃣ Snippet 1:\n'{snippets[0]}'\n"
+            snippet_2 = f"\n📖2️⃣ Snippet 2:\n'{snippets[1]}'\n"
 
             print(f"📖1️⃣ Snippet 1: {snippet_1}")
             print(f"📖2️⃣ Snippet 2: {snippet_2}")

@@ -1467,8 +1467,11 @@ def get_random_epub_snippets(book_epub_url, snippet_length=300, count=2):
             return []
 
         snippets = []
+        min_start = int(0.10 * len(full_text))
+        max_start = int(0.90 * len(full_text)) - snippet_length
+
         for _ in range(count):
-            start = random.randint(0, len(full_text) - snippet_length - 1)
+            start = random.randint(min_start, max_start)
 
             # Adjust start to word boundary
             while start > 0 and full_text[start - 1].isalnum():
@@ -1483,7 +1486,7 @@ def get_random_epub_snippets(book_epub_url, snippet_length=300, count=2):
             snippet = full_text[start:end].strip()
             snippet = f"'...{snippet}...'"
             snippets.append(snippet)
-
+            
         return snippets
 
     except Exception as e:

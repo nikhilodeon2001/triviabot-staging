@@ -1,5 +1,7 @@
 
 
+
+
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -10789,10 +10791,7 @@ def start_trivia():
             start_message = f"\n✨🧪 Check out the new mini-games!\n"
             start_message += f"\n📖🕵️‍♂️ Prose & Cons"
             start_message += f"\n🎰🗣️ PolygLottery"
-            start_message += f"\n🎧🎤 LyrIQ"
-            start_message += f"\n🎏🎉 Flag Fest"
-            start_message += f"\n🤓📚 Word Nerd"
-            start_message += f"\n🟢🎩 The Riddler\n"
+            start_message += f"\n🎧🎤 LyrIQ\n"
             
             send_message(target_room_id, start_message)
             time.sleep(3)

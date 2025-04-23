@@ -1632,7 +1632,7 @@ def ask_book_challenge(winner):
 
                         for answer in [book_author, book_title]:
                         
-                            if fuzzy_match(message_content, answer, book_category, book_url):
+                            if fuzzy_match(message_content, answer, "", book_url):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it!\n\n'{book_title.upper()}'\n\n{book_author.upper()}\n"
                                 send_message(target_room_id, message)
                                 right_answer = True

@@ -1184,7 +1184,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
         # Force black background, white text, red '?'
         background_color = (0, 0, 0)
         text_color = (255, 255, 255)
-
+    
         # Replace all ⬜ (U+2B1C) or placeholders with red '?'
         parts = question_text.split("⬜")
         rendered_parts = []
@@ -1192,28 +1192,30 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
             rendered_parts.append((part, text_color))
             if i < len(parts) - 1:
                 rendered_parts.append((" ? ", (255, 0, 0)))  # red question mark
-
+    
         # Now calculate total dimensions for mixed-color text
         total_width = 0
         max_height = 0
         for text, color in rendered_parts:
-            w, h = draw.textsize(text, font=font)
+            bbox = draw.textbbox((0, 0), text, font=font)
+            w = bbox[2] - bbox[0]
+            h = bbox[3] - bbox[1]
             total_width += w
             max_height = max(max_height, h)
-
+    
         text_x = (img_width - total_width) // 2
         text_y = (img_height - max_height) // 2
-
+    
         # Clear and draw styled text
         img = Image.new('RGB', (img_width, img_height), color=background_color)
         draw = ImageDraw.Draw(img)
-
+    
         for text, color in rendered_parts:
             draw.text((text_x, text_y), text, fill=color, font=font)
-            text_x += draw.textsize(text, font=font)[0]
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_x += bbox[2] - bbox[0]
     
     else:
-    
         wrapped_text = "\n".join(draw_text_wrapper(question_text, font, img_width - 40))
         text_bbox = draw.textbbox((0, 0), wrapped_text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
@@ -1307,7 +1309,7 @@ def ask_math_challenge(winner):
     ]
 
     math_gif_url = random.choice(math_gifs)
-    message = f"\n➕➖ Sign Language: Provide the missing signs +   -   /   * (or x)\n"
+    message = f"\n➕➖ Sign Language...fill in the missing signs\n"
     image_mxc, image_width, image_height = download_image_from_url(math_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)

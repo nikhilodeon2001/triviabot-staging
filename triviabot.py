@@ -1214,6 +1214,7 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
             draw.text((text_x, text_y), text, fill=color, font=font)
             bbox = draw.textbbox((0, 0), text, font=font)
             text_x += bbox[2] - bbox[0]
+            text_x += text_width + 10 
     
     else:
         wrapped_text = "\n".join(draw_text_wrapper(question_text, font, img_width - 40))

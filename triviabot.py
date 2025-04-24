@@ -433,7 +433,7 @@ def ask_polyglottery_challenge(winner):
     ]
 
     polyglottery_gif_url = random.choice(polyglottery_gifs)
-    message = f"\n🎰🗣️ PolygLottery\n"
+    message = f"\n🎰🗣️ PolygLottery: Guess the language...\n"
     image_mxc, image_width, image_height = download_image_from_url(polyglottery_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -1315,6 +1315,71 @@ def ask_math_challenge(winner):
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
     time.sleep(3)
+
+    message = f"\n✍️🌍 @{winner}, how many missing signs? [2 or 3]\n"
+    send_message(target_room_id, message)
+    initialize_sync()
+    
+    if since_token:
+        params["since"] = since_token
+    
+    start_time = time.time()
+    user_number = None
+    
+    while time.time() - start_time < magic_time + 5:
+        try:
+            time.sleep(1)
+    
+            if since_token:
+                params["since"] = since_token
+    
+            response = requests.get(sync_url, headers=headers, params=params)
+    
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+    
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")
+    
+                if event_type != "m.room.message" or event_id in processed_events:
+                    continue
+    
+                processed_events.add(event_id)
+                sender = event["sender"]
+                sender_display_name = get_display_name(sender)
+    
+                if sender == bot_user_id or sender_display_name != winner:
+                    continue
+    
+                message_content = event.get("content", {}).get("body", "").strip()
+    
+                if message_content in {"2", "3"}:
+                    user_number = int(message_content)
+                    react_to_message(event_id, target_room_id, "okra21")
+                    break
+    
+            if user_number is not None:
+                break
+    
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting number input: {e}")
+    
+    # Fallback or confirmation
+    if user_number:
+        message = f"\n💥🤯 Ok...ra! We're going with {user_number} missing signs!\n"
+    else:
+        message = "\n😬⏱️ Time's up! We're going with 2 missing signs!\n"
+        user_number = 2
+
+send_message(target_room_id, message)
+    
     message = f"\n5️⃣🥇 Let's do a best of 5...\n"
     send_message(target_room_id, message)
     time.sleep(3)
@@ -1322,8 +1387,9 @@ def ask_math_challenge(winner):
     math_num = 1
     while math_num <= 5:
 
-        math_string = generate_math_puzzle(3)["math_string"]
-        answer_string = generate_math_puzzle(3)["answer_string"]
+        puzzle = generate_math_puzzle(user_number)
+        math_string = puzzle["math_string"]
+        answer_string = puzzle["answer_string"]
         math_category = "Mathematics"
         math_url = ""
 

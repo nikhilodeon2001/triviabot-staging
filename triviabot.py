@@ -46,6 +46,8 @@ import signal
 from ebooklib import epub
 from html.parser import HTMLParser
 import warnings
+import operator
+from itertools import product
 
 
 # Define the base API URL for Matrix
@@ -1201,6 +1203,187 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
     else:
         print("Failed to upload the image to Matrix.")
         return None
+
+
+def ask_math_challenge(winner):    
+    global since_token, params, headers, max_retries, delay_between_retries, wf_winner
+   
+    num_of_xs = 0
+    correct_guesses = 0
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+
+    math_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/math1.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/math2.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/math3.gif",
+    ]
+
+    math_gif_url = random.choice(math_gifs)
+    message = f"\n➕➖ Sign Language: Provide the missing signs [+ - * /]\n"
+    image_mxc, image_width, image_height = download_image_from_url(math_gif_url, False, "okra.png")
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id, message)
+    time.sleep(3)
+    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
+    send_message(target_room_id, message)
+    time.sleep(3)
+
+    math_num = 1
+    while math_num <= 5:
+        try:
+            
+            lyric_category = lyric_question["category"]
+            lyric_lyrics = lyric_question['lyrics']
+            lyric_url = lyric_question["url"]
+            lyric_question_id = lyric_question["_id"] 
+            
+                       
+            print(f"Aritst: {lyric_artist}")
+            print(f"Title: {lyric_title}")
+            if pretty_categories:
+                print(f"Categories: {', '.join(pretty_categories)}")
+
+            # Select 2 unique lyric lines at random
+            if len(lyric_lyrics) >= 2:
+                selected_lines = random.sample(lyric_lyrics, 2)
+                selected_lines.sort(key=lambda x: x["line_number"])  # Optional: sort by line number for readability
+            
+                # Store formatted strings in variables
+                lyric_line_1 = f"Line {selected_lines[0]['line_number']}: '{selected_lines[0]['text']}'"
+                lyric_line_2 = f"Line {selected_lines[1]['line_number']}: '{selected_lines[1]['text']}'"
+                line_1_mxc, line_1_width, line_1_height = generate_text_image(lyric_line_1, 255, 99, 130, 255, 255, 255, True, "okra.png")
+                line_2_mxc, line_2_width, line_2_height = generate_text_image(lyric_line_2, 255, 99, 130, 255, 255, 255, True, "okra.png")
+            
+                # Print for debug
+                print(lyric_line_1)
+                print(lyric_line_2)
+            
+            else:
+                print("Not enough lyric lines to choose from.")
+                lyric_line_1 = ""
+                lyric_line_2 = ""
+
+            if lyric_question_id:
+                store_question_ids_in_mongo([lyric_question_id], "lyric")  # Store it as a list containing a single ID
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting lyric questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
+
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        #send_message(target_room_id, message)
+        message += f"\n🎧🎤 Song {lyric_num} of 5\n"    
+        message += f"\n🎶🏷️ Categories: {', '.join(pretty_categories)}\n"
+        #message += f"\n1️⃣ {lyric_line_1}"
+        #message += f"\n2️⃣ {lyric_line_2}"
+        send_message(target_room_id, message)
+        time.sleep(2)
+        #message = f"\n1️⃣"
+        #send_message(target_room_id, message)
+        send_image(target_room_id, line_1_mxc, line_1_width, line_1_height, 100) 
+        #message = f"\n2️⃣"
+        #send_message(target_room_id, message)
+        send_image(target_room_id, line_2_mxc, line_2_width, line_2_height, 100)
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        winner_name = ""
+        winner_score = ""
+        
+        while time.time() - start_time < 20 and right_answer == False:
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+
+                        for answer in [lyric_artist, lyric_title]:
+                        
+                            if fuzzy_match(message_content, answer, lyric_category, lyric_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {lyric_artist.upper()} - {lyric_title.upper()}\n"
+                                send_message(target_room_id, message)
+                                right_answer = True
+    
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                    
+                                user_correct_answers[sender_display_name] += 1
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
+            message = f"\n❌😢 No one got it.\n\nAnswer: {lyric_artist.upper()} - {lyric_title.upper()}\n"
+            send_message(target_room_id, message)
+        
+        time.sleep(2)
+
+        lyric_num = lyric_num + 1
+                        
+        # Sort the dictionary by the count (value) in descending order
+        message = ""
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+        if sorted_users:
+            if lyric_num > 5:
+                message += "\n🏁🏆 Final Standings\n"
+            else:   
+                message += "\n📊🏆 Current Standings\n"
+
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+            
+        send_message(target_room_id, message)
+        
+    time.sleep(2)
+    
+    if sorted_users:
+        winner_name, winner_score = sorted_users[0]
+        message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    else:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    send_message(target_room_id, message)
+
+    
+    wf_winner = True
+    time.sleep(3)
+    return None
+
 
 
 
@@ -5698,6 +5881,8 @@ def select_wof_questions(winner):
         message += f"{counter}. 🎰🗣️ PolygLottery ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 📖🕵️‍♂️ Prose & Cons ☕✨\n"
+        counter = counter + 1
+        message += f"{counter}. ➕➖  Sign Language ☕✨\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         message += f"\nX. ⏭️🕹️ Skip Mini-Game\n"
         send_message(target_room_id, message) 
@@ -5815,6 +6000,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "24":
             ask_book_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "25":
+            ask_math_challenge(winner)
             time.sleep(3)
             return None
         

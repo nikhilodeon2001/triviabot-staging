@@ -110,7 +110,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 100}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 80}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -651,7 +651,7 @@ def ask_polyglottery_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        message += f"\n🗣💬❓ ({polyglottery_num}/5) Name this tongue noise system...\n"
+        message += f"\n🗣💬❓ ({polyglottery_num}/5) Name this language...\n"
         send_message(target_room_id, message)
         time.sleep(2)        
         send_image(target_room_id, translation_mxc, translation_width, translation_height, 100) 
@@ -1612,7 +1612,7 @@ def ask_book_challenge(winner):
         send_image(target_room_id, snippet_1_mxc, snippet_1_width, snippet_1_height, 100) 
         time.sleep(0.2)
         #send_message(target_room_id, snippet_2)
-        send_message(target_room_id, snippet_1_intro)
+        send_message(target_room_id, snippet_2_intro)
         send_image(target_room_id, snippet_2_mxc, snippet_2_width, snippet_2_height, 100) 
 
         initialize_sync()

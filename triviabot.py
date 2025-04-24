@@ -966,7 +966,7 @@ def ask_dictionary_challenge(winner):
 
 
 
-def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f, add_okra, okra_path, lang_code="en", font_size=60):
+def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_bk, red_value_f, green_value_f, blue_value_f, add_okra, okra_path, lang_code="en", font_size=60, highlight_missing_operator=False):
     LANGUAGE_FONT_MAP = {
         "ab": "NotoSans-Regular.ttf",
         "ace": "NotoSans-Regular.ttf",
@@ -1180,15 +1180,49 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
         print(f"Error: Font file not found at {font_path}")
         return None
 
-    wrapped_text = "\n".join(draw_text_wrapper(question_text, font, img_width - 40))
-    text_bbox = draw.textbbox((0, 0), wrapped_text, font=font)
-    text_width = text_bbox[2] - text_bbox[0]
-    text_height = text_bbox[3] - text_bbox[1]
-    text_x = (img_width - text_width) // 2
-    text_y = (img_height - text_height) // 2
+    if highlight_missing_operator:
+        # Force black background, white text, red '?'
+        background_color = (0, 0, 0)
+        text_color = (255, 255, 255)
 
-    draw.multiline_text((text_x, text_y), wrapped_text, fill=text_color, font=font, align="center")
+        # Replace all ⬜ (U+2B1C) or placeholders with red '?'
+        parts = question_text.split("⬜")
+        rendered_parts = []
+        for i, part in enumerate(parts):
+            rendered_parts.append((part, text_color))
+            if i < len(parts) - 1:
+                rendered_parts.append((" ? ", (255, 0, 0)))  # red question mark
 
+        # Now calculate total dimensions for mixed-color text
+        total_width = 0
+        max_height = 0
+        for text, color in rendered_parts:
+            w, h = draw.textsize(text, font=font)
+            total_width += w
+            max_height = max(max_height, h)
+
+        text_x = (img_width - total_width) // 2
+        text_y = (img_height - max_height) // 2
+
+        # Clear and draw styled text
+        img = Image.new('RGB', (img_width, img_height), color=background_color)
+        draw = ImageDraw.Draw(img)
+
+        for text, color in rendered_parts:
+            draw.text((text_x, text_y), text, fill=color, font=font)
+            text_x += draw.textsize(text, font=font)[0]
+    
+    else:
+    
+        wrapped_text = "\n".join(draw_text_wrapper(question_text, font, img_width - 40))
+        text_bbox = draw.textbbox((0, 0), wrapped_text, font=font)
+        text_width = text_bbox[2] - text_bbox[0]
+        text_height = text_bbox[3] - text_bbox[1]
+        text_x = (img_width - text_width) // 2
+        text_y = (img_height - text_height) // 2
+    
+        draw.multiline_text((text_x, text_y), wrapped_text, fill=text_color, font=font, align="center")
+    
     image_buffer = io.BytesIO()
     img.save(image_buffer, format='PNG')
     image_buffer.seek(0)
@@ -1273,7 +1307,7 @@ def ask_math_challenge(winner):
     ]
 
     math_gif_url = random.choice(math_gifs)
-    message = f"\n➕➖ Sign Language: Provide the missing signs [+ - * /]\n"
+    message = f"\n➕➖ Sign Language: Provide the missing signs +   -   /   * (or x)\n"
     image_mxc, image_width, image_height = download_image_from_url(math_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -1302,14 +1336,13 @@ def ask_math_challenge(winner):
         print(f"Puzzle: {math_string}")
         print(f"Operators: {answer_string}")
   
-        math_mxc, math_width, math_height = generate_text_image(math_string, 0, 0, 0, 255, 255, 255, True, "okra.png")
+        math_mxc, math_width, math_height = generate_text_image(math_string, 0, 0, 0, 255, 255, 255, True, "okra.png", highlight_missing_operator=True)
                 
-
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         message += f"\n🎧🎤 Equation {math_num} of 5\n"    
-        message += f"\n🎶🏷️ Fill in the blanks: + - * /\n"
+        message += f"\n🎶🏷️ Fill in the blanks using +   -   /   * (or x)\n"
         send_message(target_room_id, message)
         time.sleep(2)
         send_image(target_room_id, math_mxc, math_width, math_height, 100) 
@@ -1356,12 +1389,12 @@ def ask_math_challenge(winner):
     
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
-                        message_content_cleaned = message_content.replace(" ", "")
+                        message_content_cleaned = message_content.replace(" ", "").lower().replace("x", "*")
                       
                         if not message_content_cleaned or message_content_cleaned[0] not in {"+", "-", "*", "/"}:
                             continue  # Skip non-math messages
                         
-                        if message_content_cleaned == operator_string:
+                        if message_content_cleaned == answer_string:
                             message = f"\n✅🎉 Correct! @{sender_display_name} got it! {pretty_answer_string}\n"
                             send_message(target_room_id, message)
                             right_answer = True

@@ -1297,6 +1297,7 @@ def ask_math_challenge(winner):
     num_of_xs = 0
     correct_guesses = 0
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+    processed_events = set()  # Track processed event IDs to avoid duplicates
 
     math_gifs = [
         "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math1.gif",

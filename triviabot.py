@@ -1378,7 +1378,7 @@ def ask_math_challenge(winner):
         message = "\n😬⏱️ Time's up! We're going with 2 missing signs!\n"
         user_number = 2
 
-send_message(target_room_id, message)
+    send_message(target_room_id, message)
     
     message = f"\n5️⃣🥇 Let's do a best of 5...\n"
     send_message(target_room_id, message)

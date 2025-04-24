@@ -1,7 +1,3 @@
-
-
-
-
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -1205,6 +1201,59 @@ def generate_text_image(question_text, red_value_bk, green_value_bk, blue_value_
         return None
 
 
+# Define operators and their actual functions
+ops = {
+    '+': operator.add,
+    '-': operator.sub,
+    '*': operator.mul,
+    '/': lambda a, b: a / b if b != 0 else None
+}
+
+def evaluate_expression(numbers, operators_seq):
+    """Evaluate an expression given numbers and a tuple of operators."""
+    expression = str(numbers[0])
+    for i in range(len(operators_seq)):
+        expression += f" {operators_seq[i]} {numbers[i + 1]}"
+    try:
+        result = eval(expression)
+        return result if result == int(result) else None
+    except ZeroDivisionError:
+        return None
+    except Exception:
+        return None
+
+def generate_math_puzzle(n):
+    """Generate a puzzle with exactly ONE valid operator combo that results in an integer."""
+    while True:
+        nums = [random.randint(1, 10) for _ in range(n + 1)]
+        op_combos = list(product(ops.keys(), repeat=n))
+        valid_solutions = []
+
+        for operator_seq in op_combos:
+            result = evaluate_expression(nums, operator_seq)
+            if result is not None:
+                valid_solutions.append((operator_seq, int(result)))
+
+        # Group results by value
+        result_to_ops = {}
+        for op_seq, res in valid_solutions:
+            if res not in result_to_ops:
+                result_to_ops[res] = []
+            result_to_ops[res].append(op_seq)
+
+        # Find results with exactly one valid operator sequence
+        unique_results = [(res, op_seqs[0]) for res, op_seqs in result_to_ops.items() if len(op_seqs) == 1]
+
+        if unique_results:
+            selected_result, selected_ops = random.choice(unique_results)
+            math_string = " ⬜ ".join(str(num) for num in nums) + f" = {selected_result}"
+            operator_string = "".join(selected_ops)
+
+            return {
+                "math_string": math_string,
+                "answer_string": operator_string
+            }
+
 def ask_math_challenge(winner):    
     global since_token, params, headers, max_retries, delay_between_retries, wf_winner
    
@@ -1213,9 +1262,14 @@ def ask_math_challenge(winner):
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
     math_gifs = [
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/math1.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/math2.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math/math3.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math1.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math2.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math3.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math5.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math7.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math8.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math9.gif",
+        "https://triviabotwebsite.s3.us-east-2.amazonaws.com/math_intro/math10.gif"
     ]
 
     math_gif_url = random.choice(math_gifs)
@@ -1230,64 +1284,35 @@ def ask_math_challenge(winner):
 
     math_num = 1
     while math_num <= 5:
-        try:
-            
-            lyric_category = lyric_question["category"]
-            lyric_lyrics = lyric_question['lyrics']
-            lyric_url = lyric_question["url"]
-            lyric_question_id = lyric_question["_id"] 
-            
-                       
-            print(f"Aritst: {lyric_artist}")
-            print(f"Title: {lyric_title}")
-            if pretty_categories:
-                print(f"Categories: {', '.join(pretty_categories)}")
 
-            # Select 2 unique lyric lines at random
-            if len(lyric_lyrics) >= 2:
-                selected_lines = random.sample(lyric_lyrics, 2)
-                selected_lines.sort(key=lambda x: x["line_number"])  # Optional: sort by line number for readability
-            
-                # Store formatted strings in variables
-                lyric_line_1 = f"Line {selected_lines[0]['line_number']}: '{selected_lines[0]['text']}'"
-                lyric_line_2 = f"Line {selected_lines[1]['line_number']}: '{selected_lines[1]['text']}'"
-                line_1_mxc, line_1_width, line_1_height = generate_text_image(lyric_line_1, 255, 99, 130, 255, 255, 255, True, "okra.png")
-                line_2_mxc, line_2_width, line_2_height = generate_text_image(lyric_line_2, 255, 99, 130, 255, 255, 255, True, "okra.png")
-            
-                # Print for debug
-                print(lyric_line_1)
-                print(lyric_line_2)
-            
-            else:
-                print("Not enough lyric lines to choose from.")
-                lyric_line_1 = ""
-                lyric_line_2 = ""
+        math_string = generate_math_puzzle(3)["math_string"]
+        answer_string = generate_math_puzzle(3)["answer_string"]
+        math_category = "Mathematics"
+        math_url = ""
 
-            if lyric_question_id:
-                store_question_ids_in_mongo([lyric_question_id], "lyric")  # Store it as a list containing a single ID
+        emoji_map = {
+            '+': '➕',
+            '-': '➖',
+            '*': '✖️',
+            '/': '➗'
+        }
 
-        except Exception as e:
-            sentry_sdk.capture_exception(e)
-            error_details = traceback.format_exc()
-            print(f"Error selecting lyric questions: {e}\nDetailed traceback:\n{error_details}")
-            return None  # Return an empty list in case of failure
+        pretty_answer_string = ''.join(emoji_map.get(char, char) for char in answer_string)
+                
+        print(f"Puzzle: {math_string}")
+        print(f"Operators: {answer_string}")
+  
+        math_mxc, math_width, math_height = generate_text_image(math_string, 0, 0, 0, 255, 255, 255, True, "okra.png")
+                
 
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        #send_message(target_room_id, message)
-        message += f"\n🎧🎤 Song {lyric_num} of 5\n"    
-        message += f"\n🎶🏷️ Categories: {', '.join(pretty_categories)}\n"
-        #message += f"\n1️⃣ {lyric_line_1}"
-        #message += f"\n2️⃣ {lyric_line_2}"
+        message += f"\n🎧🎤 Equation {math_num} of 5\n"    
+        message += f"\n🎶🏷️ Fill in the blanks: + - * /\n"
         send_message(target_room_id, message)
         time.sleep(2)
-        #message = f"\n1️⃣"
-        #send_message(target_room_id, message)
-        send_image(target_room_id, line_1_mxc, line_1_width, line_1_height, 100) 
-        #message = f"\n2️⃣"
-        #send_message(target_room_id, message)
-        send_image(target_room_id, line_2_mxc, line_2_width, line_2_height, 100)
+        send_image(target_room_id, math_mxc, math_width, math_height, 100) 
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts
@@ -1331,36 +1356,38 @@ def ask_math_challenge(winner):
     
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
-
-                        for answer in [lyric_artist, lyric_title]:
+                        message_content_cleaned = message_content.replace(" ", "")
+                      
+                        if not message_content_cleaned or message_content_cleaned[0] not in {"+", "-", "*", "/"}:
+                            continue  # Skip non-math messages
                         
-                            if fuzzy_match(message_content, answer, lyric_category, lyric_url):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {lyric_artist.upper()} - {lyric_title.upper()}\n"
-                                send_message(target_room_id, message)
-                                right_answer = True
-    
-                                # Update user-specific correct answer count
-                                if sender_display_name not in user_correct_answers:
-                                    user_correct_answers[sender_display_name] = 0
-                                    
-                                user_correct_answers[sender_display_name] += 1
+                        if message_content_cleaned == operator_string:
+                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {pretty_answer_string}\n"
+                            send_message(target_room_id, message)
+                            right_answer = True
+
+                            # Update user-specific correct answer count
+                            if sender_display_name not in user_correct_answers:
+                                user_correct_answers[sender_display_name] = 0
+                                
+                            user_correct_answers[sender_display_name] += 1
                         
             except Exception as e:
                 print(f"Error processing events: {e}")
-        
+
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\nAnswer: {lyric_artist.upper()} - {lyric_title.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\nAnswer: {pretty_answer_string}\n"
             send_message(target_room_id, message)
         
         time.sleep(2)
 
-        lyric_num = lyric_num + 1
+        math_num = math_num + 1
                         
         # Sort the dictionary by the count (value) in descending order
         message = ""
         sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
         if sorted_users:
-            if lyric_num > 5:
+            if math_num > 5:
                 message += "\n🏁🏆 Final Standings\n"
             else:   
                 message += "\n📊🏆 Current Standings\n"
@@ -1378,14 +1405,10 @@ def ask_math_challenge(winner):
     else:
         message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
     send_message(target_room_id, message)
-
     
     wf_winner = True
     time.sleep(3)
     return None
-
-
-
 
 
 def ask_lyric_challenge(winner):    
@@ -11029,10 +11052,10 @@ def start_trivia():
             send_message(target_room_id, start_message)
             time.sleep(3)
             
-            start_message = f"\n✨🧪 Check out the new mini-games!\n"
+            start_message = f"\n✨🧪 Check out the new mini-games the Okra Lab!\n"
+            start_message += f"\n➕➖ Sign Language"
             start_message += f"\n📖🕵️‍♂️ Prose & Cons"
-            start_message += f"\n🎰🗣️ PolygLottery"
-            start_message += f"\n🎧🎤 LyrIQ\n"
+            start_message += f"\n🎰🗣️ PolygLottery\n"
             
             send_message(target_room_id, start_message)
             time.sleep(3)

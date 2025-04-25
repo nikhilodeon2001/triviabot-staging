@@ -470,7 +470,7 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
         text_h = bbox[3] - bbox[1]
         text_x = cropped_x + (width - text_w) // 2
         text_y = cropped_y + (height - text_h) // 2
-        draw.text((text_x, text_y), symbol, fill="white", font=font)
+        draw.text((text_x, text_y), symbol, fill="black", font=font)
 
     # Save to buffer
     image_buffer = io.BytesIO()

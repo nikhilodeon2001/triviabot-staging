@@ -558,8 +558,8 @@ def ask_element_challenge(winner):
             print(f"Element: {element_name}")
             print(f"Element #: {element_number}")
 
-            element_mxc, element_width, element_height = highlight_element(element_x, element_y, element_width, element_height)
-            element2_mxc, element2_width, element2_height = highlight_element(element_x, element_y, element_width, element_height, blank=False, symbol=element_symbol)
+            element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height)
+            element_image2_mxc, element_image2_width, element_image2_height = highlight_element(element_x, element_y, element_width, element_height, blank=False, symbol=element_symbol)
 
             if element_question_id:
                 store_question_ids_in_mongo([element_question_id], "element")  # Store it as a list containing a single ID
@@ -576,8 +576,8 @@ def ask_element_challenge(winner):
         message += f"\n🗣💬❓ ({element_num}/5) Name this element...\n"
         send_message(target_room_id, message)
         time.sleep(2)        
-        send_image(target_room_id, element_mxc, element_width, element_height, 100) 
-        send_image(target_room_id, element2_mxc, element2_width, element2_height, 100) 
+        send_image(target_room_id, element_image_mxc, element_image_width, element_image_height, 100) 
+        send_image(target_room_id, element_image2_mxc, element_image2_width, element_image2_height, 100) 
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts

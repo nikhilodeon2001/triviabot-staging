@@ -465,7 +465,9 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
         except:
             font = ImageFont.load_default()
 
-        text_w, text_h = draw.textsize(symbol, font=font)
+        bbox = draw.textbbox((0, 0), symbol, font=font)
+        text_w = bbox[2] - bbox[0]
+        text_h = bbox[3] - bbox[1]
         text_x = cropped_x + (width - text_w) // 2
         text_y = cropped_y + (height - text_h) // 2
         draw.text((text_x, text_y), symbol, fill="white", font=font)
@@ -490,8 +492,6 @@ def ask_element_challenge(winner):
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element1.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element2.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element3.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element4.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element5.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element6.gif"
     ]
 

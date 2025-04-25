@@ -426,6 +426,48 @@ def word_similarity(guess, answer):
 
 
 
+def highlight_element(x, y, width, height):
+    # Constants
+    SVG_FILENAME = "periodic_table.svg"
+    CROP_BOX = (0, 0, 920, 530)  # Hardcoded crop
+    OUTPUT_WIDTH = 1200
+    OUTPUT_HEIGHT = 750
+
+    # Resolve file paths
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    svg_path = os.path.join(base_dir, SVG_FILENAME)
+
+    # Render SVG to PNG
+    temp_png_path = os.path.join(base_dir, "temp_rendered.png")
+    cairosvg.svg2png(
+        url=svg_path,
+        write_to=temp_png_path,
+        output_width=OUTPUT_WIDTH,
+        output_height=OUTPUT_HEIGHT
+    )
+
+    # Load and crop the image
+    img = Image.open(temp_png_path).convert("RGB").crop(CROP_BOX)
+    draw = ImageDraw.Draw(img)
+
+    # Adjust coordinates for cropping
+    cropped_x = x - CROP_BOX[0]
+    cropped_y = y - CROP_BOX[1]
+
+    # Highlight box
+    draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=(144, 238, 144))
+
+    # Save to buffer
+    image_buffer = io.BytesIO()
+    img.save(image_buffer, format="PNG")
+    image_buffer.seek(0)
+
+    return image_buffer, img.width, img.height
+
+
+
+
+
 def ask_element_challenge(winner):
     global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id
 
@@ -501,14 +543,7 @@ def ask_element_challenge(winner):
             print(f"Element: {element_name}")
             print(f"Element #: {element_number}")
 
-
-            if collected_words.strip().lower() == translated_collected_words.strip().lower():
-                message = f"\n🌐🔄 Translation is same as original. Trying a different language.\n"
-                send_message(target_room_id, message)
-                time.sleep(2)
-                continue
-                
-            translation_mxc, translation_width, translation_height = generate_text_image(translated_collected_words, 0, 0, 0, 0, 153, 255, True, "okra.png", language_code)
+            element_mxc, element_width, element_height = highlight_element(element_x, element_y, element_width, element_height)
 
             if element_question_id:
                 store_question_ids_in_mongo([element_question_id], "element")  # Store it as a list containing a single ID
@@ -522,10 +557,10 @@ def ask_element_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        message += f"\n🗣💬❓ ({element_num}/5) Name this language...\n"
+        message += f"\n🗣💬❓ ({element_num}/5) Name this element...\n"
         send_message(target_room_id, message)
         time.sleep(2)        
-        send_image(target_room_id, translation_mxc, translation_width, translation_height, 100) 
+        send_image(target_room_id, element_mxc, element_width, element_height, 100) 
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts
@@ -572,7 +607,7 @@ def ask_element_challenge(winner):
                         message_content = event.get("content", {}).get("body", "")
                         
                         if fuzzy_match(message_content, language_name, element_category, element_url):
-                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {language_name.upper()}\n"
+                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {element_name.upper()}\n"
                             send_message(target_room_id, message)
                             right_answer = True
 
@@ -586,7 +621,7 @@ def ask_element_challenge(winner):
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\nAnswer: {language_name.upper()}\n"
+            message = f"\n❌😢 No one got it.\n\nAnswer: {element_name.upper()}\n"
             send_message(target_room_id, message)
         
         time.sleep(2)

@@ -1412,7 +1412,7 @@ def ask_math_challenge(winner):
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         message += f"\n🎧🎤 Equation {math_num} of 5\n"    
-        message += f"\n🎶🏷️ Fill in the blanks using +   -   /   * (or x)\n"
+        message += f"\n🎶🏷️ Fill in the blanks using    +    -    /    * (or x)\n"
         send_message(target_room_id, message)
         time.sleep(2)
         send_image(target_room_id, math_mxc, math_width, math_height, 100) 
@@ -11167,7 +11167,7 @@ def start_trivia():
             send_message(target_room_id, start_message)
             time.sleep(3)
             
-            start_message = f"\n✨🧪 Check out the new mini-games the Okra Lab!\n"
+            start_message = f"\n✨🧪 New mini-games from the Okra Lab!\n"
             start_message += f"\n➕➖ Sign Language"
             start_message += f"\n📖🕵️‍♂️ Prose & Cons"
             start_message += f"\n🎰🗣️ PolygLottery\n"

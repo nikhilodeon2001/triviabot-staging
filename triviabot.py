@@ -461,7 +461,7 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
     if not blank and symbol:
         try:
             font_path = "/Library/Fonts/Arial Unicode.ttf" if os.name == 'posix' else "arial.ttf"
-            font = ImageFont.truetype(font_path, size=24)
+            font = ImageFont.truetype(font_path, size=72)
         except:
             font = ImageFont.load_default()
 

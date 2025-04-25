@@ -30,3 +30,4 @@ praw
 nltk==3.8.1
 Metaphone==0.6
 EbookLib==0.17.1
+cairosvg==2.7.1

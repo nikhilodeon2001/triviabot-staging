@@ -454,17 +454,19 @@ def highlight_element(x, y, width, height):
     cropped_x = x - CROP_BOX[0]
     cropped_y = y - CROP_BOX[1]
 
-    # Highlight box
+    # Highlight the box
     draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=(144, 238, 144))
 
     # Save to buffer
     image_buffer = io.BytesIO()
-    img.save(image_buffer, format="PNG")
+    img.save(image_buffer, format='PNG')
     image_buffer.seek(0)
+    image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
 
-    return image_buffer, img.width, img.height
+    # Return the uploaded image ID (or True), width, height, and a display string
+    img_width, img_height = img.size
 
-
+    return image_mxc, img_width, img_height
 
 
 

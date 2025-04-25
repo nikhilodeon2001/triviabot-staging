@@ -426,10 +426,10 @@ def word_similarity(guess, answer):
 
 
 
-def highlight_element(x, y, width, height):
+def highlight_element(x, y, width, height, blank=True, symbol=""):
     # Constants
     SVG_FILENAME = "periodic_table.svg"
-    CROP_BOX = (0, 0, 920, 530)  # Hardcoded crop
+    CROP_BOX = (0, 0, 920, 530)
     OUTPUT_WIDTH = 1200
     OUTPUT_HEIGHT = 750
 
@@ -454,20 +454,32 @@ def highlight_element(x, y, width, height):
     cropped_x = x - CROP_BOX[0]
     cropped_y = y - CROP_BOX[1]
 
-    # Highlight the box
+    # Draw the green highlight box
     draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=(144, 238, 144))
+
+    # Draw the symbol in white text if blank is False
+    if not blank and symbol:
+        try:
+            font_path = "/Library/Fonts/Arial Unicode.ttf" if os.name == 'posix' else "arial.ttf"
+            font = ImageFont.truetype(font_path, size=24)
+        except:
+            font = ImageFont.load_default()
+
+        text_w, text_h = draw.textsize(symbol, font=font)
+        text_x = cropped_x + (width - text_w) // 2
+        text_y = cropped_y + (height - text_h) // 2
+        draw.text((text_x, text_y), symbol, fill="white", font=font)
 
     # Save to buffer
     image_buffer = io.BytesIO()
     img.save(image_buffer, format='PNG')
     image_buffer.seek(0)
+
+    # Upload image (custom function must be defined elsewhere)
     image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
 
-    # Return the uploaded image ID (or True), width, height, and a display string
     img_width, img_height = img.size
-
     return image_mxc, img_width, img_height
-
 
 
 def ask_element_challenge(winner):
@@ -479,7 +491,8 @@ def ask_element_challenge(winner):
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element2.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element3.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element4.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element5.gif"
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element5.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element6.gif"
     ]
 
     element_gif_url = random.choice(element_gifs)
@@ -546,6 +559,7 @@ def ask_element_challenge(winner):
             print(f"Element #: {element_number}")
 
             element_mxc, element_width, element_height = highlight_element(element_x, element_y, element_width, element_height)
+            element2_mxc, element2_width, element2_height = highlight_element(element_x, element_y, element_width, element_height, blank=False, symbol=element_symbol)
 
             if element_question_id:
                 store_question_ids_in_mongo([element_question_id], "element")  # Store it as a list containing a single ID
@@ -563,6 +577,7 @@ def ask_element_challenge(winner):
         send_message(target_room_id, message)
         time.sleep(2)        
         send_image(target_room_id, element_mxc, element_width, element_height, 100) 
+        send_image(target_room_id, element2_mxc, element2_width, element2_height, 100) 
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts

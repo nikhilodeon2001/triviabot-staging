@@ -743,8 +743,12 @@ def ask_element_challenge(winner):
     
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
+
+                        user_guess = message_content.strip().lower()
+                        correct_answer = element_name.strip().lower()
                         
-                        if fuzzy_match(message_content, element_name, element_category, element_url):
+                        #if fuzzy_match(message_content, element_name, element_category, element_url):
+                        if user_guess == correct_answer or (len(correct_answer) >= 4 and user_guess[:4] == correct_answer[:4]):
                             message = f"\n✅🎉 Correct! @{sender_display_name} got it! {element_name.upper()}\n"
                             send_message(target_room_id, message)
                             right_answer = True

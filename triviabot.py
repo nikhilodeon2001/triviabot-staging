@@ -539,7 +539,7 @@ def ask_element_challenge(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    message = f"\n✍🧸🧨 @{winner}, 'normal' mode...or 'okrap'?\n"
+    message = f"\n🧸🧨 @{winner}, 'normal' mode...or 'okrap'?\n"
     send_message(target_room_id, message)
     initialize_sync()
     
@@ -649,10 +649,12 @@ def ask_element_challenge(winner):
                 element_summary = element_question["phase"]
                 element_easy = element_question["easy"]
                 element_color = element_question["cpk-hex"]
+                element_summary = element_question["summary"]
                 element_x = element_question["x"]
                 element_y = element_question["y"]
                 element_width = element_question["width"]
                 element_height = element_question["height"]
+                redacted_element_summary = replace_element_references(element_summary, element_name, element_symbol)
                 print(f"Element: {element_name}")
                 print(f"Element #: {element_number}")
                 
@@ -672,7 +674,7 @@ def ask_element_challenge(winner):
 
 
             if element_question_type == "single":
-
+                
                 if game_mode == "normal":
                     if element_easy == 1:
                         element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
@@ -718,6 +720,10 @@ def ask_element_challenge(winner):
         send_message(target_room_id, message)
         time.sleep(2)        
         send_image(target_room_id, element_image_mxc, element_image_width, element_image_height, 100) 
+
+        if element_question_type == "single":
+            message = f"\n🔍🧪 {redacted_element_summary}\n"
+            send_message(target_room_id, message)
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts
@@ -837,7 +843,15 @@ def ask_element_challenge(winner):
     return None
 
 
+def replace_element_references(element_summary, element_name, element_symbol):
+    # Replace ALL occurrences of element_name (even inside words)
+    modified_summary = element_summary.replace(element_name, "OKRA")
 
+    # Replace element_symbol only if it matches as a full word
+    symbol_pattern = r'\b' + re.escape(element_symbol) + r'\b'
+    modified_summary = re.sub(symbol_pattern, "OKRA", modified_summary)
+
+    return modified_summary
 
 
 

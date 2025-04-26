@@ -805,7 +805,9 @@ def ask_element_challenge(winner):
                         for correct_answer in correct_answers:
                         #if fuzzy_match(message_content, element_name, element_category, element_url):
                             if user_guess == correct_answer or (len(correct_answer) >= 4 and user_guess[:4] == correct_answer[:4]):
-                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {element_name.upper()}\n"
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
+                                formatted_answers = ", ".join(name.upper() for name in element_answers)
+                                message = f"\n🗒️📋 Full List\n\n{formatted_answers}\n"
                                 send_message(target_room_id, message)
                                 right_answer = True
     
@@ -819,7 +821,14 @@ def ask_element_challenge(winner):
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            message = f"\n❌😢 No one got it.\n\nAnswer: {element_name.upper()}\n"
+            if element_question_type == "single":
+                message = f"\n❌😢 No one got it.\n\nAnswer: {element_name.upper()}\n"
+            if element_question_type == "multiple-single-answer":
+                message = f"\n❌😢 No one got it.\n\nAnswer: {element_group.upper()}\n"
+            if element_question_type == "multiple":
+                formatted_answers = ", ".join(name.upper() for name in element_answers)
+                message = f"\n❌😢 No one got it.\n\nAnswers:\n{formatted_answers}\n"
+                    
             send_message(target_room_id, message)
         
         time.sleep(2)

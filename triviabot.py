@@ -435,20 +435,32 @@ def get_largest_fitting_font(draw, text, box_width, box_height, font_path):
     return ImageFont.truetype(font_path, 12)
 
 
+def get_largest_fitting_font(draw, text, box_width, box_height, font_path):
+    for size in range(100, 1, -1):
+        font = ImageFont.truetype(font_path, size)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_w = bbox[2] - bbox[0]
+        text_h = bbox[3] - bbox[1]
+        if text_w <= box_width - 4 and text_h <= box_height - 4:
+            return font
+    return ImageFont.truetype(font_path, 12)
+
+def get_text_color_for_background(rgb_color):
+    r, g, b = rgb_color
+    brightness = (0.299 * r + 0.587 * g + 0.114 * b)
+    return "black" if brightness > 160 else "white"
+
 def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
-    # Constants
     SVG_FILENAME = "periodic_table.svg"
     OKRA_FILENAME = "okra.png"
     CROP_BOX = (0, 0, 920, 530)
     OUTPUT_WIDTH = 1200
     OUTPUT_HEIGHT = 750
 
-    # Resolve file paths
     base_dir = os.path.dirname(os.path.abspath(__file__))
     svg_path = os.path.join(base_dir, SVG_FILENAME)
     okra_path = os.path.join(base_dir, OKRA_FILENAME)
 
-    # Render SVG to PNG
     temp_png_path = os.path.join(base_dir, "temp_rendered.png")
     cairosvg.svg2png(
         url=svg_path,
@@ -457,78 +469,62 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
         output_height=OUTPUT_HEIGHT
     )
 
-    # Load and crop the periodic table image
     table_img = Image.open(temp_png_path).convert("RGB").crop(CROP_BOX)
     table_width, table_height = table_img.size
 
-    # Create a new full black background
-    total_height = table_height + 100  # extra 100px black space at top (adjustable)
+    total_height = table_height + 100
     final_img = Image.new('RGB', (table_width, total_height), color=(0, 0, 0))
-
-    # Paste the periodic table at the bottom
-    final_img.paste(table_img, (0, 100))  # paste starting at y = 100
+    final_img.paste(table_img, (0, 100))
 
     draw = ImageDraw.Draw(final_img)
 
-    # Adjust coordinates for cropping
     cropped_x = x - CROP_BOX[0]
-    cropped_y = y - CROP_BOX[1] + 100  # shifted down by 100 for the black top margin
+    cropped_y = y - CROP_BOX[1] + 100
 
-    # Prepare color
-    if hex_color is None:
+    if not hex_color:
         hex_color = "#ffffff"
-    else:
-        hex_color = f"#{hex_color.lstrip('#')}"  # ensure leading '#'
-
+    elif not hex_color.startswith("#"):
+        hex_color = f"#{hex_color}"
     rgb_color = ImageColor.getrgb(hex_color)
 
-    # Draw the filled rectangle
     draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
+    draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], outline="yellow", width=2)
 
-    # Draw the yellow border (always)
-    border_color = (255, 255, 0)  # Yellow
-    draw.rectangle(
-        [cropped_x, cropped_y, cropped_x + width, cropped_y + height],
-        outline=border_color,
-        width=3  # thickness of border (adjust if needed)
-    )
-
-    # Draw the symbol in black text if blank is False
     if not blank and symbol:
         try:
             font_path = os.path.join(base_dir, "fonts", "DejaVuSans.ttf")
             font = get_largest_fitting_font(draw, symbol, width, height, font_path)
         except:
             font = ImageFont.load_default()
-        
+
         bbox = font.getbbox(symbol)
         text_w = bbox[2] - bbox[0]
         text_h = bbox[3] - bbox[1]
         text_x = cropped_x + (width - text_w) // 2
         text_y = cropped_y + (height - text_h) // 2
-        draw.text((text_x, text_y), symbol, fill="black", font=font)
 
-    # Now overlay the okra.png at the top center
+        text_color = get_text_color_for_background(rgb_color)
+        draw.text((text_x, text_y), symbol, fill=text_color, font=font)
+
     try:
         okra_img = Image.open(okra_path).convert("RGBA")
         okra_w, okra_h = okra_img.size
+        max_okra_height = 80
+        scale = max_okra_height / okra_h
+        okra_img = okra_img.resize((int(okra_w * scale), int(okra_h * scale)), Image.ANTIALIAS)
+        okra_w, okra_h = okra_img.size
         okra_x = (table_width - okra_w) // 2
-        okra_y = (100 - okra_h) // 2  # Center within the black margin
-        final_img.paste(okra_img, (okra_x, okra_y), okra_img)  # use mask for transparency
+        okra_y = (100 - okra_h) // 2
+        final_img.paste(okra_img, (okra_x, okra_y), okra_img)
     except Exception as e:
         print(f"Failed to overlay okra.png: {e}")
 
-    # Save to buffer
     image_buffer = io.BytesIO()
     final_img.save(image_buffer, format='PNG')
     image_buffer.seek(0)
 
-    # Upload image (custom function must be defined elsewhere)
     image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
-
-    img_width, img_height = final_img.size
-    return image_mxc, img_width, img_height
-    
+    return image_mxc, final_img.width, final_img.height
 
 def ask_element_challenge(winner):
     global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id

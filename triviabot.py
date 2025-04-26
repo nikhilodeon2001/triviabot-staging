@@ -442,7 +442,7 @@ def get_text_color_for_background(rgb_color):
     brightness = (0.299 * r + 0.587 * g + 0.114 * b)
     return "black" if brightness > 160 else "white"
 
-def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
+def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", highlight_boxes=None):
     # Constants
     SVG_FILENAME = "periodic_table.svg"
     OKRA_FILENAME = "okra.png"
@@ -484,7 +484,18 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
     else:
         hex_color = f"#{hex_color.lstrip('#')}"
     rgb_color = ImageColor.getrgb(hex_color)
-    draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
+    if highlight_boxes:
+        for box in highlight_boxes:
+            box_x = box["x"] - CROP_BOX[0]
+            box_y = box["y"] - CROP_BOX[1] + 100
+            box_w = box["width"]
+            box_h = box["height"]
+            box_color = f"#{box['color'].lstrip('#')}" if box.get("color") else "#ffffff"
+            rgb_box_color = ImageColor.getrgb(box_color)
+    
+            draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=rgb_box_color)
+    else:
+        draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
 
     # Add red border if background is light
     brightness = 0.299 * rgb_color[0] + 0.587 * rgb_color[1] + 0.114 * rgb_color[2]
@@ -653,36 +664,63 @@ def ask_element_challenge(winner):
 
             element_questions = list(element_collection.aggregate(pipeline_element))
             element_question = element_questions[0]
-            element_name = element_question["name"]
-            element_source = element_question["name"]
-            element_symbol = element_question["symbol"]
-            element_category = element_question["category"]
-            element_number = element_question["number"]
-            element_period = element_question["period"]
-            element_group = element_question["group"]
-            element_phase = element_question["phase"]
-            element_summary = element_question["phase"]
-            element_easy = element_question["easy"]
-            element_color = element_question["cpk-hex"]
-            element_x = element_question["x"]
-            element_y = element_question["y"]
-            element_width = element_question["width"]
-            element_height = element_question["height"]
+            element_question_type = element_question["question_type"]
+
+            if element_question_type == "single":
+                element_name = element_question["name"]
+                element_source = element_question["name"]
+                element_symbol = element_question["symbol"]
+                element_category = element_question["category"]
+                element_number = element_question["number"]
+                element_period = element_question["period"]
+                element_group = element_question["group"]
+                element_phase = element_question["phase"]
+                element_summary = element_question["phase"]
+                element_easy = element_question["easy"]
+                element_color = element_question["cpk-hex"]
+                element_x = element_question["x"]
+                element_y = element_question["y"]
+                element_width = element_question["width"]
+                element_height = element_question["height"]
+                
+            elif element_question_type == "multiple":
+                element_group = element_question["element_group"]
+                num_of_elements = element_question["num_of_elements"]
+                element_answers = element_question["answers"]
+                element_coordinate_data = element_question["elements"]
+            
             element_category = "element"
-            element_url = ""
+            element_url = "
             element_question_id = element_question["_id"] 
 
             print(f"Element: {element_name}")
             print(f"Element #: {element_number}")
 
-            if game_mode == "easy":
-                if element_easy == 1:
-                    element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
+
+            if element_question_type == "single":
+
+                if game_mode == "easy":
+                    if element_easy == 1:
+                        element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
+                    else:
+                        element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
                 else:
-                    element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
-            else:
-                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
-        
+                    element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
+
+            elif element_question_type == "multiple":
+                highlight_boxes = [
+                    {
+                        "x": el["x"],
+                        "y": el["y"],
+                        "width": el["width"],
+                        "height": el["height"],
+                        "color": f"#{el.get('cpk-hex', 'ffffff')}"
+                    }
+                    for el in element_coordinate_data
+                ]
+
+                element_image_mxc, element_image_width, element_image_height = highlight_element(0, 0, 0, 0, "#ffffff", blank=True, symbol="", highlight_boxes=highlight_boxes)
+            
             if element_question_id:
                 store_question_ids_in_mongo([element_question_id], "element")  # Store it as a list containing a single ID
 

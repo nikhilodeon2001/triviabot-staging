@@ -451,16 +451,19 @@ def get_text_color_for_background(rgb_color):
     return "black" if brightness > 160 else "white"
 
 def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
+    # Constants
     SVG_FILENAME = "periodic_table.svg"
     OKRA_FILENAME = "okra.png"
     CROP_BOX = (0, 0, 920, 530)
     OUTPUT_WIDTH = 1200
     OUTPUT_HEIGHT = 750
 
+    # Resolve paths
     base_dir = os.path.dirname(os.path.abspath(__file__))
     svg_path = os.path.join(base_dir, SVG_FILENAME)
     okra_path = os.path.join(base_dir, OKRA_FILENAME)
 
+    # Render SVG to PNG
     temp_png_path = os.path.join(base_dir, "temp_rendered.png")
     cairosvg.svg2png(
         url=svg_path,
@@ -469,27 +472,37 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
         output_height=OUTPUT_HEIGHT
     )
 
+    # Load and crop periodic table
     table_img = Image.open(temp_png_path).convert("RGB").crop(CROP_BOX)
     table_width, table_height = table_img.size
 
+    # Create final image with black space above
     total_height = table_height + 100
     final_img = Image.new('RGB', (table_width, total_height), color=(0, 0, 0))
-    final_img.paste(table_img, (0, 100))
-
+    final_img.paste(table_img, (0, 100))  # paste at y=100
     draw = ImageDraw.Draw(final_img)
 
+    # Adjust for crop and top margin
     cropped_x = x - CROP_BOX[0]
     cropped_y = y - CROP_BOX[1] + 100
 
+    # Handle color and box highlight
     if not hex_color:
         hex_color = "#ffffff"
-    elif not hex_color.startswith("#"):
-        hex_color = f"#{hex_color}"
+    else:
+        hex_color = f"#{hex_color.lstrip('#')}"
     rgb_color = ImageColor.getrgb(hex_color)
-
     draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
-    draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], outline="yellow", width=2)
 
+    # Yellow border for contrast if background is light
+    if sum(rgb_color) > 600:  # Very light background
+        draw.rectangle(
+            [cropped_x, cropped_y, cropped_x + width, cropped_y + height],
+            outline="yellow",
+            width=2
+        )
+
+    # Draw symbol if not blank
     if not blank and symbol:
         try:
             font_path = os.path.join(base_dir, "fonts", "DejaVuSans.ttf")
@@ -497,21 +510,25 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
         except:
             font = ImageFont.load_default()
 
+        # Auto text color
+        text_color = "black" if sum(rgb_color) > 382 else "white"  # 382 = ~50% of 765
+
         bbox = font.getbbox(symbol)
         text_w = bbox[2] - bbox[0]
         text_h = bbox[3] - bbox[1]
         text_x = cropped_x + (width - text_w) // 2
-        text_y = cropped_y + (height - text_h) // 2
-
-        text_color = get_text_color_for_background(rgb_color)
+        text_y = cropped_y + (height - text_h) // 2 - 4  # move up slightly
         draw.text((text_x, text_y), symbol, fill=text_color, font=font)
 
+    # Add okra image at top center
     try:
         okra_img = Image.open(okra_path).convert("RGBA")
         okra_w, okra_h = okra_img.size
-        max_okra_height = 80
-        scale = max_okra_height / okra_h
-        okra_img = okra_img.resize((int(okra_w * scale), int(okra_h * scale)), Image.ANTIALIAS)
+        scale = min(80 / okra_h, 0.5)  # scale down to fit top
+        okra_img = okra_img.resize(
+            (int(okra_w * scale), int(okra_h * scale)),
+            Image.Resampling.LANCZOS
+        )
         okra_w, okra_h = okra_img.size
         okra_x = (table_width - okra_w) // 2
         okra_y = (100 - okra_h) // 2
@@ -519,12 +536,14 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
     except Exception as e:
         print(f"Failed to overlay okra.png: {e}")
 
+    # Save and return
     image_buffer = io.BytesIO()
     final_img.save(image_buffer, format='PNG')
     image_buffer.seek(0)
 
     image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
     return image_mxc, final_img.width, final_img.height
+    
 
 def ask_element_challenge(winner):
     global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id

@@ -474,19 +474,33 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
     cropped_x = x - CROP_BOX[0]
     cropped_y = y - CROP_BOX[1] + 100  # shifted down by 100 for the black top margin
 
-    # Draw the green highlight box
-    hex_color = f"#{hex_color}"
+    # Prepare color
+    if hex_color is None:
+        hex_color = "#ffffff"
+    else:
+        hex_color = f"#{hex_color.lstrip('#')}"  # ensure leading '#'
+
     rgb_color = ImageColor.getrgb(hex_color)
+
+    # Draw the filled rectangle
     draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
 
-    # Draw the symbol in white text if blank is False
+    # Draw the yellow border (always)
+    border_color = (255, 255, 0)  # Yellow
+    draw.rectangle(
+        [cropped_x, cropped_y, cropped_x + width, cropped_y + height],
+        outline=border_color,
+        width=3  # thickness of border (adjust if needed)
+    )
+
+    # Draw the symbol in black text if blank is False
     if not blank and symbol:
         try:
             font_path = os.path.join(base_dir, "fonts", "DejaVuSans.ttf")
             font = get_largest_fitting_font(draw, symbol, width, height, font_path)
         except:
             font = ImageFont.load_default()
-    
+        
         bbox = font.getbbox(symbol)
         text_w = bbox[2] - bbox[0]
         text_h = bbox[3] - bbox[1]

@@ -441,49 +441,39 @@ def get_text_color_for_background(rgb_color):
     r, g, b = rgb_color
     brightness = (0.299 * r + 0.587 * g + 0.114 * b)
     return "black" if brightness > 160 else "white"
+    
 
 def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", highlight_boxes=None):
-    # Constants
     SVG_FILENAME = "periodic_table.svg"
     OKRA_FILENAME = "okra.png"
     CROP_BOX = (0, 0, 920, 530)
     OUTPUT_WIDTH = 1200
     OUTPUT_HEIGHT = 750
 
-    # Resolve paths
     base_dir = os.path.dirname(os.path.abspath(__file__))
     svg_path = os.path.join(base_dir, SVG_FILENAME)
     okra_path = os.path.join(base_dir, OKRA_FILENAME)
 
-    # Render SVG to PNG
     temp_png_path = os.path.join(base_dir, "temp_rendered.png")
-    cairosvg.svg2png(
-        url=svg_path,
-        write_to=temp_png_path,
-        output_width=OUTPUT_WIDTH,
-        output_height=OUTPUT_HEIGHT
-    )
+    cairosvg.svg2png(url=svg_path, write_to=temp_png_path, output_width=OUTPUT_WIDTH, output_height=OUTPUT_HEIGHT)
 
-    # Load and crop periodic table
     table_img = Image.open(temp_png_path).convert("RGB").crop(CROP_BOX)
     table_width, table_height = table_img.size
 
-    # Create final image with black space above
     total_height = table_height + 100
     final_img = Image.new('RGB', (table_width, total_height), color=(0, 0, 0))
-    final_img.paste(table_img, (0, 100))  # paste at y=100
+    final_img.paste(table_img, (0, 100))
     draw = ImageDraw.Draw(final_img)
 
-    # Adjust for crop and top margin
     cropped_x = x - CROP_BOX[0]
     cropped_y = y - CROP_BOX[1] + 100
 
-    # Handle color and box highlight
     if not hex_color:
         hex_color = "#ffffff"
     else:
         hex_color = f"#{hex_color.lstrip('#')}"
     rgb_color = ImageColor.getrgb(hex_color)
+
     if highlight_boxes:
         for box in highlight_boxes:
             box_x = box["x"] - CROP_BOX[0]
@@ -492,21 +482,18 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", hig
             box_h = box["height"]
             box_color = f"#{box['color'].lstrip('#')}" if box.get("color") else "#ffffff"
             rgb_box_color = ImageColor.getrgb(box_color)
-    
+
             draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=rgb_box_color)
+
+            box_brightness = 0.299 * rgb_box_color[0] + 0.587 * rgb_box_color[1] + 0.114 * rgb_box_color[2]
+            if box_brightness > 186:
+                draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], outline="red", width=2)
     else:
         draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
+        brightness = 0.299 * rgb_color[0] + 0.587 * rgb_color[1] + 0.114 * rgb_color[2]
+        if brightness > 186:
+            draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], outline="red", width=2)
 
-    # Add red border if background is light
-    brightness = 0.299 * rgb_color[0] + 0.587 * rgb_color[1] + 0.114 * rgb_color[2]
-    if brightness > 186:
-        draw.rectangle(
-            [cropped_x, cropped_y, cropped_x + width, cropped_y + height],
-            outline="red",
-            width=2
-        )
-
-    # Draw the symbol text
     if not blank and symbol:
         try:
             font_path = os.path.join(base_dir, "fonts", "DejaVuSans.ttf")
@@ -519,26 +506,9 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", hig
         text_w = bbox[2] - bbox[0]
         text_h = bbox[3] - bbox[1]
         text_x = cropped_x + (width - text_w) // 2
-        text_y = cropped_y + (height - text_h) // 2 - 4  # shift upward slightly
+        text_y = cropped_y + (height - text_h) // 2 - 4
         draw.text((text_x, text_y), symbol, fill=text_color, font=font)
 
-    # Add okra image at top center
-    #try:
-        #okra_img = Image.open(okra_path).convert("RGBA")
-        #okra_w, okra_h = okra_img.size
-        #scale = min(80 / okra_h, 0.5)
-        #okra_img = okra_img.resize(
-        #    (int(okra_w * scale), int(okra_h * scale)),
-        #    Image.Resampling.LANCZOS
-        #)
-        #okra_w, okra_h = okra_img.size
-        #okra_x = (table_width - okra_w) // 2
-        #okra_y = (100 - okra_h) // 2
-        #final_img.paste(okra_img, (okra_x, okra_y), okra_img)
-    #except Exception as e:
-    #    print(f"Failed to overlay okra.png: {e}")
-
-    # Save and return
     image_buffer = io.BytesIO()
     final_img.save(image_buffer, format='PNG')
     image_buffer.seek(0)
@@ -649,7 +619,8 @@ def ask_element_challenge(winner):
                     "$match": {
                         "_id": {"$nin": list(recent_element_ids)},
                         "hypothetical": "No",  # Ensure only enabled element are included
-                        "question_type": "multiple"
+                        "question_type": "multiple",
+                        "question_type": {"$in": ["multiple", "multiple-single-answer"]}
                     }
                 },
                 {"$sample": {"size": 5}},  # Sample a larger set first
@@ -807,7 +778,7 @@ def ask_element_challenge(winner):
                             if user_guess == correct_answer or (len(correct_answer) >= 4 and user_guess[:4] == correct_answer[:4]):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 formatted_answers = ", ".join(name.upper() for name in element_answers)
-                                message = f"\n🗒️📋 Full List\n\n{formatted_answers}\n"
+                                message += f"\n🗒️📋 Full List\n{formatted_answers}\n"
                                 send_message(target_room_id, message)
                                 right_answer = True
     

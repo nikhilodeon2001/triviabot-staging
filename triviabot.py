@@ -676,10 +676,8 @@ def ask_element_challenge(winner):
             if element_question_type == "single":
                 
                 if game_mode == "normal":
-                    if element_easy == 1:
-                        element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
-                    else:
-                        element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
+                    element_crossword_mxc, element_crossword_width, element_crossword_height, element_crossword_string = generate_crossword_image(element_name)
+                    element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
                 else:
                     element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
 
@@ -724,6 +722,9 @@ def ask_element_challenge(winner):
         if element_question_type == "single":
             message = f"\n🔍🧪 {redacted_element_summary}\n"
             send_message(target_room_id, message)
+
+            if game_mode == "normal":
+                send_image(target_room_id, element_crossword_mxc, element_crossword_width, element_crossword_height, 100)
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts
@@ -844,12 +845,13 @@ def ask_element_challenge(winner):
 
 
 def replace_element_references(element_summary, element_name, element_symbol):
-    # Replace ALL occurrences of element_name (even inside words)
-    modified_summary = element_summary.replace(element_name, "OKRA")
+    # Replace ALL occurrences of element_name (even inside words), case insensitive
+    name_pattern = re.compile(re.escape(element_name), re.IGNORECASE)
+    modified_summary = name_pattern.sub("OKRA", element_summary)
 
-    # Replace element_symbol only if it matches as a full word
-    symbol_pattern = r'\b' + re.escape(element_symbol) + r'\b'
-    modified_summary = re.sub(symbol_pattern, "OKRA", modified_summary)
+    # Replace element_symbol only if it matches as a full word, case insensitive
+    symbol_pattern = re.compile(r'\b' + re.escape(element_symbol) + r'\b', re.IGNORECASE)
+    modified_summary = symbol_pattern.sub("OKRA", modified_summary)
 
     return modified_summary
 

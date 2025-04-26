@@ -424,26 +424,18 @@ def word_similarity(guess, answer):
     score = (seq_similarity * 0.5) + first_letter_bonus + last_letter_bonus + length_similarity + phonetic_match + synonym_match
     return round(min(score, 1.0), 3)
 
-def get_largest_fitting_font(draw, text, box_width, box_height, font_path):
-    for size in range(100, 1, -1):  # Try from big to small
+def get_largest_fitting_font(draw, text, box_width, box_height, font_path, padding=6):
+    max_width = box_width - padding
+    max_height = box_height - padding
+
+    for size in range(100, 1, -1):  # Try from large to small
         font = ImageFont.truetype(font_path, size)
         bbox = draw.textbbox((0, 0), text, font=font)
         text_w = bbox[2] - bbox[0]
         text_h = bbox[3] - bbox[1]
-        if text_w <= box_width - 4 and text_h <= box_height - 4:
+        if text_w <= max_width and text_h <= max_height:
             return font
-    return ImageFont.truetype(font_path, 12)
-
-
-def get_largest_fitting_font(draw, text, box_width, box_height, font_path):
-    for size in range(100, 1, -1):
-        font = ImageFont.truetype(font_path, size)
-        bbox = draw.textbbox((0, 0), text, font=font)
-        text_w = bbox[2] - bbox[0]
-        text_h = bbox[3] - bbox[1]
-        if text_w <= box_width - 4 and text_h <= box_height - 4:
-            return font
-    return ImageFont.truetype(font_path, 12)
+    return ImageFont.truetype(font_path, 12)  # fallback
 
 def get_text_color_for_background(rgb_color):
     r, g, b = rgb_color
@@ -556,7 +548,7 @@ def ask_element_challenge(winner):
     ]
 
     element_gif_url = random.choice(element_gifs)
-    message = f"\n💧🔥 Guessium: Name the element(s)\n"
+    message = f"\n💧🔥 Elementary: Name the element(s)\n"
     image_mxc, image_width, image_height = download_image_from_url(element_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -6331,7 +6323,7 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. ➕➖ Sign Language ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. 💧🔥 Guessium ☕✨\n"
+        message += f"{counter}. 💧🔥 Elementary ☕✨\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         message += f"\nX. ⏭️🕹️ Skip Mini-Game\n"
         send_message(target_room_id, message) 
@@ -7073,13 +7065,13 @@ def ask_wof_number(winner):
 
                     if str(message_content) in {"26"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Guessium' requires {num_list_players}+ players.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Elementary' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 
                     if str(message_content) in {"26"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Guessium' requires {num_list_players}+ players.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Elementary' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
 
@@ -11498,7 +11490,7 @@ def start_trivia():
             time.sleep(3)
             
             start_message = f"\n✨🧪 New mini-games from the Okra Lab!\n"
-            start_message += f"\n💧🔥 Guessium"
+            start_message += f"\n💧🔥 Elementary"
             start_message += f"\n➕➖ Sign Language"
             start_message += f"\n📖🕵️‍♂️ Prose & Cons"
             start_message += f"\n🎰🗣️ PolygLottery\n"

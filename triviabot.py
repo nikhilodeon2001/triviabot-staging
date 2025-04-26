@@ -569,7 +569,7 @@ def ask_element_challenge(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    message = f"\n✍🧸🧨 @{winner}, 'easy' mode...or 'hard'?\n"
+    message = f"\n✍🧸🧨 @{winner}, 'normal' mode...or 'okrap'?\n"
     send_message(target_room_id, message)
     initialize_sync()
     
@@ -612,7 +612,7 @@ def ask_element_challenge(winner):
     
                 message_content = event.get("content", {}).get("body", "").strip()
     
-                if message_content in {"easy", "hard"}:
+                if message_content in {"normal", "okrap"}:
                     game_mode = message_content
                     react_to_message(event_id, target_room_id, "okra21")
                     break
@@ -628,8 +628,8 @@ def ask_element_challenge(winner):
     if game_mode:
         message = f"\n💥🤯 Ok...ra! We're going with {game_mode.upper()} mode baby!\n"
     else:
-        message = "\n😬⏱️ Time's up! We'll stick with EASY mode.\n"
-        game_mode = "easy"
+        message = "\n😬⏱️ Time's up! We'll stick with NORMAL mode.\n"
+        game_mode = "normal"
 
     send_message(target_room_id, message)
    
@@ -703,7 +703,7 @@ def ask_element_challenge(winner):
 
             if element_question_type == "single":
 
-                if game_mode == "easy":
+                if game_mode == "normal":
                     if element_easy == 1:
                         element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
                     else:

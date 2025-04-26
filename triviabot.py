@@ -494,15 +494,16 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
     rgb_color = ImageColor.getrgb(hex_color)
     draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
 
-    # Yellow border for contrast if background is light
-    if sum(rgb_color) > 600:  # Very light background
+    # Add red border if background is light
+    brightness = 0.299 * rgb_color[0] + 0.587 * rgb_color[1] + 0.114 * rgb_color[2]
+    if brightness > 186:
         draw.rectangle(
             [cropped_x, cropped_y, cropped_x + width, cropped_y + height],
-            outline="yellow",
+            outline="red",
             width=2
         )
 
-    # Draw symbol if not blank
+    # Draw the symbol text
     if not blank and symbol:
         try:
             font_path = os.path.join(base_dir, "fonts", "DejaVuSans.ttf")
@@ -510,21 +511,19 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
         except:
             font = ImageFont.load_default()
 
-        # Auto text color
-        text_color = "black" if sum(rgb_color) > 382 else "white"  # 382 = ~50% of 765
-
+        text_color = "black" if brightness > 186 else "white"
         bbox = font.getbbox(symbol)
         text_w = bbox[2] - bbox[0]
         text_h = bbox[3] - bbox[1]
         text_x = cropped_x + (width - text_w) // 2
-        text_y = cropped_y + (height - text_h) // 2 - 4  # move up slightly
+        text_y = cropped_y + (height - text_h) // 2 - 4  # shift upward slightly
         draw.text((text_x, text_y), symbol, fill=text_color, font=font)
 
     # Add okra image at top center
     try:
         okra_img = Image.open(okra_path).convert("RGBA")
         okra_w, okra_h = okra_img.size
-        scale = min(80 / okra_h, 0.5)  # scale down to fit top
+        scale = min(80 / okra_h, 0.5)
         okra_img = okra_img.resize(
             (int(okra_w * scale), int(okra_h * scale)),
             Image.Resampling.LANCZOS

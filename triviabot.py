@@ -424,25 +424,15 @@ def word_similarity(guess, answer):
     score = (seq_similarity * 0.5) + first_letter_bonus + last_letter_bonus + length_similarity + phonetic_match + synonym_match
     return round(min(score, 1.0), 3)
 
-def get_max_font_size(draw, text, max_width, max_height, font_path):
-    min_size = 1
-    max_size = 200  # Upper limit for reasonable font size
-    best_font = None
-
-    while min_size <= max_size:
-        mid_size = (min_size + max_size) // 2
-        font = ImageFont.truetype(font_path, mid_size)
+def get_largest_fitting_font(draw, text, box_width, box_height, font_path):
+    for size in range(100, 1, -1):  # Try from big to small
+        font = ImageFont.truetype(font_path, size)
         bbox = draw.textbbox((0, 0), text, font=font)
         text_w = bbox[2] - bbox[0]
         text_h = bbox[3] - bbox[1]
-
-        if text_w <= max_width and text_h <= max_height:
-            best_font = font
-            min_size = mid_size + 1
-        else:
-            max_size = mid_size - 1
-
-    return best_font or ImageFont.truetype(font_path, 12)
+        if text_w <= box_width - 4 and text_h <= box_height - 4:
+            return font
+    return ImageFont.truetype(font_path, 12)
 
 
 def highlight_element(x, y, width, height, blank=True, symbol=""):
@@ -479,8 +469,8 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
     # Draw the symbol in white text if blank is False
     if not blank and symbol:
         try:
-            font_path = "/Library/Fonts/Arial Unicode.ttf" if os.name == 'posix' else "arial.ttf"
-            font = get_max_font_size(draw, symbol, width - 6, height - 6, font_path)  # Add a small margin
+            font_path = os.path.join(os.path.dirname(__file__), "fonts", "DejaVuSans.ttf")
+            font = get_largest_fitting_font(draw, symbol, width, height, font_path)
         except:
             font = ImageFont.load_default()
     

@@ -686,7 +686,7 @@ def ask_element_challenge(winner):
                 print(f"Element: {element_name}")
                 print(f"Element #: {element_number}")
                 
-            elif element_question_type == "multiple":
+            elif element_question_type == "multiple" or element_question_type == "multiple-single-answer":
                 element_group = element_question["element_group"]
                 num_of_elements = element_question["num_of_elements"]
                 element_answers = element_question["answers"]
@@ -711,7 +711,7 @@ def ask_element_challenge(winner):
                 else:
                     element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
 
-            elif element_question_type == "multiple":
+            elif element_question_type == "multiple" or element_question_type == "multiple-single-answer":
                 highlight_boxes = [
                     {
                         "x": el["x"],
@@ -737,7 +737,14 @@ def ask_element_challenge(winner):
         processed_events = set()  # Track processed event IDs to avoid duplicates        
             
         message = f"\n⚠️🚨 Everyone's in!\n"
-        message += f"\n🗣💬❓ ({element_num}/5) Name this element...\n"
+
+        if element_question_type == "single":
+            message += f"\n🗣💬❓ ({element_num}/5) Name this element?\n"
+        elif element_question_type == "multiple-single-answer":
+            message += f"\n🗣💬❓ ({element_num}/5) What are these elements called?\n"
+        elif element_question_type == "multiple":
+            message += f"\n🗣💬❓ ({element_num}/5) Name one element of: {element_group.upper()}\n"
+            
         send_message(target_room_id, message)
         time.sleep(2)        
         send_image(target_room_id, element_image_mxc, element_image_width, element_image_height, 100) 
@@ -787,19 +794,26 @@ def ask_element_challenge(winner):
                         message_content = event.get("content", {}).get("body", "")
 
                         user_guess = message_content.strip().lower()
-                        correct_answer = element_name.strip().lower()
-                        
-                        #if fuzzy_match(message_content, element_name, element_category, element_url):
-                        if user_guess == correct_answer or (len(correct_answer) >= 4 and user_guess[:4] == correct_answer[:4]):
-                            message = f"\n✅🎉 Correct! @{sender_display_name} got it! {element_name.upper()}\n"
-                            send_message(target_room_id, message)
-                            right_answer = True
 
-                            # Update user-specific correct answer count
-                            if sender_display_name not in user_correct_answers:
-                                user_correct_answers[sender_display_name] = 0
-                                
-                            user_correct_answers[sender_display_name] += 1
+                        if element_question_type == "single":
+                            correct_answers = [element_name.strip().lower()]
+                        elif element_question_type == "multiple":
+                            correct_answers = [answer.strip().lower() for answer in element_answers]
+                        elif element_question_type == "multiple-single-answer":
+                            correct_answers = [element_group.strip().lower()]
+                        
+                        for correct_answer in correct_answers:
+                        #if fuzzy_match(message_content, element_name, element_category, element_url):
+                            if user_guess == correct_answer or (len(correct_answer) >= 4 and user_guess[:4] == correct_answer[:4]):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {element_name.upper()}\n"
+                                send_message(target_room_id, message)
+                                right_answer = True
+    
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                    
+                                user_correct_answers[sender_display_name] += 1
                         
             except Exception as e:
                 print(f"Error processing events: {e}")

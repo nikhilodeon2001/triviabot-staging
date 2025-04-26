@@ -475,6 +475,7 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
     cropped_y = y - CROP_BOX[1] + 100  # shifted down by 100 for the black top margin
 
     # Draw the green highlight box
+    hex_color = f"#{hex_color}"
     rgb_color = ImageColor.getrgb(hex_color)
     draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
 

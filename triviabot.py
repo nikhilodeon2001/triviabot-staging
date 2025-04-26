@@ -24,7 +24,7 @@ import string
 from urllib.parse import urlparse 
 from urllib.parse import quote
 import io            
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageColor
 import openai
 import main
 import subprocess
@@ -435,7 +435,7 @@ def get_largest_fitting_font(draw, text, box_width, box_height, font_path):
     return ImageFont.truetype(font_path, 12)
 
 
-def highlight_element(x, y, width, height, blank=True, symbol=""):
+def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
     # Constants
     SVG_FILENAME = "periodic_table.svg"
     OKRA_FILENAME = "okra.png"
@@ -475,7 +475,8 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
     cropped_y = y - CROP_BOX[1] + 100  # shifted down by 100 for the black top margin
 
     # Draw the green highlight box
-    draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=(144, 238, 144))
+    rgb_color = ImageColor.getrgb(hex_color)
+    draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=rgb_color)
 
     # Draw the symbol in white text if blank is False
     if not blank and symbol:
@@ -578,6 +579,7 @@ def ask_element_challenge(winner):
             element_phase = element_question["phase"]
             element_summary = element_question["phase"]
             element_easy = element_question["easy"]
+            element_color = element_question["cpk_hex"]
             element_x = element_question["x"]
             element_y = element_question["y"]
             element_width = element_question["width"]
@@ -590,9 +592,9 @@ def ask_element_challenge(winner):
             print(f"Element #: {element_number}")
 
             if element_easy == 1:
-                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height)
+                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
             else:
-                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, blank=False, symbol=element_symbol)
+                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
 
             if element_question_id:
                 store_question_ids_in_mongo([element_question_id], "element")  # Store it as a list containing a single ID

@@ -690,7 +690,7 @@ def ask_element_challenge(winner):
                 element_coordinate_data = element_question["elements"]
             
             element_category = "element"
-            element_url = "
+            element_url = ""
             element_question_id = element_question["_id"] 
 
             print(f"Element: {element_name}")

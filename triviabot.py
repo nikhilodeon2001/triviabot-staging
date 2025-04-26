@@ -512,20 +512,20 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol=""):
         draw.text((text_x, text_y), symbol, fill=text_color, font=font)
 
     # Add okra image at top center
-    try:
-        okra_img = Image.open(okra_path).convert("RGBA")
-        okra_w, okra_h = okra_img.size
-        scale = min(80 / okra_h, 0.5)
-        okra_img = okra_img.resize(
-            (int(okra_w * scale), int(okra_h * scale)),
-            Image.Resampling.LANCZOS
-        )
-        okra_w, okra_h = okra_img.size
-        okra_x = (table_width - okra_w) // 2
-        okra_y = (100 - okra_h) // 2
-        final_img.paste(okra_img, (okra_x, okra_y), okra_img)
-    except Exception as e:
-        print(f"Failed to overlay okra.png: {e}")
+    #try:
+        #okra_img = Image.open(okra_path).convert("RGBA")
+        #okra_w, okra_h = okra_img.size
+        #scale = min(80 / okra_h, 0.5)
+        #okra_img = okra_img.resize(
+        #    (int(okra_w * scale), int(okra_h * scale)),
+        #    Image.Resampling.LANCZOS
+        #)
+        #okra_w, okra_h = okra_img.size
+        #okra_x = (table_width - okra_w) // 2
+        #okra_y = (100 - okra_h) // 2
+        #final_img.paste(okra_img, (okra_x, okra_y), okra_img)
+    #except Exception as e:
+    #    print(f"Failed to overlay okra.png: {e}")
 
     # Save and return
     image_buffer = io.BytesIO()

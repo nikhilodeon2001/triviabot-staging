@@ -718,7 +718,7 @@ def ask_element_challenge(winner):
                         "y": el["y"],
                         "width": el["width"],
                         "height": el["height"],
-                        "color": f"#{el.get('cpk-hex', 'ffffff')}"
+                        "color": f"#{el['cpk-hex']}" if el.get('cpk-hex') else "#ffffff"
                     }
                     for el in element_coordinate_data
                 ]

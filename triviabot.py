@@ -683,19 +683,22 @@ def ask_element_challenge(winner):
                 element_y = element_question["y"]
                 element_width = element_question["width"]
                 element_height = element_question["height"]
+                print(f"Element: {element_name}")
+                print(f"Element #: {element_number}")
                 
             elif element_question_type == "multiple":
                 element_group = element_question["element_group"]
                 num_of_elements = element_question["num_of_elements"]
                 element_answers = element_question["answers"]
                 element_coordinate_data = element_question["elements"]
+                print(f"Element Group: {element_group} ({num_of_elements})")
+                print(f"Element Answers: {element_answers}")
             
             element_category = "element"
             element_url = ""
             element_question_id = element_question["_id"] 
 
-            print(f"Element: {element_name}")
-            print(f"Element #: {element_number}")
+            
 
 
             if element_question_type == "single":

@@ -577,6 +577,7 @@ def ask_element_challenge(winner):
             element_group = element_question["group"]
             element_phase = element_question["phase"]
             element_summary = element_question["phase"]
+            element_easy = element_question["easy"]
             element_x = element_question["x"]
             element_y = element_question["y"]
             element_width = element_question["width"]
@@ -588,8 +589,10 @@ def ask_element_challenge(winner):
             print(f"Element: {element_name}")
             print(f"Element #: {element_number}")
 
-            element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height)
-            element_image2_mxc, element_image2_width, element_image2_height = highlight_element(element_x, element_y, element_width, element_height, blank=False, symbol=element_symbol)
+            if element_easy == 1:
+                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height)
+            else:
+                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, blank=False, symbol=element_symbol)
 
             if element_question_id:
                 store_question_ids_in_mongo([element_question_id], "element")  # Store it as a list containing a single ID
@@ -607,7 +610,6 @@ def ask_element_challenge(winner):
         send_message(target_room_id, message)
         time.sleep(2)        
         send_image(target_room_id, element_image_mxc, element_image_width, element_image_height, 100) 
-        send_image(target_room_id, element_image2_mxc, element_image2_width, element_image2_height, 100) 
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts

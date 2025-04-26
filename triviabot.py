@@ -618,10 +618,9 @@ def ask_element_challenge(winner):
                 {
                     "$match": {
                         "_id": {"$nin": list(recent_element_ids)},
-                        "hypothetical": "No",  # Ensure only enabled element are included
-                        "question_type": "multiple",
+                        "hypothetical": "No",
                         "question_type": {"$in": ["multiple", "multiple-single-answer"]}
-                    }
+                }
                 },
                 {"$sample": {"size": 5}},  # Sample a larger set first
                 {

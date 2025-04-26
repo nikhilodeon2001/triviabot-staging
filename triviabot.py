@@ -558,6 +558,69 @@ def ask_element_challenge(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
+    message = f"\n✍🧸🧨 @{winner}, 'easy' mode...or 'hard'?\n"
+    send_message(target_room_id, message)
+    initialize_sync()
+    
+    if since_token:
+        params["since"] = since_token
+    
+    start_time = time.time()
+    game_mode = None
+    
+    while time.time() - start_time < magic_time + 5:
+        try:
+            time.sleep(1)
+    
+            if since_token:
+                params["since"] = since_token
+    
+            response = requests.get(sync_url, headers=headers, params=params)
+    
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+    
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")
+    
+                if event_type != "m.room.message" or event_id in processed_events:
+                    continue
+    
+                processed_events.add(event_id)
+                sender = event["sender"]
+                sender_display_name = get_display_name(sender)
+    
+                if sender == bot_user_id or sender_display_name != winner:
+                    continue
+    
+                message_content = event.get("content", {}).get("body", "").strip()
+    
+                if message_content in {"easy", "hard"}:
+                    game_mode = message_content
+                    react_to_message(event_id, target_room_id, "okra21")
+                    break
+    
+            if game_mode is not None:
+                break
+    
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting number input: {e}")
+    
+    # Fallback or confirmation
+    if game_mode:
+        message = f"\n💥🤯 Ok...ra! We're going with {game_mode.upper()} mode baby!\n"
+    else:
+        message = "\n😬⏱️ Time's up! We'll stick with EASY mode.\n"
+        game_mode = "easy"
+
+    send_message(target_room_id, message)
    
     message = f"\n5️⃣🥇 Let's do a best of 5...\n"
     send_message(target_room_id, message)
@@ -612,11 +675,14 @@ def ask_element_challenge(winner):
             print(f"Element: {element_name}")
             print(f"Element #: {element_number}")
 
-            if element_easy == 1:
-                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
+            if game_mode == "easy":
+                if element_easy == 1:
+                    element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
+                else:
+                    element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
             else:
-                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
-
+                element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
+        
             if element_question_id:
                 store_question_ids_in_mongo([element_question_id], "element")  # Store it as a list containing a single ID
 

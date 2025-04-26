@@ -529,7 +529,7 @@ def ask_element_challenge(winner):
     ]
 
     element_gif_url = random.choice(element_gifs)
-    message = f"\n💧🔥 Elementary: Name the element(s)\n"
+    message = f"\n💧🔥 Elementary: All about the fundamentals\n"
     image_mxc, image_width, image_height = download_image_from_url(element_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -709,7 +709,7 @@ def ask_element_challenge(winner):
         message = f"\n⚠️🚨 Everyone's in!\n"
 
         if element_question_type == "single":
-            message += f"\n🗣💬❓ ({element_num}/5) Name this element?\n"
+            message += f"\n🗣💬❓ ({element_num}/5) Name this element...?\n"
         elif element_question_type == "multiple-single-answer":
             message += f"\n🗣💬❓ ({element_num}/5) What are these elements called?\n"
         elif element_question_type == "multiple":
@@ -767,6 +767,7 @@ def ask_element_challenge(winner):
 
                         if element_question_type == "single":
                             correct_answers = [element_name.strip().lower()]
+                            element_answers = None
                         elif element_question_type == "multiple":
                             correct_answers = [answer.strip().lower() for answer in element_answers]
                         elif element_question_type == "multiple-single-answer":

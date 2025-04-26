@@ -438,6 +438,7 @@ def get_largest_fitting_font(draw, text, box_width, box_height, font_path):
 def highlight_element(x, y, width, height, blank=True, symbol=""):
     # Constants
     SVG_FILENAME = "periodic_table.svg"
+    OKRA_FILENAME = "okra.png"
     CROP_BOX = (0, 0, 920, 530)
     OUTPUT_WIDTH = 1200
     OUTPUT_HEIGHT = 750
@@ -445,6 +446,7 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
     # Resolve file paths
     base_dir = os.path.dirname(os.path.abspath(__file__))
     svg_path = os.path.join(base_dir, SVG_FILENAME)
+    okra_path = os.path.join(base_dir, OKRA_FILENAME)
 
     # Render SVG to PNG
     temp_png_path = os.path.join(base_dir, "temp_rendered.png")
@@ -455,13 +457,22 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
         output_height=OUTPUT_HEIGHT
     )
 
-    # Load and crop the image
-    img = Image.open(temp_png_path).convert("RGB").crop(CROP_BOX)
-    draw = ImageDraw.Draw(img)
+    # Load and crop the periodic table image
+    table_img = Image.open(temp_png_path).convert("RGB").crop(CROP_BOX)
+    table_width, table_height = table_img.size
+
+    # Create a new full black background
+    total_height = table_height + 100  # extra 100px black space at top (adjustable)
+    final_img = Image.new('RGB', (table_width, total_height), color=(0, 0, 0))
+
+    # Paste the periodic table at the bottom
+    final_img.paste(table_img, (0, 100))  # paste starting at y = 100
+
+    draw = ImageDraw.Draw(final_img)
 
     # Adjust coordinates for cropping
     cropped_x = x - CROP_BOX[0]
-    cropped_y = y - CROP_BOX[1]
+    cropped_y = y - CROP_BOX[1] + 100  # shifted down by 100 for the black top margin
 
     # Draw the green highlight box
     draw.rectangle([cropped_x, cropped_y, cropped_x + width, cropped_y + height], fill=(144, 238, 144))
@@ -469,7 +480,7 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
     # Draw the symbol in white text if blank is False
     if not blank and symbol:
         try:
-            font_path = os.path.join(os.path.dirname(__file__), "fonts", "DejaVuSans.ttf")
+            font_path = os.path.join(base_dir, "fonts", "DejaVuSans.ttf")
             font = get_largest_fitting_font(draw, symbol, width, height, font_path)
         except:
             font = ImageFont.load_default()
@@ -481,17 +492,27 @@ def highlight_element(x, y, width, height, blank=True, symbol=""):
         text_y = cropped_y + (height - text_h) // 2
         draw.text((text_x, text_y), symbol, fill="black", font=font)
 
+    # Now overlay the okra.png at the top center
+    try:
+        okra_img = Image.open(okra_path).convert("RGBA")
+        okra_w, okra_h = okra_img.size
+        okra_x = (table_width - okra_w) // 2
+        okra_y = (100 - okra_h) // 2  # Center within the black margin
+        final_img.paste(okra_img, (okra_x, okra_y), okra_img)  # use mask for transparency
+    except Exception as e:
+        print(f"Failed to overlay okra.png: {e}")
+
     # Save to buffer
     image_buffer = io.BytesIO()
-    img.save(image_buffer, format='PNG')
+    final_img.save(image_buffer, format='PNG')
     image_buffer.seek(0)
 
     # Upload image (custom function must be defined elsewhere)
     image_mxc = upload_image_to_matrix(image_buffer.read(), False, "okra.png")
 
-    img_width, img_height = img.size
+    img_width, img_height = final_img.size
     return image_mxc, img_width, img_height
-
+    
 
 def ask_element_challenge(winner):
     global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id

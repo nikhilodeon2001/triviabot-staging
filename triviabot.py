@@ -640,7 +640,7 @@ def ask_element_challenge(winner):
                     "$match": {
                         "_id": {"$nin": list(recent_element_ids)},
                         "hypothetical": "No",
-                        "question_type": {"$in": ["multiple-single-answer"]}
+                        #"question_type": {"$in": ["multiple-single-answer"]}
                 }
                 },
                 {"$sample": {"size": 5}},  # Sample a larger set first

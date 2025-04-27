@@ -685,6 +685,7 @@ def ask_element_challenge(winner):
                 element_y = element_question["y"]
                 element_width = element_question["width"]
                 element_height = element_question["height"]
+                element_bohr_url = element_question["bohr_model_image"]
                 print(f"Element: {element_name}")
                 print(f"Element #: {element_number}")
                 
@@ -708,6 +709,7 @@ def ask_element_challenge(winner):
                     element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
                 else:
                     element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
+                element_bohr_mxc, element_bohr_width, element_bohr_height = download_image_from_url(element_bohr_url, False, "okra.png") 
 
             elif element_question_type == "multiple" or element_question_type == "multiple-single-answer":
                 highlight_boxes = [
@@ -756,6 +758,9 @@ def ask_element_challenge(winner):
                 redacted_element_summary = replace_element_references(element_summary, element_name=element_name, element_symbol=element_symbol)
             message = f"\n🔍🧪 {redacted_element_summary}\n"
             send_message(target_room_id, message)
+
+        if element_question_type == "single":
+            send_image(target_room_id, element_bohr_mxc, element_bohr_width, element_bohr_height, 100)
 
         if game_mode == "normal" and (element_question_type == "multiple-single-answer" or element_question_type == "single"):
             send_image(target_room_id, element_crossword_mxc, element_crossword_width, element_crossword_height, 100)

@@ -170,6 +170,32 @@ reddit = praw.Reddit(
 )
 
 
+def get_survey_results():
+    survey_collection = db["survey_questions"]
+    results = []
+
+    # Find all documents where question_type is "rating-10"
+    rating_questions = survey_collection.find({"question_type": "rating-10"})
+
+    for doc in rating_questions:
+        question = doc.get("question", "Unknown Question")
+        responses = doc.get("responses", {})
+        answer_values = []
+
+        # Go through each user in responses
+        for user_response in responses.values():
+            answer = user_response.get("answer")
+            if isinstance(answer, (int, float)):
+                answer_values.append(answer)
+
+        # Calculate average if there are any valid answers
+        if answer_values:
+            avg_score = round(sum(answer_values) / len(answer_values), 1)
+            results.append(f"{question}: {avg_score}")
+            print(f"{question}: {avg_score}")
+
+    return results
+
 def handle_sigterm(signum, frame):
     print(f"Received signal {signum}. Printing stack trace:")
     traceback.print_stack(frame)
@@ -11632,6 +11658,7 @@ def start_trivia():
                 load_global_variables()
 
             load_parameters()
+            get_survey_results()
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
             fastest_answers_count.clear()

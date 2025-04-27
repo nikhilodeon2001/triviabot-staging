@@ -789,7 +789,7 @@ def ask_element_challenge(winner):
                             normalized_answer = normalize_text(correct_answer).replace(" ", "")
                             print(f"User Guess: {user_guess}")
                             print(f"Correct Answer: {normalized_answer}")
-                            if ((user_guess == normalized_answer or user_guess[:-1] == normalized_answer) and game_mode == "okrap") or (fuzzy_match(user_guess, normalized_answer, element_category, element_url) and game_mode == "normal")):
+                            if (((user_guess == normalized_answer or user_guess[:-1] == normalized_answer) and game_mode == "okrap") or (fuzzy_match(user_guess, normalized_answer, element_category, element_url) and game_mode == "normal")):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 if element_answers:
                                     formatted_answers = ", ".join(name.title() for name in element_answers)

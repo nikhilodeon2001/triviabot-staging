@@ -510,19 +510,27 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", hig
         draw.text((text_x, text_y), symbol, fill=text_color, font=font)
 
     # === ADD OKRA IMAGE ===
-    try:
+   try:
         okra_img = Image.open(okra_path).convert("RGBA")
         okra_w, okra_h = okra_img.size
 
-        # Scale okra so it fits within 80px height max (adjust if needed)
-        max_okra_height = 80
-        if okra_h > max_okra_height:
-            scale_factor = max_okra_height / okra_h
-            okra_img = okra_img.resize((int(okra_w * scale_factor), int(okra_h * scale_factor)), Image.Resampling.LANCZOS)
-            okra_w, okra_h = okra_img.size
+        # Black margin is 100px tall → let's use 90% of that height max
+        max_okra_height = int(100 * 0.9)  # 90px
 
-        okra_x = (table_width - okra_w) // 2
-        okra_y = (100 - okra_h) // 2  # Center within 100px black margin
+        # Also make sure it's not too wide (optional, can add if needed later)
+        max_okra_width = int(table_width * 0.6)  # allow up to 60% table width
+
+        scale_h = max_okra_height / okra_h
+        scale_w = max_okra_width / okra_w
+        scale_factor = min(scale_h, scale_w, 1.0)  # don't upscale beyond 1.0
+
+        new_w = int(okra_w * scale_factor)
+        new_h = int(okra_h * scale_factor)
+
+        okra_img = okra_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+
+        okra_x = (table_width - new_w) // 2
+        okra_y = (100 - new_h) // 2  # perfectly centered vertically
         final_img.paste(okra_img, (okra_x, okra_y), okra_img)
     except Exception as e:
         print(f"Failed to overlay okra.png: {e}")

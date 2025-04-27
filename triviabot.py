@@ -705,7 +705,7 @@ def ask_element_challenge(winner):
             if element_question_type == "single":
                 
                 if game_mode == "normal":
-                    element_crossword_mxc, element_crossword_width, element_crossword_height, element_crossword_string = generate_crossword_image(element_name)
+                    element_crossword_mxc, element_crossword_width, element_crossword_height, element_crossword_string = generate_crossword_image(element_name, prefill=0.3)
                     element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
                 else:
                     element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
@@ -723,7 +723,7 @@ def ask_element_challenge(winner):
                     for el in element_coordinate_data
                 ]
                 if game_mode == "normal":
-                    element_crossword_mxc, element_crossword_width, element_crossword_height, element_crossword_string = generate_crossword_image(element_group)
+                    element_crossword_mxc, element_crossword_width, element_crossword_height, element_crossword_string = generate_crossword_image(element_group, prefill=0.3)
                     
                 element_image_mxc, element_image_width, element_image_height = highlight_element(0, 0, 0, 0, "#ffffff", blank=True, symbol="", highlight_boxes=highlight_boxes)
             
@@ -7900,7 +7900,7 @@ def draw_text_wrapper(text, font, max_width):
     return lines
 
 
-def generate_crossword_image(answer):
+def generate_crossword_image(answer, prefill=0.5):
     answer_length = len(answer)
     
     # Define the grid size
@@ -7919,7 +7919,7 @@ def generate_crossword_image(answer):
     # Determine prefilled letter count and positions
     if answer_length > 2:
         #prefill_count = int(answer_length * .5) + 1  # At least 1 letter should be filled in
-        prefill_count = math.ceil(answer_length * 0.5)
+        prefill_count = math.ceil(answer_length * prefill)
         prefill_positions = random.sample(range(answer_length), prefill_count)
     else:
         prefill_positions = []

@@ -530,8 +530,8 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", hig
 
         okra_img = okra_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
-        okra_x = (table_width - new_w) // 2 - 50
-        okra_y = (100 - new_h) // 2 + 30 # perfectly centered vertically
+        okra_x = (table_width - new_w) // 2 - 80
+        okra_y = (100 - new_h) // 2 + 60 # perfectly centered vertically
         final_img.paste(okra_img, (okra_x, okra_y), okra_img)
     except Exception as e:
         print(f"Failed to overlay okra.png: {e}")

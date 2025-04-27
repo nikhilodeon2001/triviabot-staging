@@ -114,7 +114,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 80, "element": 15}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 80, "element": 100}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -709,7 +709,7 @@ def ask_element_challenge(winner):
                     element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color, blank=False, symbol=element_symbol)
                 else:
                     element_image_mxc, element_image_width, element_image_height = highlight_element(element_x, element_y, element_width, element_height, element_color)
-                element_bohr_mxc, element_bohr_width, element_bohr_height = download_image_from_url(element_bohr_url, False, "okra.png") 
+                #element_bohr_mxc, element_bohr_width, element_bohr_height = download_image_from_url(element_bohr_url, False, "okra.png") 
 
             elif element_question_type == "multiple" or element_question_type == "multiple-single-answer":
                 highlight_boxes = [
@@ -747,6 +747,7 @@ def ask_element_challenge(winner):
         elif element_question_type == "multiple":
             message += f"\n🗣💬❓ ({element_num}/5) Name one element in this group: {element_group.upper()}\n"
             
+        print(f"Question: {message}")
         send_message(target_room_id, message)
         time.sleep(2)        
         send_image(target_room_id, element_image_mxc, element_image_width, element_image_height, 100) 
@@ -759,8 +760,8 @@ def ask_element_challenge(winner):
             message = f"\n🔍🧪 {redacted_element_summary}\n"
             send_message(target_room_id, message)
 
-        if element_question_type == "single":
-            send_image(target_room_id, element_bohr_mxc, element_bohr_width, element_bohr_height, 100)
+        #if element_question_type == "single":
+        #    send_image(target_room_id, element_bohr_mxc, element_bohr_width, element_bohr_height, 100)
 
         if game_mode == "normal" and (element_question_type == "multiple-single-answer" or element_question_type == "single"):
             send_image(target_room_id, element_crossword_mxc, element_crossword_width, element_crossword_height, 100)
@@ -822,8 +823,6 @@ def ask_element_challenge(winner):
                         for correct_answer in correct_answers:
                         #if fuzzy_match(message_content, element_name, element_category, element_url):
                             normalized_answer = normalize_text(correct_answer).replace(" ", "")
-                            print(f"User Guess: {user_guess}")
-                            print(f"Correct Answer: {normalized_answer}")
                             if (((user_guess == normalized_answer or user_guess[:-1] == normalized_answer) and game_mode == "okrap") or (fuzzy_match(user_guess, normalized_answer, element_category, element_url) and game_mode == "normal")):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 if element_answers:
@@ -11633,7 +11632,6 @@ def start_trivia():
                 load_global_variables()
 
             load_parameters()
-            ask_element_challenge("nsharma2")
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
             fastest_answers_count.clear()

@@ -785,7 +785,7 @@ def ask_element_challenge(winner):
                         
                         for correct_answer in correct_answers:
                         #if fuzzy_match(message_content, element_name, element_category, element_url):
-                            if ((user_guess == correct_answer and game_mode == "okrap") or (fuzzy_match(messagde_content, correct_answer, element_category, element_url) and game_mode == "normal")):
+                            if ((user_guess == correct_answer and game_mode == "okrap") or (fuzzy_match(user_guess, correct_answer, element_category, element_url) and game_mode == "normal")):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 if element_answers:
                                     formatted_answers = ", ".join(name.title() for name in element_answers)

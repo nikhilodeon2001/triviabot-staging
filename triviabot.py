@@ -785,7 +785,7 @@ def ask_element_challenge(winner):
                         
                         for correct_answer in correct_answers:
                         #if fuzzy_match(message_content, element_name, element_category, element_url):
-                            if user_guess == correct_answer or (len(correct_answer) >= 4 and user_guess[:4] == correct_answer[:4]):
+                            if user_guess == correct_answer: #or (len(correct_answer) >= 4 and user_guess[:4] == correct_answer[:4]):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 if element_answers:
                                     formatted_answers = ", ".join(name.title() for name in element_answers)

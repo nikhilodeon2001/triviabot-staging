@@ -670,8 +670,6 @@ def ask_element_challenge(winner):
             element_question_id = element_question["_id"] 
 
             
-
-
             if element_question_type == "single":
                 
                 if game_mode == "normal":
@@ -691,7 +689,7 @@ def ask_element_challenge(winner):
                     }
                     for el in element_coordinate_data
                 ]
-                if game_mode == "normal" and element_question_type == "multiple-single-answer":
+                if game_mode == "normal":
                     element_crossword_mxc, element_crossword_width, element_crossword_height, element_crossword_string = generate_crossword_image(element_group)
                     
                 element_image_mxc, element_image_width, element_image_height = highlight_element(0, 0, 0, 0, "#ffffff", blank=True, symbol="", highlight_boxes=highlight_boxes)
@@ -710,11 +708,11 @@ def ask_element_challenge(winner):
         message = f"\n⚠️🚨 Everyone's in!\n"
 
         if element_question_type == "single":
-            message += f"\n🗣💬❓ ({element_num}/5) Name this element...?\n"
+            message += f"\n🗣💬❓ ({element_num}/5) Name this element.\n"
         elif element_question_type == "multiple-single-answer":
-            message += f"\n🗣💬❓ ({element_num}/5) What are these elements called?\n"
+            message += f"\n🗣💬❓ ({element_num}/5) What is this group of elements called?\n"
         elif element_question_type == "multiple":
-            message += f"\n🗣💬❓ ({element_num}/5) Name one element of: {element_group.upper()}\n"
+            message += f"\n🗣💬❓ ({element_num}/5) Name one element in this group: {element_group.upper()}\n"
             
         send_message(target_room_id, message)
         time.sleep(2)        
@@ -787,7 +785,7 @@ def ask_element_challenge(winner):
                         
                         for correct_answer in correct_answers:
                         #if fuzzy_match(message_content, element_name, element_category, element_url):
-                            if ((user_guess == correct_answer and game_mode == "okrap") or (fuzzy_match(message_content, element_name, element_category, element_url) and game_mode == "normal")):
+                            if ((user_guess == correct_answer and game_mode == "okrap") or (fuzzy_match(message_content, correct_answer, element_category, element_url) and game_mode == "normal")):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 if element_answers:
                                     formatted_answers = ", ".join(name.title() for name in element_answers)

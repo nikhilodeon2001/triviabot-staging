@@ -530,8 +530,8 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", hig
     
             okra_img = okra_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
     
-            okra_x = (table_width - new_w) // 2 - 30
-            okra_y = (100 - new_h) // 2 + 30 # perfectly centered vertically
+            okra_x = (table_width - new_w) // 2 - 5
+            okra_y = (100 - new_h) // 2 + 5 # perfectly centered vertically
             final_img.paste(okra_img, (okra_x, okra_y), okra_img)
         except Exception as e:
             print(f"Failed to overlay okra.png: {e}")
@@ -559,7 +559,7 @@ def ask_element_challenge(winner):
     ]
 
     element_gif_url = random.choice(element_gifs)
-    message = f"\n💧🔥 Elementary: All about the fundamentals\n"
+    message = f"\n💧🔥 Elementary: Back to the Building Blocks\n"
     image_mxc, image_width, image_height = download_image_from_url(element_gif_url, False, "okra.png")
     send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
     send_message(target_room_id, message)
@@ -569,7 +569,8 @@ def ask_element_challenge(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    message = f"\n🧸🧨 @{winner}, 'normal' mode...or 'okrap'?\n"
+    message = f"\n🕹️🚀 @{winner}, select the mode:\n"
+    message += "\n🧸🧨 Normal or Okrap.\n"
     send_message(target_room_id, message)
     initialize_sync()
     

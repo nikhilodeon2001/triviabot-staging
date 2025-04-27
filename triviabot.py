@@ -11600,6 +11600,7 @@ def start_trivia():
                 load_global_variables()
 
             load_parameters()
+            ask_element_challenge("nsharma2")
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
             fastest_answers_count.clear()

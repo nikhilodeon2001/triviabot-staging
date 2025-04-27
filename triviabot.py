@@ -723,7 +723,7 @@ def ask_element_challenge(winner):
         if element_question_type == "single":
             if game_mode == "normal":
                 redacted_element_summary = replace_element_references(element_summary, element_name=element_name)
-            elif game_mode == "hard":
+            elif game_mode == "okrap":
                 redacted_element_summary = replace_element_references(element_summary, element_name=element_name, element_symbol=element_symbol)
             message = f"\n🔍🧪 {redacted_element_summary}\n"
             send_message(target_room_id, message)
@@ -787,7 +787,7 @@ def ask_element_challenge(winner):
                         
                         for correct_answer in correct_answers:
                         #if fuzzy_match(message_content, element_name, element_category, element_url):
-                            if ((user_guess == correct_answer and game_mode == "hard") or (fuzzy_match(message_content, element_name, element_category, element_url) and game_mode == "normal")):
+                            if ((user_guess == correct_answer and game_mode == "okrap") or (fuzzy_match(message_content, element_name, element_category, element_url) and game_mode == "normal")):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 if element_answers:
                                     formatted_answers = ", ".join(name.title() for name in element_answers)

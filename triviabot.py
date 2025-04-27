@@ -523,7 +523,7 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", hig
             scale_h = max_okra_height / okra_h
             scale_w = max_okra_width / okra_w
             #scale_factor = min(scale_h, scale_w, 1.0)  # don't upscale beyond 1.0
-            scale_factor = 2
+            scale_factor = .5
     
             new_w = int(okra_w * scale_factor)
             new_h = int(okra_h * scale_factor)

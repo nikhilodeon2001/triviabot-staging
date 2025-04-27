@@ -691,7 +691,9 @@ def ask_element_challenge(winner):
                     }
                     for el in element_coordinate_data
                 ]
-
+                if game_mode == "normal" and element_question_type == "multiple-single-answer":
+                    element_crossword_mxc, element_crossword_width, element_crossword_height, element_crossword_string = generate_crossword_image(element_group)
+                    
                 element_image_mxc, element_image_width, element_image_height = highlight_element(0, 0, 0, 0, "#ffffff", blank=True, symbol="", highlight_boxes=highlight_boxes)
             
             if element_question_id:
@@ -726,8 +728,8 @@ def ask_element_challenge(winner):
             message = f"\n🔍🧪 {redacted_element_summary}\n"
             send_message(target_room_id, message)
 
-            if game_mode == "normal":
-                send_image(target_room_id, element_crossword_mxc, element_crossword_width, element_crossword_height, 100)
+        if game_mode == "normal" and (element_question_type == "multiple-single-answer" or element_question_type == "single"):
+            send_image(target_room_id, element_crossword_mxc, element_crossword_width, element_crossword_height, 100)
 
         initialize_sync()
         start_time = time.time()  # Track when the question starts
@@ -785,7 +787,7 @@ def ask_element_challenge(winner):
                         
                         for correct_answer in correct_answers:
                         #if fuzzy_match(message_content, element_name, element_category, element_url):
-                            if user_guess == correct_answer: #or (len(correct_answer) >= 4 and user_guess[:4] == correct_answer[:4]):
+                            if ((user_guess == correct_answer and game_mode == "hard") or (fuzzy_match(message_content, element_name, element_category, element_url) and game_mode == "normal")):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 if element_answers:
                                     formatted_answers = ", ".join(name.title() for name in element_answers)

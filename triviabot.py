@@ -773,8 +773,7 @@ def ask_element_challenge(winner):
                         sender_display_name = get_display_name(sender)
                         message_content = event.get("content", {}).get("body", "")
 
-                        user_guess = normalize_text(message_content)
-                        user_guess.replace(" ", "")
+                        user_guess = normalize_text(message_content).replace(" ", "")
 
                         if element_question_type == "single":
                             correct_answers = [element_name]

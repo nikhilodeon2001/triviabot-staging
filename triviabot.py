@@ -525,7 +525,10 @@ def ask_element_challenge(winner):
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element1.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element2.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element3.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element6.gif"
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element4.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element5.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element6.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/element/element7.gif"
     ]
 
     element_gif_url = random.choice(element_gifs)
@@ -608,7 +611,7 @@ def ask_element_challenge(winner):
     time.sleep(3)
 
     element_num = 1
-    while element_num <= 50:
+    while element_num <= 5:
         try:
             recent_element_ids = get_recent_question_ids_from_mongo("element")
 
@@ -11597,7 +11600,6 @@ def start_trivia():
                 load_global_variables()
 
             load_parameters()
-            ask_element_challenge("nsharma2")
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()
             fastest_answers_count.clear()

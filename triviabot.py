@@ -460,7 +460,7 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", hig
     table_img = Image.open(temp_png_path).convert("RGB").crop(CROP_BOX)
     table_width, table_height = table_img.size
 
-    total_height = table_height + 100
+    total_height = table_height + 100  # Black margin of 100px
     final_img = Image.new('RGB', (table_width, total_height), color=(0, 0, 0))
     final_img.paste(table_img, (0, 100))
     draw = ImageDraw.Draw(final_img)
@@ -508,6 +508,24 @@ def highlight_element(x, y, width, height, hex_color, blank=True, symbol="", hig
         text_x = cropped_x + (width - text_w) // 2
         text_y = cropped_y + (height - text_h) // 2 - 4
         draw.text((text_x, text_y), symbol, fill=text_color, font=font)
+
+    # === ADD OKRA IMAGE ===
+    try:
+        okra_img = Image.open(okra_path).convert("RGBA")
+        okra_w, okra_h = okra_img.size
+
+        # Scale okra so it fits within 80px height max (adjust if needed)
+        max_okra_height = 80
+        if okra_h > max_okra_height:
+            scale_factor = max_okra_height / okra_h
+            okra_img = okra_img.resize((int(okra_w * scale_factor), int(okra_h * scale_factor)), Image.Resampling.LANCZOS)
+            okra_w, okra_h = okra_img.size
+
+        okra_x = (table_width - okra_w) // 2
+        okra_y = (100 - okra_h) // 2  # Center within 100px black margin
+        final_img.paste(okra_img, (okra_x, okra_y), okra_img)
+    except Exception as e:
+        print(f"Failed to overlay okra.png: {e}")
 
     image_buffer = io.BytesIO()
     final_img.save(image_buffer, format='PNG')

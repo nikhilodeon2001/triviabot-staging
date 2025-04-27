@@ -774,18 +774,19 @@ def ask_element_challenge(winner):
                         message_content = event.get("content", {}).get("body", "")
 
                         user_guess = normalize_text(message_content)
+                        user_guess.replace(" ", "")
 
                         if element_question_type == "single":
-                            correct_answers = [normalize_text(element_name)]
+                            correct_answers = [element_name]
                             element_answers = None
                         elif element_question_type == "multiple":
-                            correct_answers = [normalize_text(answer) for answer in element_answers]
+                            correct_answers = [answer for answer in element_answers]
                         elif element_question_type == "multiple-single-answer":
-                            correct_answers = [normalize_text(element_group)]
+                            correct_answers = [element_group]
                         
                         for correct_answer in correct_answers:
                         #if fuzzy_match(message_content, element_name, element_category, element_url):
-                            if ((user_guess == correct_answer and game_mode == "okrap") or (fuzzy_match(user_guess, correct_answer, element_category, element_url) and game_mode == "normal")):
+                            if ((user_guess == normalize_text(correct_answer).replace(" ", "") and game_mode == "okrap") or (fuzzy_match(user_guess, normalize_text(correct_answer).replace(" ", ""), element_category, element_url) and game_mode == "normal")):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {correct_answer.upper()}\n"
                                 if element_answers:
                                     formatted_answers = ", ".join(name.title() for name in element_answers)

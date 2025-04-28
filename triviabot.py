@@ -634,7 +634,7 @@ def ask_jigsaw_challenge(winner):
             jigsaw_category = "jigsaw"
             jigsaw_question_id = jigsaw_question["_id"] 
             
-           random_tints = [
+            random_tints = [
                 (255, 150, 150),  # light red
                 (150, 255, 150),  # light green
                 (150, 150, 255),  # light blue

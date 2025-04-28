@@ -11991,7 +11991,7 @@ def start_trivia():
                 load_global_variables()
 
             load_parameters()
-            ask_jigsaw_challenge("nsharma2")
+            #ask_jigsaw_challenge("nsharma2")
             get_survey_results()
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()

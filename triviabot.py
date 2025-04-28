@@ -452,76 +452,80 @@ def word_similarity(guess, answer):
 
 
 def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=None, fixed_tint=None, tint_strength=0.50):
-    # Fetch image from URL
-    response = requests.get(image_url)
-    if response.status_code != 200:
-        raise Exception(f"Failed to download image from {image_url}")
+    try:
+        response = requests.get(image_url)
+        if response.status_code != 200:
+            raise Exception(f"Failed to download image from {image_url} (status {response.status_code})")
 
-    content_type = response.headers.get('Content-Type', '')
+        content_type = response.headers.get('Content-Type', '')
 
+        if "svg" in content_type or image_url.lower().endswith(".svg"):
+            try:
+                png_bytes = cairosvg.svg2png(bytestring=response.content)
+                img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
+            except Exception as e:
+                print(f"⚠️ SVG to PNG conversion failed for {image_url}: {e}")
+                raise  # Raise again so you skip
+        else:
+            try:
+                img = Image.open(io.BytesIO(response.content)).convert("RGB")
+            except Exception as e:
+                print(f"⚠️ Image opening failed for {image_url}: {e}")
+                raise
 
-    if "svg" in content_type or image_url.lower().endswith(".svg"):
-        # Convert SVG bytes to PNG bytes
-        png_bytes = cairosvg.svg2png(bytestring=response.content)
-        img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
-    else:
-        # Assume it's a PNG/JPG
-        img = Image.open(io.BytesIO(response.content)).convert("RGB")
-    
-    width, height = img.size
+        width, height = img.size
 
-    # Validate number of pieces
-    grid_size = int(num_pieces ** 0.5)
-    if grid_size * grid_size != num_pieces:
-        raise ValueError("num_pieces must be a perfect square (like 4, 9, 16, etc.)")
+        # Validate pieces
+        grid_size = int(num_pieces ** 0.5)
+        if grid_size * grid_size != num_pieces:
+            raise ValueError("num_pieces must be a perfect square (like 4, 9, 16, etc.)")
 
-    piece_width = width // grid_size
-    piece_height = height // grid_size
+        piece_width = width // grid_size
+        piece_height = height // grid_size
 
-    # Cut image into pieces
-    pieces = []
-    for i in range(grid_size):
-        for j in range(grid_size):
-            left = j * piece_width
-            upper = i * piece_height
-            right = left + piece_width
-            lower = upper + piece_height
-            piece = img.crop((left, upper, right, lower))
-            pieces.append(piece)
+        pieces = []
+        for i in range(grid_size):
+            for j in range(grid_size):
+                left = j * piece_width
+                upper = i * piece_height
+                right = left + piece_width
+                lower = upper + piece_height
+                piece = img.crop((left, upper, right, lower))
+                pieces.append(piece)
 
-    img.close()  # ✅ Free up memory immediately
-    random.shuffle(pieces)
+        img.close()
+        random.shuffle(pieces)
 
-    shuffled_img = Image.new("RGB", (width, height))
+        shuffled_img = Image.new("RGB", (width, height))
 
-    idx = 0
-    for i in range(grid_size):
-        for j in range(grid_size):
-            piece = pieces[idx]
+        idx = 0
+        for i in range(grid_size):
+            for j in range(grid_size):
+                piece = pieces[idx]
 
-            if tint_mode == "fixed" and fixed_tint:
-                overlay = Image.new("RGB", piece.size, fixed_tint)
-                piece = Image.blend(piece, overlay, alpha=tint_strength)
-            elif tint_mode == "random" and tint_colors:
-                random_tint = random.choice(tint_colors)
-                overlay = Image.new("RGB", piece.size, random_tint)
-                piece = Image.blend(piece, overlay, alpha=tint_strength)
+                if tint_mode == "fixed" and fixed_tint:
+                    overlay = Image.new("RGB", piece.size, fixed_tint)
+                    piece = Image.blend(piece, overlay, alpha=tint_strength)
+                elif tint_mode == "random" and tint_colors:
+                    random_tint = random.choice(tint_colors)
+                    overlay = Image.new("RGB", piece.size, random_tint)
+                    piece = Image.blend(piece, overlay, alpha=tint_strength)
 
-            left = j * piece_width
-            upper = i * piece_height
-            shuffled_img.paste(piece, (left, upper))
-            idx += 1
+                left = j * piece_width
+                upper = i * piece_height
+                shuffled_img.paste(piece, (left, upper))
+                idx += 1
 
-    # Save to memory buffer
-    image_buffer = io.BytesIO()
-    shuffled_img.save(image_buffer, format="PNG")
-    image_buffer.seek(0)
+        image_buffer = io.BytesIO()
+        shuffled_img.save(image_buffer, format="PNG")
+        image_buffer.seek(0)
 
-    # Upload to Matrix and get mxc
-    image_mxc = upload_image_to_matrix(image_buffer.read(), False, "shuffled.png")
-    
-    return image_mxc, width, height
+        image_mxc = upload_image_to_matrix(image_buffer.read(), False, "shuffled.png")
+        return image_mxc, width, height
 
+    except Exception as e:
+        print(f"⚠️ Skipping {image_url} due to error: {e}")
+        return None, None, None  # Important so your loop doesn't crash
 
 
 

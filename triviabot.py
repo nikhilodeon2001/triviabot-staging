@@ -457,6 +457,10 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
         if response.status_code != 200:
             raise Exception(f"Failed to download image from {image_url} (status {response.status_code})")
 
+        print(f"Downloaded {image_url} ({len(response.content)} bytes)")
+
+        # Show a small preview of the content to debug
+        print(response.content[:300])  # show first 300 bytes
         content_type = response.headers.get('Content-Type', '')
 
         if "svg" in content_type or image_url.lower().endswith(".svg"):

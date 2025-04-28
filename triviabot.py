@@ -640,7 +640,7 @@ def ask_jigsaw_challenge(winner):
                 (150, 150, 255),  # bluish
             ]
             image_mxc, image_width, image_height = download_image_from_url(jigsaw_image_url, False, "okra.png")
-            jigsaw_image_mxc, jigsaw_image_width, jigsaw_image_height = shuffle_image_pieces(jigsaw_image_url, num_pieces=num_pieces, tint_mode="random", tint_colors=random_tints, fixed_tint=None, tint_strength=0.50)
+            jigsaw_image_mxc, jigsaw_image_width, jigsaw_image_height = shuffle_image_pieces(jigsaw_image_url, num_pieces=int(num_pieces), tint_mode="random", tint_colors=random_tints, fixed_tint=None, tint_strength=0.50)
             
             if jigsaw_question_id:
                 store_question_ids_in_mongo([jigsaw_question_id], "jigsaw")  # Store it as a list containing a single ID
@@ -11991,7 +11991,7 @@ def start_trivia():
                 load_global_variables()
 
             load_parameters()
-            #ask_jigsaw_challenge("nsharma2")
+            ask_jigsaw_challenge("nsharma2")
             get_survey_results()
             # Reset the scoreboard and fastest answers at the start of each round
             scoreboard.clear()

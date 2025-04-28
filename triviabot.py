@@ -666,9 +666,24 @@ def ask_jigsaw_challenge(winner):
                 (220, 200, 255),  # light violet
             ]
         
-            image_mxc, image_width, image_height = download_image_from_url(jigsaw_image_url, False, "okra.png")
-            jigsaw_image_mxc, jigsaw_image_width, jigsaw_image_height = shuffle_image_pieces(jigsaw_image_url, num_pieces=int(num_pieces), tint_mode="random", tint_colors=random_tints, fixed_tint=None, tint_strength=0.50)
-            
+            #image_mxc, image_width, image_height = download_image_from_url(jigsaw_image_url, False, "okra.png")
+            #jigsaw_image_mxc, jigsaw_image_width, jigsaw_image_height = shuffle_image_pieces(jigsaw_image_url, num_pieces=int(num_pieces), tint_mode="random", tint_colors=random_tints, fixed_tint=None, tint_strength=0.50)
+
+            try:
+                image_mxc, image_width, image_height = download_image_from_url(jigsaw_image_url, False, "okra.png")
+                jigsaw_image_mxc, jigsaw_image_width, jigsaw_image_height = shuffle_image_pieces(
+                    jigsaw_image_url,
+                    num_pieces=int(num_pieces),
+                    tint_mode="random",
+                    tint_colors=random_tints,
+                    fixed_tint=None,
+                    tint_strength=0.50
+                )
+                
+            except Exception as e:
+                print(f"⚠️ Skipping {jigsaw_image_url} due to error: {e}")
+                continue  # ✅ Skip to the next loop iteration
+                
             if jigsaw_question_id:
                 store_question_ids_in_mongo([jigsaw_question_id], "jigsaw")  # Store it as a list containing a single ID
 
@@ -12050,7 +12065,7 @@ def start_trivia():
             
             start_message = f"\n✨🧪 New mini-games from the Okra Lab!\n"
             start_message += f"\n🧩🌀 Jigsawed"
-            start_message += f"\n💧🔥 Elementary/n"
+            start_message += f"\n💧🔥 Elementary\n"
             
             send_message(target_room_id, start_message)
             time.sleep(3)

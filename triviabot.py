@@ -114,7 +114,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 80, "element": 100}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 80, "element": 100, "jigsaw": 50}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -449,6 +449,320 @@ def word_similarity(guess, answer):
 
     score = (seq_similarity * 0.5) + first_letter_bonus + last_letter_bonus + length_similarity + phonetic_match + synonym_match
     return round(min(score, 1.0), 3)
+
+
+def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=None, fixed_tint=None, tint_strength=0.50):
+    # Fetch image from URL
+    response = requests.get(image_url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to download image from {image_url}")
+    
+    img = Image.open(io.BytesIO(response.content)).convert("RGB")
+    width, height = img.size
+
+    # Validate number of pieces
+    grid_size = int(num_pieces ** 0.5)
+    if grid_size * grid_size != num_pieces:
+        raise ValueError("num_pieces must be a perfect square (like 4, 9, 16, etc.)")
+
+    piece_width = width // grid_size
+    piece_height = height // grid_size
+
+    # Cut image into pieces
+    pieces = []
+    for i in range(grid_size):
+        for j in range(grid_size):
+            left = j * piece_width
+            upper = i * piece_height
+            right = left + piece_width
+            lower = upper + piece_height
+            piece = img.crop((left, upper, right, lower))
+            pieces.append(piece)
+
+    random.shuffle(pieces)
+
+    shuffled_img = Image.new("RGB", (width, height))
+
+    idx = 0
+    for i in range(grid_size):
+        for j in range(grid_size):
+            piece = pieces[idx]
+
+            if tint_mode == "fixed" and fixed_tint:
+                overlay = Image.new("RGB", piece.size, fixed_tint)
+                piece = Image.blend(piece, overlay, alpha=tint_strength)
+            elif tint_mode == "random" and tint_colors:
+                random_tint = random.choice(tint_colors)
+                overlay = Image.new("RGB", piece.size, random_tint)
+                piece = Image.blend(piece, overlay, alpha=tint_strength)
+
+            left = j * piece_width
+            upper = i * piece_height
+            shuffled_img.paste(piece, (left, upper))
+            idx += 1
+
+    # Save to memory buffer
+    image_buffer = io.BytesIO()
+    shuffled_img.save(image_buffer, format="PNG")
+    image_buffer.seek(0)
+
+    # Upload to Matrix and get mxc
+    image_mxc = upload_image_to_matrix(image_buffer.read(), False, "shuffled.png")
+    
+    return image_mxc, width, height
+
+
+
+
+def ask_jigsaw_challenge(winner):
+    global since_token, params, headers, max_retries, delay_between_retries, magic_time, bot_user_id, target_room_id
+
+
+    jigsaw_gifs = [
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw1.gif",
+    ]
+
+    jigsaw_gif_url = random.choice(jigsaw_gifs)
+    message = f"\n🧩🌀 Jigsawed: Let's play a game...\n"
+    image_mxc, image_width, image_height = download_image_from_url(jigsaw_gif_url, False, "okra.png")
+    send_image(target_room_id, image_mxc, image_width, image_height, image_size=100)
+    send_message(target_room_id, message)
+    time.sleep(5)
+
+    sync_url = f"{matrix_base_url}/sync"
+    processed_events = set()  # Track processed event IDs to avoid duplicates
+    user_correct_answers = {}  # Initialize dictionary to track correct answers per user
+
+    message = f"\n🪚🔢 @{winner}, how many pieces?\n"
+    message += "\n👉👉 4, 9, 16, or 25\n"
+    send_message(target_room_id, message)
+    initialize_sync()
+    
+    if since_token:
+        params["since"] = since_token
+    
+    start_time = time.time()
+    num_pieces = None
+    
+    while time.time() - start_time < magic_time + 5:
+        try:
+            time.sleep(1)
+    
+            if since_token:
+                params["since"] = since_token
+    
+            response = requests.get(sync_url, headers=headers, params=params)
+    
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                continue
+    
+            sync_data = response.json()
+            since_token = sync_data.get("next_batch")
+            room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+            for event in room_events:
+                event_id = event["event_id"]
+                event_type = event.get("type")
+    
+                if event_type != "m.room.message" or event_id in processed_events:
+                    continue
+    
+                processed_events.add(event_id)
+                sender = event["sender"]
+                sender_display_name = get_display_name(sender)
+    
+                if sender == bot_user_id or sender_display_name != winner:
+                    continue
+    
+                message_content = event.get("content", {}).get("body", "").strip()
+    
+                if message_content in {"4", "9", "16", "25"}:
+                    num_pieces = message_content
+                    react_to_message(event_id, target_room_id, "okra21")
+                    break
+    
+            if num_pieces is not None:
+                break
+    
+        except requests.exceptions.RequestException as e:
+            sentry_sdk.capture_exception(e)
+            print(f"Error collecting number input: {e}")
+    
+    # Fallback or confirmation
+    if num_pieces:
+        message = f"\n💥🤯 Ok...ra! We're going with {num_pieces} pieces!\n"
+    else:
+        message = "\n😬⏱️ Time's up! We'll go with 9 pieces.\n"
+        num_pieces = "9"
+
+    send_message(target_room_id, message)
+   
+    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
+    send_message(target_room_id, message)
+    time.sleep(3)
+
+    jigsaw_num = 1
+    while jigsaw_num <= 5:
+        try:
+            recent_jigsaw_ids = get_recent_question_ids_from_mongo("jigsaw")
+
+            # Fetch wheel of fortune questions using the random subset method
+            jigsaw_collection = db["jigsaw_questions"]
+            pipeline_jigsaw = [
+                {
+                    "$match": {
+                        "_id": {"$nin": list(recent_jigsaw_ids)}
+                }
+                },
+                {"$sample": {"size": 5}},  # Sample a larger set first
+                {
+                    "$group": {  
+                        "_id": "$question",
+                        "question_doc": {"$first": "$$ROOT"}
+                    }
+                },
+                {"$replaceRoot": {"newRoot": "$question_doc"}},  
+                {"$sample": {"size": 1}}  # Sample 1 unique question
+            ]
+
+            jigsaw_questions = list(jigsaw_collection.aggregate(pipeline_jigsaw))
+            jigsaw_question = jigsaw_questions[0]
+            jigsaw_image_url = jigsaw_question["url"]
+            jigsaw_answers = jigsaw_question["answers"]   
+            jigsaw_main_answer = jigsaw_answers[0]
+            jigsaw_category = "jigsaw"
+            jigsaw_question_id = jigsaw_question["_id"] 
+            
+            random_tints = [
+                (255, 150, 150),  # reddish
+                (150, 255, 150),  # greenish
+                (150, 150, 255),  # bluish
+            ]
+            image_mxc, image_width, image_height = download_image_from_url(jigsaw_image_url, False, "okra.png")
+            jigsaw_image_mxc, jigsaw_image_width, jigsaw_image_height = shuffle_image_pieces(jigsaw_image_url, num_pieces=num_pieces, tint_mode="random", tint_colors=random_tints, fixed_tint=None, tint_strength=0.50)
+            
+            if jigsaw_question_id:
+                store_question_ids_in_mongo([jigsaw_question_id], "jigsaw")  # Store it as a list containing a single ID
+
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            error_details = traceback.format_exc()
+            print(f"Error selecting jigsaw questions: {e}\nDetailed traceback:\n{error_details}")
+            return None  # Return an empty list in case of failure
+
+        processed_events = set()  # Track processed event IDs to avoid duplicates        
+            
+        message = f"\n⚠️🚨 Everyone's in!\n"
+        
+        message += f"\n🗣💬❓ ({jigsaw_num}/5) Who or What is THIS?!?.\n"
+   
+        print(f"Answer: {jigsaw_answers}")
+        send_message(target_room_id, message)
+        time.sleep(2)        
+        
+        send_image(target_room_id, jigsaw_image_mxc, jigsaw_image_width, jigsaw_image_height, 100) 
+
+        initialize_sync()
+        start_time = time.time()  # Track when the question starts
+        message_content = ""
+        right_answer = False
+        winner_name = ""
+        winner_score = ""
+        
+        while time.time() - start_time < 20 and right_answer == False:
+            time.sleep(1)
+            try:                                                      
+                if since_token:
+                    params["since"] = since_token
+    
+                response = requests.get(sync_url, headers=headers, params=params)
+    
+                if response.status_code != 200:
+                    print(f"Unexpected status code: {response.status_code}")
+                    continue
+    
+                sync_data = response.json()
+                since_token = sync_data.get("next_batch")  # Update since_token for the next batch
+                room_events = sync_data.get("rooms", {}).get("join", {}).get(target_room_id, {}).get("timeline", {}).get("events", [])
+    
+                for event in room_events:                
+                    event_id = event["event_id"]
+                    event_type = event.get("type")
+    
+                    # Only process and redact if the event type is "m.room.message"
+                    if event_type == "m.room.message":
+                        
+                        # Skip processing if this event_id was already processed
+                        if event_id in processed_events:
+                            continue
+        
+                        # Add event_id to the set of processed events
+                        processed_events.add(event_id)
+                        sender = event["sender"]
+    
+                        if sender == bot_user_id:
+                            continue
+    
+                        sender_display_name = get_display_name(sender)
+                        message_content = event.get("content", {}).get("body", "")
+
+                        user_guess = normalize_text(message_content).replace(" ", "")
+
+                        
+                        for jigsaw_answer in jigsaw_answers:
+                        #if fuzzy_match(message_content, jigsaw_name, jigsaw_category, jigsaw_url):
+                            normalized_answer = normalize_text(jigsaw_answer).replace(" ", "")
+                            if fuzzy_match(user_guess, normalized_answer, jigsaw_category, jigsaw_url):
+                                message = f"\n✅🎉 Correct! @{sender_display_name} got it! {jigsaw_answer.upper()}\n"
+                                send_message(target_room_id, message)
+                                send_image(target_room_id, image_mxc, image_width, image_height, 100) 
+                                right_answer = True
+    
+                                # Update user-specific correct answer count
+                                if sender_display_name not in user_correct_answers:
+                                    user_correct_answers[sender_display_name] = 0
+                                    
+                                user_correct_answers[sender_display_name] += 1
+                        
+            except Exception as e:
+                print(f"Error processing events: {e}")
+        
+        if right_answer == False:    
+            message = f"\n❌😢 No one got it.\n\nAnswer: {jigsaw_main_answer.upper()}\n"
+            send_message(target_room_id, message)
+            send_image(target_room_id, image_mxc, image_width, image_height, 100) 
+        
+        time.sleep(2)
+
+        jigsaw_num = jigsaw_num + 1
+                        
+        # Sort the dictionary by the count (value) in descending order
+        message = ""
+        sorted_users = sorted(user_correct_answers.items(), key=lambda x: x[1], reverse=True)
+        if sorted_users:
+            if jigsaw_num > 5:
+                message += "\n🏁🏆 Final Standings\n"
+            else:   
+                message += "\n📊🏆 Current Standings\n"
+            
+
+        for counter, (user, count) in enumerate(sorted_users, start=1):
+            message += f"{counter}. @{user}: {count}\n"
+            
+        send_message(target_room_id, message)
+        
+    time.sleep(2)
+    if sorted_users:
+        winner_name, winner_score = sorted_users[0]
+        message = f"\n🎉🥇 The winner is @{winner_name}!\n"
+    else:
+        message = f"\n👎😢 No right answers. I'm ashamed to call you Okrans.\n"
+    send_message(target_room_id, message)
+    
+    wf_winner = True
+    time.sleep(3)
+    return None
 
 def get_largest_fitting_font(draw, text, box_width, box_height, font_path, padding=6):
     max_width = box_width - padding
@@ -6518,6 +6832,8 @@ def select_wof_questions(winner):
         message += f"{counter}. ➕➖ Sign Language ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 💧🔥 Elementary ☕✨\n"
+        counter = counter + 1
+        message += f"{counter}. 🧩🌀 Jigsawed ☕✨\n"
         message += f"\n00. 🥗🌟 Okra's Choice\n"
         message += f"\nX. ⏭️🕹️ Skip Mini-Game\n"
         send_message(target_room_id, message) 
@@ -6645,6 +6961,11 @@ def select_wof_questions(winner):
 
         elif selected_wof_category == "26":
             ask_element_challenge(winner)
+            time.sleep(3)
+            return None
+
+        elif selected_wof_category == "27":
+            ask_jigsaw_challenge(winner)
             time.sleep(3)
             return None
         
@@ -7032,7 +7353,7 @@ def ask_wof_number(winner):
     
                         # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
                         if len(round_responders) >= num_list_players:
-                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26"]
+                            set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27"]
                         else:
                             set_b = ["5", "6", "7", "8", "9"]
                     
@@ -7269,6 +7590,18 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
+                    if str(message_content) in {"27"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Jigsawed' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"27"} and len(round_responders) < num_list_players:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Jigsawed' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
                     if str(message_content) in {"11"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
                         message = f"\n🙏😔 Sorry {winner}. 'List Battle' requires ☕️.\n"
@@ -7282,7 +7615,7 @@ def ask_wof_number(winner):
                         continue
                         
 
-                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26"}:
+                    if str(message_content) in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27"}:
                         selected_question = str(message_content).lower()
                         react_to_message(event_id, target_room_id, "okra21")
                         message = f"\n💪🛡️ I got you {winner}. {message_content} it is.\n"
@@ -7300,7 +7633,7 @@ def ask_wof_number(winner):
     
     # Possible set for the 10% case (exclude '9' if scoreboard length ≤ 4)
     if len(round_responders) >= num_list_players:
-        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26"]
+        set_b = ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27"]
     else:
         set_b = ["5", "6", "7", "8", "9"]
 
@@ -11684,6 +12017,7 @@ def start_trivia():
             time.sleep(3)
             
             start_message = f"\n✨🧪 New mini-games from the Okra Lab!\n"
+            start_message += f"\n🧩🌀 Jigsawed"
             start_message += f"\n💧🔥 Elementary"
             start_message += f"\n➕➖ Sign Language"
             start_message += f"\n📖🕵️‍♂️ Prose & Cons"

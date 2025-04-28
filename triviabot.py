@@ -533,8 +533,8 @@ def ask_jigsaw_challenge(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    message = f"\n🪚🔢 @{winner}, how many pieces?\n"
-    message += "\n👉👉 4, 9, 16, or 25\n"
+    message = f"\n🪚🔢 @{winner}, how many pieces (perfect squares ONLY)?\n"
+    message += "\n👉👉 4, 9, 16, 25, 36, 49, 64, 81, or 100\n"
     send_message(target_room_id, message)
     initialize_sync()
     
@@ -577,7 +577,7 @@ def ask_jigsaw_challenge(winner):
     
                 message_content = event.get("content", {}).get("body", "").strip()
     
-                if message_content in {"4", "9", "16", "25"}:
+                if message_content in {"4", "9", "16", "25", "36", "49", "64", "81", "100"}:
                     num_pieces = message_content
                     react_to_message(event_id, target_room_id, "okra21")
                     break
@@ -593,8 +593,8 @@ def ask_jigsaw_challenge(winner):
     if num_pieces:
         message = f"\n💥🤯 Ok...ra! We're going with {num_pieces} pieces!\n"
     else:
-        message = "\n😬⏱️ Time's up! We'll go with 9 pieces.\n"
-        num_pieces = "9"
+        message = "\n😬⏱️ Time's up! We'll go with 16 pieces.\n"
+        num_pieces = "16"
 
     send_message(target_room_id, message)
    
@@ -634,11 +634,21 @@ def ask_jigsaw_challenge(winner):
             jigsaw_category = "jigsaw"
             jigsaw_question_id = jigsaw_question["_id"] 
             
-            random_tints = [
-                (255, 150, 150),  # reddish
-                (150, 255, 150),  # greenish
-                (150, 150, 255),  # bluish
+           random_tints = [
+                (255, 150, 150),  # light red
+                (150, 255, 150),  # light green
+                (150, 150, 255),  # light blue
+                (255, 255, 150),  # light yellow
+                (150, 255, 255),  # light cyan
+                (255, 150, 255),  # light magenta / pink
+                (255, 200, 150),  # light orange
+                (200, 150, 255),  # light purple
+                (150, 255, 200),  # light teal / turquoise
+                (255, 220, 200),  # peach
+                (200, 255, 150),  # light lime
+                (220, 200, 255),  # light violet
             ]
+        
             image_mxc, image_width, image_height = download_image_from_url(jigsaw_image_url, False, "okra.png")
             jigsaw_image_mxc, jigsaw_image_width, jigsaw_image_height = shuffle_image_pieces(jigsaw_image_url, num_pieces=int(num_pieces), tint_mode="random", tint_colors=random_tints, fixed_tint=None, tint_strength=0.50)
             

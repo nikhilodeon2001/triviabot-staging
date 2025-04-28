@@ -531,6 +531,10 @@ def ask_jigsaw_challenge(winner):
 
     jigsaw_gifs = [
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw1.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw2.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw3.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw4.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw5.gif",
     ]
 
     jigsaw_gif_url = random.choice(jigsaw_gifs)
@@ -544,7 +548,7 @@ def ask_jigsaw_challenge(winner):
     processed_events = set()  # Track processed event IDs to avoid duplicates
     user_correct_answers = {}  # Initialize dictionary to track correct answers per user
 
-    message = f"\n🪚🔢 @{winner}, how many pieces (perfect squares ONLY)?\n"
+    message = f"\n🪚🔢 @{winner}, how many jigsaw pieces?\n"
     message += "\n👉👉 4, 9, 16, 25, 36, 49, 64, 81, or 100\n"
     send_message(target_room_id, message)
     initialize_sync()
@@ -676,7 +680,7 @@ def ask_jigsaw_challenge(winner):
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         
-        message += f"\n🗣💬❓ ({jigsaw_num}/5) Who or What is THIS?!?.\n"
+        message += f"\n🗣💬❓ ({jigsaw_num}/5) Category: {jigsaw_question.upper()}\n"
    
         print(f"Answer: {jigsaw_answers}")
         send_message(target_room_id, message)
@@ -12039,10 +12043,7 @@ def start_trivia():
             
             start_message = f"\n✨🧪 New mini-games from the Okra Lab!\n"
             start_message += f"\n🧩🌀 Jigsawed"
-            start_message += f"\n💧🔥 Elementary"
-            start_message += f"\n➕➖ Sign Language"
-            start_message += f"\n📖🕵️‍♂️ Prose & Cons"
-            start_message += f"\n🎰🗣️ PolygLottery\n"
+            start_message += f"\n💧🔥 Elementary/n"
             
             send_message(target_room_id, start_message)
             time.sleep(3)

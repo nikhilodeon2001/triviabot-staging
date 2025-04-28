@@ -711,9 +711,8 @@ def ask_jigsaw_challenge(winner):
 
                         
                         for jigsaw_answer in jigsaw_answers:
-                        #if fuzzy_match(message_content, jigsaw_name, jigsaw_category, jigsaw_url):
                             normalized_answer = normalize_text(jigsaw_answer).replace(" ", "")
-                            if fuzzy_match(user_guess, normalized_answer, jigsaw_category, jigsaw_url):
+                            if fuzzy_match(user_guess, normalized_answer, jigsaw_category, jigsaw_image_url):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {jigsaw_answer.upper()}\n"
                                 send_message(target_room_id, message)
                                 send_image(target_room_id, image_mxc, image_width, image_height, 100) 

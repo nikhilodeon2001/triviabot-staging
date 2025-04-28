@@ -456,8 +456,18 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
     response = requests.get(image_url)
     if response.status_code != 200:
         raise Exception(f"Failed to download image from {image_url}")
+
+    content_type = response.headers.get('Content-Type', '')
+
+
+    if "svg" in content_type or image_url.lower().endswith(".svg"):
+        # Convert SVG bytes to PNG bytes
+        png_bytes = cairosvg.svg2png(bytestring=response.content)
+        img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
+    else:
+        # Assume it's a PNG/JPG
+        img = Image.open(io.BytesIO(response.content)).convert("RGB")
     
-    img = Image.open(io.BytesIO(response.content)).convert("RGB")
     width, height = img.size
 
     # Validate number of pieces
@@ -479,6 +489,7 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
             piece = img.crop((left, upper, right, lower))
             pieces.append(piece)
 
+    img.close()  # ✅ Free up memory immediately
     random.shuffle(pieces)
 
     shuffled_img = Image.new("RGB", (width, height))

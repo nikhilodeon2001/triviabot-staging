@@ -535,6 +535,8 @@ def ask_jigsaw_challenge(winner):
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw3.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw4.gif",
     "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw5.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw6.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw7.gif"
     ]
 
     jigsaw_gif_url = random.choice(jigsaw_gifs)

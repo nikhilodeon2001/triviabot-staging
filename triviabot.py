@@ -451,6 +451,7 @@ def word_similarity(guess, answer):
     return round(min(score, 1.0), 3)
 
 
+
 def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=None, fixed_tint=None, tint_strength=0.50):
     try:
         response = requests.get(image_url)
@@ -465,17 +466,28 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
 
         if "svg" in content_type or image_url.lower().endswith(".svg"):
             try:
-                png_bytes = cairosvg.svg2png(bytestring=response.content)
+                svg_content = response.content
+
+                # Remove DOCTYPE if present (Fix for old SVGs)
+                if b'<!DOCTYPE' in svg_content:
+                    print("Removing DOCTYPE from SVG...")
+                    svg_content = b"\n".join(
+                        line for line in svg_content.splitlines()
+                        if not line.strip().startswith(b'<!DOCTYPE')
+                    )
+
+                png_bytes = cairosvg.svg2png(bytestring=svg_content)
                 print(f"Converted SVG to PNG, output size: {len(png_bytes)} bytes")
                 img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
+
             except Exception as e:
-                print(f"⚠️ SVG to PNG conversion failed for {image_url}: {e}")
-                raise  # Raise again so you skip
+                print(f"\u26a0\ufe0f SVG to PNG conversion failed for {image_url}: {e}")
+                raise
         else:
             try:
                 img = Image.open(io.BytesIO(response.content)).convert("RGB")
             except Exception as e:
-                print(f"⚠️ Image opening failed for {image_url}: {e}")
+                print(f"\u26a0\ufe0f Image opening failed for {image_url}: {e}")
                 raise
 
         width, height = img.size
@@ -525,11 +537,12 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
         shuffled_img.save(image_buffer, format="PNG")
         image_buffer.seek(0)
 
+        # Assuming you have a function upload_image_to_matrix to handle uploads
         image_mxc = upload_image_to_matrix(image_buffer.read(), False, "shuffled.png")
         return image_mxc, width, height
 
     except Exception as e:
-        print(f"⚠️ Skipping {image_url} due to error: {e}")
+        print(f"\u26a0\ufe0f Skipping {image_url} due to error: {e}")
         return None, None, None  # Important so your loop doesn't crash
 
 

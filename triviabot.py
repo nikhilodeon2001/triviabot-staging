@@ -648,7 +648,8 @@ def ask_jigsaw_challenge(winner):
             jigsaw_image_url = jigsaw_question["url"]
             jigsaw_answers = jigsaw_question["answers"]   
             jigsaw_main_answer = jigsaw_answers[0]
-            jigsaw_category = "jigsaw"
+            jigsaw_category = jigsaw_question["category"]
+            jigsaw_question_text = jigsaw_question["question"]
             jigsaw_question_id = jigsaw_question["_id"] 
             
             random_tints = [
@@ -697,7 +698,7 @@ def ask_jigsaw_challenge(winner):
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         
-        message += f"\n🗣💬❓ ({jigsaw_num}/5) Category: {jigsaw_question.upper()}\n"
+        message += f"\n🗣💬❓ ({jigsaw_num}/5) Category: {jigsaw_question_text.upper()}\n"
    
         print(f"Answer: {jigsaw_answers}")
         send_message(target_room_id, message)

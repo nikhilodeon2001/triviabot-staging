@@ -466,6 +466,7 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
         if "svg" in content_type or image_url.lower().endswith(".svg"):
             try:
                 png_bytes = cairosvg.svg2png(bytestring=response.content)
+                print(f"Converted SVG to PNG, output size: {len(png_bytes)} bytes")
                 img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
             except Exception as e:
                 print(f"⚠️ SVG to PNG conversion failed for {image_url}: {e}")

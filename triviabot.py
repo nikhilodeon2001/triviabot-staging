@@ -641,7 +641,7 @@ def ask_jigsaw_challenge(winner):
             recent_jigsaw_ids = get_recent_question_ids_from_mongo("jigsaw")
 
             # Fetch wheel of fortune questions using the random subset method
-            jigsaw_collection = db["jigsaw_questions_svg"]
+            jigsaw_collection = db["jigsaw_questions"]
             pipeline_jigsaw = [
                 {
                     "$match": {

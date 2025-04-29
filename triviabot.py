@@ -114,7 +114,7 @@ time_between_questions = int(os.getenv("time_between_questions"))
 time_between_questions_default = time_between_questions
 max_retries = int(os.getenv("max_retries"))
 delay_between_retries = int(os.getenv("delay_between_retries"))
-id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 80, "element": 100, "jigsaw": 50}
+id_limits = {"general": 2000, "mysterybox": 2000, "crossword": 100000, "jeopardy": 100000, "wof": 1500, "list": 20, "feud": 1000, "posters": 2000, "movie_scenes": 5000, "missing_link": 2500, "people": 2500, "ranker_list": 4000, "animal": 2000, "riddle": 2500, "dictionary": 100000, "flags": 800, "lyric": 500, "polyglottery": 80, "book": 80, "element": 100, "jigsaw": 30000}
 first_place_bonus = 0
 magic_time = 10
 magic_number = 0000
@@ -603,12 +603,12 @@ def ask_jigsaw_challenge(winner):
 
     send_message(target_room_id, message)
    
-    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
+    message = f"\n5️⃣🥇 Let's do a best of 10...\n"
     send_message(target_room_id, message)
     time.sleep(3)
 
     jigsaw_num = 1
-    while jigsaw_num <= 5:
+    while jigsaw_num <= 10:
         try:
             recent_jigsaw_ids = get_recent_question_ids_from_mongo("jigsaw")
 
@@ -6865,7 +6865,9 @@ def select_wof_questions(winner):
         counter = counter + 1
         message += f"{counter}. 📖🕵️‍♂️ Prose & Cons ☕✨\n"
         counter = counter + 1
-        message += f"{counter}. ➕➖ Sign Language ☕✨\n"
+        send_message(target_room_id, message)  
+        time.sleep(0.2)
+        message = f"{counter}. ➕➖ Sign Language ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 💧🔥 Elementary ☕✨\n"
         counter = counter + 1

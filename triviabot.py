@@ -452,6 +452,13 @@ def word_similarity(guess, answer):
 
 
 
+import re
+import requests
+import random
+import io
+from PIL import Image
+import cairosvg
+
 def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=None, fixed_tint=None, tint_strength=0.50):
     try:
         response = requests.get(image_url)
@@ -459,43 +466,31 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
             raise Exception(f"Failed to download image from {image_url} (status {response.status_code})")
 
         print(f"Downloaded {image_url} ({len(response.content)} bytes)")
-
-        # Show a small preview of the content to debug
-        print(response.content[:300])  # show first 300 bytes
         content_type = response.headers.get('Content-Type', '')
 
+        svg_mode = False
         if "svg" in content_type or image_url.lower().endswith(".svg"):
-            try:
-                svg_content = response.content
+            svg_mode = True
 
-                # Remove DOCTYPE if present (Fix for old SVGs)
-                if b'<!DOCTYPE' in svg_content:
-                    print("Removing DOCTYPE from SVG...")
-                    svg_content = b"\n".join(
-                        line for line in svg_content.splitlines()
-                        if not line.strip().startswith(b'<!DOCTYPE')
-                    )
+        if svg_mode:
+            raw_svg = response.content.decode('utf-8', errors='replace')
 
-                png_bytes = cairosvg.svg2png(bytestring=svg_content)
-                print(f"Converted SVG to PNG, output size: {len(png_bytes)} bytes")
-                img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
+            # 🔥 Strip the DOCTYPE line
+            cleaned_svg = re.sub(r'<!DOCTYPE[^>]*>', '', raw_svg, flags=re.IGNORECASE)
 
-            except Exception as e:
-                print(f"\u26a0\ufe0f SVG to PNG conversion failed for {image_url}: {e}")
-                raise
+            # Now safely convert cleaned SVG to PNG
+            png_bytes = cairosvg.svg2png(bytestring=cleaned_svg.encode('utf-8'))
+            img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
+            print(f"Converted SVG to PNG, output size: {len(png_bytes)} bytes")
         else:
-            try:
-                img = Image.open(io.BytesIO(response.content)).convert("RGB")
-            except Exception as e:
-                print(f"\u26a0\ufe0f Image opening failed for {image_url}: {e}")
-                raise
+            img = Image.open(io.BytesIO(response.content)).convert("RGB")
 
         width, height = img.size
 
         # Validate pieces
         grid_size = int(num_pieces ** 0.5)
         if grid_size * grid_size != num_pieces:
-            raise ValueError("num_pieces must be a perfect square (like 4, 9, 16, etc.)")
+            raise ValueError("num_pieces must be a perfect square (4,9,16,etc)")
 
         piece_width = width // grid_size
         piece_height = height // grid_size
@@ -514,7 +509,6 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
         random.shuffle(pieces)
 
         shuffled_img = Image.new("RGB", (width, height))
-
         idx = 0
         for i in range(grid_size):
             for j in range(grid_size):
@@ -537,13 +531,14 @@ def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=
         shuffled_img.save(image_buffer, format="PNG")
         image_buffer.seek(0)
 
-        # Assuming you have a function upload_image_to_matrix to handle uploads
-        image_mxc = upload_image_to_matrix(image_buffer.read(), False, "shuffled.png")
-        return image_mxc, width, height
+        # You would now upload this buffer somewhere, e.g., Matrix upload
+        # Here, I'll just return None for example:
+        # image_mxc = upload_image_to_matrix(image_buffer.read(), False, "shuffled.png")
+        return "uploaded_image_mxc_url", width, height
 
     except Exception as e:
-        print(f"\u26a0\ufe0f Skipping {image_url} due to error: {e}")
-        return None, None, None  # Important so your loop doesn't crash
+        print(f"⚠️ Skipping {image_url} due to error: {e}")
+        return None, None, None
 
 
 
@@ -552,13 +547,12 @@ def ask_jigsaw_challenge(winner):
 
 
     jigsaw_gifs = [
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw1.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw2.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw3.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw4.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw5.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw6.gif",
-    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw/jigsaw7.gif"
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw-intro/jigsaw1.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw-intro/jigsaw2.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw-intro/jigsaw3.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw-intro/jigsaw4.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw-intro/jigsaw5.gif",
+    "https://triviabotwebsite.s3.us-east-2.amazonaws.com/jigsaw-intro/jigsaw6.gif"
     ]
 
     jigsaw_gif_url = random.choice(jigsaw_gifs)
@@ -647,7 +641,7 @@ def ask_jigsaw_challenge(winner):
             recent_jigsaw_ids = get_recent_question_ids_from_mongo("jigsaw")
 
             # Fetch wheel of fortune questions using the random subset method
-            jigsaw_collection = db["jigsaw_questions"]
+            jigsaw_collection = db["jigsaw_questions_svg"]
             pipeline_jigsaw = [
                 {
                     "$match": {

@@ -452,93 +452,65 @@ def word_similarity(guess, answer):
 
 
 
-import re
-import requests
-import random
-import io
-from PIL import Image
-import cairosvg
-
 def shuffle_image_pieces(image_url, num_pieces=9, tint_mode="none", tint_colors=None, fixed_tint=None, tint_strength=0.50):
-    try:
-        response = requests.get(image_url)
-        if response.status_code != 200:
-            raise Exception(f"Failed to download image from {image_url} (status {response.status_code})")
+    # Fetch image from URL
+    response = requests.get(image_url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to download image from {image_url}")
+    
+    img = Image.open(io.BytesIO(response.content)).convert("RGB")
+    width, height = img.size
 
-        print(f"Downloaded {image_url} ({len(response.content)} bytes)")
-        content_type = response.headers.get('Content-Type', '')
+    # Validate number of pieces
+    grid_size = int(num_pieces ** 0.5)
+    if grid_size * grid_size != num_pieces:
+        raise ValueError("num_pieces must be a perfect square (like 4, 9, 16, etc.)")
 
-        svg_mode = False
-        if "svg" in content_type or image_url.lower().endswith(".svg"):
-            svg_mode = True
+    piece_width = width // grid_size
+    piece_height = height // grid_size
 
-        if svg_mode:
-            raw_svg = response.content.decode('utf-8', errors='replace')
+    # Cut image into pieces
+    pieces = []
+    for i in range(grid_size):
+        for j in range(grid_size):
+            left = j * piece_width
+            upper = i * piece_height
+            right = left + piece_width
+            lower = upper + piece_height
+            piece = img.crop((left, upper, right, lower))
+            pieces.append(piece)
 
-            # 🔥 Strip the DOCTYPE line
-            cleaned_svg = re.sub(r'<!DOCTYPE[^>]*>', '', raw_svg, flags=re.IGNORECASE)
+    random.shuffle(pieces)
 
-            # Now safely convert cleaned SVG to PNG
-            png_bytes = cairosvg.svg2png(bytestring=cleaned_svg.encode('utf-8'))
-            img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
-            print(f"Converted SVG to PNG, output size: {len(png_bytes)} bytes")
-        else:
-            img = Image.open(io.BytesIO(response.content)).convert("RGB")
+    shuffled_img = Image.new("RGB", (width, height))
 
-        width, height = img.size
+    idx = 0
+    for i in range(grid_size):
+        for j in range(grid_size):
+            piece = pieces[idx]
 
-        # Validate pieces
-        grid_size = int(num_pieces ** 0.5)
-        if grid_size * grid_size != num_pieces:
-            raise ValueError("num_pieces must be a perfect square (4,9,16,etc)")
+            if tint_mode == "fixed" and fixed_tint:
+                overlay = Image.new("RGB", piece.size, fixed_tint)
+                piece = Image.blend(piece, overlay, alpha=tint_strength)
+            elif tint_mode == "random" and tint_colors:
+                random_tint = random.choice(tint_colors)
+                overlay = Image.new("RGB", piece.size, random_tint)
+                piece = Image.blend(piece, overlay, alpha=tint_strength)
 
-        piece_width = width // grid_size
-        piece_height = height // grid_size
+            left = j * piece_width
+            upper = i * piece_height
+            shuffled_img.paste(piece, (left, upper))
+            idx += 1
 
-        pieces = []
-        for i in range(grid_size):
-            for j in range(grid_size):
-                left = j * piece_width
-                upper = i * piece_height
-                right = left + piece_width
-                lower = upper + piece_height
-                piece = img.crop((left, upper, right, lower))
-                pieces.append(piece)
+    # Save to memory buffer
+    image_buffer = io.BytesIO()
+    shuffled_img.save(image_buffer, format="PNG")
+    image_buffer.seek(0)
 
-        img.close()
-        random.shuffle(pieces)
-
-        shuffled_img = Image.new("RGB", (width, height))
-        idx = 0
-        for i in range(grid_size):
-            for j in range(grid_size):
-                piece = pieces[idx]
-
-                if tint_mode == "fixed" and fixed_tint:
-                    overlay = Image.new("RGB", piece.size, fixed_tint)
-                    piece = Image.blend(piece, overlay, alpha=tint_strength)
-                elif tint_mode == "random" and tint_colors:
-                    random_tint = random.choice(tint_colors)
-                    overlay = Image.new("RGB", piece.size, random_tint)
-                    piece = Image.blend(piece, overlay, alpha=tint_strength)
-
-                left = j * piece_width
-                upper = i * piece_height
-                shuffled_img.paste(piece, (left, upper))
-                idx += 1
-
-        image_buffer = io.BytesIO()
-        shuffled_img.save(image_buffer, format="PNG")
-        image_buffer.seek(0)
-
-        # You would now upload this buffer somewhere, e.g., Matrix upload
-        # Here, I'll just return None for example:
-        # image_mxc = upload_image_to_matrix(image_buffer.read(), False, "shuffled.png")
-        return "uploaded_image_mxc_url", width, height
-
-    except Exception as e:
-        print(f"⚠️ Skipping {image_url} due to error: {e}")
-        return None, None, None
+    # Upload to Matrix and get mxc
+    image_mxc = upload_image_to_matrix(image_buffer.read(), False, "shuffled.png")
+    
+    return image_mxc, width, height
 
 
 

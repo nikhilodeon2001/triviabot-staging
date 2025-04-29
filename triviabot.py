@@ -6818,7 +6818,7 @@ def select_wof_questions(winner):
             message += f"\n{counter}. 🎡💰 WoF: {category}"
             counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.2)
+        time.sleep(0.3)
         
         premium_counts = counter
         message = f"{counter}. 🌐🎲 Wikipedia Roulette ☕\n"
@@ -6842,7 +6842,7 @@ def select_wof_questions(winner):
         message += f"{counter}. 🧩🔗 Missing Link ☕✨"
         counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.2)
+        time.sleep(0.3)
         message = f"{counter}. 👤🌟 Famous Peeps ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🔢📜 Ranker Lists ☕✨\n"
@@ -6856,7 +6856,7 @@ def select_wof_questions(winner):
         message += f"{counter}. 🤓📚 Word Nerd ☕✨"
         counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.2)
+        time.sleep(0.3)
         message = f"{counter}. 🎏🎉 Flag Fest ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 🎧🎤 LyrIQ ☕✨\n"
@@ -6866,7 +6866,7 @@ def select_wof_questions(winner):
         message += f"{counter}. 📖🕵️‍♂️ Prose & Cons ☕✨\n"
         counter = counter + 1
         send_message(target_room_id, message)  
-        time.sleep(0.2)
+        time.sleep(0.3)
         message = f"{counter}. ➕➖ Sign Language ☕✨\n"
         counter = counter + 1
         message += f"{counter}. 💧🔥 Elementary ☕✨\n"

@@ -686,8 +686,9 @@ def ask_jigsaw_challenge(winner):
             
         message = f"\n⚠️🚨 Everyone's in!\n"
         
-        message += f"\n🗣💬❓ ({jigsaw_num}/5) Category: {jigsaw_question_text.upper()}\n"
-   
+        #message += f"\n🗣💬❓ ({jigsaw_num}/5) Category: {jigsaw_question_text.upper()}\n"
+        message += f"\n🗣💬❓ ({jigsaw_num}/5) Who or what is THIS?!?\n"
+        
         print(f"Answer: {jigsaw_answers}")
         send_message(target_room_id, message)
         time.sleep(2)        

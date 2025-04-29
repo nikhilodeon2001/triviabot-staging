@@ -745,7 +745,7 @@ def ask_jigsaw_challenge(winner):
                             normalized_answer = normalize_text(jigsaw_answer).replace(" ", "")
                             if fuzzy_match(user_guess, normalized_answer, jigsaw_category, jigsaw_image_url):
                                 message = f"\n✅🎉 Correct! @{sender_display_name} got it! {jigsaw_answer.upper()}\n"
-                                all_answers_str = "\n".join(f"• {answer.upper()}" for answer in jigsaw_answers)
+                                all_answers_str = "\n".join(f"{answer.upper()}" for answer in jigsaw_answers)
                                 message += f"\n📝🧠 All Answers:\n{all_answers_str}\n"
                                 send_message(target_room_id, message)
                                 send_image(target_room_id, image_mxc, image_width, image_height, 100) 
@@ -763,7 +763,7 @@ def ask_jigsaw_challenge(winner):
                 print(f"Error processing events: {e}")
         
         if right_answer == False:    
-            all_answers_str = "\n".join(f"• {answer.upper()}" for answer in jigsaw_answers)
+            all_answers_str = "\n".join(f"{answer.upper()}" for answer in jigsaw_answers)
             message = f"\n❌😢 No one got it.\n\n📝🧠 Answers:\n{all_answers_str}\n"
             send_message(target_room_id, message)
             send_image(target_room_id, image_mxc, image_width, image_height, 100) 

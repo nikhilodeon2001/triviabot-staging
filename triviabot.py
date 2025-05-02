@@ -4635,7 +4635,15 @@ def load_previous_question():
                 }
             else:
                 # If the document is not found, set default values
-                previous_question = {"trivia_category": None, "trivia_question": None, "trivia_url": None, "trivia_answer_list": None}            
+                previous_question = {
+                    "trivia_category": None,
+                    "trivia_question": None,
+                    "trivia_url": None,
+                    "trivia_answer_list": None,
+                    "trivia_db": None,
+                    "trivia_id": None
+                }    
+            break
                 
         except Exception as e:
             sentry_sdk.capture_exception(e)
@@ -4646,7 +4654,14 @@ def load_previous_question():
             else:
                 print("Max retries reached. Data loading failed.")
                 # Set to default values if loading fails
-                previous_question = {"trivia_category": None, "trivia_question": None, "trivia_url": None, "trivia_answer_list": None}
+                previous_question = {
+                    "trivia_category": None,
+                    "trivia_question": None,
+                    "trivia_url": None,
+                    "trivia_answer_list": None,
+                    "trivia_db": None,
+                    "trivia_id": None
+                }
 
 
 

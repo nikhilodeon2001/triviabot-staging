@@ -4626,7 +4626,7 @@ def load_previous_question():
 
             if previous_question_retrieved is not None:
                 previous_question = {
-                    "trivia_catetgory": previous_question_retrieved.get("trivia_category"),
+                    "trivia_category": previous_question_retrieved.get("trivia_category"),
                     "trivia_question": previous_question_retrieved.get("trivia_question"),
                     "trivia_url": previous_question_retrieved.get("trivia_url"),
                     "trivia_answer_list": previous_question_retrieved.get("trivia_answer_list"),

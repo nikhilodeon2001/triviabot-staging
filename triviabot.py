@@ -603,12 +603,12 @@ def ask_jigsaw_challenge(winner):
 
     send_message(target_room_id, message)
    
-    message = f"\n5️⃣🥇 Let's do a best of 10...\n"
+    message = f"\n5️⃣🥇 Let's do a best of 5...\n"
     send_message(target_room_id, message)
     time.sleep(3)
 
     jigsaw_num = 1
-    while jigsaw_num <= 10:
+    while jigsaw_num <= 5:
         try:
             recent_jigsaw_ids = get_recent_question_ids_from_mongo("jigsaw")
 
@@ -687,7 +687,7 @@ def ask_jigsaw_challenge(winner):
         message = f"\n⚠️🚨 Everyone's in!\n"
         
         #message += f"\n🗣💬❓ ({jigsaw_num}/5) Category: {jigsaw_question_text.upper()}\n"
-        message += f"\n🗣💬❓ ({jigsaw_num}/10) Who or what is THIS?!?\n"
+        message += f"\n🗣💬❓ ({jigsaw_num}/5) Who or what is THIS?!?\n"
         
         print(f"Answer: {jigsaw_answers}")
         send_message(target_room_id, message)
@@ -6123,9 +6123,9 @@ def load_parameters():
                 num_wf_letters = default_values["num_wf_letters"]
                 num_math_questions_default = default_values["num_math_questions_default"]
                 num_stats_questions_default = default_values["num_stats_questions_default"]
-                skip_summary = default["skip_summary"]
-                discount_step_amount = default["discount_step_amount"]
-                discount_streak_amount = default["discount_streak_amount"]
+                skip_summary = default_values["skip_summary"]
+                discount_step_amount = default_values["discount_step_amount"]
+                discount_streak_amount = default_values["discount_streak_amount"]
 
                 num_mysterybox_clues = num_mysterybox_clues_default
                 num_crossword_clues = num_crossword_clues_default

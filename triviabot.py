@@ -7631,9 +7631,15 @@ def ask_wof_number(winner):
                         send_message(target_room_id, message)
                         continue
 
-                    if str(message_content) in {"26"} and len(round_responders) < num_list_players:
+                    if str(message_content) in {"25"} and len(round_responders) < num_list_players:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Elementary' requires {num_list_players}+ players.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Sign Language' requires {num_list_players}+ players.\n"
+                        send_message(target_room_id, message)
+                        continue
+
+                    if str(message_content) in {"26"} and winner_coffees <= 0:
+                        react_to_message(event_id, target_room_id, "okra5")
+                        message = f"\n🙏😔 Sorry {winner}. 'Elementary' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
@@ -7642,10 +7648,10 @@ def ask_wof_number(winner):
                         message = f"\n🙏😔 Sorry {winner}. 'Elementary' requires {num_list_players}+ players.\n"
                         send_message(target_room_id, message)
                         continue
-
-                    if str(message_content) in {"27"} and len(round_responders) < num_list_players:
+                        
+                    if str(message_content) in {"27"} and winner_coffees <= 0:
                         react_to_message(event_id, target_room_id, "okra5")
-                        message = f"\n🙏😔 Sorry {winner}. 'Jigsawed' requires {num_list_players}+ players.\n"
+                        message = f"\n🙏😔 Sorry {winner}. 'Jigsawed' requires ☕️.\n"
                         send_message(target_room_id, message)
                         continue
 
